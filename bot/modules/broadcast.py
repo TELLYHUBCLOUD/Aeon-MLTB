@@ -55,8 +55,8 @@ def generate_status(total, successful, blocked, unsuccessful, elapsed_time=""):
     status += f"✅ <b>Success:</b> {successful}\n"
     status += f"🚫 <b>Blocked or Deleted:</b> {blocked}\n"
     status += f"⚠️ <b>Unsuccessful attempts:</b> {unsuccessful}"
-    
+
     if elapsed_time:
         status += f"\n⏳ <b>Elapsed Time:</b> {elapsed_time}"
-    
+
     return status
