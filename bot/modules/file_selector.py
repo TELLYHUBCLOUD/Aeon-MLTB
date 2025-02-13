@@ -33,7 +33,7 @@ async def select(_, message):
 
     user_id = message.from_user.id
     msg = message.text.split()
-    
+
     if len(msg) > 1:
         gid = msg[1]
         task = await get_task_by_gid(gid)
@@ -73,7 +73,9 @@ async def select(_, message):
         return
 
     if task.name().startswith("[METADATA]") or task.name().startswith("Trying"):
-        await send_message(message, "📡 Try again after the metadata download is complete!")
+        await send_message(
+            message, "📡 Try again after the metadata download is complete!"
+        )
         return
 
     try:
@@ -105,7 +107,7 @@ async def confirm_selection(_, query):
     data = query.data.split()
     message = query.message
     task = await get_task_by_gid(data[2])
-    
+
     if task is None:
         await query.answer("❌ This task has been cancelled!", show_alert=True)
         await delete_message(message)
@@ -124,8 +126,10 @@ async def confirm_selection(_, query):
                     await sync_to_async(xnox_client.torrents_info, torrent_hash=id_)
                 )[0]
                 path = tor_info.content_path.rsplit("/", 1)[0]
-                res = await sync_to_async(xnox_client.torrents_files, torrent_hash=id_)
-                
+                res = await sync_to_async(
+                    xnox_client.torrents_files, torrent_hash=id_
+                )
+
                 for f in res:
                     if f.priority == 0:
                         f_paths = [f"{path}/{f.name}", f"{path}/{f.name}.!qB"]
@@ -135,7 +139,9 @@ async def confirm_selection(_, query):
                                     await remove(f_path)
 
                 if not task.queued:
-                    await sync_to_async(xnox_client.torrents_start, torrent_hashes=id_)
+                    await sync_to_async(
+                        xnox_client.torrents_start, torrent_hashes=id_
+                    )
             else:
                 res = await sync_to_async(aria2.client.get_files, id_)
                 for f in res:
@@ -147,7 +153,9 @@ async def confirm_selection(_, query):
                     try:
                         await sync_to_async(aria2.client.unpause, id_)
                     except Exception as e:
-                        LOGGER.error(f"⚠️ {e} Error in resume, likely due to Aria2 abuse. Try selecting again!")
+                        LOGGER.error(
+                            f"⚠️ {e} Error in resume, likely due to Aria2 abuse. Try selecting again!"
+                        )
 
         await send_status_message(message)
         await delete_message(message)
