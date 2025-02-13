@@ -186,7 +186,7 @@ def source(self):
 
 
 async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=1):
-    msg = f'<blockquote><a href="https://t.me/TELLYMIRROR"><b>⚡ POWERED BY TELLY MIRROR 🤖</b></a></blockquote>'
+    msg = '<blockquote><a href="https://t.me/TELLYMIRROR"><b>⚡ POWERED BY TELLY MIRROR 🤖</b></a></blockquote>'
     msg = ""
     button = None
 
@@ -233,7 +233,9 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
             else:
                 subsize = ""
                 count = ""
-            msg += f"\n📂 <b>Processed:</b> {task.processed_bytes()}{subsize} {count}"
+            msg += (
+                f"\n📂 <b>Processed:</b> {task.processed_bytes()}{subsize} {count}"
+            )
             msg += f"\n📏 <b>Size:</b> {task.size()}"
             msg += f"\n🚀 <b>Speed:</b> {task.speed()}"
             msg += f"\n⏳ <b>ETA:</b> {task.eta()}"
