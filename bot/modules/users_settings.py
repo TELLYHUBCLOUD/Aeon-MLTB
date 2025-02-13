@@ -55,12 +55,12 @@ async def get_user_settings(from_user):
     )
 
     # Conditions
-    rccmsg = "Exists" if await aiopath.exists(rclone_conf) else "Not Exists"
-    tokenmsg = "Exists" if await aiopath.exists(token_pickle) else "Not Exists"
+    rccmsg = "Exists ✅" if await aiopath.exists(rclone_conf) else "Not Exists ❌"
+    tokenmsg = "Exists ✅" if await aiopath.exists(token_pickle) else "Not Exists ❌"
     default_upload = user_dict.get("default_upload", Config.DEFAULT_UPLOAD)
-    dur = "Gdrive API" if default_upload != "gd" else "Rclone"
+    dur = "Gdrive API 🌐" if default_upload != "gd" else "Rclone 🔄"
     user_tokens = user_dict.get("user_tokens", False)
-    trr = "OWNER" if user_tokens else "MY"
+    trr = "OWNER 👑" if user_tokens else "MY 🧑‍💻"
 
     # Buttons
     buttons.data_button("Leech 💾", f"userset {user_id} leech")
