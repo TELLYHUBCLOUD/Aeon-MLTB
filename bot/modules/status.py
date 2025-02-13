@@ -20,16 +20,20 @@ from bot.helper.telegram_helper.message_utils import (
 
 
 @new_task
+
+python
+Copy
+Edit
 async def task_status(_, message):
     async with task_dict_lock:
         count = len(task_dict)
     if count == 0:
         currentTime = get_readable_time(time() - bot_start_time)
         free = get_readable_file_size(disk_usage(Config.DOWNLOAD_DIR).free)
-        msg = f"No Active Tasks!\nEach user can get status for his tasks by adding me or user_id after cmd: /{BotCommands.StatusCommand} me"
+        msg = f"No Active Tasks! 🛑\nEach user can get status for their tasks by adding me or user_id after cmd: /{BotCommands.StatusCommand} me"
         msg += (
-            f"\n<b>CPU:</b> {cpu_percent()}% | <b>FREE:</b> {free}"
-            f"\n<b>RAM:</b> {virtual_memory().percent}% | <b>UPTIME:</b> {currentTime}"
+            f"\n<b>💻 CPU:</b> {cpu_percent()}% | <b>💾 FREE:</b> {free}"
+            f"\n<b>🧠 RAM:</b> {virtual_memory().percent}% | <b>⏳ UPTIME:</b> {currentTime}"
         )
         reply_message = await send_message(message, msg)
         await auto_delete_message(message, reply_message)
