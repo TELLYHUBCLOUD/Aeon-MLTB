@@ -190,7 +190,7 @@ seed = """🌱 <b>Torrent Seeding</b>
 Control seeding with -d
 
 <code>/cmd link -d ratio:time</code>
-Examples: 
+Examples:
 <code>-d 0.7:10</code> (ratio & time)
 <code>-d :30</code> (time only)
 </blockquote>"""
@@ -216,7 +216,7 @@ yt_opt = """⚙️ <b>YT-DLP Options</b>
 Advanced options with -opt
 
 Format: <code>-opt key:value|key1:value1</code>
-Supports complex formats: 
+Supports complex formats:
 <code>wait_for_video:(5, 100)</code>
 </blockquote>"""
 
@@ -225,7 +225,7 @@ convert_media = """🔄 <b>Media Conversion</b>
 Convert files with -ca/-cv
 
 <code>/cmd link -ca mp3 -cv mp4</code>
-Specific formats: 
+Specific formats:
 <code>-ca mp3 + flac ogg</code>
 </blockquote>"""
 
@@ -259,7 +259,7 @@ name_sub = """🔤 <b>Name Replacement</b>
 Modify filenames with -ns
 
 Format: <code>-ns pattern/replacement</code>
-Example: <code>-ns \[(.*)\]/\\1/s</code>
+Example: <code>-ns \\[(.*)\\]/\\1/s</code>
 Supports regex patterns
 </blockquote>"""
 
