@@ -74,7 +74,8 @@ async def select(_, message):
 
     if task.name().startswith("[METADATA]") or task.name().startswith("Trying"):
         await send_message(
-            message, "📡 Try again after the metadata download is complete!"
+            message,
+            "📡 Try again after the metadata download is complete!",
         )
         return
 
@@ -127,7 +128,8 @@ async def confirm_selection(_, query):
                 )[0]
                 path = tor_info.content_path.rsplit("/", 1)[0]
                 res = await sync_to_async(
-                    xnox_client.torrents_files, torrent_hash=id_
+                    xnox_client.torrents_files,
+                    torrent_hash=id_,
                 )
 
                 for f in res:
@@ -140,7 +142,8 @@ async def confirm_selection(_, query):
 
                 if not task.queued:
                     await sync_to_async(
-                        xnox_client.torrents_start, torrent_hashes=id_
+                        xnox_client.torrents_start,
+                        torrent_hashes=id_,
                     )
             else:
                 res = await sync_to_async(aria2.client.get_files, id_)
@@ -154,7 +157,7 @@ async def confirm_selection(_, query):
                         await sync_to_async(aria2.client.unpause, id_)
                     except Exception as e:
                         LOGGER.error(
-                            f"⚠️ {e} Error in resume, likely due to Aria2 abuse. Try selecting again!"
+                            f"⚠️ {e} Error in resume, likely due to Aria2 abuse. Try selecting again!",
                         )
 
         await send_status_message(message)

@@ -22,7 +22,7 @@ async def remove_from_queue(_, message):
     user_id = message.from_user.id if message.from_user else message.sender_chat.id
     msg = message.text.split()
     status = msg[1] if len(msg) > 1 and msg[1] in ["fd", "fu"] else ""
-    
+
     if (status and len(msg) > 2) or (not status and len(msg) > 1):
         gid = msg[2] if status else msg[1]
         task = await get_task_by_gid(gid)
@@ -52,7 +52,7 @@ Reply to an active **Command message** used to start the **download/upload**.
 """
         await send_message(message, msg)
         return
-    
+
     if user_id not in (Config.OWNER_ID, task.listener.user_id) and (
         user_id not in user_data or not user_data[user_id].get("is_sudo")
     ):
