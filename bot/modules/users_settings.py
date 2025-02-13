@@ -99,7 +99,6 @@ async def get_user_settings(from_user):
     return text, buttons.build_menu(2), thumbnail
 
 
-
 async def update_user_settings(query):
     msg, button, thumb = await get_user_settings(query.from_user)
     await edit_message(query.message, msg, button, thumb, markdown=True)
@@ -202,20 +201,19 @@ async def set_option(_, message, pre_event, option):
                 value = eval(value)
                 msg = "FFmpeg commands updated ✅"
             except Exception as e:
-                await send_message(message, f"Error: {str(e)} ❌")
+                await send_message(message, f"Error: {e!s} ❌")
                 await update_user_settings(pre_event)
                 return
         else:
             await send_message(message, "It must be a list of str! ❌")
             await update_user_settings(pre_event)
             return
-    
+
     update_user_ldata(user_id, option, value)
     await delete_message(message)
     await update_user_settings(pre_event)
     await database.update_user_data(user_id)
     await send_message(message, msg, parse_mode="HTML")
-
 
 
 async def event_handler(client, query, pfunc, photo=False, document=False):
@@ -327,7 +325,9 @@ async def edit_user_settings(client, query):
             session_string = "✅ Exists"
         else:
             session_string = "❌ Not exists"
-        thumbmsg = "✅ Exists" if await aiopath.exists(thumbpath) else "❌ Not Exists"
+        thumbmsg = (
+            "✅ Exists" if await aiopath.exists(thumbpath) else "❌ Not Exists"
+        )
         split_size = Config.LEECH_SPLIT_SIZE
         buttons.data_button("📂 Leech Destination", f"userset {user_id} ldest")
         buttons.data_button("📝 Leech Prefix", f"userset {user_id} leech_prefix")
@@ -348,10 +348,14 @@ async def edit_user_settings(client, query):
             "as_doc" not in user_dict and Config.AS_DOCUMENT
         ):
             ltype = "📄 DOCUMENT"
-            buttons.data_button("📺 Send As Media", f"userset {user_id} as_doc false")
+            buttons.data_button(
+                "📺 Send As Media", f"userset {user_id} as_doc false"
+            )
         else:
             ltype = "📺 MEDIA"
-            buttons.data_button("📄 Send As Document", f"userset {user_id} as_doc true")
+            buttons.data_button(
+                "📄 Send As Document", f"userset {user_id} as_doc true"
+            )
         if user_dict.get("media_group", False) or (
             "media_group" not in user_dict and Config.MEDIA_GROUP
         ):
@@ -422,7 +426,9 @@ async def edit_user_settings(client, query):
         buttons.data_button("📁 Default Rclone Path", f"userset {user_id} rcp")
         buttons.data_button("⬅️ Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
-        rccmsg = "✅ Exists" if await aiopath.exists(rclone_conf) else "❌ Not Exists"
+        rccmsg = (
+            "✅ Exists" if await aiopath.exists(rclone_conf) else "❌ Not Exists"
+        )
         if user_dict.get("rclone_path", False):
             rccpath = user_dict["rclone_path"]
         elif RP := Config.RCLONE_PATH:
@@ -456,7 +462,9 @@ async def edit_user_settings(client, query):
             sd_msg = "🚫 Disabled"
         buttons.data_button("⬅️ Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
-        tokenmsg = "✅ Exists" if await aiopath.exists(token_pickle) else "❌ Not Exists"
+        tokenmsg = (
+            "✅ Exists" if await aiopath.exists(token_pickle) else "❌ Not Exists"
+        )
         if user_dict.get("gdrive_id", False):
             gdrive_id = user_dict["gdrive_id"]
         elif GDID := Config.GDRIVE_ID:
@@ -602,7 +610,9 @@ Check all yt-dlp api options from this <a href='https://github.com/yt-dlp/yt-dlp
         if user_dict.get("lprefix", False) or (
             "lprefix" not in user_dict and Config.LEECH_FILENAME_PREFIX
         ):
-            buttons.data_button("🗑️ Remove Leech Prefix", f"userset {user_id} lprefix")
+            buttons.data_button(
+                "🗑️ Remove Leech Prefix", f"userset {user_id} lprefix"
+            )
         buttons.data_button("⬅️ Back", f"userset {user_id} leech")
         buttons.data_button("❌ Close", f"userset {user_id} close")
         await edit_message(
@@ -613,7 +623,7 @@ Check all yt-dlp api options from this <a href='https://github.com/yt-dlp/yt-dlp
         )
         pfunc = partial(set_option, pre_event=query, option="lprefix")
         await event_handler(client, query, pfunc)
-    
+
     elif data[2] == "leech_caption":
         await query.answer()
         buttons = ButtonMaker()
@@ -639,8 +649,8 @@ Check all yt-dlp api options from this <a href='https://github.com/yt-dlp/yt-dlp
             "leech_dest" not in user_dict and Config.LEECH_DUMP_CHAT
         ):
             buttons.data_button(
-                "🔄 Reset Leech Destination", 
-                f"userset {user_id} leech_dest"
+                "🔄 Reset Leech Destination",
+                f"userset {user_id} leech_dest",
             )
         buttons.data_button("⬅️ Back", f"userset {user_id} leech")
         buttons.data_button("❌ Close", f"userset {user_id} close")
@@ -692,7 +702,7 @@ Check all yt-dlp api options from this <a href='https://github.com/yt-dlp/yt-dlp
         )
         pfunc = partial(set_option, pre_event=query, option="session_string")
         await event_handler(client, query, pfunc)
-        
+
     elif data[2] == "u_dump":
         await query.answer()
         buttons = ButtonMaker()
@@ -754,9 +764,7 @@ Example: script/code/s | mirror/leech | tea/ /s | clone | cpu/ | \[mltb\]/mltb |
 7. [mltb] will get replaced by mltb
 8. \text\ will get replaced by text with sensitive case
 """
-        emsg += (
-    f"🔄 Your Current Value is: {user_dict.get('name_sub') or 'not added yet!'}"
-)
+        emsg += f"🔄 Your Current Value is: {user_dict.get('name_sub') or 'not added yet!'}"
 
         await edit_message(
             message,
@@ -774,9 +782,7 @@ Example: script/code/s | mirror/leech | tea/ /s | clone | cpu/ | \[mltb\]/mltb |
         buttons.data_button("⬅️ Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
         emsg = "Metadata will change MKV video files including all audio, streams, and subtitle titles."
-        emsg += (
-            f"🔄 Your Current Value is: {user_dict.get('metadata') or 'not added yet!'}"
-        )
+        emsg += f"🔄 Your Current Value is: {user_dict.get('metadata') or 'not added yet!'}"
         await edit_message(message, emsg, buttons.build_menu(1), markdown=True)
         pfunc = partial(set_option, pre_event=query, option="metadata")
         await event_handler(client, query, pfunc)
@@ -792,9 +798,7 @@ Example: script/code/s | mirror/leech | tea/ /s | clone | cpu/ | \[mltb\]/mltb |
         buttons.data_button("⬅️ Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
         emsg = "Sorry, No doc for now. 😔"
-        emsg += (
-            f"🔄 Your Current Value is: {user_dict.get('watermark') or 'not added yet!'}"
-        )
+        emsg += f"🔄 Your Current Value is: {user_dict.get('watermark') or 'not added yet!'}"
         await edit_message(message, emsg, buttons.build_menu(1), markdown=True)
         pfunc = partial(set_option, pre_event=query, option="watermark")
         await event_handler(client, query, pfunc)
@@ -805,8 +809,10 @@ Example: script/code/s | mirror/leech | tea/ /s | clone | cpu/ | \[mltb\]/mltb |
         update_user_ldata(user_id, "default_upload", du)
         await update_user_settings(query)
         await database.update_user_data(user_id)
-        await query.edit_message_text("✅ Default upload source updated successfully!")
-    
+        await query.edit_message_text(
+            "✅ Default upload source updated successfully!"
+        )
+
     elif data[2] == "user_tokens":
         await query.answer()
         tr = data[3].lower() == "false"
@@ -814,7 +820,7 @@ Example: script/code/s | mirror/leech | tea/ /s | clone | cpu/ | \[mltb\]/mltb |
         await update_user_settings(query)
         await database.update_user_data(user_id)
         await query.edit_message_text("🔑 User tokens updated!")
-    
+
     elif data[2] == "upload_paths":
         await query.answer()
         buttons = ButtonMaker()
@@ -844,7 +850,7 @@ Example: script/code/s | mirror/leech | tea/ /s | clone | cpu/ | \[mltb\]/mltb |
         )
         pfunc = partial(set_option, pre_event=query, option="upload_paths")
         await event_handler(client, query, pfunc)
-    
+
     elif data[2] == "rm_path":
         await query.answer()
         buttons = ButtonMaker()
@@ -858,7 +864,7 @@ Example: script/code/s | mirror/leech | tea/ /s | clone | cpu/ | \[mltb\]/mltb |
         )
         pfunc = partial(delete_path, pre_event=query)
         await event_handler(client, query, pfunc)
-    
+
     elif data[2] == "show_path":
         await query.answer()
         buttons = ButtonMaker()
@@ -875,7 +881,7 @@ Example: script/code/s | mirror/leech | tea/ /s | clone | cpu/ | \[mltb\]/mltb |
             buttons.build_menu(1),
             markdown=True,
         )
-    
+
     elif data[2] == "reset":
         await query.answer()
         if ud := user_data.get(user_id, {}):
@@ -891,11 +897,11 @@ Example: script/code/s | mirror/leech | tea/ /s | clone | cpu/ | \[mltb\]/mltb |
             if await aiopath.exists(fpath):
                 await remove(fpath)
         await query.edit_message_text("🔄 All settings have been reset.")
-    
+
     elif data[2] == "back":
         await query.answer()
         await update_user_settings(query)
-    
+
     else:
         await query.answer()
         await delete_message(message.reply_to_message)
@@ -918,7 +924,9 @@ async def get_users_settings(_, message):
             with BytesIO(msg_ecd) as ofile:
                 ofile.name = "users_settings.txt"
                 await send_file(message, ofile)
-                await send_message(message, "📂 The settings have been sent as a file.")
+                await send_message(
+                    message, "📂 The settings have been sent as a file."
+                )
         else:
             await send_message(message, msg)
             await send_message(message, "✅ All user settings are displayed.")
