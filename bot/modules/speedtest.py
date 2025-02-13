@@ -34,7 +34,6 @@ async def speedtest(_, message):
     string_speed += f"<b>• Download:</b> <code>{get_readable_file_size(result.download / 8)}/s</code> 📥\n"
     string_speed += f"<b>• IP Address:</b> <code>{result.client['ip']}</code> 🌍"
 
-
     try:
         await send_message(message, string_speed, photo=result.share())
         await delete_message(speed)
