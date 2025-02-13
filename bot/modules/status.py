@@ -20,10 +20,6 @@ from bot.helper.telegram_helper.message_utils import (
 
 
 @new_task
-
-python
-Copy
-Edit
 async def task_status(_, message):
     async with task_dict_lock:
         count = len(task_dict)
