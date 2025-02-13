@@ -15,23 +15,23 @@ SIZE_UNITS = ["B", "KB", "MB", "GB", "TB", "PB"]
 
 
 class MirrorStatus:
-    STATUS_UPLOAD = "Upload"
-    STATUS_DOWNLOAD = "Download"
-    STATUS_CLONE = "Clone"
-    STATUS_QUEUEDL = "QueueDl"
-    STATUS_QUEUEUP = "QueueUp"
-    STATUS_PAUSED = "Pause"
-    STATUS_ARCHIVE = "Archive"
-    STATUS_EXTRACT = "Extract"
-    STATUS_SPLIT = "Split"
-    STATUS_CHECK = "CheckUp"
-    STATUS_SEED = "Seed"
-    STATUS_SAMVID = "SamVid"
-    STATUS_CONVERT = "Convert"
-    STATUS_FFMPEG = "FFmpeg"
-    STATUS_METADATA = "Metadata"
-    STATUS_WATERMARK = "Watermark"
-    STATUS_ETHUMB = "Embed Thumb"
+    STATUS_UPLOAD = "🚀 Upload"
+    STATUS_DOWNLOAD = "📥 Download"
+    STATUS_CLONE = "📄 Clone"
+    STATUS_QUEUEDL = "⏳ QueueDl"
+    STATUS_QUEUEUP = "⏳ QueueUp"
+    STATUS_PAUSED = "⏸️ Pause"
+    STATUS_ARCHIVE = "📦 Archive"
+    STATUS_EXTRACT = "📂 Extract"
+    STATUS_SPLIT = "✂️ Split"
+    STATUS_CHECK = "✅ CheckUp"
+    STATUS_SEED = "🌱 Seed"
+    STATUS_SAMVID = "🎥 SamVid"
+    STATUS_CONVERT = "🔄 Convert"
+    STATUS_FFMPEG = "🎬 FFmpeg"
+    STATUS_METADATA = "📝 Metadata"
+    STATUS_WATERMARK = "💦 Watermark"
+    STATUS_ETHUMB = "🖼️ Embed Thumb"
 
 
 STATUSES = {
@@ -105,7 +105,7 @@ def get_readable_file_size(size_in_bytes):
         size_in_bytes /= 1024
         index += 1
 
-    return f"{size_in_bytes:.2f}{SIZE_UNITS[index]}"
+    return f"📏 {size_in_bytes:.2f} {SIZE_UNITS[index]}"
 
 
 def get_readable_time(seconds, full_time=False):
@@ -126,7 +126,7 @@ def get_readable_time(seconds, full_time=False):
         if seconds >= period_seconds:
             period_value, seconds = divmod(seconds, period_seconds)
             plural_suffix = "s" if period_value > 1 else ""
-            result += f"{int(period_value)} {period_name}{plural_suffix} "
+            result += f"⏳ {int(period_value)} {period_name}{plural_suffix} "
             if not full_time:
                 break
     return result.strip()
