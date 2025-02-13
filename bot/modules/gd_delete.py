@@ -18,7 +18,7 @@ async def delete_file(_, message):
         link = reply_to.text.split(maxsplit=1)[0].strip()
     else:
         link = ""
-    
+
     if is_gdrive_link(link):
         LOGGER.info(link)
         msg = await sync_to_async(GoogleDriveDelete().deletefile, link, user.id)
