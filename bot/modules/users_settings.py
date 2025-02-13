@@ -349,12 +349,14 @@ async def edit_user_settings(client, query):
         ):
             ltype = "📄 DOCUMENT"
             buttons.data_button(
-                "📺 Send As Media", f"userset {user_id} as_doc false"
+                "📺 Send As Media",
+                f"userset {user_id} as_doc false",
             )
         else:
             ltype = "📺 MEDIA"
             buttons.data_button(
-                "📄 Send As Document", f"userset {user_id} as_doc true"
+                "📄 Send As Document",
+                f"userset {user_id} as_doc true",
             )
         if user_dict.get("media_group", False) or (
             "media_group" not in user_dict and Config.MEDIA_GROUP
@@ -611,7 +613,8 @@ Check all yt-dlp api options from this <a href='https://github.com/yt-dlp/yt-dlp
             "lprefix" not in user_dict and Config.LEECH_FILENAME_PREFIX
         ):
             buttons.data_button(
-                "🗑️ Remove Leech Prefix", f"userset {user_id} lprefix"
+                "🗑️ Remove Leech Prefix",
+                f"userset {user_id} lprefix",
             )
         buttons.data_button("⬅️ Back", f"userset {user_id} leech")
         buttons.data_button("❌ Close", f"userset {user_id} close")
@@ -810,7 +813,7 @@ Example: script/code/s | mirror/leech | tea/ /s | clone | cpu/ | \[mltb\]/mltb |
         await update_user_settings(query)
         await database.update_user_data(user_id)
         await query.edit_message_text(
-            "✅ Default upload source updated successfully!"
+            "✅ Default upload source updated successfully!",
         )
 
     elif data[2] == "user_tokens":
@@ -925,7 +928,8 @@ async def get_users_settings(_, message):
                 ofile.name = "users_settings.txt"
                 await send_file(message, ofile)
                 await send_message(
-                    message, "📂 The settings have been sent as a file."
+                    message,
+                    "📂 The settings have been sent as a file.",
                 )
         else:
             await send_message(message, msg)
