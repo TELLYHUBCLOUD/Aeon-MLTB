@@ -9,16 +9,16 @@ from bot.helper.telegram_helper.message_utils import send_file, send_message
 async def run_shell(_, message):
     cmd = message.text.split(maxsplit=1)
     if len(cmd) == 1:
-        await send_message(message, "No command to execute was given.")
+        await send_message(message, "❗ No command to execute was given.")
         return
     cmd = cmd[1]
     stdout, stderr, _ = await cmd_exec(cmd, shell=True)
     reply = ""
     if len(stdout) != 0:
-        reply += f"*Stdout*\n<code>{stdout}</code>\n"
+        reply += f"✅ *Stdout*\n<code>{stdout}</code>\n"
         LOGGER.info(f"Shell - {cmd} - {stdout}")
     if len(stderr) != 0:
-        reply += f"*Stderr*\n<code>{stderr}</code>"
+        reply += f"⚠️ *Stderr*\n<code>{stderr}</code>"
         LOGGER.error(f"Shell - {cmd} - {stderr}")
     if len(reply) > 3000:
         with BytesIO(str.encode(reply)) as out_file:
@@ -27,4 +27,4 @@ async def run_shell(_, message):
     elif len(reply) != 0:
         await send_message(message, reply)
     else:
-        await send_message(message, "No Reply")
+        await send_message(message, "❌ No Reply")
