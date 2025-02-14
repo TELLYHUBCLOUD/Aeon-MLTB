@@ -70,7 +70,6 @@ async def start(client, message):
     return None
 
 
-
 @new_task
 async def ping(_, message):
     start_time = int(round(time() * 1000))
@@ -98,7 +97,9 @@ async def aeon_callback(_, query):
     user_id = query.from_user.id
     data = query.data.split()
     if user_id != int(data[1]):
-        return await query.answer(text="🚫 This message is not yours!", show_alert=True)
+        return await query.answer(
+            text="🚫 This message is not yours!", show_alert=True
+        )
     if data[2] == "view":
         await query.answer()
         async with aiopen("log.txt") as f:
