@@ -5,7 +5,7 @@ from time import time
 
 from psutil import cpu_percent, disk_usage, virtual_memory
 
-from bot import DOWNLOAD_DIR, bot_start_time, status_dict, task_dict, task_dict_lock
+from bot import bot_start_time, status_dict, task_dict, task_dict_lock
 from bot.helper.telegram_helper.button_build import ButtonMaker
 
 SIZE_UNITS = ["B", "KB", "MB", "GB", "TB", "PB"]
@@ -251,7 +251,6 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
         else:
             msg += f"\n📏 <b>Size: </b>{task.size()}"
         msg += f"\n🛑 /stop_{task.gid()[:8]}\n\n"
-
 
     if len(msg) == 0:
         if status == "All":
