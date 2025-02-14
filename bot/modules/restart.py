@@ -32,7 +32,6 @@ async def restart_bot(_, message):
     )
 
 
-
 @new_task
 async def restart_sessions(_, message):
     buttons = button_build.ButtonMaker()
@@ -44,7 +43,6 @@ async def restart_sessions(_, message):
         "🔄 Are you sure you want to restart the session(s)?!",
         button,
     )
-
 
 
 async def send_incomplete_task_message(cid, msg_id, msg):
@@ -68,8 +66,6 @@ async def send_incomplete_task_message(cid, msg_id, msg):
         LOGGER.error(f"Error: {e} 🔴")
 
 
-
-
 async def restart_notification():
     if await aiopath.isfile(".restartmsg"):
         async with aiopen(".restartmsg") as f:
@@ -84,7 +80,11 @@ async def restart_notification():
         and (notifier_dict := await database.get_incomplete_tasks())
     ):
         for cid, data in notifier_dict.items():
-            msg = "✅ Restarted Successfully!" if cid == chat_id else "🤖 Bot Restarted!"
+            msg = (
+                "✅ Restarted Successfully!"
+                if cid == chat_id
+                else "🤖 Bot Restarted!"
+            )
             for tag, links in data.items():
                 msg += f"\n\n🔹 <b>{tag}</b>:"
                 for index, link in enumerate(links, start=1):
@@ -103,7 +103,6 @@ async def restart_notification():
                 text="✅ Restarted Successfully!",
             )
         await remove(".restartmsg")
-
 
 
 @new_task
