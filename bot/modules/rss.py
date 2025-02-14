@@ -42,7 +42,7 @@ headers = {
 async def rss_menu(event):
     user_id = event.from_user.id
     buttons = ButtonMaker()
-    
+
     # Main RSS buttons
     buttons.data_button("📥 Subscribe", f"rss sub {user_id}")
     buttons.data_button("📋 Subscriptions", f"rss list {user_id} 0")
@@ -51,7 +51,7 @@ async def rss_menu(event):
     buttons.data_button("⏸️ Pause", f"rss pause {user_id}")
     buttons.data_button("▶️ Resume", f"rss resume {user_id}")
     buttons.data_button("❌ Unsubscribe", f"rss unsubscribe {user_id}")
-    
+
     # Admin-specific buttons
     if await CustomFilters.sudo("", event):
         buttons.data_button("🌍 All Subscriptions", f"rss listall {user_id} 0")
@@ -59,23 +59,22 @@ async def rss_menu(event):
         buttons.data_button("▶️ Resume All", f"rss allresume {user_id}")
         buttons.data_button("❌ Unsubscribe All", f"rss allunsub {user_id}")
         buttons.data_button("🧹 Delete User", f"rss deluser {user_id}")
-        
+
         # RSS control buttons
         if scheduler.running:
             buttons.data_button("🛑 Shutdown Rss", f"rss shutdown {user_id}")
         else:
             buttons.data_button("🔄 Start Rss", f"rss start {user_id}")
-    
+
     # Close button
     buttons.data_button("❌ Close", f"rss close {user_id}")
-    
+
     # Building the button layout
     button = buttons.build_menu(2)
-    
+
     # Sending the menu message
     msg = f"📡 Rss Menu | Users: {len(rss_dict)} | Running: {scheduler.running}"
     return msg, button
-
 
 
 async def update_rss_menu(query):
@@ -216,7 +215,7 @@ async def rss_sub(_, message, pre_event):
             emsg = f"The link: {feed_link} doesn't seem to be a RSS feed or it's region-blocked!"
             await send_message(message, emsg + "\nError: " + str(e))
         except Exception as e:
-            await send_message(message, f"⚠️ An unexpected error occurred: {str(e)}")
+            await send_message(message, f"⚠️ An unexpected error occurred: {e!s}")
     if msg:
         await database.rss_update(user_id)
         await send_message(message, msg)
@@ -227,6 +226,7 @@ async def rss_sub(_, message, pre_event):
             add_job()
             scheduler.start()
     await update_rss_menu(pre_event)
+
 
 async def get_user_id(title):
     async with rss_dict_lock:
