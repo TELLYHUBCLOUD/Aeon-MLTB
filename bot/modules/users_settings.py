@@ -58,7 +58,9 @@ async def get_user_settings(from_user, stype="main"):
 
     if stype == "leech":
         buttons.data_button("📸 Thumbnail", f"userset {user_id} menu THUMBNAIL")
-        buttons.data_button("🔑 Leech Prefix", f"userset {user_id} menu LEECH_FILENAME_PREFIX")
+        buttons.data_button(
+            "🔑 Leech Prefix", f"userset {user_id} menu LEECH_FILENAME_PREFIX"
+        )
         if user_dict.get("LEECH_FILENAME_PREFIX", False):
             lprefix = user_dict["LEECH_FILENAME_PREFIX"]
         elif (
@@ -67,11 +69,14 @@ async def get_user_settings(from_user, stype="main"):
             lprefix = Config.LEECH_FILENAME_PREFIX
         else:
             lprefix = "None"
-        buttons.data_button("📝 Leech Caption", f"userset {user_id} menu LEECH_FILENAME_CAPTION")
+        buttons.data_button(
+            "📝 Leech Caption", f"userset {user_id} menu LEECH_FILENAME_CAPTION"
+        )
         if user_dict.get("LEECH_FILENAME_CAPTION", False):
             lcap = user_dict["LEECH_FILENAME_CAPTION"]
         elif (
-            "LEECH_FILENAME_CAPTION" not in user_dict and Config.LEECH_FILENAME_CAPTION
+            "LEECH_FILENAME_CAPTION" not in user_dict
+            and Config.LEECH_FILENAME_CAPTION
         ):
             lcap = Config.LEECH_FILENAME_CAPTION
         else:
@@ -87,19 +92,29 @@ async def get_user_settings(from_user, stype="main"):
             "AS_DOCUMENT" not in user_dict and Config.AS_DOCUMENT
         ):
             ltype = "DOCUMENT"
-            buttons.data_button("📄 Send As Media", f"userset {user_id} tog AS_DOCUMENT f")
+            buttons.data_button(
+                "📄 Send As Media", f"userset {user_id} tog AS_DOCUMENT f"
+            )
         else:
             ltype = "MEDIA"
-            buttons.data_button("🎥 Send As Document", f"userset {user_id} tog AS_DOCUMENT t")
+            buttons.data_button(
+                "🎥 Send As Document", f"userset {user_id} tog AS_DOCUMENT t"
+            )
         if user_dict.get("MEDIA_GROUP", False) or (
             "MEDIA_GROUP" not in user_dict and Config.MEDIA_GROUP
         ):
-            buttons.data_button("🚫 Disable Media Group", f"userset {user_id} tog MEDIA_GROUP f")
+            buttons.data_button(
+                "🚫 Disable Media Group", f"userset {user_id} tog MEDIA_GROUP f"
+            )
             media_group = "Enabled"
         else:
-            buttons.data_button("✅ Enable Media Group", f"userset {user_id} tog MEDIA_GROUP t")
+            buttons.data_button(
+                "✅ Enable Media Group", f"userset {user_id} tog MEDIA_GROUP t"
+            )
             media_group = "Disabled"
-        buttons.data_button("🖼️ Thumbnail Layout", f"userset {user_id} menu THUMBNAIL_LAYOUT")
+        buttons.data_button(
+            "🖼️ Thumbnail Layout", f"userset {user_id} menu THUMBNAIL_LAYOUT"
+        )
         if user_dict.get("THUMBNAIL_LAYOUT", False):
             thumb_layout = user_dict["THUMBNAIL_LAYOUT"]
         elif "THUMBNAIL_LAYOUT" not in user_dict and Config.THUMBNAIL_LAYOUT:
@@ -120,8 +135,12 @@ async def get_user_settings(from_user, stype="main"):
 🖼️ Thumbnail Layout is <b>{thumb_layout}</b>
 """
     elif stype == "rclone":
-        buttons.data_button("📂 Rclone Config", f"userset {user_id} menu RCLONE_CONFIG")
-        buttons.data_button("🛠️ Default Rclone Path", f"userset {user_id} menu RCLONE_PATH")
+        buttons.data_button(
+            "📂 Rclone Config", f"userset {user_id} menu RCLONE_CONFIG"
+        )
+        buttons.data_button(
+            "🛠️ Default Rclone Path", f"userset {user_id} menu RCLONE_PATH"
+        )
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
         rccmsg = "Exists" if await aiopath.exists(rclone_conf) else "Not Exists"
@@ -135,16 +154,25 @@ async def get_user_settings(from_user, stype="main"):
 🔧 Rclone Config <b>{rccmsg}</b>
 📂 Rclone Path is <code>{rccpath}</code>"""
     elif stype == "gdrive":
-        buttons.data_button("📑 token.pickle", f"userset {user_id} menu TOKEN_PICKLE")
-        buttons.data_button("🔑 Default Gdrive ID", f"userset {user_id} menu GDRIVE_ID")
+        buttons.data_button(
+            "📑 token.pickle", f"userset {user_id} menu TOKEN_PICKLE"
+        )
+        buttons.data_button(
+            "🔑 Default Gdrive ID", f"userset {user_id} menu GDRIVE_ID"
+        )
         buttons.data_button("🌐 Index URL", f"userset {user_id} menu INDEX_URL")
         if user_dict.get("STOP_DUPLICATE", False) or (
             "STOP_DUPLICATE" not in user_dict and Config.STOP_DUPLICATE
         ):
-            buttons.data_button("❌ Disable Stop Duplicate", f"userset {user_id} tog STOP_DUPLICATE f")
+            buttons.data_button(
+                "❌ Disable Stop Duplicate",
+                f"userset {user_id} tog STOP_DUPLICATE f",
+            )
             sd_msg = "Enabled"
         else:
-            buttons.data_button("✅ Enable Stop Duplicate", f"userset {user_id} tog STOP_DUPLICATE t")
+            buttons.data_button(
+                "✅ Enable Stop Duplicate", f"userset {user_id} tog STOP_DUPLICATE t"
+            )
             sd_msg = "Disabled"
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
@@ -178,7 +206,9 @@ async def get_user_settings(from_user, stype="main"):
         else:
             upload_paths = "None"
 
-        buttons.data_button("📁 Upload Paths", f"userset {user_id} menu UPLOAD_PATHS")
+        buttons.data_button(
+            "📁 Upload Paths", f"userset {user_id} menu UPLOAD_PATHS"
+        )
 
         if user_dict.get("DEFAULT_UPLOAD", ""):
             default_upload = user_dict["DEFAULT_UPLOAD"]
