@@ -21,7 +21,7 @@ async def broadcast(_, message):
     total, successful, blocked, unsuccessful = 0, 0, 0, 0
     start_time = time()
     updater = time()
-    broadcast_message = await send_message(message, "Broadcast in progress...")
+    broadcast_message = await send_message(message, "📢 Broadcasting in progress...")
 
     for uid in await database.get_pm_uids():
         try:
@@ -50,11 +50,13 @@ async def broadcast(_, message):
 
 
 def generate_status(total, successful, blocked, unsuccessful, elapsed_time=""):
-    status = "<b>Broadcast Stats :</b>\n\n"
-    status += f"<b>• Total users:</b> {total}\n"
-    status += f"<b>• Success:</b> {successful}\n"
-    status += f"<b>• Blocked or deleted:</b> {blocked}\n"
-    status += f"<b>• Unsuccessful attempts:</b> {unsuccessful}"
+    status = "📢 <b>Broadcast Stats:</b>\n\n"
+    status += f"👥 <b>Total users:</b> {total}\n"
+    status += f"✅ <b>Success:</b> {successful}\n"
+    status += f"🚫 <b>Blocked or Deleted:</b> {blocked}\n"
+    status += f"⚠️ <b>Unsuccessful attempts:</b> {unsuccessful}"
+
     if elapsed_time:
-        status += f"\n\n<b>Elapsed Time:</b> {elapsed_time}"
+        status += f"\n⏳ <b>Elapsed Time:</b> {elapsed_time}"
+
     return status
