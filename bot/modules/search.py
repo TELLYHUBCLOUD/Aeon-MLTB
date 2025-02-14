@@ -76,7 +76,6 @@ async def search(key, site, message):
     await edit_message(message, msg, button)
 
 
-
 async def get_result(search_results, key, message):
     telegraph_content = []
     msg = f"<h4>🔍 PLUGINS Search Result(s) For {key}</h4>"

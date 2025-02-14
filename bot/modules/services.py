@@ -98,7 +98,8 @@ async def aeon_callback(_, query):
     data = query.data.split()
     if user_id != int(data[1]):
         return await query.answer(
-            text="🚫 This message is not yours!", show_alert=True
+            text="🚫 This message is not yours!",
+            show_alert=True,
         )
     if data[2] == "view":
         await query.answer()
