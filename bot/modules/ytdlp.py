@@ -95,7 +95,7 @@ class YtSelection:
         try:
             await wait_for(self.event.wait(), timeout=self._timeout)
         except Exception:
-            await edit_message(self._reply_to, "Timed Out. Task has been cancelled!")
+            await edit_message(self._reply_to, "⏳ Timed Out. ❌ Task has been cancelled!")
             self.qual = None
             self.listener.is_cancelled = True
             self.event.set()
@@ -107,23 +107,25 @@ class YtSelection:
         if "entries" in result:
             self._is_playlist = True
             for i in ["144", "240", "360", "480", "720", "1080", "1440", "2160"]:
-                video_format = (
-                    f"bv*[height<=?{i}][ext=mp4]+ba[ext=m4a]/b[height<=?{i}]"
-                )
+                video_format = f"bv*[height<=?{i}][ext=mp4]+ba[ext=m4a]/b[height<=?{i}]"
                 b_data = f"{i}|mp4"
                 self.formats[b_data] = video_format
-                buttons.data_button(f"{i}-mp4", f"ytq {b_data}")
+                buttons.data_button(f"📹 {i}-mp4", f"ytq {b_data}")
+                
                 video_format = f"bv*[height<=?{i}][ext=webm]+ba/b[height<=?{i}]"
                 b_data = f"{i}|webm"
                 self.formats[b_data] = video_format
-                buttons.data_button(f"{i}-webm", f"ytq {b_data}")
-            buttons.data_button("MP3", "ytq mp3")
-            buttons.data_button("Audio Formats", "ytq audio")
-            buttons.data_button("Best Videos", "ytq bv*+ba/b")
-            buttons.data_button("Best Audios", "ytq ba/b")
-            buttons.data_button("Cancel", "ytq cancel", "footer")
+                buttons.data_button(f"🎥 {i}-webm", f"ytq {b_data}")
+            
+            buttons.data_button("🎵 MP3", "ytq mp3")
+            buttons.data_button("🎶 Audio Formats", "ytq audio")
+            buttons.data_button("📺 Best Videos", "ytq bv*+ba/b")
+            buttons.data_button("🔊 Best Audios", "ytq ba/b")
+            buttons.data_button("❌ Cancel", "ytq cancel", "footer")
+            
             self._main_buttons = buttons.build_menu(3)
-            msg = f"Choose Playlist Videos Quality:\nTimeout: {get_readable_time(self._timeout - (time() - self._time))}"
+            msg = f"📽️ Choose Playlist Videos Quality:\n⏳ Timeout: {get_readable_time(self._timeout - (time() - self._time))}"
+
         else:
             format_dict = result.get("formats")
             if format_dict is not None:
@@ -145,14 +147,14 @@ class YtSelection:
                             if item.get("audio_ext") == "m4a":
                                 self._is_m4a = True
                             b_name = (
-                                f"{item.get('acodec') or format_id}-{item['ext']}"
+                                f"🎵 {item.get('acodec') or format_id}-{item['ext']}"
                             )
                             v_format = format_id
                         elif item.get("height"):
                             height = item["height"]
                             ext = item["ext"]
                             fps = item["fps"] if item.get("fps") else ""
-                            b_name = f"{height}p{fps}-{ext}"
+                            b_name = f"📺 {height}p{fps}-{ext}"
                             ba_ext = (
                                 "[ext=m4a]" if self._is_m4a and ext == "mp4" else ""
                             )
@@ -174,11 +176,11 @@ class YtSelection:
                         buttons.data_button(buttonName, f"ytq sub {b_name} {tbr}")
                     else:
                         buttons.data_button(b_name, f"ytq dict {b_name}")
-            buttons.data_button("MP3", "ytq mp3")
-            buttons.data_button("Audio Formats", "ytq audio")
-            buttons.data_button("Best Video", "ytq bv*+ba/b")
-            buttons.data_button("Best Audio", "ytq ba/b")
-            buttons.data_button("Cancel", "ytq cancel", "footer")
+            buttons.data_button("🎵 MP3", "ytq mp3")
+            buttons.data_button("🎶 Audio Formats", "ytq audio")
+            buttons.data_button("📺 Best Video", "ytq bv*+ba/b")
+            buttons.data_button("🔊 Best Audio", "ytq ba/b")
+            buttons.data_button("❌ Cancel", "ytq cancel", "footer")
             self._main_buttons = buttons.build_menu(2)
             msg = f"Choose Video Quality:\nTimeout: {get_readable_time(self._timeout - (time() - self._time))}"
         self._reply_to = await send_message(
@@ -193,22 +195,26 @@ class YtSelection:
 
     async def back_to_main(self):
         if self._is_playlist:
-            msg = f"Choose Playlist Videos Quality:\nTimeout: {get_readable_time(self._timeout - (time() - self._time))}"
+            msg = f"📂 Choose Playlist Videos Quality:\n⏳ Timeout: {get_readable_time(self._timeout - (time() - self._time))}"
         else:
-            msg = f"Choose Video Quality:\nTimeout: {get_readable_time(self._timeout - (time() - self._time))}"
+            msg = f"📺 Choose Video Quality:\n⏳ Timeout: {get_readable_time(self._timeout - (time() - self._time))}"
         await edit_message(self._reply_to, msg, self._main_buttons)
+
 
     async def qual_subbuttons(self, b_name):
         buttons = ButtonMaker()
         tbr_dict = self.formats[b_name]
         for tbr, d_data in tbr_dict.items():
-            button_name = f"{tbr}K ({get_readable_file_size(d_data[0])})"
+            button_name = f"🎚️ {tbr}K ({get_readable_file_size(d_data[0])})"
             buttons.data_button(button_name, f"ytq sub {b_name} {tbr}")
-        buttons.data_button("Back", "ytq back", "footer")
-        buttons.data_button("Cancel", "ytq cancel", "footer")
+        
+        buttons.data_button("🔙 Back", "ytq back", "footer")
+        buttons.data_button("❌ Cancel", "ytq cancel", "footer")
+        
         subbuttons = buttons.build_menu(2)
-        msg = f"Choose Bit rate for <b>{b_name}</b>:\nTimeout: {get_readable_time(self._timeout - (time() - self._time))}"
+        msg = f"🎵 Choose Bitrate for <b>{b_name}</b>:\n⏳ Timeout: {get_readable_time(self._timeout - (time() - self._time))}"
         await edit_message(self._reply_to, msg, subbuttons)
+    
 
     async def mp3_subbuttons(self):
         i = "s" if self._is_playlist else ""
@@ -216,45 +222,55 @@ class YtSelection:
         audio_qualities = [64, 128, 320]
         for q in audio_qualities:
             audio_format = f"ba/b-mp3-{q}"
-            buttons.data_button(f"{q}K-mp3", f"ytq {audio_format}")
-        buttons.data_button("Back", "ytq back")
-        buttons.data_button("Cancel", "ytq cancel")
+            buttons.data_button(f"🎵 {q}K-mp3", f"ytq {audio_format}")
+    
+        buttons.data_button("🔙 Back", "ytq back")
+        buttons.data_button("❌ Cancel", "ytq cancel")
+    
         subbuttons = buttons.build_menu(3)
-        msg = f"Choose mp3 Audio{i} Bitrate:\nTimeout: {get_readable_time(self._timeout - (time() - self._time))}"
+        msg = f"🎶 Choose MP3 Audio{i} Bitrate:\n⏳ Timeout: {get_readable_time(self._timeout - (time() - self._time))}"
+        
         await edit_message(self._reply_to, msg, subbuttons)
+    
 
     async def audio_format(self):
         i = "s" if self._is_playlist else ""
         buttons = ButtonMaker()
         for frmt in ["aac", "alac", "flac", "m4a", "opus", "vorbis", "wav"]:
             audio_format = f"ba/b-{frmt}-"
-            buttons.data_button(frmt, f"ytq aq {audio_format}")
-        buttons.data_button("Back", "ytq back", "footer")
-        buttons.data_button("Cancel", "ytq cancel", "footer")
+            buttons.data_button(f"🎵 {frmt.upper()}", f"ytq aq {audio_format}")
+    
+        buttons.data_button("🔙 Back", "ytq back", "footer")
+        buttons.data_button("❌ Cancel", "ytq cancel", "footer")
+    
         subbuttons = buttons.build_menu(3)
-        msg = f"Choose Audio{i} Format:\nTimeout: {get_readable_time(self._timeout - (time() - self._time))}"
+        msg = f"🎶 Choose Audio{i} Format:\n⏳ Timeout: {get_readable_time(self._timeout - (time() - self._time))}"
+    
         await edit_message(self._reply_to, msg, subbuttons)
+    
 
     async def audio_quality(self, format):
         i = "s" if self._is_playlist else ""
         buttons = ButtonMaker()
         for qual in range(11):
             audio_format = f"{format}{qual}"
-            buttons.data_button(qual, f"ytq {audio_format}")
-        buttons.data_button("Back", "ytq aq back")
-        buttons.data_button("Cancel", "ytq aq cancel")
+            buttons.data_button(f"🎚️ {qual}", f"ytq {audio_format}")
+    
+        buttons.data_button("🔙 Back", "ytq aq back")
+        buttons.data_button("❌ Cancel", "ytq aq cancel")
+    
         subbuttons = buttons.build_menu(5)
-        msg = f"Choose Audio{i} Qaulity:\n0 is best and 10 is worst\nTimeout: {get_readable_time(self._timeout - (time() - self._time))}"
+        msg = f"🎶 Choose Audio{i} Quality:\n🔹 0 is Best\n🔻 10 is Worst\n⏳ Timeout: {get_readable_time(self._timeout - (time() - self._time))}"
+    
         await edit_message(self._reply_to, msg, subbuttons)
 
 
 def extract_info(link, options):
     with YoutubeDL(options) as ydl:
         result = ydl.extract_info(link, download=False)
-        if result is None:
-            raise ValueError("Info result is None")
+        if not result:
+            raise ValueError("❌ Failed to extract info. Result is None.")
         return result
-
 
 async def _mdisk(link, name):
     key = link.split("/")[-1]
@@ -492,7 +508,7 @@ class YtDlp(TaskListener):
                 await self.remove_from_same_dir()
                 return None
 
-        LOGGER.info(f"Downloading with YT-DLP: {self.link}")
+        LOGGER.info(f"⬇️ Downloading with YT-DLP: {self.link}")
         playlist = "entries" in result
         ydl = YoutubeDLHelper(self)
         create_task(ydl.add_download(path, qual, playlist, opt))  # noqa: RUF006
