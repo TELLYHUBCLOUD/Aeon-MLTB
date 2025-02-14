@@ -42,27 +42,40 @@ headers = {
 async def rss_menu(event):
     user_id = event.from_user.id
     buttons = ButtonMaker()
-    buttons.data_button("Subscribe", f"rss sub {user_id}")
-    buttons.data_button("Subscriptions", f"rss list {user_id} 0")
-    buttons.data_button("Get Items", f"rss get {user_id}")
-    buttons.data_button("Edit", f"rss edit {user_id}")
-    buttons.data_button("Pause", f"rss pause {user_id}")
-    buttons.data_button("Resume", f"rss resume {user_id}")
-    buttons.data_button("Unsubscribe", f"rss unsubscribe {user_id}")
+    
+    # Main RSS buttons
+    buttons.data_button("📥 Subscribe", f"rss sub {user_id}")
+    buttons.data_button("📋 Subscriptions", f"rss list {user_id} 0")
+    buttons.data_button("📑 Get Items", f"rss get {user_id}")
+    buttons.data_button("✏️ Edit", f"rss edit {user_id}")
+    buttons.data_button("⏸️ Pause", f"rss pause {user_id}")
+    buttons.data_button("▶️ Resume", f"rss resume {user_id}")
+    buttons.data_button("❌ Unsubscribe", f"rss unsubscribe {user_id}")
+    
+    # Admin-specific buttons
     if await CustomFilters.sudo("", event):
-        buttons.data_button("All Subscriptions", f"rss listall {user_id} 0")
-        buttons.data_button("Pause All", f"rss allpause {user_id}")
-        buttons.data_button("Resume All", f"rss allresume {user_id}")
-        buttons.data_button("Unsubscribe All", f"rss allunsub {user_id}")
-        buttons.data_button("Delete User", f"rss deluser {user_id}")
+        buttons.data_button("🌍 All Subscriptions", f"rss listall {user_id} 0")
+        buttons.data_button("⏸️ Pause All", f"rss allpause {user_id}")
+        buttons.data_button("▶️ Resume All", f"rss allresume {user_id}")
+        buttons.data_button("❌ Unsubscribe All", f"rss allunsub {user_id}")
+        buttons.data_button("🧹 Delete User", f"rss deluser {user_id}")
+        
+        # RSS control buttons
         if scheduler.running:
-            buttons.data_button("Shutdown Rss", f"rss shutdown {user_id}")
+            buttons.data_button("🛑 Shutdown Rss", f"rss shutdown {user_id}")
         else:
-            buttons.data_button("Start Rss", f"rss start {user_id}")
-    buttons.data_button("Close", f"rss close {user_id}")
+            buttons.data_button("🔄 Start Rss", f"rss start {user_id}")
+    
+    # Close button
+    buttons.data_button("❌ Close", f"rss close {user_id}")
+    
+    # Building the button layout
     button = buttons.build_menu(2)
-    msg = f"Rss Menu | Users: {len(rss_dict)} | Running: {scheduler.running}"
+    
+    # Sending the menu message
+    msg = f"📡 Rss Menu | Users: {len(rss_dict)} | Running: {scheduler.running}"
     return msg, button
+
 
 
 async def update_rss_menu(query):
@@ -91,21 +104,21 @@ async def rss_sub(_, message, pre_event):
         if len(args) < 2:
             await send_message(
                 message,
-                f"{item}. Wrong Input format. Read help message before adding new subcription!",
+                f"❌ {item}. Wrong Input format. Read help message before adding new subscription!",
             )
             continue
         title = args[0].strip()
         if (user_feeds := rss_dict.get(user_id, False)) and title in user_feeds:
             await send_message(
                 message,
-                f"This title {title} already subscribed! Choose another title!",
+                f"⚠️ This title {title} already subscribed! Choose another title!",
             )
             continue
         feed_link = args[1].strip()
         if feed_link.startswith(("-inf", "-exf", "-c")):
             await send_message(
                 message,
-                f"Wrong input in line {index}! Add Title! Read the example!",
+                f"❌ Wrong input in line {index}! Add Title! Read the example!",
             )
             continue
         inf_lists = []
@@ -154,11 +167,11 @@ async def rss_sub(_, message, pre_event):
                 size = get_size_bytes(sizes[0])
             else:
                 size = 0
-            msg += "<b>Subscribed!</b>"
+            msg += "<b>✅ Subscribed!</b>"
             msg += (
                 f"\n<b>Title: </b><code>{title}</code>\n<b>Feed Url: </b>{feed_link}"
             )
-            msg += f"\n<b>latest record for </b>{rss_d.feed.title}:"
+            msg += f"\n<b>Latest record for </b>{rss_d.feed.title}:"
             msg += f"\nName: <code>{last_title.replace('>', '').replace('<', '')}</code>"
             try:
                 last_link = rss_d.entries[0]["links"][1]["href"]
@@ -168,7 +181,7 @@ async def rss_sub(_, message, pre_event):
             if size:
                 msg += f"\nSize: {get_readable_file_size(size)}"
             msg += f"\n<b>Command: </b><code>{cmd}</code>"
-            msg += f"\n<b>Filters:-</b>\ninf: <code>{inf}</code>\nexf: <code>{exf}</code>\n<b>sensitive: </b>{stv}"
+            msg += f"\n<b>Filters:-</b>\ninf: <code>{inf}</code>\nexf: <code>{exf}</code>\n<b>Sensitive: </b>{stv}"
             async with rss_dict_lock:
                 if rss_dict.get(user_id, False):
                     rss_dict[user_id][title] = {
@@ -203,7 +216,7 @@ async def rss_sub(_, message, pre_event):
             emsg = f"The link: {feed_link} doesn't seem to be a RSS feed or it's region-blocked!"
             await send_message(message, emsg + "\nError: " + str(e))
         except Exception as e:
-            await send_message(message, str(e))
+            await send_message(message, f"⚠️ An unexpected error occurred: {str(e)}")
     if msg:
         await database.rss_update(user_id)
         await send_message(message, msg)
@@ -214,7 +227,6 @@ async def rss_sub(_, message, pre_event):
             add_job()
             scheduler.start()
     await update_rss_menu(pre_event)
-
 
 async def get_user_id(title):
     async with rss_dict_lock:
