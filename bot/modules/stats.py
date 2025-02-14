@@ -77,6 +77,7 @@ async def bot_stats(_, message):
     await delete_message(message)
     await one_minute_del(reply_message)
 
+
 async def get_version_async(command, regex):
     try:
         out, err, code = await cmd_exec(command)
