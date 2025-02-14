@@ -22,6 +22,6 @@ async def delete_file(_, message):
         LOGGER.info(link)
         msg = await sync_to_async(GoogleDriveDelete().deletefile, link, user.id)
     else:
-        msg = "Send Gdrive link along with command or by replying to the link by command"
+        msg = "⚠️ **Send a valid Gdrive link along with the command or reply to the link!**"  # Add warning emoji.
     reply_message = await send_message(message, msg)
     await auto_delete_message(message, reply_message)
