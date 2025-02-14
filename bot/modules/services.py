@@ -33,23 +33,23 @@ async def start(client, message):
         if stored_token is None:
             return await send_message(
                 message,
-                "<b>This token is not for you!</b>\n\nPlease generate your own.",
+                "<b>❌ This token is not for you!</b>\n\nPlease generate your own. 🔑",
             )
         if input_token != stored_token:
             return await send_message(
                 message,
-                "Invalid token.\n\nPlease generate a new one.",
+                "⚠️ Invalid token.\n\nPlease generate a new one. 🔑",
             )
         if userid not in user_data:
             return await send_message(
                 message,
-                "This token is not yours!\n\nKindly generate your own.",
+                "🚫 This token is not yours!\n\nKindly generate your own. 🔑",
             )
         data = user_data[userid]
         if "TOKEN" not in data or data["TOKEN"] != input_token:
             return await send_message(
                 message,
-                "<b>This token has already been used!</b>\n\nPlease get a new one.",
+                "<b>❌ This token has already been used!</b>\n\nPlease get a new one. 🔑",
             )
         token = str(uuid4())
         token_time = time()
@@ -57,31 +57,32 @@ async def start(client, message):
         data["TIME"] = token_time
         user_data[userid].update(data)
         await database.update_user_tdata(userid, token, token_time)
-        msg = "Your token has been successfully generated!\n\n"
-        msg += f"It will be valid for {get_readable_time(int(Config.TOKEN_TIMEOUT), True)}"
+        msg = "✅ Your token has been successfully generated! 🎉\n\n"
+        msg += f"It will be valid for {get_readable_time(int(Config.TOKEN_TIMEOUT), True)} ⏳"
         return await send_message(message, msg)
     elif await CustomFilters.authorized(client, message):
         help_command = f"/{BotCommands.HelpCommand}"
-        start_string = f"This bot can mirror all your links|files|torrents to Google Drive or any rclone cloud or to telegram.\n<b>Type {help_command} to get a list of available commands</b>"
+        start_string = f"This bot can mirror all your links|files|torrents to Google Drive or any rclone cloud or to telegram. 📂☁️\n<b>Type {help_command} to get a list of available commands.</b> 📜"
         await send_message(message, start_string)
     else:
-        await send_message(message, "You are not a authorized user!")
+        await send_message(message, "🚫 You are not an authorized user! ❌")
     await database.update_pm_users(message.from_user.id)
     return None
+
 
 
 @new_task
 async def ping(_, message):
     start_time = int(round(time() * 1000))
-    reply = await send_message(message, "Starting Ping")
+    reply = await send_message(message, "🏓 Starting Ping...")
     end_time = int(round(time() * 1000))
-    await edit_message(reply, f"{end_time - start_time} ms")
+    await edit_message(reply, f"⏱️ {end_time - start_time} ms")
 
 
 @new_task
 async def log(_, message):
     buttons = ButtonMaker()
-    buttons.data_button("View log", f"aeon {message.from_user.id} view")
+    buttons.data_button("📜 View log", f"aeon {message.from_user.id} view")
     reply_message = await send_file(
         message,
         "log.txt",
@@ -97,7 +98,7 @@ async def aeon_callback(_, query):
     user_id = query.from_user.id
     data = query.data.split()
     if user_id != int(data[1]):
-        return await query.answer(text="This message not your's!", show_alert=True)
+        return await query.answer(text="🚫 This message is not yours!", show_alert=True)
     if data[2] == "view":
         await query.answer()
         async with aiopen("log.txt") as f:
@@ -119,7 +120,7 @@ async def aeon_callback(_, query):
             start_line = "<pre language='python'>"
             end_line = "</pre>"
             btn = ButtonMaker()
-            btn.data_button("Close", f"aeon {user_id} close")
+            btn.data_button("❌ Close", f"aeon {user_id} close")
             reply_message = await send_message(
                 message,
                 start_line + escape(log_lines) + end_line,
@@ -129,7 +130,7 @@ async def aeon_callback(_, query):
             await delete_message(message)
             await five_minute_del(reply_message)
         except Exception as err:
-            LOGGER.error(f"TG Log Display : {err!s}")
+            LOGGER.error(f"TG Log Display Error: {err!s}")
     elif data[2] == "private":
         await query.answer(url=f"https://t.me/{TgClient.NAME}?start=private")
         return None
