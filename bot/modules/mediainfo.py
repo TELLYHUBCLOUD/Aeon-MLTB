@@ -29,7 +29,7 @@ section_dict = {"General", "Video", "Audio", "Text", "Image"}
 def parseinfo(out, file_size):
     tc = ""
     skip = False
-    file_size_line = f"File size                              : {file_size / (1024 * 1024):.2f} MiB"
+    file_size_line = f"File size                              : {file_size / (1024 * 1024):.2f} MiB 📦"
 
     for line in out.split("\n"):
         if line.startswith("Menu"):
@@ -38,21 +38,21 @@ def parseinfo(out, file_size):
             skip = False
             if not line.startswith("General"):
                 tc += "</pre><br>"
-            tc += f"<blockquote>{line.replace('Text', 'Subtitle')}</blockquote><pre>"
+            tc += f"<blockquote>{line.replace('Text', 'Subtitle')} 🎬</blockquote><pre>"
         if not skip:
             # Replace File size line
             if line.startswith("File size"):
                 line = file_size_line
             key, sep, value = line.partition(":")
-            tc += f"{key.strip():<28}{sep} {value.strip()}\n"
+            tc += f"{key.strip():<28}{sep} {value.strip()} 📊\n"
     tc += "</pre><br>"
     return tc
 
 
 async def gen_mediainfo(message, link=None, media=None, msg=None):
-    temp_send = await send_message(message, "Generating MediaInfo...")
+    temp_send = await send_message(message, "Generating MediaInfo... 🔄")
     try:
-        path = "Mediainfo/"
+        path = "Mediainfo/ 🗂️"
         if not await aiopath.isdir(path):
             await mkdir(path)
 
@@ -87,19 +87,19 @@ async def gen_mediainfo(message, link=None, media=None, msg=None):
         stdout, _, _ = await cmd_exec(ssplit(f'mediainfo "{des_path}"'))
 
         # Parse MediaInfo with updated file size
-        tc = f"<h4>{ospath.basename(des_path)}</h4><br><br>"
+        tc = f"<h4>{ospath.basename(des_path)} 🎥</h4><br><br>"
         if stdout:
             tc += parseinfo(stdout, file_size)
 
     except Exception as e:
         LOGGER.error(e)
-        await edit_message(temp_send, f"MediaInfo stopped due to {e!s}")
+        await edit_message(temp_send, f"MediaInfo stopped due to {e!s} ❌")
     finally:
         await aioremove(des_path)
 
-    link_id = (await telegraph.create_page(title="MediaInfo", content=tc))["path"]
+    link_id = (await telegraph.create_page(title="MediaInfo 📑", content=tc))["path"]
     await temp_send.edit(
-        f"<blockquote>MediaInfo generated successfully<a href='https://graph.org/{link_id}'>.</a></blockquote>",
+        f"<blockquote>MediaInfo generated successfully ✅<a href='https://graph.org/{link_id}'>.</a></blockquote>",
         disable_web_page_preview=False,
     )
 
@@ -116,9 +116,9 @@ async def mediainfo(_, message):
             return
     reply = message.reply_to_message
     help_msg = (
-        "<b>By replying to media:</b>"
+        "<b>By replying to media:</b> 🎬"
         f"\n<code>/{BotCommands.MediaInfoCommand} media </code>"
-        "\n\n<b>By reply/sending download link:</b>"
+        "\n\n<b>By reply/sending download link:</b> 🔗"
         f"\n<code>/{BotCommands.MediaInfoCommand} link </code>"
     )
     if len(message.command) > 1 or (reply and reply.text):
