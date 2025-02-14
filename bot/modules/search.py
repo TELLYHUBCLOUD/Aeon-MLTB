@@ -42,7 +42,7 @@ async def initiate_search_tools():
 
 
 async def search(key, site, message):
-    LOGGER.info(f"PLUGINS Searching: {key} from {site}")
+    LOGGER.info(f"🔍 PLUGINS Searching: {key} from {site}")
     search = await TorrentManager.qbittorrent.search.start(
         pattern=key,
         plugins=site,
@@ -63,11 +63,11 @@ async def search(key, site, message):
     if total_results == 0:
         await edit_message(
             message,
-            f"No result found for <i>{key}</i>\nTorrent Site:- <i>{site.capitalize()}</i>",
+            f"No result found for <i>{key}</i>\nTorrent Site:- <i>{site.capitalize()}</i> 🚫",
         )
         return
-    msg = f"<b>Found {min(total_results, TELEGRAPH_LIMIT)}</b>"
-    msg += f" <b>result(s) for <i>{key}</i>\nTorrent Site:- <i>{site.capitalize()}</i></b>"
+    msg = f"<b>Found {min(total_results, TELEGRAPH_LIMIT)}</b> result(s) for <i>{key}</i> 📝\n"
+    msg += f"Torrent Site:- <i>{site.capitalize()}</i> 🌐"
     await TorrentManager.qbittorrent.search.delete(search_id)
     link = await get_result(search_results, key, message)
     buttons = ButtonMaker()
@@ -76,18 +76,19 @@ async def search(key, site, message):
     await edit_message(message, msg, button)
 
 
+
 async def get_result(search_results, key, message):
     telegraph_content = []
-    msg = f"<h4>PLUGINS Search Result(s) For {key}</h4>"
+    msg = f"<h4>🔍 PLUGINS Search Result(s) For {key}</h4>"
     for index, result in enumerate(search_results, start=1):
         msg += f"<a href='{result.descrLink}'>{escape(result.fileName)}</a><br>"
         msg += f"<b>Size: </b>{get_readable_file_size(result.fileSize)}<br>"
         msg += f"<b>Seeders: </b>{result.nbSeeders} | <b>Leechers: </b>{result.nbLeechers}<br>"
         link = result.fileUrl
         if link.startswith("magnet:"):
-            msg += f"<b>Share Magnet to</b> <a href='http://t.me/share/url?url={quote(link)}'>Telegram</a><br><br>"
+            msg += f"<b>Share Magnet to</b> <a href='http://t.me/share/url?url={quote(link)}'>Telegram 📲</a><br><br>"
         else:
-            msg += f"<a href='{link}'>Direct Link</a><br><br>"
+            msg += f"<a href='{link}'>Direct Link 🔗</a><br><br>"
 
         if len(msg.encode("utf-8")) > 39000:
             telegraph_content.append(msg)
@@ -101,7 +102,7 @@ async def get_result(search_results, key, message):
 
     await edit_message(
         message,
-        f"<b>Creating</b> {len(telegraph_content)} <b>Telegraph pages.</b>",
+        f"<b>Creating</b> {len(telegraph_content)} <b>Telegraph pages. 📄</b>",
     )
     path = [
         (
@@ -115,7 +116,7 @@ async def get_result(search_results, key, message):
     if len(path) > 1:
         await edit_message(
             message,
-            f"<b>Editing</b> {len(telegraph_content)} <b>Telegraph pages.</b>",
+            f"<b>Editing</b> {len(telegraph_content)} <b>Telegraph pages. ✍️</b>",
         )
         await telegraph.edit_telegraph(path, telegraph_content)
     return f"https://telegra.ph/{path[0]}"
@@ -129,11 +130,11 @@ async def plugin_buttons(user_id):
             PLUGINS.append(i.name)
     for siteName in PLUGINS:
         buttons.data_button(
-            siteName.capitalize(),
+            f"{siteName.capitalize()} 🌐",
             f"torser {user_id} {siteName} plugin",
         )
-    buttons.data_button("All", f"torser {user_id} all plugin")
-    buttons.data_button("Cancel", f"torser {user_id} cancel")
+    buttons.data_button("All 🔎", f"torser {user_id} all plugin")
+    buttons.data_button("Cancel ❌", f"torser {user_id} cancel")
     return buttons.build_menu(2)
 
 
@@ -142,7 +143,7 @@ async def torrent_search(_, message):
     user_id = message.from_user.id
     key = message.text.split()
     if len(key) == 1:
-        await send_message(message, "Send a search key along with command")
+        await send_message(message, "❗ Send a search key along with command")
     else:
         button = await plugin_buttons(user_id)
         await send_message(message, "Choose site to search | Plugins:", button)
@@ -156,19 +157,19 @@ async def torrent_search_update(_, query):
     key = key[1].strip() if len(key) > 1 else None
     data = query.data.split()
     if user_id != int(data[1]):
-        await query.answer("Not Yours!", show_alert=True)
+        await query.answer("❗ Not Yours!", show_alert=True)
     elif data[2] == "plugin":
         await query.answer()
         button = await plugin_buttons(user_id)
-        await edit_message(message, "Choose site:", button)
+        await edit_message(message, "Choose site 🖥️:", button)
     elif data[2] != "cancel":
         await query.answer()
         site = data[2]
         await edit_message(
             message,
-            f"<b>Searching for <i>{key}</i>\nTorrent Site:- <i>{site.capitalize()}</i></b>",
+            f"<b>Searching for <i>{key}</i> 🔍\nTorrent Site:- <i>{site.capitalize()}</i></b> 🌐",
         )
         await search(key, site, message)
     else:
         await query.answer()
-        await edit_message(message, "Search has been canceled!")
+        await edit_message(message, "Search has been canceled! ❌")
