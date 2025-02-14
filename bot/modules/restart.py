@@ -22,48 +22,52 @@ from bot.helper.telegram_helper.message_utils import delete_message, send_messag
 @new_task
 async def restart_bot(_, message):
     buttons = button_build.ButtonMaker()
-    buttons.data_button("Yes!", "botrestart confirm")
-    buttons.data_button("Cancel", "botrestart cancel")
+    buttons.data_button("✅ Yes!", "botrestart confirm")
+    buttons.data_button("❌ Cancel", "botrestart cancel")
     button = buttons.build_menu(2)
     await send_message(
         message,
-        "Are you sure you want to restart the bot ?!",
+        "⚠️ Are you sure you want to restart the bot?!",
         button,
     )
+
 
 
 @new_task
 async def restart_sessions(_, message):
     buttons = button_build.ButtonMaker()
-    buttons.data_button("Yes!", "sessionrestart confirm")
-    buttons.data_button("Cancel", "sessionrestart cancel")
+    buttons.data_button("✅ Yes!", "sessionrestart confirm")
+    buttons.data_button("❌ Cancel", "sessionrestart cancel")
     button = buttons.build_menu(2)
     await send_message(
         message,
-        "Are you sure you want to restart the session(s) ?!",
+        "🔄 Are you sure you want to restart the session(s)?!",
         button,
     )
 
 
+
 async def send_incomplete_task_message(cid, msg_id, msg):
     try:
-        if msg.startswith("Restarted Successfully!"):
+        if msg.startswith("✅ Restarted Successfully!"):
             await TgClient.bot.edit_message_text(
                 chat_id=cid,
                 message_id=msg_id,
-                text=msg,
+                text=f"✅ {msg}",
                 disable_web_page_preview=True,
             )
             await remove(".restartmsg")
         else:
             await TgClient.bot.send_message(
                 chat_id=cid,
-                text=msg,
+                text=f"⚠️ {msg} ❗",
                 disable_web_page_preview=True,
                 disable_notification=True,
             )
     except Exception as e:
-        LOGGER.error(e)
+        LOGGER.error(f"Error: {e} 🔴")
+
+
 
 
 async def restart_notification():
@@ -80,9 +84,9 @@ async def restart_notification():
         and (notifier_dict := await database.get_incomplete_tasks())
     ):
         for cid, data in notifier_dict.items():
-            msg = "Restarted Successfully!" if cid == chat_id else "Bot Restarted!"
+            msg = "✅ Restarted Successfully!" if cid == chat_id else "🤖 Bot Restarted!"
             for tag, links in data.items():
-                msg += f"\n\n{tag}: "
+                msg += f"\n\n🔹 <b>{tag}</b>:"
                 for index, link in enumerate(links, start=1):
                     msg += f" <a href='{link}'>{index}</a> |"
                     if len(msg.encode()) > 4000:
@@ -96,9 +100,10 @@ async def restart_notification():
             await TgClient.bot.edit_message_text(
                 chat_id=chat_id,
                 message_id=msg_id,
-                text="Restarted Successfully!",
+                text="✅ Restarted Successfully!",
             )
         await remove(".restartmsg")
+
 
 
 @new_task
@@ -110,7 +115,7 @@ async def confirm_restart(_, query):
     if data[1] == "confirm":
         reply_to = message.reply_to_message
         intervals["stopAll"] = True
-        restart_message = await send_message(reply_to, "Restarting...")
+        restart_message = await send_message(reply_to, "🔄 Restarting...")
         await delete_message(message)
         # await TgClient.stop()
         if scheduler.running:
