@@ -2,7 +2,7 @@ from bot.core.aeon_client import TgClient
 from bot.helper.telegram_helper.bot_commands import BotCommands
 
 nsfw_keywords = [
-    "orgy"
+    "orgy",
 ]
 
 mirror = """<b>Send link along with command line or </b>
