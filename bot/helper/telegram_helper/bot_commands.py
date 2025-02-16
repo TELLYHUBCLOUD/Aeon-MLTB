@@ -20,7 +20,7 @@ class BotCommands:
     ForceStartCommand = [f"forcestart{i}", f"fs{i}"]
     ListCommand = f"list{i}"
     SearchCommand = f"search{i}"
-    StatusCommand = f"status{i}"
+    StatusCommand = [f"status{i}", f"sall"]
     UsersCommand = f"users{i}"
     AuthorizeCommand = f"authorize{i}"
     UnAuthorizeCommand = f"unauthorize{i}"
