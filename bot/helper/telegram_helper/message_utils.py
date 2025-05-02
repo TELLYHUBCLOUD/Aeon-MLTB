@@ -92,6 +92,7 @@ async def send_message(
                     reply_markup=buttons,
                     parse_mode=parse_mode,
                 )
+
             return f"Invalid message object: {type(message)}"
 
         if photo:
@@ -103,6 +104,7 @@ async def send_message(
                 disable_notification=True,
                 parse_mode=parse_mode,
             )
+
         return await message.reply(
             text=text,
             quote=True,
@@ -111,6 +113,7 @@ async def send_message(
             reply_markup=buttons,
             parse_mode=parse_mode,
         )
+
     except FloodWait as f:
         LOGGER.warning(str(f))
         if not block:
@@ -218,6 +221,7 @@ async def send_file(message, file, caption="", buttons=None):
             disable_notification=True,
             reply_markup=buttons,
         )
+
     except FloodWait as f:
         LOGGER.warning(str(f))
         await sleep(f.value * 1.2)
@@ -251,6 +255,7 @@ async def send_rss(text, chat_id, thread_id):
             message_thread_id=thread_id,
             disable_notification=True,
         )
+
     except MessageEmpty:
         LOGGER.error("Telegram says: Message is empty")
         # Try with a simplified message as a fallback
@@ -263,6 +268,7 @@ async def send_rss(text, chat_id, thread_id):
                 message_thread_id=thread_id,
                 disable_notification=True,
             )
+
         except Exception as e2:
             LOGGER.error(f"Failed to send simplified message too: {e2}")
             return str(e2)
@@ -283,6 +289,7 @@ async def send_rss(text, chat_id, thread_id):
                     message_thread_id=thread_id,
                     disable_notification=True,
                 )
+
             except Exception as e2:
                 LOGGER.error(f"Failed to send simplified message too: {e2}")
         return str(e)

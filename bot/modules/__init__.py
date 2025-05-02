@@ -1,5 +1,12 @@
+from .ai import ask_ai
 from .bot_settings import edit_bot_settings, send_bot_settings
-from .broadcast import broadcast
+from .broadcast import (
+    broadcast,
+    broadcast_media,
+    handle_broadcast_command,
+    handle_broadcast_media,
+    handle_cancel_broadcast_command,
+)
 from .cancel_task import cancel, cancel_all_buttons, cancel_all_update, cancel_multi
 from .chat_permission import add_sudo, authorize, remove_sudo, unauthorize
 from .check_deletion import (
@@ -51,6 +58,7 @@ from .shell import run_shell
 from .speedtest import speedtest
 from .stats import bot_stats, get_packages_version
 from .status import status_pages, task_status
+from .truecaller import truecaller_lookup
 from .users_settings import (
     edit_user_settings,
     get_users_settings,
@@ -63,10 +71,12 @@ __all__ = [
     "aeon_callback",
     "aioexecute",
     "arg_usage",
+    "ask_ai",
     "authorize",
     "bot_help",
     "bot_stats",
     "broadcast",
+    "broadcast_media",
     "cancel",
     "cancel_all_buttons",
     "cancel_all_update",
@@ -90,6 +100,9 @@ __all__ = [
     "get_packages_version",
     "get_rss_menu",
     "get_users_settings",
+    "handle_broadcast_command",
+    "handle_broadcast_media",
+    "handle_cancel_broadcast_command",
     "handle_cancel_command",
     "handle_command",
     "handle_group_gensession",
@@ -132,6 +145,7 @@ __all__ = [
     "task_status",
     "torrent_search",
     "torrent_search_update",
+    "truecaller_lookup",
     "unauthorize",
     "ytdl",
     "ytdl_leech",
