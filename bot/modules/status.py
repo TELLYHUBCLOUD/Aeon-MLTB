@@ -5,7 +5,6 @@ from psutil import cpu_percent, disk_usage, virtual_memory
 
 from bot import (
     DOWNLOAD_DIR,
-    LOGGER,
     bot_start_time,
     intervals,
     sabnzbd_client,
@@ -93,9 +92,9 @@ async def status_pages(_, query):
     # Handle query.answer() with proper error handling
     try:
         await query.answer()
-    except Exception as e:
-        LOGGER.warning(f"Failed to answer callback query: {e!s}")
+    except Exception:
         # Continue processing even if answering the query fails
+        pass
 
     if data[2] == "ref":
         await update_status_message(key, force=True)

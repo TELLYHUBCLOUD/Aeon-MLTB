@@ -868,9 +868,6 @@ class YtDlp(TaskListener):
                 or "This video is unavailable" in msg
                 or "Sign in to confirm" in msg
             ):
-                LOGGER.warning(
-                    "YouTube extraction failed, trying with Android client"
-                )
                 try:
                     # Try with Android client
                     if (
@@ -882,8 +879,7 @@ class YtDlp(TaskListener):
                         ]
 
                     result = await sync_to_async(extract_info, self.link, options)
-                except Exception as e2:
-                    LOGGER.warning(f"Android client failed too: {e2!s}")
+                except Exception:
                     try:
                         # Last resort: try with web client
                         if (

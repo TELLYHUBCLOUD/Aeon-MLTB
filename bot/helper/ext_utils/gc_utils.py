@@ -73,7 +73,6 @@ def force_garbage_collection(threshold_mb=100, log_stats=False, generation=None)
                 if generation is not None:
                     # Collect specific generation
                     collected = gc.collect(generation)
-                    total_collected = collected
                     collected_gen0 = collected if generation == 0 else 0
                     collected_gen1 = collected if generation == 1 else 0
                     collected_gen2 = collected if generation == 2 else 0
@@ -82,29 +81,16 @@ def force_garbage_collection(threshold_mb=100, log_stats=False, generation=None)
                     collected_gen0 = gc.collect(0)  # Collect youngest generation
                     collected_gen1 = gc.collect(1)  # Collect middle generation
                     collected_gen2 = gc.collect(2)  # Collect oldest generation
-                    total_collected = (
-                        collected_gen0 + collected_gen1 + collected_gen2
-                    )
+                    (collected_gen0 + collected_gen1 + collected_gen2)
 
                 # Get memory after collection
                 memory_after = process.memory_info().rss / (1024 * 1024)
-                memory_freed = max(
-                    0, memory_mb - memory_after
-                )  # Avoid negative values
+                max(0, memory_mb - memory_after)  # Avoid negative values
 
                 # Only log if explicitly requested or if there's a significant memory issue
-                if (
-                    log_stats and memory_freed > 50
-                ):  # Only log if more than 50MB freed
-                    LOGGER.debug(
-                        f"Garbage collection: freed {total_collected} objects, "
-                        f"memory freed: {memory_freed:.2f} MB"
-                    )
-
                 # Log unreachable objects if there are any
                 unreachable = gc.garbage
                 if unreachable:
-                    LOGGER.warning(f"Found {len(unreachable)} unreachable objects")
                     # Clear the list to avoid memory leaks
                     gc.garbage.clear()
             # Just collect without stats
@@ -228,7 +214,7 @@ def log_memory_usage():
 
         # Only log if memory usage is high
         if system_memory_percent > 85:
-            LOGGER.warning(f"High memory usage: System at {system_memory_percent}%")
+            pass
 
         return {
             "rss_mb": rss_mb,
@@ -258,11 +244,8 @@ def set_gc_parameters(threshold=700, interval=60):
         # Only change if significantly different to avoid unnecessary changes
         if abs(current_thresholds[0] - threshold) > 50:
             gc.set_threshold(threshold, current_thresholds[1], current_thresholds[2])
-            LOGGER.debug(f"Set garbage collection threshold to {threshold}")
-
         # Set our custom interval
         _gc_interval = interval
-        LOGGER.debug(f"Set garbage collection interval to {interval} seconds")
     except Exception as e:
         LOGGER.error(f"Failed to set garbage collection parameters: {e}")
 
@@ -288,8 +271,8 @@ def optimized_garbage_collection(aggressive=False, log_stats=False):
                 process = psutil.Process(os.getpid())
                 memory_info = process.memory_info()
                 memory_before = memory_info.rss / (1024 * 1024)
-            except Exception as e:
-                LOGGER.debug(f"Error getting memory before collection: {e}")
+            except Exception:
+                pass
 
         # First collect only generation 0 (youngest objects)
         # This is usually very fast and frees up most temporary objects
@@ -319,26 +302,16 @@ def optimized_garbage_collection(aggressive=False, log_stats=False):
                 # Get memory after collection
                 process = psutil.Process(os.getpid())
                 memory_after = process.memory_info().rss / (1024 * 1024)
-                memory_freed = max(
-                    0, memory_before - memory_after
-                )  # Avoid negative values
+                max(0, memory_before - memory_after)  # Avoid negative values
 
-                total_collected = collected_gen0 + collected_gen1 + collected_gen2
+                collected_gen0 + collected_gen1 + collected_gen2
 
                 # Only log if significant memory was freed or in debug mode
-                if memory_freed > 50:  # Only log if more than 50MB freed
-                    LOGGER.debug(
-                        f"Optimized GC: freed {total_collected} objects, "
-                        f"memory freed: {memory_freed:.2f} MB"
-                    )
-
                 # Always log unreachable objects as they indicate potential memory leaks
                 if unreachable_count > 0:
-                    LOGGER.warning(
-                        f"Cleared {unreachable_count} unreachable objects"
-                    )
-            except Exception as e:
-                LOGGER.debug(f"Error logging GC stats: {e}")
+                    pass
+            except Exception:
+                pass
 
         return True
     except Exception as e:
@@ -359,8 +332,8 @@ def cleanup_large_objects():
                 process = psutil.Process(os.getpid())
                 memory_info = process.memory_info()
                 memory_before = memory_info.rss / (1024 * 1024)
-            except Exception as e:
-                LOGGER.debug(f"Error getting memory before cleanup: {e}")
+            except Exception:
+                pass
 
         # Force a full collection first
         gc.collect()
@@ -381,38 +354,25 @@ def cleanup_large_objects():
 
         # Log information about large objects
         if large_objects:
-            LOGGER.warning(f"Found {len(large_objects)} large objects in memory")
-            for i, (obj, size) in enumerate(
+            for _i, (obj, size) in enumerate(
                 sorted(large_objects, key=lambda x: x[1], reverse=True)[:5]
             ):
-                LOGGER.warning(
-                    f"Large object {i + 1}: {type(obj)} - {size / 1024 / 1024:.2f} MB"
-                )
-
                 # Try to identify what the object is
                 try:
                     if hasattr(obj, "__dict__"):
-                        attrs = list(obj.__dict__.keys())[
-                            :5
-                        ]  # Get first 5 attributes
-                        LOGGER.warning(f"  Attributes: {attrs}")
+                        list(obj.__dict__.keys())[:5]  # Get first 5 attributes
                     elif hasattr(obj, "__len__"):
-                        LOGGER.warning(f"  Length: {len(obj)}")
+                        pass
                 except Exception:
                     pass
 
                 # For lists, tuples, and dicts, try to identify contents
                 if isinstance(obj, list | tuple) and len(obj) > 0:
                     with contextlib.suppress(Exception):
-                        LOGGER.warning(f"  First element type: {type(obj[0])}")
-                elif isinstance(obj, dict) and len(obj) > 0:
-                    try:
-                        first_key = next(iter(obj.keys()))
-                        LOGGER.warning(
-                            f"  Sample key: {first_key}, value type: {type(obj[first_key])}"
-                        )
-                    except Exception:
                         pass
+                elif isinstance(obj, dict) and len(obj) > 0:
+                    with contextlib.suppress(Exception):
+                        next(iter(obj.keys()))
 
         # Store the count before clearing references
         count = len(large_objects) if large_objects else 0
@@ -430,9 +390,6 @@ def cleanup_large_objects():
         unreachable_count = 0
         if gc.garbage:
             unreachable_count = len(gc.garbage)
-            LOGGER.warning(
-                f"Clearing {unreachable_count} unreachable objects from gc.garbage"
-            )
             gc.garbage.clear()
 
         # Log memory freed if psutil is available
@@ -441,23 +398,13 @@ def cleanup_large_objects():
                 # Get memory after collection
                 process = psutil.Process(os.getpid())
                 memory_after = process.memory_info().rss / (1024 * 1024)
-                memory_freed = max(
-                    0, memory_before - memory_after
-                )  # Avoid negative values
+                max(0, memory_before - memory_after)  # Avoid negative values
 
                 # Only log if significant memory was freed
-                if memory_freed > 50:  # Only log if more than 50MB freed
-                    LOGGER.debug(
-                        f"Large object cleanup: freed {count} large objects, "
-                        f"memory freed: {memory_freed:.2f} MB"
-                    )
-
-                    if unreachable_count > 0:
-                        LOGGER.warning(
-                            f"Cleared {unreachable_count} unreachable objects"
-                        )
-            except Exception as e:
-                LOGGER.debug(f"Error logging memory stats after cleanup: {e}")
+                if unreachable_count > 0:
+                    pass
+            except Exception:
+                pass
 
         return count
     except Exception as e:
@@ -488,8 +435,8 @@ def smart_garbage_collection(aggressive=False, for_split_file=False):
             try:
                 memory = psutil.virtual_memory()
                 memory_percent = memory.percent
-            except Exception as e:
-                LOGGER.debug(f"Error getting memory usage: {e}")
+            except Exception:
+                pass
 
         # For split files, always be more aggressive
         if for_split_file:
@@ -504,9 +451,6 @@ def smart_garbage_collection(aggressive=False, for_split_file=False):
 
             # For split files or very high memory usage, do extra cleanup
             if memory_percent > 90 or aggressive:
-                LOGGER.debug(
-                    f"Memory usage critical ({memory_percent}%), cleaning up large objects"
-                )
                 cleanup_large_objects()
 
                 # For split files, do an extra round of collection
@@ -531,8 +475,8 @@ def smart_garbage_collection(aggressive=False, for_split_file=False):
                                 module._cache, dict
                             ):
                                 module._cache.clear()
-                    except Exception as e:
-                        LOGGER.debug(f"Error clearing caches: {e}")
+                    except Exception:
+                        pass
 
             return True
         # Normal memory usage

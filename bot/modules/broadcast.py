@@ -26,9 +26,6 @@ async def broadcast(_, message):
     """
     # Check if user is owner
     if not await is_owner(message):
-        LOGGER.warning(
-            f"Non-owner user {message.from_user.id} attempted to use broadcast command"
-        )
         return
 
     if not message.reply_to_message:
@@ -49,7 +46,6 @@ async def broadcast(_, message):
     try:
         pm_users = await database.get_pm_uids()
         if not pm_users:
-            LOGGER.warning("No users found in database for broadcast")
             await edit_message(broadcast_message, "No users found in database.")
             return
 
@@ -60,18 +56,11 @@ async def broadcast(_, message):
                 # Use copy method which handles all media types automatically
                 await msg_to_broadcast.copy(uid)
                 successful += 1
-                LOGGER.debug(f"Successfully sent broadcast to user {uid}")
             except FloodWait as e:
-                LOGGER.warning(
-                    f"FloodWait detected during broadcast: {e.value} seconds"
-                )
                 await asyncio.sleep(e.value)
                 try:
                     await msg_to_broadcast.copy(uid)
                     successful += 1
-                    LOGGER.debug(
-                        f"Successfully sent broadcast to user {uid} after FloodWait"
-                    )
                 except Exception as retry_err:
                     LOGGER.error(
                         f"Failed to send broadcast to {uid} after FloodWait: {retry_err!s}"
@@ -134,9 +123,6 @@ async def broadcast_media(client, message, options=None):
 
     # Only allow owner to use this command
     if not await is_owner(message):
-        LOGGER.warning(
-            f"Non-owner user {message.from_user.id} attempted to use broadcast command"
-        )
         return
 
     # First step: Ask for the message to broadcast
@@ -204,7 +190,6 @@ async def broadcast_media(client, message, options=None):
 
         pm_users = await database.get_pm_uids()
         if not pm_users:
-            LOGGER.warning("No users found in database for broadcast")
             await edit_message(broadcast_message, "No users found in database.")
             return
 
@@ -221,9 +206,6 @@ async def broadcast_media(client, message, options=None):
                 else:
                     unsuccessful += 1
             except FloodWait as e:
-                LOGGER.warning(
-                    f"FloodWait detected during broadcast: {e.value} seconds"
-                )
                 await asyncio.sleep(e.value)
                 try:
                     await message.copy(uid)

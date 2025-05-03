@@ -1370,10 +1370,6 @@ Configure global watermark settings that will be used when user settings are not
             current_page = total_pages - 1
             globals()["merge_page"] = total_pages - 1
 
-        LOGGER.debug(
-            f"Using merge_page: {current_page} (global: {globals()['merge_page']})"
-        )
-
         # Get settings for current page
         start_idx = current_page * items_per_page
         end_idx = min(start_idx + items_per_page, len(merge_settings))
@@ -1413,12 +1409,7 @@ Configure global watermark settings that will be used when user settings are not
                         str(i + 1), f"botset start_merge {i}", "page"
                     )
 
-            # Add a debug log message
-            LOGGER.debug(
-                f"Added pagination buttons for merge menu. Total pages: {total_pages}, Current page: {current_page}"
-            )
-
-        # Get current merge settings
+            # Add a debug log message# Get current merge settings
         merge_enabled = "✅ Enabled" if Config.MERGE_ENABLED else "❌ Disabled"
         concat_demuxer = (
             "✅ Enabled" if Config.CONCAT_DEMUXER_ENABLED else "❌ Disabled"
@@ -2907,9 +2898,6 @@ Configure global convert settings that will be used when user settings are not a
 
             # Always use editvar in both view and edit states to ensure consistent behavior
             callback_data = f"botset editvar {setting}"
-            LOGGER.debug(
-                f"Creating metadata button: {display_name} with callback: {callback_data} (state={state})"
-            )
             buttons.data_button(display_name, callback_data)
 
         if state == "view":
@@ -3092,12 +3080,7 @@ Configure global metadata settings that will be used when user settings are not 
                         str(i + 1), f"botset start_merge_config {i}", "page"
                     )
 
-            # Add a debug log message
-            LOGGER.debug(
-                f"Added pagination buttons for merge_config in bot_settings. Total pages: {total_pages}, Current page: {current_page}"
-            )
-
-        # Get current merge configuration settings - Output formats
+            # Add a debug log message# Get current merge configuration settings - Output formats
         video_format = Config.MERGE_OUTPUT_FORMAT_VIDEO or "mkv (Default)"
         audio_format = Config.MERGE_OUTPUT_FORMAT_AUDIO or "mp3 (Default)"
         image_format = Config.MERGE_OUTPUT_FORMAT_IMAGE or "jpg (Default)"
@@ -3263,9 +3246,6 @@ Configure advanced merge settings that will be used when user settings are not a
 
 async def update_buttons(message, key=None, edit_type=None, page=0):
     user_id = message.chat.id
-    LOGGER.debug(
-        f"update_buttons called with key={key}, edit_type={edit_type}, page={page}, state={globals()['state']}"
-    )
 
     msg, button = await get_buttons(key, edit_type, page, user_id)
     await edit_message(message, msg, button)
@@ -3487,34 +3467,16 @@ async def edit_variable(_, message, pre_message, key):
     # Determine which menu to return to based on the key
     if key.startswith(("WATERMARK_", "AUDIO_WATERMARK_", "SUBTITLE_WATERMARK_")):
         return_menu = "mediatools_watermark"
-        LOGGER.debug(
-            f"edit_variable: Setting return_menu for {key} to {return_menu}"
-        )
     elif key.startswith("METADATA_"):
         return_menu = "mediatools_metadata"
-        LOGGER.debug(
-            f"edit_variable: Setting return_menu for {key} to {return_menu}"
-        )
     elif key.startswith("CONVERT_"):
         return_menu = "mediatools_convert"
-        LOGGER.debug(
-            f"edit_variable: Setting return_menu for {key} to {return_menu}"
-        )
     elif key.startswith("COMPRESSION_"):
         return_menu = "mediatools_compression"
-        LOGGER.debug(
-            f"edit_variable: Setting return_menu for {key} to {return_menu}"
-        )
     elif key.startswith("MISTRAL_"):
         return_menu = "ai"
-        LOGGER.debug(
-            f"edit_variable: Setting return_menu for {key} to {return_menu}"
-        )
     elif key.startswith("TASK_MONITOR_"):
         return_menu = "taskmonitor"
-        LOGGER.debug(
-            f"edit_variable: Setting return_menu for {key} to {return_menu}"
-        )
     elif key.startswith("MERGE_") or key in [
         "CONCAT_DEMUXER_ENABLED",
         "FILTER_COMPLEX_ENABLED",
@@ -3775,12 +3737,8 @@ async def update_private_file(_, message, pre_message):
 async def event_handler(client, query, pfunc, rfunc, document=False):
     chat_id = query.message.chat.id
     handler_dict[chat_id] = True
-    start_time = time()
-    LOGGER.debug(
-        f"Starting event_handler for chat_id={chat_id}, pfunc={pfunc}, rfunc={rfunc}"
-    )
+    start_time = time()  # pylint: disable=unused-argument
 
-    # pylint: disable=unused-argument
     async def event_filter(_, *args):
         event = args[1]  # The event is the second argument
         user = event.from_user or event.sender_chat
@@ -3804,11 +3762,7 @@ async def event_handler(client, query, pfunc, rfunc, document=False):
         await sleep(0.5)
         if time() - start_time > 60:
             handler_dict[chat_id] = False
-            LOGGER.debug(
-                f"Timeout in event_handler for chat_id={chat_id}, calling rfunc={rfunc}"
-            )
             await rfunc()
-    LOGGER.debug(f"Exiting event_handler for chat_id={chat_id}")
     client.remove_handler(*handler)
 
 
@@ -3890,7 +3844,6 @@ async def edit_bot_settings(client, query):
         await update_buttons(message, "mediatools_merge_config", page=0)
     elif data[1] == "mediatools_metadata":
         await query.answer()
-        LOGGER.debug("mediatools_metadata button clicked")
         await update_buttons(message, "mediatools_metadata")
     elif data[1] == "mediatools_convert":
         from bot.helper.ext_utils.bot_utils import is_media_tool_enabled
@@ -3902,8 +3855,6 @@ async def edit_bot_settings(client, query):
                 "Convert tool is disabled by the bot owner.", show_alert=True
             )
             return
-
-        LOGGER.debug("mediatools_convert button clicked")
         await update_buttons(message, "mediatools_convert")
     elif data[1] == "mediatools_trim":
         from bot.helper.ext_utils.bot_utils import is_media_tool_enabled
@@ -3915,8 +3866,6 @@ async def edit_bot_settings(client, query):
                 "Trim tool is disabled by the bot owner.", show_alert=True
             )
             return
-
-        LOGGER.debug("mediatools_trim button clicked")
         await update_buttons(message, "mediatools_trim")
 
     elif data[1] == "mediatools_extract":
@@ -3929,8 +3878,6 @@ async def edit_bot_settings(client, query):
                 "Extract tool is disabled by the bot owner.", show_alert=True
             )
             return
-
-        LOGGER.debug("mediatools_extract button clicked")
         await update_buttons(message, "mediatools_extract")
 
     elif data[1] == "mediatools_compression":
@@ -3943,13 +3890,10 @@ async def edit_bot_settings(client, query):
                 "Compression tool is disabled by the bot owner.", show_alert=True
             )
             return
-
-        LOGGER.debug("mediatools_compression button clicked")
         await update_buttons(message, "mediatools_compression")
 
     elif data[1] == "ai":
         await query.answer()
-        LOGGER.debug("ai button clicked")
         await update_buttons(message, "ai")
 
     elif data[1] == "default_watermark":
@@ -4787,34 +4731,23 @@ async def edit_bot_settings(client, query):
         await query.answer()
         # Set the global state to edit mode
         globals()["state"] = "edit"
-        LOGGER.debug(f"Setting global state to edit for {data[2]}")
-
         # For merge settings, maintain the current page
         if data[2] == "mediatools_merge":
             # Just update the state, the page is maintained by the global merge_page variable
-            LOGGER.debug(
-                f"Edit button clicked, using merge_page: {globals()['merge_page']}"
-            )
             await update_buttons(
                 message, "mediatools_merge", page=globals()["merge_page"]
             )
         elif data[2] == "mediatools_metadata":
-            LOGGER.debug("Edit button clicked for metadata settings")
             await update_buttons(message, "mediatools_metadata")
         elif data[2] == "mediatools_convert":
-            LOGGER.debug("Edit button clicked for convert settings")
             await update_buttons(message, "mediatools_convert")
         elif data[2] == "mediatools_compression":
-            LOGGER.debug("Edit button clicked for compression settings")
             await update_buttons(message, "mediatools_compression")
         elif data[2] == "mediatools_trim":
-            LOGGER.debug("Edit button clicked for trim settings")
             await update_buttons(message, "mediatools_trim")
         elif data[2] == "mediatools_extract":
-            LOGGER.debug("Edit button clicked for extract settings")
             await update_buttons(message, "mediatools_extract")
         elif data[2] == "ai":
-            LOGGER.debug("Edit button clicked for AI settings")
             await update_buttons(message, "ai")
         else:
             await update_buttons(message, data[2])
@@ -4832,33 +4765,22 @@ async def edit_bot_settings(client, query):
         await query.answer()
         # Set the global state to view mode
         globals()["state"] = "view"
-        LOGGER.debug(f"Setting global state to view for {data[2]}")
-
         # For merge settings, maintain the current page
         if data[2] == "mediatools_merge":
-            LOGGER.debug(
-                f"View button clicked, using merge_page: {globals()['merge_page']}"
-            )
             await update_buttons(
                 message, "mediatools_merge", page=globals()["merge_page"]
             )
         elif data[2] == "mediatools_metadata":
-            LOGGER.debug("View button clicked for metadata settings")
             await update_buttons(message, "mediatools_metadata")
         elif data[2] == "mediatools_convert":
-            LOGGER.debug("View button clicked for convert settings")
             await update_buttons(message, "mediatools_convert")
         elif data[2] == "mediatools_compression":
-            LOGGER.debug("View button clicked for compression settings")
             await update_buttons(message, "mediatools_compression")
         elif data[2] == "mediatools_trim":
-            LOGGER.debug("View button clicked for trim settings")
             await update_buttons(message, "mediatools_trim")
         elif data[2] == "mediatools_extract":
-            LOGGER.debug("View button clicked for extract settings")
             await update_buttons(message, "mediatools_extract")
         elif data[2] == "ai":
-            LOGGER.debug("View button clicked for AI settings")
             await update_buttons(message, "ai")
         else:
             await update_buttons(message, data[2])
@@ -5091,14 +5013,10 @@ async def edit_bot_settings(client, query):
 
         # Handle edit mode for all settings
         await query.answer()
-        LOGGER.debug(f"Handling editvar for {data[2]} in {state} mode")
-
         # Make sure we're in edit mode
         if state != "edit":
             globals()["state"] = "edit"
-            LOGGER.debug(f"Forcing state to edit for {data[2]}")
-
-        await update_buttons(message, data[2], data[1])
+            await update_buttons(message, data[2], data[1])
         pfunc = partial(edit_variable, pre_message=message, key=data[2])
 
         # Determine which menu to return to based on the key
@@ -5107,39 +5025,22 @@ async def edit_bot_settings(client, query):
             or data[2].startswith("AUDIO_WATERMARK_")
             or data[2].startswith("SUBTITLE_WATERMARK_")
         ):
-            LOGGER.debug(
-                f"Setting return function for {data[2]} to mediatools_watermark"
-            )
             rfunc = partial(update_buttons, message, "mediatools_watermark")
         elif data[2].startswith("METADATA_"):
-            LOGGER.debug(
-                f"Setting return function for {data[2]} to mediatools_metadata"
-            )
             rfunc = partial(update_buttons, message, "mediatools_metadata")
         elif data[2].startswith("CONVERT_"):
-            LOGGER.debug(
-                f"Setting return function for {data[2]} to mediatools_convert"
-            )
             rfunc = partial(update_buttons, message, "mediatools_convert")
         elif data[2].startswith("COMPRESSION_"):
-            LOGGER.debug(
-                f"Setting return function for {data[2]} to mediatools_compression"
-            )
             rfunc = partial(update_buttons, message, "mediatools_compression")
         elif data[2].startswith("TRIM_"):
-            LOGGER.debug(f"Setting return function for {data[2]} to mediatools_trim")
             rfunc = partial(update_buttons, message, "mediatools_trim")
         elif data[2].startswith("EXTRACT_"):
-            LOGGER.debug(
-                f"Setting return function for {data[2]} to mediatools_extract"
-            )
             rfunc = partial(update_buttons, message, "mediatools_extract")
         elif data[2].startswith("TASK_MONITOR_"):
-            LOGGER.debug(f"Setting return function for {data[2]} to taskmonitor")
             rfunc = partial(update_buttons, message, "taskmonitor")
-        elif data[2] == "DEFAULT_AI_PROVIDER":
-            LOGGER.debug("Setting up AI provider selection menu")
-            # Create a special menu for selecting the AI provider
+        elif (
+            data[2] == "DEFAULT_AI_PROVIDER"
+        ):  # Create a special menu for selecting the AI provider
             buttons = ButtonMaker()
             buttons.data_button("Mistral", "botset setprovider mistral")
             buttons.data_button("DeepSeek", "botset setprovider deepseek")
@@ -5159,7 +5060,6 @@ async def edit_bot_settings(client, query):
             or data[2].startswith("CHATGPT_")
             or data[2].startswith("GEMINI_")
         ):
-            LOGGER.debug(f"Setting return function for {data[2]} to ai")
             rfunc = partial(update_buttons, message, "ai")
         elif data[2].startswith("MERGE_") or data[2] in [
             "CONCAT_DEMUXER_ENABLED",
@@ -5504,10 +5404,7 @@ async def edit_bot_settings(client, query):
         rfunc = partial(update_buttons, message)
         await event_handler(client, query, pfunc, rfunc, True)
     elif data[1] == "botvar" and state == "edit":
-        await query.answer()
-        LOGGER.debug(f"Handling botvar for {data[2]} in edit mode")
-
-        # Special handling for MEDIA_TOOLS_ENABLED
+        await query.answer()  # Special handling for MEDIA_TOOLS_ENABLED
         if data[2] == "MEDIA_TOOLS_ENABLED":
             # Create a special menu for selecting media tools
             buttons = ButtonMaker()
@@ -5566,18 +5463,12 @@ async def edit_bot_settings(client, query):
 
         # Determine which menu to return to based on the key
         if data[2].startswith("METADATA_"):
-            LOGGER.debug(
-                f"Setting return function for botvar {data[2]} to mediatools_metadata"
-            )
             rfunc = partial(update_buttons, message, "mediatools_metadata")
         elif data[2].startswith("CONVERT_"):
-            LOGGER.debug(
-                f"Setting return function for botvar {data[2]} to mediatools_convert"
-            )
             rfunc = partial(update_buttons, message, "mediatools_convert")
-        elif data[2] == "DEFAULT_AI_PROVIDER":
-            LOGGER.debug("Setting up AI provider selection menu for botvar")
-            # Create a special menu for selecting the AI provider
+        elif (
+            data[2] == "DEFAULT_AI_PROVIDER"
+        ):  # Create a special menu for selecting the AI provider
             buttons = ButtonMaker()
             buttons.data_button("Mistral", "botset setprovider mistral")
             buttons.data_button("DeepSeek", "botset setprovider deepseek")
@@ -5597,7 +5488,6 @@ async def edit_bot_settings(client, query):
             or data[2].startswith("CHATGPT_")
             or data[2].startswith("GEMINI_")
         ):
-            LOGGER.debug(f"Setting return function for botvar {data[2]} to ai")
             rfunc = partial(update_buttons, message, "ai")
         else:
             rfunc = partial(update_buttons, message, "var")
@@ -5935,14 +5825,10 @@ async def edit_bot_settings(client, query):
     elif data[1] == "edit":
         await query.answer()
         globals()["state"] = "edit"
-        LOGGER.debug(f"Setting state to edit for {data[2]}")
-
         await update_buttons(message, data[2])
     elif data[1] == "view":
         await query.answer()
         globals()["state"] = "view"
-        LOGGER.debug(f"Setting state to view for {data[2]}")
-
         await update_buttons(message, data[2])
     elif data[1] == "start":
         await query.answer()
@@ -5955,7 +5841,6 @@ async def edit_bot_settings(client, query):
             if len(data) > 2:
                 # Update the global merge_page variable
                 globals()["merge_page"] = int(data[2])
-                LOGGER.debug(f"Updated merge_page to {globals()['merge_page']}")
                 await update_buttons(
                     message, "mediatools_merge", page=globals()["merge_page"]
                 )
@@ -6039,26 +5924,18 @@ async def edit_bot_settings(client, query):
         return_menu = "mediatools"
         if key.startswith(("WATERMARK_", "AUDIO_WATERMARK_", "SUBTITLE_WATERMARK_")):
             return_menu = "mediatools_watermark"
-            LOGGER.debug(f"toggle: Setting return_menu for {key} to {return_menu}")
         elif key.startswith("CONVERT_"):
             return_menu = "mediatools_convert"
-            LOGGER.debug(f"toggle: Setting return_menu for {key} to {return_menu}")
         elif key.startswith("COMPRESSION_"):
             return_menu = "mediatools_compression"
-            LOGGER.debug(f"toggle: Setting return_menu for {key} to {return_menu}")
         elif key.startswith("TRIM_"):
             return_menu = "mediatools_trim"
-            LOGGER.debug(f"toggle: Setting return_menu for {key} to {return_menu}")
         elif key.startswith("EXTRACT_"):
             return_menu = "mediatools_extract"
-            LOGGER.debug(f"toggle: Setting return_menu for {key} to {return_menu}")
         elif key in {"ENABLE_EXTRA_MODULES", "MEDIA_TOOLS_ENABLED"}:
             return_menu = "var"
-            LOGGER.debug(f"toggle: Setting return_menu for {key} to {return_menu}")
         elif key.startswith(("MISTRAL_", "DEEPSEEK_", "CHATGPT_", "GEMINI_")):
             return_menu = "ai"
-            LOGGER.debug(f"toggle: Setting return_menu for {key} to {return_menu}")
-
         await update_buttons(message, return_menu)
         await database.update_config({key: value})
     # Handle redirects for mediatools callbacks
@@ -6077,7 +5954,7 @@ async def send_bot_settings(_, message):
     msg, button = await get_buttons(user_id=user_id)
     globals()["start"] = 0
     # Don't auto-delete the bot settings message
-    await send_message(message, msg, button, auto_delete=False)
+    await send_message(message, msg, button)
 
 
 async def load_config():

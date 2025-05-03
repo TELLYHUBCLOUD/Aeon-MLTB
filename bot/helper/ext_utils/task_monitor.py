@@ -109,8 +109,7 @@ async def get_task_speed(task) -> int:
             # Convert string speed (like "1.5 MB/s") to bytes
             return speed_string_to_bytes(speed)
         return speed
-    except Exception as e:
-        LOGGER.debug(f"Error getting task speed: {e}")
+    except Exception:
         return 0
 
 
@@ -149,8 +148,7 @@ async def get_task_eta(task) -> int:
                 # If parsing fails, return infinite ETA
                 return float("inf")
         return eta
-    except Exception as e:
-        LOGGER.debug(f"Error getting task ETA: {e}")
+    except Exception:
         return float("inf")  # Return infinite ETA on error
 
 
@@ -186,8 +184,7 @@ async def estimate_completion_time(task) -> int:
         remaining_bytes = size - processed
         return remaining_bytes / speed if speed > 0 else float("inf")
 
-    except Exception as e:
-        LOGGER.debug(f"Error estimating completion time: {e}")
+    except Exception:
         return float("inf")
 
 
@@ -202,8 +199,7 @@ async def get_task_elapsed_time(task) -> int:
             return 0
 
         return int(time.time() - task.listener.message.date.timestamp())
-    except Exception as e:
-        LOGGER.debug(f"Error getting task elapsed time: {e}")
+    except Exception:
         return 0
 
 
@@ -234,8 +230,7 @@ async def should_cancel_task(task, gid: str) -> tuple[bool, str]:
         # Only monitor download tasks
         if status not in [MirrorStatus.STATUS_DOWNLOAD, MirrorStatus.STATUS_QUEUEDL]:
             return False, ""
-    except Exception as e:
-        LOGGER.debug(f"Error checking task status: {e}")
+    except Exception:
         return False, ""
 
     elapsed_time = await get_task_elapsed_time(task)
@@ -404,10 +399,10 @@ async def identify_resource_intensive_tasks():
                         )
                         if size > 1024 * 1024 * 1024:  # 1GB
                             memory_intensive_tasks.append((mid, "memory"))
-                    except Exception as e:
-                        LOGGER.debug(f"Error checking task size: {e}")
-            except Exception as e:
-                LOGGER.debug(f"Error identifying resource intensive task {mid}: {e}")
+                    except Exception:
+                        pass
+            except Exception:
+                pass
 
 
 async def queue_task(mid: int, reason: str):
@@ -421,9 +416,6 @@ async def queue_task(mid: int, reason: str):
 
             # Check if task has listener attribute
             if not hasattr(task, "listener"):
-                LOGGER.warning(
-                    f"Task {mid} doesn't have listener attribute, can't queue"
-                )
                 return
 
             listener = task.listener
@@ -508,9 +500,6 @@ async def resume_queued_tasks(resource_type: str):
                         queued_up[mid].set()
                         LOGGER.info(f"Resuming queued upload task {mid}")
                     else:
-                        LOGGER.warning(
-                            f"Task {mid} not found in any queue, can't resume"
-                        )
                         continue
 
                     # Remove from queued_by_monitor
@@ -554,9 +543,6 @@ async def cancel_task(task, gid: str, reason: str):
         else:
             # Fallback: Mark as cancelled and let the task handle it
             task.listener.is_cancelled = True
-            LOGGER.warning(
-                f"Task {task.listener.name} doesn't have cancel_task method, marked as cancelled"
-            )
 
         # Clean up task_warnings to prevent memory leaks
         task_warnings.pop(gid, None)

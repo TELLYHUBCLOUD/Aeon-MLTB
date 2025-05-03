@@ -12,7 +12,7 @@ from functools import partial, wraps
 
 from httpx import AsyncClient
 
-from bot import LOGGER, bot_loop, user_data
+from bot import bot_loop, user_data
 from bot.core.config_manager import Config
 from bot.helper.telegram_helper.button_build import ButtonMaker
 
@@ -327,12 +327,8 @@ def get_user_split_size(user_id, args, file_size, equal_splits=False):
     safe_telegram_limit = telegram_limit - safety_margin
 
     if split_size > safe_telegram_limit:
-        premium_status = "premium" if TgClient.IS_PREMIUM_USER else "non-premium"
-        limit_in_gb = telegram_limit / (1024 * 1024 * 1024)
-        safe_limit_in_gb = safe_telegram_limit / (1024 * 1024 * 1024)
-        LOGGER.warning(
-            f"Split size {split_size} exceeds Telegram's {limit_in_gb:.1f} GiB {premium_status} limit. Reducing to {safe_telegram_limit} bytes ({safe_limit_in_gb:.1f} GiB) with safety margin."
-        )
+        telegram_limit / (1024 * 1024 * 1024)
+        safe_telegram_limit / (1024 * 1024 * 1024)
         split_size = safe_telegram_limit
 
     # Ensure split size doesn't exceed maximum allowed
@@ -589,11 +585,4 @@ def is_flag_enabled(flag_name):
     tool_name = flag_to_tool_map[flag_name.lstrip("-")]
 
     # Check if the tool is enabled
-    is_enabled = is_media_tool_enabled(tool_name)
-
-    # For debugging
-    from bot import LOGGER
-
-    LOGGER.debug(f"Flag {flag_name} maps to tool {tool_name}, enabled: {is_enabled}")
-
-    return is_enabled
+    return is_media_tool_enabled(tool_name)
