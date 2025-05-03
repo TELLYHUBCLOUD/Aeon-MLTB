@@ -173,7 +173,7 @@ def get_progress_bar_string(pct):
     c_full = int((p + 5) // 10)
     p_str = "●" * c_full
     p_str += "○" * (10 - c_full)
-    return p_str
+    return f'<p><a href="https://t.me/TELLYMIRROR">{p_str}</a></p>'
 
 
 def source(self):
@@ -224,7 +224,7 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
             and task.listener.progress
         ):
             progress = task.progress()
-            msg += f"\n{get_progress_bar_string(progress)} {progress}"
+            msg += f"\n[{get_progress_bar_string(progress)}] : {progress}"
             if task.listener.subname:
                 subsize = f"/{get_readable_file_size(task.listener.subsize)}"
                 ac = len(task.listener.files_to_proceed)
@@ -232,7 +232,7 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
             else:
                 subsize = ""
                 count = ""
-            msg += f"\n<b>Processed:</b> {task.processed_bytes()}{subsize}"
+            msg += f"\n<blockquote><b>Processed:</b> {task.processed_bytes()}{subsize}"
             if count:
                 msg += f"\n<b>Count:</b> {count}"
             msg += f"\n<b>Size:</b> {task.size()}"
@@ -244,17 +244,17 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
                 with contextlib.suppress(Exception):
                     msg += f"\n<b>Seeders:</b> {task.seeders_num()} | <b>Leechers:</b> {task.leechers_num()}"
         elif tstatus == MirrorStatus.STATUS_SEED:
-            msg += f"\n<b>Size: </b>{task.size()}"
+            msg += f"\n<blockquote><b>Size: </b>{task.size()}"
             msg += f"\n<b>Speed: </b>{task.seed_speed()}"
             msg += f"\n<b>Uploaded: </b>{task.uploaded_bytes()}"
             msg += f"\n<b>Ratio: </b>{task.ratio()}"
             msg += f" | <b>Time: </b>{task.seeding_time()}"
         else:
-            msg += f"\n<b>Size: </b>{task.size()}"
-        msg += f"\n<b>Tool:</b> {task.tool}"
+            msg += f"\n<blockquote><b>Size: </b>{task.size()}"
+        msg += f"\n<b>Tool:</b> {task.tool}</blockquote>"
         task_gid = task.gid()
         short_gid = task_gid[-8:] if task_gid.startswith("SABnzbd") else task_gid[:8]
-        msg += f"\n/stop_{short_gid}\n\n"
+        msg += f"\n<blockquote> /stop_{short_gid} </blockquote>\n\n"
 
     if len(msg) == 0:
         if status == "All":
