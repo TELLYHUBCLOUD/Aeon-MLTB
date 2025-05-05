@@ -758,6 +758,24 @@ class TaskConfig:
         else:
             self.merge_threading = True
 
+        # Merge Remove Original
+        if user_merge_enabled and "MERGE_REMOVE_ORIGINAL" in self.user_dict:
+            self.merge_remove_original = self.user_dict["MERGE_REMOVE_ORIGINAL"]
+        elif self.merge_enabled and hasattr(Config, "MERGE_REMOVE_ORIGINAL"):
+            self.merge_remove_original = Config.MERGE_REMOVE_ORIGINAL
+        else:
+            self.merge_remove_original = True
+
+        # Check for -del flag in command line arguments
+        if hasattr(self, "args") and self.args:
+            # The -del flag takes precedence over settings for merge
+            if self.args.get("-del") == "t" or self.args.get("-del") is True:
+                self.merge_remove_original = True
+                LOGGER.info("Setting merge_remove_original=True due to -del flag")
+            elif self.args.get("-del") == "f" or self.args.get("-del") is False:
+                self.merge_remove_original = False
+                LOGGER.info("Setting merge_remove_original=False due to -del flag")
+
         # Initialize convert settings with the same priority logic
         self.user_convert_enabled = self.user_dict.get("CONVERT_ENABLED", False)
         self.owner_convert_enabled = (
