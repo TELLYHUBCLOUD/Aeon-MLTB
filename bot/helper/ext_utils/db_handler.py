@@ -82,7 +82,8 @@ class DbManager:
             upsert=True,
         )
 
-        # Get the current runtime config
+        # Also update the runtime config with the new values
+        # First get the current runtime config
         runtime_config = (
             await self.db.settings.config.find_one(
                 {"_id": TgClient.ID},
@@ -91,22 +92,22 @@ class DbManager:
             or {}
         )
 
-        # Only add new variables that don't exist in runtime_config
-        new_vars = {}
+        # Find all variables that are new or have changed values
+        changed_vars = {}
         for k, v in config_file.items():
-            # Only add variables that don't exist in runtime_config
-            if k not in runtime_config:
-                new_vars[k] = v
+            # Add new variables or update variables with changed values
+            if k not in runtime_config or runtime_config.get(k) != v:
+                changed_vars[k] = v
 
-        if new_vars:
-            # Update runtime configuration with only new variables
-            runtime_config.update(new_vars)
+        if changed_vars:
+            # Update runtime configuration with all changed variables
+            runtime_config.update(changed_vars)
             await self.db.settings.config.replace_one(
                 {"_id": TgClient.ID},
                 runtime_config,
                 upsert=True,
             )
-            LOGGER.info(f"Added new config variables from config.py: {list(new_vars.keys())}")
+            LOGGER.info(f"Updated runtime config variables from config.py: {list(changed_vars.keys())}")
 
     async def update_config(self, dict_):
         if self._return:
