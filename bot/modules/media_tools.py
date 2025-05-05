@@ -1698,13 +1698,6 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
             f"mediatools {user_id} tog COMPRESSION_ENABLED {'f' if compression_enabled else 't'}",
         )
 
-        # Add delete original toggle
-        delete_original = user_dict.get("COMPRESSION_DELETE_ORIGINAL", False)
-        buttons.data_button(
-            f"Delete Original: {'✅ ON' if delete_original else '❌ OFF'}",
-            f"mediatools {user_id} tog COMPRESSION_DELETE_ORIGINAL {'f' if delete_original else 't'}",
-        )
-
         buttons.data_button("Configure", f"mediatools {user_id} compression_config")
         buttons.data_button(
             "Set Priority", f"mediatools {user_id} menu COMPRESSION_PRIORITY"
@@ -3339,6 +3332,28 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         else:
             archive_status = "❌ Disabled"
 
+        # Get video bitdepth, bitrate, and resolution settings
+        video_bitdepth = user_dict.get("COMPRESSION_VIDEO_BITDEPTH", None)
+        if video_bitdepth is None and hasattr(Config, "COMPRESSION_VIDEO_BITDEPTH"):
+            video_bitdepth = Config.COMPRESSION_VIDEO_BITDEPTH
+        video_bitdepth_str = f"{video_bitdepth}" if video_bitdepth else "none (Default)"
+
+        video_bitrate = user_dict.get("COMPRESSION_VIDEO_BITRATE", None)
+        if video_bitrate is None and hasattr(Config, "COMPRESSION_VIDEO_BITRATE"):
+            video_bitrate = Config.COMPRESSION_VIDEO_BITRATE
+        video_bitrate_str = f"{video_bitrate}" if video_bitrate else "none (Default)"
+
+        video_resolution = user_dict.get("COMPRESSION_VIDEO_RESOLUTION", None)
+        if video_resolution is None and hasattr(Config, "COMPRESSION_VIDEO_RESOLUTION"):
+            video_resolution = Config.COMPRESSION_VIDEO_RESOLUTION
+        video_resolution_str = f"{video_resolution}" if video_resolution else "none (Default)"
+
+        # Get audio bitdepth setting
+        audio_bitdepth = user_dict.get("COMPRESSION_AUDIO_BITDEPTH", None)
+        if audio_bitdepth is None and hasattr(Config, "COMPRESSION_AUDIO_BITDEPTH"):
+            audio_bitdepth = Config.COMPRESSION_AUDIO_BITDEPTH
+        audio_bitdepth_str = f"{audio_bitdepth}" if audio_bitdepth else "none (Default)"
+
         text = f"""⌬ <b>Compression Configuration :</b>
 ┟ <b>Name</b> → {user_name}
 ┃
@@ -3350,12 +3365,16 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
 ┠ <b>Video Codec</b> → <code>{video_codec_str}</code>
 ┠ <b>Video Tune</b> → <code>{video_tune_str}</code>
 ┠ <b>Video Pixel Format</b> → <code>{video_pixel_format_str}</code>
+┠ <b>Video Bitdepth</b> → <code>{video_bitdepth_str}</code>
+┠ <b>Video Bitrate</b> → <code>{video_bitrate_str}</code>
+┠ <b>Video Resolution</b> → <code>{video_resolution_str}</code>
 ┠ <b>Video Format</b> → <code>{video_format_str}</code>
 ┃
 ┠ <b>Audio Compression</b> → {audio_status}
 ┠ <b>Audio Preset</b> → <code>{audio_preset_str}</code>
 ┠ <b>Audio Codec</b> → <code>{audio_codec_str}</code>
 ┠ <b>Audio Bitrate</b> → <code>{audio_bitrate_str}</code>
+┠ <b>Audio Bitdepth</b> → <code>{audio_bitdepth_str}</code>
 ┠ <b>Audio Channels</b> → <code>{audio_channels_str}</code>
 ┠ <b>Audio Format</b> → <code>{audio_format_str}</code>
 ┃

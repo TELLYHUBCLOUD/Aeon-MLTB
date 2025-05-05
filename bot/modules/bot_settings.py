@@ -2626,6 +2626,9 @@ Configure global extract settings that will be used when user settings are not a
         video_codec = Config.COMPRESSION_VIDEO_CODEC
         video_tune = Config.COMPRESSION_VIDEO_TUNE
         video_pixel_format = Config.COMPRESSION_VIDEO_PIXEL_FORMAT
+        video_bitdepth = Config.COMPRESSION_VIDEO_BITDEPTH
+        video_bitrate = Config.COMPRESSION_VIDEO_BITRATE
+        video_resolution = Config.COMPRESSION_VIDEO_RESOLUTION
         video_format = Config.COMPRESSION_VIDEO_FORMAT
 
         # Audio settings
@@ -2636,6 +2639,7 @@ Configure global extract settings that will be used when user settings are not a
         audio_codec = Config.COMPRESSION_AUDIO_CODEC
         audio_bitrate = Config.COMPRESSION_AUDIO_BITRATE
         audio_channels = Config.COMPRESSION_AUDIO_CHANNELS
+        audio_bitdepth = Config.COMPRESSION_AUDIO_BITDEPTH
         audio_format = Config.COMPRESSION_AUDIO_FORMAT
 
         # Image settings
@@ -2686,6 +2690,9 @@ Configure global extract settings that will be used when user settings are not a
 • <b>Codec:</b> <code>{video_codec}</code>
 • <b>Tune:</b> <code>{video_tune}</code>
 • <b>Pixel Format:</b> <code>{video_pixel_format}</code>
+• <b>Bitdepth:</b> <code>{video_bitdepth}</code>
+• <b>Bitrate:</b> <code>{video_bitrate}</code>
+• <b>Resolution:</b> <code>{video_resolution}</code>
 • <b>Format:</b> <code>{video_format}</code>
 
 <b>Audio Compression Settings:</b>
@@ -2694,6 +2701,7 @@ Configure global extract settings that will be used when user settings are not a
 • <b>Codec:</b> <code>{audio_codec}</code>
 • <b>Bitrate:</b> <code>{audio_bitrate}</code>
 • <b>Channels:</b> <code>{audio_channels}</code>
+• <b>Bitdepth:</b> <code>{audio_bitdepth}</code>
 • <b>Format:</b> <code>{audio_format}</code>
 
 <b>Image Compression Settings:</b>
