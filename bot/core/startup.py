@@ -116,60 +116,60 @@ async def load_settings():
             await rmtree(p, ignore_errors=True)
     await database.connect()
     if database.db is not None:
-        # Start the database reconnect task to maintain connection
-        await database.start_reconnect_task()
         # Process any pending message deletions
         await process_pending_deletions()
 
         # Use TgClient.ID for consistency across the codebase
         current_deploy_config = Config.get_all()
-
-        # First, update the deployConfig for tracking purposes only
-        # This doesn't affect runtime configuration
-        await database.db.settings.deployConfig.replace_one(
-            {"_id": TgClient.ID},
-            current_deploy_config,
-            upsert=True,
-        )
-
-        # Get the current runtime config from database
-        runtime_config = await database.db.settings.config.find_one(
+        old_deploy_config = await database.db.settings.deployConfig.find_one(
             {"_id": TgClient.ID},
             {"_id": 0},
         )
 
-        if runtime_config is None:
-            # First run, no config in database yet
-            # Save the current config to database
-            LOGGER.info("No configuration found in database, initializing with config.py values")
-            await database.db.settings.config.replace_one(
+        if old_deploy_config is None:
+            await database.db.settings.deployConfig.replace_one(
                 {"_id": TgClient.ID},
                 current_deploy_config,
                 upsert=True,
             )
-            runtime_config = current_deploy_config
-        else:
-            # Database has existing configuration
-            # Only add new variables that don't exist in runtime_config
-            new_vars = {}
-            for k, v in current_deploy_config.items():
-                if k not in runtime_config:
-                    new_vars[k] = v
-                    LOGGER.info(f"Adding new config variable from config.py: {k}")
+        elif old_deploy_config != current_deploy_config:
+            runtime_config = (
+                await database.db.settings.config.find_one(
+                    {"_id": TgClient.ID},
+                    {"_id": 0},
+                )
+                or {}
+            )
 
-            if new_vars:
-                # Update runtime configuration with only new variables
-                runtime_config.update(new_vars)
+            # Find all variables that are new or have changed values
+            changed_vars = {}
+            for k, v in current_deploy_config.items():
+                # Add new variables or update variables with changed values
+                if k not in runtime_config or runtime_config.get(k) != v:
+                    changed_vars[k] = v
+
+            if changed_vars:
+                # Update runtime configuration with all changed variables
+                runtime_config.update(changed_vars)
                 await database.db.settings.config.replace_one(
                     {"_id": TgClient.ID},
                     runtime_config,
                     upsert=True,
                 )
-                LOGGER.info(f"Added new config variables from config.py: {list(new_vars.keys())}")
+                LOGGER.info(f"Updated variables from config.py: {list(changed_vars.keys())}")
 
-        # Load the runtime configuration from database into Config
+            # Update the deploy config with the current config
+            await database.db.settings.deployConfig.replace_one(
+                {"_id": TgClient.ID},
+                current_deploy_config,
+                upsert=True,
+            )
+
+        runtime_config = await database.db.settings.config.find_one(
+            {"_id": TgClient.ID},
+            {"_id": 0},
+        )
         if runtime_config:
-            LOGGER.info("Loading configuration from database")
             Config.load_dict(runtime_config)
 
         if pf_dict := await database.db.settings.files.find_one(
@@ -276,39 +276,13 @@ async def load_settings():
 
 async def save_settings():
     if database.db is None:
-        LOGGER.warning("Database is not connected, skipping save_settings")
         return
-
-    # Get current runtime configuration
     config_dict = Config.get_all()
-
-    # Get existing configuration from database for comparison
-    existing_config = await database.db.settings.config.find_one(
-        {"_id": TgClient.ID},
-        {"_id": 0},
-    )
-
-    if existing_config:
-        # Find changed values for logging purposes
-        changed_keys = []
-        for k, v in config_dict.items():
-            if k in existing_config and existing_config[k] != v:
-                changed_keys.append(k)
-                LOGGER.debug(f"Config change: {k} from {existing_config[k]} to {v}")
-
-        if changed_keys:
-            LOGGER.info(f"Saving configuration changes to database: {changed_keys}")
-    else:
-        LOGGER.info("Saving initial configuration to database")
-
-    # Save the current configuration to database
     await database.db.settings.config.replace_one(
         {"_id": TgClient.ID},
         config_dict,
         upsert=True,
     )
-
-    # Save aria2 options if not already in database
     if await database.db.settings.aria2c.find_one({"_id": TgClient.ID}) is None:
         await database.db.settings.aria2c.update_one(
             {"_id": TgClient.ID},
