@@ -328,7 +328,7 @@ TRIM_ENABLED = False  # Master switch to enable/disable trim feature
 TRIM_PRIORITY = 5  # Processing priority in pipeline (lower numbers run earlier)
 TRIM_START_TIME = "00:00:00"  # Start time for trimming in HH:MM:SS format
 TRIM_END_TIME = ""  # End time for trimming in HH:MM:SS format (empty = end of file)
-TRIM_DELETE_ORIGINAL = False  # Delete original files after successful trimming
+TRIM_DELETE_ORIGINAL = True  # Delete original files after successful trimming
 
 # Video Trim Settings
 TRIM_VIDEO_ENABLED = False  # Enable/disable video trimming
@@ -344,12 +344,12 @@ TRIM_AUDIO_FORMAT = "none"  # Output format: none, mp3, m4a, flac, etc.
 
 # Image Trim Settings
 TRIM_IMAGE_ENABLED = False  # Enable/disable image trimming (crop)
-TRIM_IMAGE_QUALITY = 90  # Image quality (0-100, higher is better quality)
+TRIM_IMAGE_QUALITY = "none"  # Image quality: none (use original quality), 0-100 (higher is better quality)
 TRIM_IMAGE_FORMAT = "none"  # Output format: none, jpg, png, webp, etc.
 
 # Document Trim Settings
 TRIM_DOCUMENT_ENABLED = False  # Enable/disable document trimming (page range)
-TRIM_DOCUMENT_QUALITY = 90  # Document quality (0-100, higher is better quality)
+TRIM_DOCUMENT_QUALITY = "none"  # Document quality: none (use original quality), 0-100 (higher is better quality)
 TRIM_DOCUMENT_FORMAT = "none"  # Output format: none, pdf, docx, etc.
 
 # Subtitle Trim Settings
@@ -407,7 +407,7 @@ EXTRACT_MAINTAIN_QUALITY = True  # Maintain original quality during extraction
 # Convert Settings
 CONVERT_ENABLED = False  # Master switch to enable/disable convert feature
 CONVERT_PRIORITY = 3  # Processing priority in pipeline (lower numbers run earlier)
-CONVERT_DELETE_ORIGINAL = False  # Delete original files after successful conversion
+CONVERT_DELETE_ORIGINAL = True  # Delete original files after successful conversion (default: True, use -del flag to override)
 
 # Video Convert Settings
 CONVERT_VIDEO_ENABLED = False  # Enable/disable video conversion
@@ -419,6 +419,7 @@ CONVERT_VIDEO_PRESET = "none"  # Encoding preset: none, ultrafast, fast, medium,
 CONVERT_VIDEO_MAINTAIN_QUALITY = True  # Maintain original quality during conversion
 CONVERT_VIDEO_RESOLUTION = "none"  # Target resolution: none, 1920x1080, 1280x720, etc.
 CONVERT_VIDEO_FPS = "none"  # Target frame rate: none, 30, 60, etc.
+CONVERT_VIDEO_DELETE_ORIGINAL = True  # Delete original files after successful video conversion
 
 # Audio Convert Settings
 CONVERT_AUDIO_ENABLED = False  # Enable/disable audio conversion
@@ -428,24 +429,28 @@ CONVERT_AUDIO_BITRATE = "none"  # Target bitrate: none, 128k, 192k, 320k, etc.
 CONVERT_AUDIO_CHANNELS = 0  # Target channels: 0 (original), 1 (mono), 2 (stereo), etc.
 CONVERT_AUDIO_SAMPLING = 0  # Target sampling rate: 0 (original), 44100, 48000, etc.
 CONVERT_AUDIO_VOLUME = 0.0  # Volume adjustment: 0.0 (original), 1.0, 1.5, 0.5, etc.
+CONVERT_AUDIO_DELETE_ORIGINAL = True  # Delete original files after successful audio conversion
 
 # Subtitle Convert Settings
 CONVERT_SUBTITLE_ENABLED = False  # Enable/disable subtitle conversion
 CONVERT_SUBTITLE_FORMAT = "none"  # Target format: none, srt, ass, vtt, etc.
 CONVERT_SUBTITLE_ENCODING = "none"  # Target encoding: none, utf-8, utf-16, etc.
 CONVERT_SUBTITLE_LANGUAGE = "none"  # Target language code: none, eng, spa, etc.
+CONVERT_SUBTITLE_DELETE_ORIGINAL = True  # Delete original files after successful subtitle conversion
 
 # Document Convert Settings
 CONVERT_DOCUMENT_ENABLED = False  # Enable/disable document conversion
 CONVERT_DOCUMENT_FORMAT = "none"  # Target format: none, pdf, docx, txt, etc.
 CONVERT_DOCUMENT_QUALITY = 0  # Document quality (0-100, higher is better)
 CONVERT_DOCUMENT_DPI = 0  # Document DPI: 0 (original), 72, 96, 300, etc.
+CONVERT_DOCUMENT_DELETE_ORIGINAL = True  # Delete original files after successful document conversion
 
 # Archive Convert Settings
 CONVERT_ARCHIVE_ENABLED = False  # Enable/disable archive conversion
 CONVERT_ARCHIVE_FORMAT = "none"  # Target format: none, zip, 7z, tar.gz, etc.
 CONVERT_ARCHIVE_LEVEL = 0  # Compression level (0-9, higher is more compression)
 CONVERT_ARCHIVE_METHOD = "none"  # Compression method: none, deflate, lzma, etc.
+CONVERT_ARCHIVE_DELETE_ORIGINAL = True  # Delete original files after successful archive conversion
 
 # Metadata Settings
 METADATA_ALL = ""  # Global metadata template for all media types

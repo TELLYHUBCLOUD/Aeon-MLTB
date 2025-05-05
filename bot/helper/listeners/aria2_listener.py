@@ -3,7 +3,7 @@ from asyncio import create_task, sleep
 from time import time
 
 from aiofiles.os import path as aiopath
-from aiofiles.os import remove
+from aiofiles.os import makedirs, remove
 from aiohttp.client_exceptions import ClientError
 
 from bot import LOGGER, intervals, task_dict, task_dict_lock
@@ -119,7 +119,19 @@ async def _on_download_complete(api, data):
         else:
             LOGGER.info(f"onDownloadComplete: {aria2_name(download)} - Gid: {gid}")
             if task := await get_task_by_gid(gid):
-                await task.listener.on_download_complete()
+                try:
+                    # Ensure the download directory exists before proceeding
+                    if not await aiopath.exists(task.listener.dir):
+                        LOGGER.error(f"Download directory does not exist: {task.listener.dir}")
+                        await makedirs(task.listener.dir, exist_ok=True)
+                        LOGGER.info(f"Created download directory: {task.listener.dir}")
+
+                    await task.listener.on_download_complete()
+                except Exception as e:
+                    LOGGER.error(f"Error in aria2 download complete handler: {e}")
+                    await task.listener.on_download_error(f"Error processing download: {e}")
+                    return
+
                 if intervals["stopAll"]:
                     return
                 # Try to remove the download with error handling

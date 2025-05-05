@@ -3,7 +3,7 @@ from asyncio import create_task, sleep
 from time import time
 
 from aiofiles.os import path as aiopath
-from aiofiles.os import remove
+from aiofiles.os import makedirs, remove
 from aiohttp.client_exceptions import ClientError
 
 from bot import (
@@ -94,7 +94,19 @@ async def _on_download_complete(tor):
                 if f.priority == 0 and await aiopath.exists(f"{path}/{f.name}"):
                     with contextlib.suppress(Exception):
                         await remove(f"{path}/{f.name}")
-        await task.listener.on_download_complete()
+        try:
+            # Ensure the download directory exists before proceeding
+            if not await aiopath.exists(task.listener.dir):
+                LOGGER.error(f"Download directory does not exist: {task.listener.dir}")
+                await makedirs(task.listener.dir, exist_ok=True)
+                LOGGER.info(f"Created download directory: {task.listener.dir}")
+
+            await task.listener.on_download_complete()
+        except Exception as e:
+            LOGGER.error(f"Error in qBit download complete handler: {e}")
+            await _on_download_error(f"Error processing download: {e}", tor)
+            return
+
         if intervals["stopAll"]:
             return
         if task.listener.seed and not task.listener.is_cancelled:

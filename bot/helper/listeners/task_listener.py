@@ -135,19 +135,41 @@ class TaskListener(TaskConfig):
                                 LOGGER.info(
                                     f"Moving files from {self.mid} to {des_id}",
                                 )
-                                for item in await listdir(spath):
-                                    if item.strip().endswith((".aria2", ".!qB")):
-                                        continue
-                                    item_path = (
-                                        f"{self.dir}{self.folder_name}/{item}"
-                                    )
-                                    if item in await listdir(des_path):
-                                        await move(
-                                            item_path,
-                                            f"{des_path}/{self.mid}-{item}",
+                                try:
+                                    if not await aiopath.exists(spath):
+                                        LOGGER.error(f"Source path does not exist: {spath}")
+                                        break
+
+                                    items = await listdir(spath)
+                                    for item in items:
+                                        if item.strip().endswith((".aria2", ".!qB")):
+                                            continue
+                                        item_path = (
+                                            f"{self.dir}{self.folder_name}/{item}"
                                         )
-                                    else:
-                                        await move(item_path, f"{des_path}/{item}")
+
+                                        try:
+                                            des_items = await listdir(des_path)
+                                            if item in des_items:
+                                                await move(
+                                                    item_path,
+                                                    f"{des_path}/{self.mid}-{item}",
+                                                )
+                                            else:
+                                                await move(item_path, f"{des_path}/{item}")
+                                        except FileNotFoundError:
+                                            LOGGER.error(f"Destination path does not exist: {des_path}")
+                                            # Try to create the directory again
+                                            await makedirs(des_path, exist_ok=True)
+                                            await move(item_path, f"{des_path}/{item}")
+                                        except Exception as e:
+                                            LOGGER.error(f"Error moving file {item}: {e}")
+                                except FileNotFoundError:
+                                    LOGGER.error(f"Source path does not exist: {spath}")
+                                    break
+                                except Exception as e:
+                                    LOGGER.error(f"Error listing directory {spath}: {e}")
+                                    break
                                 multi_links = True
                             break
                     await sleep(1)
@@ -177,11 +199,32 @@ class TaskListener(TaskConfig):
 
         if not await aiopath.exists(f"{self.dir}/{self.name}"):
             try:
+                # Check if directory exists before listing
+                if not await aiopath.exists(self.dir):
+                    LOGGER.error(f"Directory does not exist: {self.dir}")
+                    await self.on_upload_error(f"Directory does not exist: {self.dir}")
+                    return
+
                 files = await listdir(self.dir)
+                if not files:
+                    LOGGER.error(f"Directory is empty: {self.dir}")
+                    await self.on_upload_error(f"Directory is empty: {self.dir}")
+                    return
+
                 self.name = files[-1]
                 if self.name == "yt-dlp-thumb":
-                    self.name = files[0]
+                    if len(files) > 1:
+                        self.name = files[0]
+                    else:
+                        LOGGER.error(f"No valid files found in directory: {self.dir}")
+                        await self.on_upload_error(f"No valid files found in directory: {self.dir}")
+                        return
+            except FileNotFoundError:
+                LOGGER.error(f"Directory does not exist: {self.dir}")
+                await self.on_upload_error(f"Directory does not exist: {self.dir}")
+                return
             except Exception as e:
+                LOGGER.error(f"Error listing directory {self.dir}: {e}")
                 await self.on_upload_error(str(e))
                 return
 

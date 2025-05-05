@@ -289,7 +289,7 @@ class Config:
     # Convert Settings
     CONVERT_ENABLED: bool = False
     CONVERT_PRIORITY: int = 3
-    CONVERT_DELETE_ORIGINAL: bool = False
+    CONVERT_DELETE_ORIGINAL: bool = True
 
     # Video Convert Settings
     CONVERT_VIDEO_ENABLED: bool = False

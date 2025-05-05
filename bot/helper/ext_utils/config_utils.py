@@ -98,7 +98,7 @@ async def reset_tool_configs(tool_name, database):
         # Convert Settings
         "CONVERT_ENABLED": False,
         "CONVERT_PRIORITY": 3,
-        "CONVERT_DELETE_ORIGINAL": False,
+        "CONVERT_DELETE_ORIGINAL": True,
         # Video Convert Settings
         "CONVERT_VIDEO_ENABLED": False,
         "CONVERT_VIDEO_FORMAT": "none",
@@ -109,6 +109,7 @@ async def reset_tool_configs(tool_name, database):
         "CONVERT_VIDEO_MAINTAIN_QUALITY": True,
         "CONVERT_VIDEO_RESOLUTION": "none",
         "CONVERT_VIDEO_FPS": "none",
+        "CONVERT_VIDEO_DELETE_ORIGINAL": True,
         # Audio Convert Settings
         "CONVERT_AUDIO_ENABLED": False,
         "CONVERT_AUDIO_FORMAT": "none",
@@ -117,21 +118,25 @@ async def reset_tool_configs(tool_name, database):
         "CONVERT_AUDIO_CHANNELS": 0,
         "CONVERT_AUDIO_SAMPLING": 0,
         "CONVERT_AUDIO_VOLUME": 0.0,
+        "CONVERT_AUDIO_DELETE_ORIGINAL": True,
         # Subtitle Convert Settings
         "CONVERT_SUBTITLE_ENABLED": False,
         "CONVERT_SUBTITLE_FORMAT": "none",
         "CONVERT_SUBTITLE_ENCODING": "none",
         "CONVERT_SUBTITLE_LANGUAGE": "none",
+        "CONVERT_SUBTITLE_DELETE_ORIGINAL": True,
         # Document Convert Settings
         "CONVERT_DOCUMENT_ENABLED": False,
         "CONVERT_DOCUMENT_FORMAT": "none",
         "CONVERT_DOCUMENT_QUALITY": 0,
         "CONVERT_DOCUMENT_DPI": 0,
+        "CONVERT_DOCUMENT_DELETE_ORIGINAL": True,
         # Archive Convert Settings
         "CONVERT_ARCHIVE_ENABLED": False,
         "CONVERT_ARCHIVE_FORMAT": "none",
         "CONVERT_ARCHIVE_LEVEL": 0,
         "CONVERT_ARCHIVE_METHOD": "none",
+        "CONVERT_ARCHIVE_DELETE_ORIGINAL": True,
         # Compression Settings
         "COMPRESSION_ENABLED": False,
         "COMPRESSION_PRIORITY": 4,

@@ -1718,7 +1718,7 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
             compression_priority = "4 (Default)"
 
         # Get delete original status
-        delete_original = user_dict.get("COMPRESSION_DELETE_ORIGINAL", False)
+        delete_original = user_dict.get("COMPRESSION_DELETE_ORIGINAL", True)  # Default to True
         owner_delete_original = (
             hasattr(Config, "COMPRESSION_DELETE_ORIGINAL")
             and Config.COMPRESSION_DELETE_ORIGINAL
@@ -2218,7 +2218,7 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         end_time_str = f"{end_time}" if end_time else "End of file (Default)"
 
         # Get delete original setting
-        delete_original = user_dict.get("TRIM_DELETE_ORIGINAL", None)
+        delete_original = user_dict.get("TRIM_DELETE_ORIGINAL", True)  # Default to True
         if delete_original is None and hasattr(Config, "TRIM_DELETE_ORIGINAL"):
             delete_original = Config.TRIM_DELETE_ORIGINAL
         delete_original_str = "✅ Enabled" if delete_original else "❌ Disabled"
@@ -2264,11 +2264,11 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         )
 
         # Get image trim settings
-        image_quality = user_dict.get("TRIM_IMAGE_QUALITY", None)
+        image_quality = user_dict.get("TRIM_IMAGE_QUALITY", "none")
         if image_quality is None and hasattr(Config, "TRIM_IMAGE_QUALITY"):
             image_quality = Config.TRIM_IMAGE_QUALITY
         if not image_quality or image_quality in {"none", "0", 0}:
-            image_quality_str = "Original Quality (Default)"
+            image_quality_str = "none (Default - Original Quality)"
         else:
             image_quality_str = f"{image_quality}"
 
@@ -2282,11 +2282,11 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         )
 
         # Get document trim settings
-        document_quality = user_dict.get("TRIM_DOCUMENT_QUALITY", None)
+        document_quality = user_dict.get("TRIM_DOCUMENT_QUALITY", "none")
         if document_quality is None and hasattr(Config, "TRIM_DOCUMENT_QUALITY"):
             document_quality = Config.TRIM_DOCUMENT_QUALITY
         if not document_quality or document_quality in {"none", "0", 0}:
-            document_quality_str = "Original Quality (Default)"
+            document_quality_str = "none (Default - Original Quality)"
         else:
             document_quality_str = f"{document_quality}"
 
@@ -2900,7 +2900,7 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
     elif stype == "compression_config":
         # Compression configuration menu
         # Add global delete original toggle
-        delete_original = user_dict.get("COMPRESSION_DELETE_ORIGINAL", False)
+        delete_original = user_dict.get("COMPRESSION_DELETE_ORIGINAL", True)  # Default to True
         buttons.data_button(
             f"Delete Original: {'✅ ON' if delete_original else '❌ OFF'}",
             f"mediatools {user_id} tog COMPRESSION_DELETE_ORIGINAL {'f' if delete_original else 't'}",
@@ -3046,7 +3046,7 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         btns = buttons.build_menu(2)
 
         # Get delete original setting
-        delete_original = user_dict.get("COMPRESSION_DELETE_ORIGINAL", False)
+        delete_original = user_dict.get("COMPRESSION_DELETE_ORIGINAL", True)  # Default to True
         owner_delete_original = (
             hasattr(Config, "COMPRESSION_DELETE_ORIGINAL")
             and Config.COMPRESSION_DELETE_ORIGINAL
@@ -6902,7 +6902,7 @@ async def edit_media_tools_settings(client, query):
         update_user_ldata(user_id, "CONVERT_DOCUMENT_ENABLED", False)
         update_user_ldata(user_id, "CONVERT_ARCHIVE_ENABLED", False)
         update_user_ldata(user_id, "CONVERT_VIDEO_MAINTAIN_QUALITY", False)
-        update_user_ldata(user_id, "CONVERT_DELETE_ORIGINAL", False)
+        update_user_ldata(user_id, "CONVERT_DELETE_ORIGINAL", True)
         for key in convert_keys:
             if key in [
                 "CONVERT_VIDEO_CRF",
@@ -6998,7 +6998,7 @@ async def edit_media_tools_settings(client, query):
         update_user_ldata(user_id, "CONVERT_DOCUMENT_ENABLED", False)
         update_user_ldata(user_id, "CONVERT_ARCHIVE_ENABLED", False)
         update_user_ldata(user_id, "CONVERT_VIDEO_MAINTAIN_QUALITY", False)
-        update_user_ldata(user_id, "CONVERT_DELETE_ORIGINAL", False)
+        update_user_ldata(user_id, "CONVERT_DELETE_ORIGINAL", True)
         update_user_ldata(user_id, "COMPRESSION_ENABLED", False)
         update_user_ldata(user_id, "COMPRESSION_VIDEO_ENABLED", False)
         update_user_ldata(user_id, "COMPRESSION_AUDIO_ENABLED", False)

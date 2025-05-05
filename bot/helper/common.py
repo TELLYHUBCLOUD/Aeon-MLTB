@@ -126,9 +126,9 @@ class TaskConfig:
         self.trim_audio_codec = ""
         self.trim_audio_preset = ""
         self.trim_image_enabled = False
-        self.trim_image_quality = 0
+        self.trim_image_quality = "none"
         self.trim_document_enabled = False
-        self.trim_document_quality = 0
+        self.trim_document_quality = "none"
         self.trim_subtitle_enabled = False
         self.trim_subtitle_encoding = ""
         self.trim_subtitle_format = ""
@@ -138,7 +138,7 @@ class TaskConfig:
         self.trim_audio_format = ""
         self.trim_image_format = ""
         self.trim_document_format = ""
-        self.trim_delete_original = False
+        self.trim_delete_original = True
         self.merge_threading = False
         self.concat_demuxer_enabled = False
         self.filter_complex_enabled = False
@@ -966,7 +966,7 @@ class TaskConfig:
         ):
             self.trim_image_quality = Config.TRIM_IMAGE_QUALITY
         else:
-            self.trim_image_quality = 90
+            self.trim_image_quality = "none"
 
         # Initialize document trim settings
         if user_trim_enabled and "TRIM_DOCUMENT_ENABLED" in self.user_dict:
@@ -989,7 +989,7 @@ class TaskConfig:
         ):
             self.trim_document_quality = Config.TRIM_DOCUMENT_QUALITY
         else:
-            self.trim_document_quality = 90
+            self.trim_document_quality = "none"
 
         # Initialize subtitle trim settings
         if user_trim_enabled and "TRIM_SUBTITLE_ENABLED" in self.user_dict:
@@ -1028,7 +1028,7 @@ class TaskConfig:
         elif self.trim_enabled and hasattr(Config, "TRIM_DELETE_ORIGINAL"):
             self.trim_delete_original = Config.TRIM_DELETE_ORIGINAL
         else:
-            self.trim_delete_original = False
+            self.trim_delete_original = True  # Default to True if not specified
 
         # Check for -del flag in command line arguments
         if hasattr(self, "args") and self.args:
@@ -2429,7 +2429,7 @@ class TaskConfig:
 
         # Compression Delete Original
         user_compression_delete_original = self.user_dict.get(
-            "COMPRESSION_DELETE_ORIGINAL", False
+            "COMPRESSION_DELETE_ORIGINAL", True  # Default to True
         )
         owner_compression_delete_original = (
             hasattr(Config, "COMPRESSION_DELETE_ORIGINAL")

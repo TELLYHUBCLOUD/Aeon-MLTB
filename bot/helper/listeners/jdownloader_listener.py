@@ -43,7 +43,22 @@ async def _on_download_complete(gid):
                     "ALL",
                     package_ids=jd_downloads[gid]["ids"],
                 )
-        await task.listener.on_download_complete()
+        try:
+            # Ensure the download directory exists before proceeding
+            from aiofiles.os import path as aiopath
+            from aiofiles.os import makedirs
+
+            if not await aiopath.exists(task.listener.dir):
+                LOGGER.error(f"Download directory does not exist: {task.listener.dir}")
+                await makedirs(task.listener.dir, exist_ok=True)
+                LOGGER.info(f"Created download directory: {task.listener.dir}")
+
+            await task.listener.on_download_complete()
+        except Exception as e:
+            LOGGER.error(f"Error in JDownloader download complete handler: {e}")
+            await task.listener.on_download_error(f"Error processing download: {e}")
+            return
+
         if intervals["stopAll"]:
             return
         async with jd_listener_lock:
