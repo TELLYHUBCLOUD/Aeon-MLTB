@@ -1,6 +1,6 @@
 import inspect
 from importlib import import_module
-from time import time as get_time
+from time import time
 
 from aiofiles import open as aiopen
 from aiofiles.os import path as aiopath
@@ -23,14 +23,27 @@ class DbManager:
         self._return = True
         self._conn = None
         self.db = None
+        self._reconnect_task = None
+        self._last_ping_time = 0
 
     async def connect(self):
         try:
+            # Check if we already have a valid connection
             if self._conn is not None:
                 try:
-                    await self._conn.close()
+                    # Test the connection by making a simple query
+                    await self._conn.admin.command('ping')
+                    LOGGER.debug("Reusing existing database connection")
+                    self._return = False
+                    return
                 except Exception as e:
-                    LOGGER.error(f"Error closing previous DB connection: {e}")
+                    LOGGER.warning(f"Existing database connection is invalid, reconnecting: {e}")
+                    try:
+                        await self._conn.close()
+                    except Exception as e:
+                        LOGGER.error(f"Error closing previous DB connection: {e}")
+
+            # Create a new connection
             self._conn = AsyncIOMotorClient(
                 Config.DATABASE_URL,
                 server_api=ServerApi("1"),
@@ -39,7 +52,13 @@ class DbManager:
                 maxIdleTimeMS=30000,  # Close idle connections after 30 seconds
                 connectTimeoutMS=5000,  # 5 second connection timeout
                 socketTimeoutMS=10000,  # 10 second socket timeout
+                retryWrites=True,  # Enable retry for write operations
+                retryReads=True,   # Enable retry for read operations
             )
+
+            # Test the connection with a ping
+            await self._conn.admin.command('ping')
+
             # Use 'aeon' as the database name for consistency across the codebase
             self.db = self._conn.aeon
             self._return = False
@@ -61,9 +80,61 @@ class DbManager:
         self._conn = None
         self.db = None
 
+        # Cancel reconnect task if it exists
+        if self._reconnect_task is not None:
+            try:
+                self._reconnect_task.cancel()
+                self._reconnect_task = None
+            except Exception as e:
+                LOGGER.error(f"Error canceling reconnect task: {e}")
+
         # Force garbage collection after database operations
         if smart_garbage_collection is not None:
             smart_garbage_collection(aggressive=True)
+
+    async def start_reconnect_task(self):
+        """Start a background task to periodically check and reconnect to the database if needed."""
+        from asyncio import create_task, sleep
+
+        # Cancel existing task if it exists
+        if self._reconnect_task is not None:
+            try:
+                self._reconnect_task.cancel()
+            except Exception:
+                pass
+
+        # Define the reconnect function
+        async def reconnect_loop():
+            while True:
+                try:
+                    # Only check connection every 5 minutes
+                    await sleep(300)
+
+                    # Skip if no connection is expected
+                    if self._return or not Config.DATABASE_URL:
+                        continue
+
+                    # Check if connection is still valid
+                    if self._conn is not None:
+                        try:
+                            # Test the connection with a ping
+                            await self._conn.admin.command('ping')
+                            self._last_ping_time = int(time())
+                            LOGGER.debug("Database connection is healthy")
+                        except Exception as e:
+                            LOGGER.warning(f"Database connection lost, reconnecting: {e}")
+                            await self.connect()
+                    else:
+                        # No connection exists, try to connect
+                        LOGGER.warning("No database connection exists, reconnecting")
+                        await self.connect()
+                except Exception as e:
+                    LOGGER.error(f"Error in database reconnect loop: {e}")
+                    await sleep(60)  # Wait a bit longer after an error
+
+        # Start the reconnect task
+        self._reconnect_task = create_task(reconnect_loop())
+        LOGGER.info("Database reconnect task started")
 
     async def update_deploy_config(self):
         if self._return:
@@ -75,15 +146,14 @@ class DbManager:
             if not key.startswith("__")
         }
 
-        # Update deployConfig with the new config
+        # Update deployConfig with the new config (this is just for tracking purposes)
         await self.db.settings.deployConfig.replace_one(
             {"_id": TgClient.ID},
             config_file,
             upsert=True,
         )
 
-        # Also update the runtime config with the new values
-        # First get the current runtime config
+        # Get the current runtime config from database
         runtime_config = (
             await self.db.settings.config.find_one(
                 {"_id": TgClient.ID},
@@ -92,31 +162,54 @@ class DbManager:
             or {}
         )
 
-        # Find all variables that are new or have changed values
-        changed_vars = {}
+        # Only update new variables that don't exist in the runtime config
+        # This prevents overwriting user-configured settings on restart
+        new_vars = {}
         for k, v in config_file.items():
-            # Add new variables or update variables with changed values
-            if k not in runtime_config or runtime_config.get(k) != v:
-                changed_vars[k] = v
+            # Only add variables that don't exist in runtime_config
+            if k not in runtime_config:
+                new_vars[k] = v
+                LOGGER.info(f"Adding new config variable from config.py: {k}")
 
-        if changed_vars:
-            # Update runtime configuration with all changed variables
-            runtime_config.update(changed_vars)
+        if new_vars:
+            # Update runtime configuration with only new variables
+            runtime_config.update(new_vars)
             await self.db.settings.config.replace_one(
                 {"_id": TgClient.ID},
                 runtime_config,
                 upsert=True,
             )
-            LOGGER.info(f"Updated runtime config variables from config.py: {list(changed_vars.keys())}")
+            LOGGER.info(f"Added new config variables from config.py: {list(new_vars.keys())}")
 
     async def update_config(self, dict_):
         if self._return:
+            LOGGER.warning("Database is not connected, skipping update_config")
             return
+
+        # Get current configuration from database for comparison
+        current_config = await self.db.settings.config.find_one(
+            {"_id": TgClient.ID},
+            {"_id": 0},
+        ) or {}
+
+        # Log changes for debugging
+        for key, value in dict_.items():
+            if key in current_config:
+                if current_config[key] != value:
+                    LOGGER.info(f"Updating config: {key} from {current_config[key]} to {value}")
+            else:
+                LOGGER.info(f"Adding new config: {key} = {value}")
+
+        # Update the configuration in database
         await self.db.settings.config.update_one(
             {"_id": TgClient.ID},
             {"$set": dict_},
             upsert=True,
         )
+
+        # Update the Config object with the new values
+        for key, value in dict_.items():
+            Config.set(key, value)
 
     async def update_aria2(self, key, value):
         if self._return:
@@ -425,7 +518,7 @@ class DbManager:
         if self.db is None:
             return []
 
-        current_time = int(get_time())
+        current_time = int(time())
         # Get current time for comparison
 
         # Create index for better performance if it doesn't exist
@@ -456,7 +549,7 @@ class DbManager:
             return 0
 
         # Calculate the timestamp for 'days' ago
-        one_day_ago = int(get_time() - (days * 86400))  # 86400 seconds = 1 day
+        one_day_ago = int(time() - (days * 86400))  # 86400 seconds = 1 day
 
         # Cleaning up old scheduled deletion entries
 
@@ -466,7 +559,7 @@ class DbManager:
         ]
 
         # Count entries by type
-        current_time = int(get_time())
+        current_time = int(time())
         past_due = [
             doc for doc in entries_to_check if doc["delete_time"] < current_time
         ]
@@ -493,7 +586,7 @@ class DbManager:
             return []
 
         cursor = self.db.scheduled_deletions.find({})
-        current_time = int(get_time())
+        current_time = int(time())
 
         # Return all scheduled deletions
         result = [

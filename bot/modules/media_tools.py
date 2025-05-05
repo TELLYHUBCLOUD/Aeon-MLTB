@@ -471,6 +471,19 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         else:
             opacity_value = "1.0 (Default)"
 
+        # Get watermark remove original status
+        user_has_remove_original = "WATERMARK_REMOVE_ORIGINAL" in user_dict
+        if user_has_remove_original:
+            remove_original_status = (
+                "✅ Enabled (User)"
+                if user_dict["WATERMARK_REMOVE_ORIGINAL"]
+                else "❌ Disabled (User)"
+            )
+        elif Config.WATERMARK_REMOVE_ORIGINAL:
+            remove_original_status = "✅ Enabled (Global)"
+        else:
+            remove_original_status = "❌ Disabled"
+
         text = f"""⌬ <b>Watermark Settings :</b>
 ┟ <b>Name</b> → {user_name}
 ┃
