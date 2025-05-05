@@ -287,12 +287,38 @@ async def load_settings():
 async def save_settings():
     if database.db is None:
         return
-    config_dict = Config.get_all()
-    await database.db.settings.config.replace_one(
-        {"_id": TgClient.ID},
-        config_dict,
-        upsert=True,
-    )
+    try:
+        # Get all config values
+        config_dict = Config.get_all()
+
+        # Filter out non-serializable objects
+        serializable_config = {}
+        for key, value in config_dict.items():
+            # Skip internal Python attributes
+            if key.startswith("__"):
+                continue
+
+            # Handle different types of values
+            if isinstance(value, (str, int, float, bool)):
+                serializable_config[key] = value
+            elif isinstance(value, (list, dict)):
+                try:
+                    # Test if it can be JSON serialized
+                    import json
+                    json.dumps(value)
+                    serializable_config[key] = value
+                except (TypeError, OverflowError):
+                    # If it can't be serialized, skip it
+                    LOGGER.warning(f"Skipping non-serializable config value: {key}")
+
+        # Save the serializable config to the database
+        await database.db.settings.config.replace_one(
+            {"_id": TgClient.ID},
+            serializable_config,
+            upsert=True,
+        )
+    except Exception as e:
+        LOGGER.error(f"Error saving settings to database: {e}")
     if await database.db.settings.aria2c.find_one({"_id": TgClient.ID}) is None:
         await database.db.settings.aria2c.update_one(
             {"_id": TgClient.ID},
