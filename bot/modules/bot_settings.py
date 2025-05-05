@@ -398,15 +398,30 @@ async def get_buttons(key=None, edit_type=None, page=0, user_id=None):
                 ]
             ):
                 # If it's a format setting, it's from the merge_config menu
-                buttons.data_button("Back", "botset mediatools_merge_config")
+                # Store the current page in the callback data to ensure we return to the correct page
+                if "merge_config_page" in globals():
+                    page = globals()["merge_config_page"]
+                    buttons.data_button("Back", f"botset back_to_merge_config {page}")
+                else:
+                    buttons.data_button("Back", "botset mediatools_merge_config")
             elif key in ["MERGE_ENABLED", "MERGE_PRIORITY", "MERGE_THREADING",
                         "MERGE_THREAD_NUMBER", "MERGE_REMOVE_ORIGINAL",
                         "CONCAT_DEMUXER_ENABLED", "FILTER_COMPLEX_ENABLED"]:
                 # These are from the main merge menu
-                buttons.data_button("Back", "botset mediatools_merge")
+                # Store the current page in the callback data to ensure we return to the correct page
+                if "merge_page" in globals():
+                    page = globals()["merge_page"]
+                    buttons.data_button("Back", f"botset back_to_merge {page}")
+                else:
+                    buttons.data_button("Back", "botset mediatools_merge")
             else:
                 # Default to merge menu for any other merge settings
-                buttons.data_button("Back", "botset mediatools_merge")
+                # Store the current page in the callback data to ensure we return to the correct page
+                if "merge_page" in globals():
+                    page = globals()["merge_page"]
+                    buttons.data_button("Back", f"botset back_to_merge {page}")
+                else:
+                    buttons.data_button("Back", "botset mediatools_merge")
             buttons.data_button("Close", "botset close")
 
             # Get help text for settings
@@ -3633,43 +3648,59 @@ async def edit_variable(_, message, pre_message, key):
         "CONCAT_DEMUXER_ENABLED",
         "FILTER_COMPLEX_ENABLED",
     ]:
-        # Check if we're in the merge_config menu
-        if (pre_message.text and "Merge Configuration" in pre_message.text) or (
-            key.startswith("MERGE_")
-            and any(
-                x in key
-                for x in [
-                    "OUTPUT_FORMAT",
-                    "VIDEO_",
-                    "AUDIO_",
-                    "IMAGE_",
-                    "SUBTITLE_",
-                    "DOCUMENT_",
-                    "METADATA_",
-                ]
-            )
+        # Check if the key is from the merge_config menu
+        if key.startswith("MERGE_") and any(
+            x in key
+            for x in [
+                "OUTPUT_FORMAT",
+                "VIDEO_",
+                "AUDIO_",
+                "IMAGE_",
+                "SUBTITLE_",
+                "DOCUMENT_",
+                "METADATA_",
+            ]
         ):
+            # This is a merge_config setting
             return_menu = "mediatools_merge_config"
-        # Check if we need to return to a specific page in mediatools_merge
-        elif pre_message.text and "Page:" in pre_message.text:
-            try:
-                page_info = pre_message.text.split("Page:")[1].strip().split("/")[0]
-                page_no = int(page_info) - 1
-                # Set the global merge_page variable to ensure we return to the correct page
-                globals()["merge_page"] = page_no
 
-                # Determine which menu to return to based on the message content
-                if "Merge Configuration" in pre_message.text:
-                    return_menu = "mediatools_merge_config"
-                else:
-                    return_menu = "mediatools_merge"
-            except (ValueError, IndexError):
-                if "Merge Configuration" in pre_message.text:
-                    return_menu = "mediatools_merge_config"
-                else:
-                    return_menu = "mediatools_merge"
-        else:
+            # Check if we need to return to a specific page in mediatools_merge_config
+            if pre_message.text and "Page:" in pre_message.text:
+                try:
+                    page_info = pre_message.text.split("Page:")[1].strip().split("/")[0]
+                    page_no = int(page_info) - 1
+                    # Set the global merge_config_page variable to ensure we return to the correct page
+                    globals()["merge_config_page"] = page_no
+                except (ValueError, IndexError):
+                    pass
+        elif key in ["MERGE_ENABLED", "MERGE_PRIORITY", "MERGE_THREADING",
+                    "MERGE_THREAD_NUMBER", "MERGE_REMOVE_ORIGINAL",
+                    "CONCAT_DEMUXER_ENABLED", "FILTER_COMPLEX_ENABLED"]:
+            # These are from the main merge menu
             return_menu = "mediatools_merge"
+
+            # Check if we need to return to a specific page in mediatools_merge
+            if pre_message.text and "Page:" in pre_message.text:
+                try:
+                    page_info = pre_message.text.split("Page:")[1].strip().split("/")[0]
+                    page_no = int(page_info) - 1
+                    # Set the global merge_page variable to ensure we return to the correct page
+                    globals()["merge_page"] = page_no
+                except (ValueError, IndexError):
+                    pass
+        else:
+            # Default to merge menu for any other merge settings
+            return_menu = "mediatools_merge"
+
+            # Check if we need to return to a specific page in mediatools_merge
+            if pre_message.text and "Page:" in pre_message.text:
+                try:
+                    page_info = pre_message.text.split("Page:")[1].strip().split("/")[0]
+                    page_no = int(page_info) - 1
+                    # Set the global merge_page variable to ensure we return to the correct page
+                    globals()["merge_page"] = page_no
+                except (ValueError, IndexError):
+                    pass
     elif key == "MEDIA_TOOLS_PRIORITY":
         return_menu = "mediatools"
     else:
@@ -5092,7 +5123,12 @@ async def edit_bot_settings(client, query):
         current_state = globals()["state"]
         # Set the state back to what it was
         globals()["state"] = current_state
-        await update_buttons(message, "mediatools_merge")
+
+        # Maintain the current page when returning to the merge menu
+        if "merge_page" in globals():
+            await update_buttons(message, "mediatools_merge", page=globals()["merge_page"])
+        else:
+            await update_buttons(message, "mediatools_merge", page=0)
     # This is a duplicate handler, removed to avoid confusion
     elif data[1] == "edit" and data[2] in [
         "mediatools_watermark",
@@ -5260,23 +5296,22 @@ async def edit_bot_settings(client, query):
             "CONCAT_DEMUXER_ENABLED",
             "FILTER_COMPLEX_ENABLED",
         ]:
-            # Check if we're in the merge_config menu
-            if (message.text and "Merge Configuration" in message.text) or (
-                data[2].startswith("MERGE_")
-                and any(
-                    x in data[2]
-                    for x in [
-                        "OUTPUT_FORMAT",
-                        "VIDEO_",
-                        "AUDIO_",
-                        "IMAGE_",
-                        "SUBTITLE_",
-                        "DOCUMENT_",
-                        "METADATA_",
-                    ]
-                )
+            # Check if the key is from the merge_config menu
+            if data[2].startswith("MERGE_") and any(
+                x in data[2]
+                for x in [
+                    "OUTPUT_FORMAT",
+                    "VIDEO_",
+                    "AUDIO_",
+                    "IMAGE_",
+                    "SUBTITLE_",
+                    "DOCUMENT_",
+                    "METADATA_",
+                ]
             ):
+                # This is a merge_config setting
                 return_menu = "mediatools_merge_config"
+
                 # Check if we need to return to a specific page in mediatools_merge_config
                 if message.text and "Page:" in message.text:
                     try:
@@ -5444,7 +5479,12 @@ async def edit_bot_settings(client, query):
         current_state = globals()["state"]
         # Set the state back to what it was
         globals()["state"] = current_state
-        await update_buttons(message, "mediatools_merge_config")
+
+        # Maintain the current page when returning to the merge_config menu
+        if "merge_config_page" in globals():
+            await update_buttons(message, "mediatools_merge_config", page=globals()["merge_config_page"])
+        else:
+            await update_buttons(message, "mediatools_merge_config", page=0)
     elif data[1] in [
         "var",
         "aria",
@@ -6550,6 +6590,46 @@ async def edit_bot_settings(client, query):
         except (ValueError, IndexError) as e:
             # In case of any error, stay on the current page
             LOGGER.error(f"Error in start_merge_config handler: {e}")
+
+            # Set the state back to what it was
+            globals()["state"] = current_state
+            await update_buttons(message, "mediatools_merge_config", page=globals()["merge_config_page"])
+    elif data[1] == "back_to_merge":
+        await query.answer()
+        # Get the current state before making changes
+        current_state = globals()["state"]
+
+        try:
+            if len(data) > 2:
+                # Update the global merge_page variable
+                globals()["merge_page"] = int(data[2])
+
+            # Set the state back to what it was
+            globals()["state"] = current_state
+            await update_buttons(message, "mediatools_merge", page=globals()["merge_page"])
+        except (ValueError, IndexError) as e:
+            # In case of any error, stay on the current page
+            LOGGER.error(f"Error in back_to_merge handler: {e}")
+
+            # Set the state back to what it was
+            globals()["state"] = current_state
+            await update_buttons(message, "mediatools_merge", page=globals()["merge_page"])
+    elif data[1] == "back_to_merge_config":
+        await query.answer()
+        # Get the current state before making changes
+        current_state = globals()["state"]
+
+        try:
+            if len(data) > 2:
+                # Update the global merge_config_page variable
+                globals()["merge_config_page"] = int(data[2])
+
+            # Set the state back to what it was
+            globals()["state"] = current_state
+            await update_buttons(message, "mediatools_merge_config", page=globals()["merge_config_page"])
+        except (ValueError, IndexError) as e:
+            # In case of any error, stay on the current page
+            LOGGER.error(f"Error in back_to_merge_config handler: {e}")
 
             # Set the state back to what it was
             globals()["state"] = current_state
