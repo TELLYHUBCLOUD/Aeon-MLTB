@@ -67,102 +67,54 @@ class DbManager:
     async def update_deploy_config(self):
         if self._return:
             return
-        try:
-            settings = import_module("config")
+        settings = import_module("config")
+        config_file = {
+            key: value.strip() if isinstance(value, str) else value
+            for key, value in vars(settings).items()
+            if not key.startswith("__")
+        }
 
-            # Filter out non-serializable objects and only include primitive types
-            # that MongoDB can store
-            config_file = {}
-            for key, value in vars(settings).items():
-                # Skip internal Python attributes
-                if key.startswith("__"):
-                    continue
+        # Update deployConfig with the new config
+        await self.db.settings.deployConfig.replace_one(
+            {"_id": TgClient.ID},
+            config_file,
+            upsert=True,
+        )
 
-                # Handle different types of values
-                if isinstance(value, (str, int, float, bool, list, dict)):
-                    # For strings, strip whitespace
-                    if isinstance(value, str):
-                        config_file[key] = value.strip()
-                    # For lists and dicts, make sure they only contain serializable types
-                    elif isinstance(value, (list, dict)):
-                        try:
-                            # Test if it can be JSON serialized
-                            import json
-                            json.dumps(value)
-                            config_file[key] = value
-                        except (TypeError, OverflowError):
-                            # If it can't be serialized, skip it
-                            LOGGER.warning(f"Skipping non-serializable config value: {key}")
-                    else:
-                        config_file[key] = value
-
-            # Update deployConfig with the new config
-            await self.db.settings.deployConfig.replace_one(
+        # Get the current runtime config
+        runtime_config = (
+            await self.db.settings.config.find_one(
                 {"_id": TgClient.ID},
-                config_file,
+                {"_id": 0},
+            )
+            or {}
+        )
+
+        # Only add new variables that don't exist in runtime_config
+        new_vars = {}
+        for k, v in config_file.items():
+            # Only add variables that don't exist in runtime_config
+            if k not in runtime_config:
+                new_vars[k] = v
+
+        if new_vars:
+            # Update runtime configuration with only new variables
+            runtime_config.update(new_vars)
+            await self.db.settings.config.replace_one(
+                {"_id": TgClient.ID},
+                runtime_config,
                 upsert=True,
             )
-
-            # Get the current runtime config
-            runtime_config = (
-                await self.db.settings.config.find_one(
-                    {"_id": TgClient.ID},
-                    {"_id": 0},
-                )
-                or {}
-            )
-
-            # Only add new variables that don't exist in runtime_config
-            new_vars = {}
-            for k, v in config_file.items():
-                # Only add variables that don't exist in runtime_config
-                if k not in runtime_config:
-                    new_vars[k] = v
-
-            if new_vars:
-                # Update runtime configuration with only new variables
-                runtime_config.update(new_vars)
-                await self.db.settings.config.replace_one(
-                    {"_id": TgClient.ID},
-                    runtime_config,
-                    upsert=True,
-                )
-                LOGGER.info(f"Added new config variables from config.py: {list(new_vars.keys())}")
-        except Exception as e:
-            LOGGER.error(f"Error updating deploy config: {e}")
+            LOGGER.info(f"Added new config variables from config.py: {list(new_vars.keys())}")
 
     async def update_config(self, dict_):
         if self._return:
             return
-        try:
-            # Filter out non-serializable objects
-            serializable_dict = {}
-            for key, value in dict_.items():
-                # Skip internal Python attributes
-                if key.startswith("__"):
-                    continue
-
-                # Handle different types of values
-                if isinstance(value, (str, int, float, bool)):
-                    serializable_dict[key] = value
-                elif isinstance(value, (list, dict)):
-                    try:
-                        # Test if it can be JSON serialized
-                        import json
-                        json.dumps(value)
-                        serializable_dict[key] = value
-                    except (TypeError, OverflowError):
-                        # If it can't be serialized, skip it
-                        LOGGER.warning(f"Skipping non-serializable config value: {key}")
-
-            # Update the database with serializable values
-            await self.db.settings.config.update_one(
-                {"_id": TgClient.ID},
-                {"$set": serializable_dict},
-                upsert=True,
-            )
-        except Exception as e:
-            LOGGER.error(f"Error updating config in database: {e}")
+        await self.db.settings.config.update_one(
+            {"_id": TgClient.ID},
+            {"$set": dict_},
+            upsert=True,
+        )
 
     async def update_aria2(self, key, value):
         if self._return:

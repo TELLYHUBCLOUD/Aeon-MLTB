@@ -485,28 +485,11 @@ class Config:
 
     @classmethod
     def get_all(cls):
-        config_dict = {}
-        for key in sorted(cls.__dict__):
-            # Skip internal attributes and callable methods
-            if key.startswith("__") or callable(getattr(cls, key)):
-                continue
-
-            value = getattr(cls, key)
-
-            # Only include serializable types
-            if isinstance(value, (str, int, float, bool)):
-                config_dict[key] = value
-            elif isinstance(value, (list, dict)):
-                try:
-                    # Test if it can be JSON serialized
-                    import json
-                    json.dumps(value)
-                    config_dict[key] = value
-                except (TypeError, OverflowError):
-                    # Skip non-serializable complex types
-                    pass
-
-        return config_dict
+        return {
+            key: getattr(cls, key)
+            for key in sorted(cls.__dict__)
+            if not key.startswith("__") and not callable(getattr(cls, key))
+        }
 
     @classmethod
     def load(cls):
