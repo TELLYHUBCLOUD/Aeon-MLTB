@@ -81,24 +81,25 @@ DEFAULT_VALUES = {
     # Watermark Settings
     "WATERMARK_ENABLED": False,
     "WATERMARK_KEY": "",
-    "WATERMARK_POSITION": "top_left",
-    "WATERMARK_SIZE": 20,
-    "WATERMARK_COLOR": "white",
-    "WATERMARK_FONT": "default.otf",
+    "WATERMARK_POSITION": "none",
+    "WATERMARK_SIZE": 0,
+    "WATERMARK_COLOR": "none",
+    "WATERMARK_FONT": "none",
     "WATERMARK_PRIORITY": 2,
     "WATERMARK_THREADING": True,
     "WATERMARK_THREAD_NUMBER": 4,
     "WATERMARK_FAST_MODE": True,
     "WATERMARK_MAINTAIN_QUALITY": True,
-    "WATERMARK_OPACITY": 1.0,
+    "WATERMARK_OPACITY": 0.0,
+    "WATERMARK_REMOVE_ORIGINAL": True,
     # Audio Watermark Settings
     "AUDIO_WATERMARK_ENABLED": False,
     "AUDIO_WATERMARK_TEXT": "",
-    "AUDIO_WATERMARK_VOLUME": 0.3,
+    "AUDIO_WATERMARK_VOLUME": 0.0,
     # Subtitle Watermark Settings
     "SUBTITLE_WATERMARK_ENABLED": False,
     "SUBTITLE_WATERMARK_TEXT": "",
-    "SUBTITLE_WATERMARK_STYLE": "normal",
+    "SUBTITLE_WATERMARK_STYLE": "none",
     # Merge Settings
     "MERGE_ENABLED": False,
     "MERGE_PRIORITY": 1,
@@ -1245,6 +1246,7 @@ Configure task monitoring settings to automatically manage downloads based on pe
             "WATERMARK_FAST_MODE",
             "WATERMARK_MAINTAIN_QUALITY",
             "WATERMARK_OPACITY",
+            "WATERMARK_REMOVE_ORIGINAL",
         ]
 
         # Audio watermark settings
@@ -1315,6 +1317,7 @@ Configure task monitoring settings to automatically manage downloads based on pe
                     "WATERMARK_THREADING",
                     "WATERMARK_FAST_MODE",
                     "WATERMARK_MAINTAIN_QUALITY",
+                    "WATERMARK_REMOVE_ORIGINAL",
                 ]:
                     status = "✅ ON" if getattr(Config, setting) else "❌ OFF"
                     display_name = f"{display_name}: {status}"
@@ -1358,6 +1361,9 @@ Configure task monitoring settings to automatically manage downloads based on pe
             "✅ Enabled" if Config.WATERMARK_MAINTAIN_QUALITY else "❌ Disabled"
         )
         watermark_opacity = Config.WATERMARK_OPACITY or "1.0 (Default)"
+        watermark_remove_original = (
+            "✅ Enabled" if Config.WATERMARK_REMOVE_ORIGINAL else "❌ Disabled"
+        )
 
         # Get current audio watermark settings
         audio_watermark_enabled = (
@@ -1394,6 +1400,7 @@ Configure task monitoring settings to automatically manage downloads based on pe
 <b>Fast Mode:</b> {watermark_fast_mode}
 <b>Maintain Quality:</b> {watermark_maintain_quality}
 <b>Opacity:</b> <code>{watermark_opacity}</code>
+<b>Remove Original:</b> {watermark_remove_original}
 
 <b>Audio Watermark Settings:</b>
 <b>Status:</b> {audio_watermark_enabled}
@@ -4281,50 +4288,52 @@ async def edit_bot_settings(client, query):
         # Reset all watermark settings to default
         Config.WATERMARK_ENABLED = False
         Config.WATERMARK_KEY = ""
-        Config.WATERMARK_POSITION = "top_left"
-        Config.WATERMARK_SIZE = 20
-        Config.WATERMARK_COLOR = "white"
-        Config.WATERMARK_FONT = "default.otf"
+        Config.WATERMARK_POSITION = "none"
+        Config.WATERMARK_SIZE = 0
+        Config.WATERMARK_COLOR = "none"
+        Config.WATERMARK_FONT = "none"
         Config.WATERMARK_PRIORITY = 2
         Config.WATERMARK_THREADING = True
         Config.WATERMARK_THREAD_NUMBER = 4
         Config.WATERMARK_FAST_MODE = True
         Config.WATERMARK_MAINTAIN_QUALITY = True
-        Config.WATERMARK_OPACITY = 1.0
+        Config.WATERMARK_OPACITY = 0.0
+        Config.WATERMARK_REMOVE_ORIGINAL = True
 
         # Reset audio watermark settings
         Config.AUDIO_WATERMARK_ENABLED = False
         Config.AUDIO_WATERMARK_TEXT = ""
-        Config.AUDIO_WATERMARK_VOLUME = 0.3
+        Config.AUDIO_WATERMARK_VOLUME = 0.0
 
         # Reset subtitle watermark settings
         Config.SUBTITLE_WATERMARK_ENABLED = False
         Config.SUBTITLE_WATERMARK_TEXT = ""
-        Config.SUBTITLE_WATERMARK_STYLE = "normal"
+        Config.SUBTITLE_WATERMARK_STYLE = "none"
 
         # Update the database
         await database.update_config(
             {
                 "WATERMARK_ENABLED": False,
                 "WATERMARK_KEY": "",
-                "WATERMARK_POSITION": "top_left",
-                "WATERMARK_SIZE": 20,
-                "WATERMARK_COLOR": "white",
-                "WATERMARK_FONT": "default.otf",
+                "WATERMARK_POSITION": "none",
+                "WATERMARK_SIZE": 0,
+                "WATERMARK_COLOR": "none",
+                "WATERMARK_FONT": "none",
                 "WATERMARK_PRIORITY": 2,
                 "WATERMARK_THREADING": True,
                 "WATERMARK_THREAD_NUMBER": 4,
                 "WATERMARK_FAST_MODE": True,
                 "WATERMARK_MAINTAIN_QUALITY": True,
-                "WATERMARK_OPACITY": 1.0,
+                "WATERMARK_OPACITY": 0.0,
+                "WATERMARK_REMOVE_ORIGINAL": True,
                 # Audio watermark settings
                 "AUDIO_WATERMARK_ENABLED": False,
                 "AUDIO_WATERMARK_TEXT": "",
-                "AUDIO_WATERMARK_VOLUME": 0.3,
+                "AUDIO_WATERMARK_VOLUME": 0.0,
                 # Subtitle watermark settings
                 "SUBTITLE_WATERMARK_ENABLED": False,
                 "SUBTITLE_WATERMARK_TEXT": "",
-                "SUBTITLE_WATERMARK_STYLE": "normal",
+                "SUBTITLE_WATERMARK_STYLE": "none",
             }
         )
         # Update the UI - maintain the current state (edit/view)

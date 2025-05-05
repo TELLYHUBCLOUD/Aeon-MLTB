@@ -117,6 +117,22 @@ async def get_watermark_cmd(
     if not media_type:
         return None, None
 
+    # Handle "none" values for parameters
+    if position and position.lower() == "none":
+        position = "top_left"  # Default position
+
+    if size == 0 or (isinstance(size, str) and size.lower() == "none"):
+        size = 20  # Default size
+
+    if color and color.lower() == "none":
+        color = "white"  # Default color
+
+    if font and font.lower() == "none":
+        font = "default.otf"  # Default font
+
+    if opacity == 0.0 or (isinstance(opacity, str) and opacity.lower() == "none"):
+        opacity = 1.0  # Default opacity
+
     # Check if file dimensions are divisible by 2 for video files
     needs_padding = True  # Always use padding for safety
     width = 0
@@ -204,10 +220,10 @@ async def get_watermark_cmd(
     # Create the drawtext filter with shadow for better visibility
     # Add a shadow effect to make text more readable on any background
 
-    # Handle None values for color by using default color "white"
-    if color is None or color == "None":
+    # This is already handled above, so this check is redundant
+    # Just ensure color is not None for the rest of the function
+    if color is None:
         color = "white"
-        LOGGER.info(f"Color parameter was None, using default color: {color}")
 
     shadow_color = "black" if color.lower() != "black" else "white"
     drawtext_filter = (

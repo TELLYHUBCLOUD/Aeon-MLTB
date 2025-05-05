@@ -328,26 +328,27 @@ class Config:
     # Watermark Settings
     WATERMARK_ENABLED: bool = False
     WATERMARK_KEY: str = ""
-    WATERMARK_POSITION: str = "top_left"
-    WATERMARK_SIZE: int = 20
-    WATERMARK_COLOR: str = "white"
-    WATERMARK_FONT: str = "default.otf"
+    WATERMARK_POSITION: str = "none"
+    WATERMARK_SIZE: int = 0
+    WATERMARK_COLOR: str = "none"
+    WATERMARK_FONT: str = "none"
     WATERMARK_PRIORITY: int = 2
     WATERMARK_THREADING: bool = True
     WATERMARK_THREAD_NUMBER: int = 4
     WATERMARK_FAST_MODE: bool = True
-    WATERMARK_OPACITY: float = 1.0
+    WATERMARK_OPACITY: float = 0.0
     WATERMARK_MAINTAIN_QUALITY: bool = True
+    WATERMARK_REMOVE_ORIGINAL: bool = True
 
     # Audio Watermark Settings
     AUDIO_WATERMARK_ENABLED: bool = False
     AUDIO_WATERMARK_TEXT: str = ""
-    AUDIO_WATERMARK_VOLUME: float = 0.3
+    AUDIO_WATERMARK_VOLUME: float = 0.0
 
     # Subtitle Watermark Settings
     SUBTITLE_WATERMARK_ENABLED: bool = False
     SUBTITLE_WATERMARK_TEXT: str = ""
-    SUBTITLE_WATERMARK_STYLE: str = "normal"
+    SUBTITLE_WATERMARK_STYLE: str = "none"
 
     # Merge Settings
     MERGE_ENABLED: bool = False

@@ -597,6 +597,14 @@ class TaskConfig:
         else:
             self.watermark_opacity = 1.0
 
+        # Watermark Remove Original
+        if user_watermark_enabled and "WATERMARK_REMOVE_ORIGINAL" in self.user_dict:
+            self.watermark_remove_original = self.user_dict["WATERMARK_REMOVE_ORIGINAL"]
+        elif self.watermark_enabled and hasattr(Config, "WATERMARK_REMOVE_ORIGINAL"):
+            self.watermark_remove_original = Config.WATERMARK_REMOVE_ORIGINAL
+        else:
+            self.watermark_remove_original = True
+
         # Audio Watermark Enabled
         user_audio_watermark_enabled = self.user_dict.get(
             "AUDIO_WATERMARK_ENABLED", False
@@ -768,13 +776,15 @@ class TaskConfig:
 
         # Check for -del flag in command line arguments
         if hasattr(self, "args") and self.args:
-            # The -del flag takes precedence over settings for merge
+            # The -del flag takes precedence over settings for watermark and merge
             if self.args.get("-del") == "t" or self.args.get("-del") is True:
+                self.watermark_remove_original = True
                 self.merge_remove_original = True
-                LOGGER.info("Setting merge_remove_original=True due to -del flag")
+                LOGGER.info("Setting watermark_remove_original=True and merge_remove_original=True due to -del flag")
             elif self.args.get("-del") == "f" or self.args.get("-del") is False:
+                self.watermark_remove_original = False
                 self.merge_remove_original = False
-                LOGGER.info("Setting merge_remove_original=False due to -del flag")
+                LOGGER.info("Setting watermark_remove_original=False and merge_remove_original=False due to -del flag")
 
         # Initialize convert settings with the same priority logic
         self.user_convert_enabled = self.user_dict.get("CONVERT_ENABLED", False)
@@ -8797,8 +8807,15 @@ class TaskConfig:
                     self.subsize = self.size
                     res = await ffmpeg.metadata_watermark_cmds(cmd, dl_path)
                     if res:
-                        os.replace(temp_file, dl_path)
-                        LOGGER.info(f"Successfully applied watermark to: {dl_path}")
+                        # Create a new path for the watermarked file if we need to keep the original
+                        if not self.watermark_remove_original:
+                            watermarked_path = f"{ospath.splitext(dl_path)[0]}_watermarked{ospath.splitext(dl_path)[1]}"
+                            os.replace(temp_file, watermarked_path)
+                            LOGGER.info(f"Successfully applied watermark to: {watermarked_path} (original kept)")
+                            return watermarked_path
+                        else:
+                            os.replace(temp_file, dl_path)
+                            LOGGER.info(f"Successfully applied watermark to: {dl_path} (original replaced)")
                     elif await aiopath.exists(temp_file):
                         os.remove(temp_file)
                 else:
@@ -8856,10 +8873,14 @@ class TaskConfig:
                                 file_path,
                             )
                             if res:
-                                os.replace(temp_file, file_path)
-                                LOGGER.info(
-                                    f"Successfully applied watermark to: {file_path}"
-                                )
+                                # Create a new path for the watermarked file if we need to keep the original
+                                if not self.watermark_remove_original:
+                                    watermarked_path = f"{ospath.splitext(file_path)[0]}_watermarked{ospath.splitext(file_path)[1]}"
+                                    os.replace(temp_file, watermarked_path)
+                                    LOGGER.info(f"Successfully applied watermark to: {watermarked_path} (original kept)")
+                                else:
+                                    os.replace(temp_file, file_path)
+                                    LOGGER.info(f"Successfully applied watermark to: {file_path} (original replaced)")
                             elif await aiopath.exists(temp_file):
                                 os.remove(temp_file)
                         else:

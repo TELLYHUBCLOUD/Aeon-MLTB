@@ -324,6 +324,13 @@ def get_watermark_intro_page():
     msg += "You can also use it without any flags. You can set the text and other settings in Media Tools settings. Then run the command:\n"
     msg += "<code>/leech https://example.com/video.mp4</code>\n\n"
 
+    msg += "<b>Remove Original Files</b>:\n"
+    msg += "By default, watermarking will replace the original file. To keep both the original and watermarked files, you can:\n"
+    msg += "• Set 'Remove Original' to OFF in /mediatools > Watermark > Configure\n"
+    msg += "• Use the <code>-del</code> flag to control this behavior:\n"
+    msg += '<code>/leech https://example.com/video.mp4 -watermark "© My Channel" -del f</code> (keep original)\n'
+    msg += '<code>/leech https://example.com/video.mp4 -watermark "© My Channel" -del t</code> (remove original)\n\n'
+
     msg += "<b>Supported Media Types</b>:\n"
     msg += "• <b>Videos</b>: MKV, MP4, AVI, MOV, WebM, FLV, WMV, M4V, TS, 3GP\n"
     msg += "• <b>Images</b>: JPG, JPEG, PNG, BMP, WebP, GIF\n"
@@ -354,12 +361,13 @@ def get_watermark_settings_page():
     msg += "<b>Visual Watermark Settings</b>:\n"
     msg += "• <b>Text</b>: The text to display as watermark\n"
     msg += "• <b>Position</b>: Where to place the watermark\n"
-    msg += "• <b>Size</b>: Font size of the watermark text (default: 20)\n"
-    msg += "• <b>Color</b>: Color of the watermark text\n"
-    msg += "• <b>Font</b>: Font file to use (supports Google Fonts)\n"
-    msg += "• <b>Opacity</b>: Transparency level of watermark (0.0-1.0)\n"
+    msg += "• <b>Size</b>: Font size of the watermark text (default: none)\n"
+    msg += "• <b>Color</b>: Color of the watermark text (default: none)\n"
+    msg += "• <b>Font</b>: Font file to use (supports Google Fonts) (default: none)\n"
+    msg += "• <b>Opacity</b>: Transparency level of watermark (0.0-1.0) (default: none)\n"
     msg += "• <b>Fast Mode</b>: Use faster encoding for large files\n"
-    msg += "• <b>Maintain Quality</b>: Preserve original quality\n\n"
+    msg += "• <b>Maintain Quality</b>: Preserve original quality\n"
+    msg += "• <b>Remove Original</b>: Delete original file after watermarking\n\n"
 
     msg += "<b>Audio Watermark Settings</b>:\n"
     msg += "• <b>Audio WM</b>: Enable/disable audio watermarking\n"
@@ -392,7 +400,12 @@ def get_watermark_settings_page():
     msg += "• <b>Default</b>: System default sans-serif font\n"
     msg += "• <b>Google Fonts</b>: Any Google Font name (e.g., Roboto, Open Sans)\n"
     msg += "• <b>Custom Fonts</b>: Path to .ttf or .otf file\n"
-    msg += "• <b>Recommended</b>: Sans-serif fonts for better readability</blockquote>\n\n"
+    msg += "• <b>Recommended</b>: Sans-serif fonts for better readability\n\n"
+    msg += "<b>How to Use Google Fonts</b>:\n"
+    msg += "1. Visit <a href='https://fonts.google.com/'>fonts.google.com</a>\n"
+    msg += "2. Find a font you like (e.g., 'Montserrat')\n"
+    msg += "3. Set it as your watermark font in /mediatools > Watermark > Configure\n"
+    msg += "4. The bot will automatically download and use the font</blockquote>\n\n"
 
     msg += '<blockquote expandable="expandable"><b>Advanced Settings</b>:\n'
     msg += "• <b>Padding</b>: Space between watermark and edge\n"
@@ -410,9 +423,13 @@ def get_watermark_settings_page():
     msg += "• Number of beeps is determined by size parameter\n"
     msg += "• Adds metadata with watermark text to audio files\n"
     msg += "• Will not be applied to video files with audio tracks\n"
-    msg += (
-        "• Can be enabled/disabled separately from visual watermark</blockquote>\n\n"
-    )
+    msg += "• Can be enabled/disabled separately from visual watermark\n\n"
+    msg += "<b>Audio Volume Setting</b>:\n"
+    msg += "• Controls the volume of the audio watermark\n"
+    msg += "• Range: 0.0 (silent) to 1.0 (full volume)\n"
+    msg += "• Default: 0.0 (disabled)\n"
+    msg += "• Recommended: 0.1-0.3 for subtle watermarking\n"
+    msg += "• Example: <code>/leech file.mp3 -watermark \"My Channel\" -vol 0.2</code></blockquote>\n\n"
 
     msg += '<blockquote expandable="expandable"><b>Subtitle Watermark Details</b>:\n'
     msg += "• Adds watermark text to subtitle entries\n"
@@ -420,9 +437,14 @@ def get_watermark_settings_page():
     msg += "• Preserves original subtitle timing and formatting\n"
     msg += "• Will not be applied to videos with embedded subtitle tracks\n"
     msg += "• Can be enabled/disabled separately from visual watermark\n"
-    msg += (
-        "• Custom text can be different from visual watermark text</blockquote>\n\n"
-    )
+    msg += "• Custom text can be different from visual watermark text\n\n"
+    msg += "<b>Subtitle Style Setting</b>:\n"
+    msg += "• Controls the appearance of subtitle watermarks\n"
+    msg += "• Options: none, normal, bold, italic, bold_italic, underline, strikethrough\n"
+    msg += "• Default: none (uses plain text)\n"
+    msg += "• Example: <code>/leech file.srt -watermark \"My Channel\" -style bold</code>\n"
+    msg += "• For ASS/SSA subtitles, supports more advanced styling\n"
+    msg += "• Google Fonts can be used for subtitle watermarks in ASS/SSA format</blockquote>\n\n"
 
     return msg
 
@@ -1021,6 +1043,8 @@ def get_usage_examples_page_1():
     msg += "  Adds copyright watermark to all videos\n\n"
     msg += '• <code>/leech https://example.com/images.zip -wm "My Logo" -wm-position bottom_right</code>\n'
     msg += "  Adds watermark at bottom right position to all images\n\n"
+    msg += '• <code>/leech https://example.com/video.mp4 -wm "My Watermark" -del f</code>\n'
+    msg += "  Adds watermark and keeps the original file\n\n"
 
     msg += "<b>Convert Examples:</b>\n"
     msg += "• <code>/leech https://example.com/video.webm -cv mp4</code>\n"

@@ -484,7 +484,8 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
 ┠ <b>Fast Mode</b> → {fast_mode_status}
 ┠ <b>Quality</b> → {maintain_quality_status}
 ┠ <b>Threading</b> → {threading_status}
-┖ <b>Thread Number</b> → <code>{thread_number}</code>"""
+┠ <b>Thread Number</b> → <code>{thread_number}</code>
+┖ <b>Remove Original</b> → {remove_original_status}"""
 
     elif stype == "watermark_config":
         # Watermark configuration menu
@@ -499,6 +500,14 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         buttons.data_button("Set Font", f"mediatools {user_id} menu WATERMARK_FONT")
         buttons.data_button(
             "Set Opacity", f"mediatools {user_id} menu WATERMARK_OPACITY"
+        )
+
+        # Add Remove Original toggle button
+        # Use global setting as fallback when user hasn't set it explicitly
+        remove_original = user_dict.get("WATERMARK_REMOVE_ORIGINAL", Config.WATERMARK_REMOVE_ORIGINAL)
+        buttons.data_button(
+            f"Remove Original: {'✅ ON' if remove_original else '❌ OFF'}",
+            f"mediatools {user_id} tog WATERMARK_REMOVE_ORIGINAL {'f' if remove_original else 't'}",
         )
 
         # Audio watermark settings
@@ -523,20 +532,45 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
             "Subtitle Text", f"mediatools {user_id} menu SUBTITLE_WATERMARK_TEXT"
         )
 
-        # Add fast mode toggle
-        fast_mode_enabled = user_dict.get("WATERMARK_FAST_MODE", True)
+        # Add Audio Volume button
         buttons.data_button(
-            f"Fast Mode: {'✅ ON' if fast_mode_enabled else '❌ OFF'}",
-            f"mediatools {user_id} tog WATERMARK_FAST_MODE {'f' if fast_mode_enabled else 't'}",
+            "Audio Volume", f"mediatools {user_id} menu AUDIO_WATERMARK_VOLUME"
         )
 
-        # Add maintain quality toggle
-        maintain_quality = user_dict.get("WATERMARK_MAINTAIN_QUALITY", True)
+        # Add Subtitle Style button
         buttons.data_button(
-            f"Quality: {'✅ High' if maintain_quality else '❌ Normal'}",
-            f"mediatools {user_id} tog WATERMARK_MAINTAIN_QUALITY {'f' if maintain_quality else 't'}",
+            "Subtitle Style", f"mediatools {user_id} menu SUBTITLE_WATERMARK_STYLE"
         )
 
+        # Add fast mode toggle - only show as user setting if explicitly set
+        if "WATERMARK_FAST_MODE" in user_dict:
+            fast_mode_enabled = user_dict["WATERMARK_FAST_MODE"]
+            buttons.data_button(
+                f"Fast Mode: {'✅ ON (User)' if fast_mode_enabled else '❌ OFF (User)'}",
+                f"mediatools {user_id} tog WATERMARK_FAST_MODE {'f' if fast_mode_enabled else 't'}",
+            )
+        else:
+            fast_mode_enabled = Config.WATERMARK_FAST_MODE
+            buttons.data_button(
+                f"Fast Mode: {'✅ ON (Global)' if fast_mode_enabled else '❌ OFF (Global)'}",
+                f"mediatools {user_id} tog WATERMARK_FAST_MODE {'f' if fast_mode_enabled else 't'}",
+            )
+
+        # Add maintain quality toggle - only show as user setting if explicitly set
+        if "WATERMARK_MAINTAIN_QUALITY" in user_dict:
+            maintain_quality = user_dict["WATERMARK_MAINTAIN_QUALITY"]
+            buttons.data_button(
+                f"Quality: {'✅ High (User)' if maintain_quality else '❌ Normal (User)'}",
+                f"mediatools {user_id} tog WATERMARK_MAINTAIN_QUALITY {'f' if maintain_quality else 't'}",
+            )
+        else:
+            maintain_quality = Config.WATERMARK_MAINTAIN_QUALITY
+            buttons.data_button(
+                f"Quality: {'✅ High (Global)' if maintain_quality else '❌ Normal (Global)'}",
+                f"mediatools {user_id} tog WATERMARK_MAINTAIN_QUALITY {'f' if maintain_quality else 't'}",
+            )
+
+        # Always go back to the watermark menu
         buttons.data_button("Back", f"mediatools {user_id} watermark", "footer")
         buttons.data_button("Close", f"mediatools {user_id} close", "footer")
         btns = buttons.build_menu(2)
@@ -674,6 +708,19 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         else:
             opacity_value = "1.0 (Default)"
 
+        # Get watermark remove original status
+        user_has_remove_original = "WATERMARK_REMOVE_ORIGINAL" in user_dict
+        if user_has_remove_original:
+            remove_original_status = (
+                "✅ Enabled (User)"
+                if user_dict["WATERMARK_REMOVE_ORIGINAL"]
+                else "❌ Disabled (User)"
+            )
+        elif Config.WATERMARK_REMOVE_ORIGINAL:
+            remove_original_status = "✅ Enabled (Global)"
+        else:
+            remove_original_status = "❌ Disabled"
+
         # Get audio watermark text
         audio_watermark_enabled = user_dict.get("AUDIO_WATERMARK_ENABLED", False)
         user_has_audio_text = (
@@ -725,6 +772,7 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
 ┠ <b>Quality</b> → {maintain_quality_status}
 ┠ <b>Threading</b> → {threading_status}
 ┠ <b>Thread Number</b> → <code>{thread_number}</code>
+┠ <b>Remove Original</b> → {remove_original_status}
 ┃
 ┠ <b>Audio Watermark</b> → {"✅ Enabled" if audio_watermark_enabled else "❌ Disabled"}
 ┠ <b>Audio Text</b> → <code>{audio_watermark_text}</code>
@@ -6359,6 +6407,17 @@ async def edit_media_tools_settings(client, query):
             "WATERMARK_FONT",
             "WATERMARK_PRIORITY",
             "WATERMARK_THREADING",
+            "WATERMARK_THREAD_NUMBER",
+            "WATERMARK_FAST_MODE",
+            "WATERMARK_MAINTAIN_QUALITY",
+            "WATERMARK_OPACITY",
+            "WATERMARK_REMOVE_ORIGINAL",
+            "AUDIO_WATERMARK_ENABLED",
+            "AUDIO_WATERMARK_TEXT",
+            "AUDIO_WATERMARK_VOLUME",
+            "SUBTITLE_WATERMARK_ENABLED",
+            "SUBTITLE_WATERMARK_TEXT",
+            "SUBTITLE_WATERMARK_STYLE",
         ]
         for key in watermark_keys:
             if key in user_dict:
@@ -6425,10 +6484,16 @@ async def edit_media_tools_settings(client, query):
             "WATERMARK_SIZE",
             "WATERMARK_COLOR",
             "WATERMARK_FONT",
+            "WATERMARK_OPACITY",
         ]
         update_user_ldata(user_id, "WATERMARK_ENABLED", False)
+        update_user_ldata(user_id, "WATERMARK_REMOVE_ORIGINAL", True)
+        update_user_ldata(user_id, "AUDIO_WATERMARK_ENABLED", False)
+        update_user_ldata(user_id, "AUDIO_WATERMARK_VOLUME", 0.0)
+        update_user_ldata(user_id, "SUBTITLE_WATERMARK_ENABLED", False)
+        update_user_ldata(user_id, "SUBTITLE_WATERMARK_STYLE", "none")
         for key in watermark_keys:
-            update_user_ldata(user_id, key, "None")
+            update_user_ldata(user_id, key, "none")
         await database.update_user_data(user_id)
         await update_media_tools_settings(query, "watermark")
     elif data[2] == "remove_merge":
