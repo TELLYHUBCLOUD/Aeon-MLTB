@@ -40,7 +40,8 @@ class DbManager:
                 connectTimeoutMS=5000,  # 5 second connection timeout
                 socketTimeoutMS=10000,  # 10 second socket timeout
             )
-            self.db = self._conn.luna
+            # Use 'aeon' as the database name for consistency across the codebase
+            self.db = self._conn.aeon
             self._return = False
             LOGGER.info("Successfully connected to database")
         except PyMongoError as e:
