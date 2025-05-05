@@ -2567,6 +2567,11 @@ Configure global extract settings that will be used when user settings are not a
             ]:
                 # Use True as default for COMPRESSION_DELETE_ORIGINAL, False for others
                 default_value = True if setting == "COMPRESSION_DELETE_ORIGINAL" else False
+
+                # Make sure COMPRESSION_DELETE_ORIGINAL exists in Config with the correct default
+                if setting == "COMPRESSION_DELETE_ORIGINAL" and not hasattr(Config, setting):
+                    Config.COMPRESSION_DELETE_ORIGINAL = True
+
                 setting_value = getattr(Config, setting, default_value)
                 status = "✅ ON" if setting_value else "❌ OFF"
 
@@ -4368,6 +4373,7 @@ async def edit_bot_settings(client, query):
         # General compression settings
         Config.COMPRESSION_ENABLED = DEFAULT_VALUES["COMPRESSION_ENABLED"]
         Config.COMPRESSION_PRIORITY = DEFAULT_VALUES["COMPRESSION_PRIORITY"]
+        Config.COMPRESSION_DELETE_ORIGINAL = DEFAULT_VALUES["COMPRESSION_DELETE_ORIGINAL"]  # This is True by default
 
         # Video compression settings
         Config.COMPRESSION_VIDEO_ENABLED = DEFAULT_VALUES[
@@ -4444,6 +4450,7 @@ async def edit_bot_settings(client, query):
                 # General compression settings
                 "COMPRESSION_ENABLED": DEFAULT_VALUES["COMPRESSION_ENABLED"],
                 "COMPRESSION_PRIORITY": DEFAULT_VALUES["COMPRESSION_PRIORITY"],
+                "COMPRESSION_DELETE_ORIGINAL": DEFAULT_VALUES["COMPRESSION_DELETE_ORIGINAL"],
                 # Video compression settings
                 "COMPRESSION_VIDEO_ENABLED": DEFAULT_VALUES[
                     "COMPRESSION_VIDEO_ENABLED"
@@ -6851,6 +6858,11 @@ async def load_config():
     drives_ids.clear()
     drives_names.clear()
     index_urls.clear()
+
+    # Ensure COMPRESSION_DELETE_ORIGINAL is set with the correct default value
+    if not hasattr(Config, "COMPRESSION_DELETE_ORIGINAL"):
+        Config.COMPRESSION_DELETE_ORIGINAL = True
+
     await update_variables()
 
     if not await aiopath.exists("accounts"):
