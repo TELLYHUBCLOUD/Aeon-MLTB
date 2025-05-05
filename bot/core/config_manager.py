@@ -358,17 +358,17 @@ class Config:
     FILTER_COMPLEX_ENABLED: bool = False
 
     # Output formats
-    MERGE_OUTPUT_FORMAT_VIDEO: str = "mkv"
-    MERGE_OUTPUT_FORMAT_AUDIO: str = "mp3"
-    MERGE_OUTPUT_FORMAT_IMAGE: str = "jpg"
-    MERGE_OUTPUT_FORMAT_DOCUMENT: str = "pdf"
-    MERGE_OUTPUT_FORMAT_SUBTITLE: str = "srt"
+    MERGE_OUTPUT_FORMAT_VIDEO: str = "none"
+    MERGE_OUTPUT_FORMAT_AUDIO: str = "none"
+    MERGE_OUTPUT_FORMAT_IMAGE: str = "none"
+    MERGE_OUTPUT_FORMAT_DOCUMENT: str = "none"
+    MERGE_OUTPUT_FORMAT_SUBTITLE: str = "none"
 
     # Video settings
     MERGE_VIDEO_CODEC: str = "none"
     MERGE_VIDEO_QUALITY: str = "none"
     MERGE_VIDEO_PRESET: str = "none"
-    MERGE_VIDEO_CRF: int = 0
+    MERGE_VIDEO_CRF: str = "none"
     MERGE_VIDEO_PIXEL_FORMAT: str = "none"
     MERGE_VIDEO_TUNE: str = "none"
     MERGE_VIDEO_FASTSTART: bool = False
@@ -376,29 +376,29 @@ class Config:
     # Audio settings
     MERGE_AUDIO_CODEC: str = "none"
     MERGE_AUDIO_BITRATE: str = "none"
-    MERGE_AUDIO_CHANNELS: int = 0
+    MERGE_AUDIO_CHANNELS: str = "none"
     MERGE_AUDIO_SAMPLING: str = "none"
-    MERGE_AUDIO_VOLUME: float = 0.0
+    MERGE_AUDIO_VOLUME: str = "none"
 
     # Image settings
     MERGE_IMAGE_MODE: str = "none"
-    MERGE_IMAGE_COLUMNS: int = 0
+    MERGE_IMAGE_COLUMNS: str = "none"
     MERGE_IMAGE_QUALITY: int = 0
-    MERGE_IMAGE_DPI: int = 0
+    MERGE_IMAGE_DPI: str = "none"
     MERGE_IMAGE_RESIZE: str = "none"
     MERGE_IMAGE_BACKGROUND: str = "none"
 
     # Subtitle settings
     MERGE_SUBTITLE_ENCODING: str = "none"
     MERGE_SUBTITLE_FONT: str = "none"
-    MERGE_SUBTITLE_FONT_SIZE: int = 0
+    MERGE_SUBTITLE_FONT_SIZE: str = "none"
     MERGE_SUBTITLE_FONT_COLOR: str = "none"
     MERGE_SUBTITLE_BACKGROUND: str = "none"
 
     # Document settings
     MERGE_DOCUMENT_PAPER_SIZE: str = "none"
     MERGE_DOCUMENT_ORIENTATION: str = "none"
-    MERGE_DOCUMENT_MARGIN: int = 0
+    MERGE_DOCUMENT_MARGIN: str = "none"
 
     # General settings
     MERGE_REMOVE_ORIGINAL: bool = True

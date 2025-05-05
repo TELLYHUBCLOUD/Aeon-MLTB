@@ -1720,6 +1720,7 @@ async def get_merge_concat_demuxer_cmd(files, output_format="mkv", media_type=No
     Args:
         files: List of file paths to merge
         output_format: Output file format (default: mkv)
+                      If "none", will use the format of the first input file
         media_type: Type of media ('video', 'audio', 'subtitle', 'image') for specialized handling
 
     Returns:
@@ -1732,6 +1733,33 @@ async def get_merge_concat_demuxer_cmd(files, output_format="mkv", media_type=No
 
     # Use files in the order they were provided
     # (No sorting to preserve user's intended order)
+
+    # If output_format is "none", use the format of the first input file
+    if output_format == "none" and files:
+        # Extract extension from the first file
+        first_file_ext = os.path.splitext(files[0])[1].lower().lstrip('.')
+        if first_file_ext:
+            # Use the extension if it's valid
+            if media_type == "video" and first_file_ext in ["mp4", "mkv", "avi", "mov", "webm", "flv"]:
+                output_format = first_file_ext
+            elif media_type == "audio" and first_file_ext in ["mp3", "aac", "ogg", "wav", "flac", "m4a"]:
+                output_format = first_file_ext
+            elif media_type == "subtitle" and first_file_ext in ["srt", "ass", "vtt", "sub"]:
+                output_format = first_file_ext
+            elif media_type == "image" and first_file_ext in ["jpg", "jpeg", "png", "gif", "webp"]:
+                output_format = first_file_ext
+            else:
+                # Default formats based on media type
+                if media_type == "video":
+                    output_format = "mkv"
+                elif media_type == "audio":
+                    output_format = "mp3"
+                elif media_type == "subtitle":
+                    output_format = "srt"
+                elif media_type == "image":
+                    output_format = "jpg"
+                else:
+                    output_format = "mkv"
 
     # Check if all files have the same codec for video and audio
     # This is important for concat demuxer to work properly
@@ -2060,6 +2088,7 @@ async def get_merge_filter_complex_cmd(files, media_type, output_format=None):
         files: List of file paths to merge
         media_type: Type of media ('video', 'audio', 'subtitle')
         output_format: Output file format (default: based on media_type)
+                      If "none", will use the format of the first input file
 
     Returns:
         tuple: FFmpeg command and output file path
@@ -2072,8 +2101,31 @@ async def get_merge_filter_complex_cmd(files, media_type, output_format=None):
     # Use files in the order they were provided
     # (No sorting to preserve user's intended order)
 
+    # Handle "none" output format by using the format of the first input file
+    if output_format == "none" and files:
+        # Extract extension from the first file
+        first_file_ext = os.path.splitext(files[0])[1].lower().lstrip('.')
+        if first_file_ext:
+            # Use the extension if it's valid
+            if media_type == "video" and first_file_ext in ["mp4", "mkv", "avi", "mov", "webm", "flv"]:
+                output_format = first_file_ext
+            elif media_type == "audio" and first_file_ext in ["mp3", "aac", "ogg", "wav", "flac", "m4a"]:
+                output_format = first_file_ext
+            elif media_type == "subtitle" and first_file_ext in ["srt", "ass", "vtt", "sub"]:
+                output_format = first_file_ext
+            else:
+                # Default formats based on media type
+                if media_type == "video":
+                    output_format = "mkv"
+                elif media_type == "audio":
+                    output_format = "mp3"
+                elif media_type == "subtitle":
+                    output_format = "srt"
+                else:
+                    output_format = "mkv"
+
     # Set default output format based on media type if not specified
-    if not output_format:
+    elif not output_format:
         if media_type == "video":
             output_format = "mkv"
         elif media_type == "audio":
@@ -2732,6 +2784,7 @@ async def get_merge_mixed_cmd(
         audio_files: List of audio file paths
         subtitle_files: List of subtitle file paths
         output_format: Output file format (default: mkv)
+                      If "none", will use the format of the first input file
 
     Returns:
         tuple: FFmpeg command and output file path
@@ -2739,6 +2792,34 @@ async def get_merge_mixed_cmd(
     # Note: codec_groups parameter is reserved for future use to optimize codec selection
     if not video_files and not audio_files:
         return None, None
+
+    # Handle "none" output format by using the format of the first input file
+    if output_format == "none":
+        # Determine which files to use for format detection
+        files_to_check = []
+        if video_files:
+            files_to_check = video_files
+        elif audio_files:
+            files_to_check = audio_files
+        elif subtitle_files:
+            files_to_check = subtitle_files
+
+        if files_to_check:
+            # Extract extension from the first file
+            first_file_ext = os.path.splitext(files_to_check[0])[1].lower().lstrip('.')
+            if first_file_ext:
+                # Use the extension if it's valid
+                if video_files and first_file_ext in ["mp4", "mkv", "avi", "mov", "webm", "flv"]:
+                    output_format = first_file_ext
+                elif audio_files and first_file_ext in ["mp3", "aac", "ogg", "wav", "flac", "m4a"]:
+                    output_format = first_file_ext
+                else:
+                    # Default to mkv for mixed media
+                    output_format = "mkv"
+            else:
+                output_format = "mkv"
+        else:
+            output_format = "mkv"
 
     # Use files in the order they were provided
     # (No sorting to preserve user's intended order)

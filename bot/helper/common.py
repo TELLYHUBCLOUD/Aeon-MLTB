@@ -703,28 +703,40 @@ class TaskConfig:
             user_merge_enabled
             and "MERGE_OUTPUT_FORMAT_VIDEO" in self.user_dict
             and self.user_dict["MERGE_OUTPUT_FORMAT_VIDEO"]
+            and self.user_dict["MERGE_OUTPUT_FORMAT_VIDEO"] != "none"
         ):
             self.merge_output_format_video = self.user_dict[
                 "MERGE_OUTPUT_FORMAT_VIDEO"
             ]
-        elif self.merge_enabled and Config.MERGE_OUTPUT_FORMAT_VIDEO:
+        elif (
+            self.merge_enabled
+            and Config.MERGE_OUTPUT_FORMAT_VIDEO
+            and Config.MERGE_OUTPUT_FORMAT_VIDEO != "none"
+        ):
             self.merge_output_format_video = Config.MERGE_OUTPUT_FORMAT_VIDEO
         else:
-            self.merge_output_format_video = "mkv"
+            # Use "none" to indicate that the format should be determined from the input file
+            self.merge_output_format_video = "none"
 
         # Merge Output Format Audio
         if (
             user_merge_enabled
             and "MERGE_OUTPUT_FORMAT_AUDIO" in self.user_dict
             and self.user_dict["MERGE_OUTPUT_FORMAT_AUDIO"]
+            and self.user_dict["MERGE_OUTPUT_FORMAT_AUDIO"] != "none"
         ):
             self.merge_output_format_audio = self.user_dict[
                 "MERGE_OUTPUT_FORMAT_AUDIO"
             ]
-        elif self.merge_enabled and Config.MERGE_OUTPUT_FORMAT_AUDIO:
+        elif (
+            self.merge_enabled
+            and Config.MERGE_OUTPUT_FORMAT_AUDIO
+            and Config.MERGE_OUTPUT_FORMAT_AUDIO != "none"
+        ):
             self.merge_output_format_audio = Config.MERGE_OUTPUT_FORMAT_AUDIO
         else:
-            self.merge_output_format_audio = "mp3"
+            # Use "none" to indicate that the format should be determined from the input file
+            self.merge_output_format_audio = "none"
 
         # Merge Priority
         if (
@@ -8267,11 +8279,23 @@ class TaskConfig:
                     LOGGER.info(
                         f"Merging {len(analysis['image_files'])} images in {mode} mode"
                     )
+                    # Get image DPI from user settings or global settings
+                    image_dpi = self.user_dict.get("MERGE_IMAGE_DPI", None)
+                    if image_dpi is None or image_dpi == "none":
+                        image_dpi = getattr(Config, "MERGE_IMAGE_DPI", "none")
+
+                    # Get image quality from user settings or global settings
+                    image_quality = self.user_dict.get("MERGE_IMAGE_QUALITY", None)
+                    if image_quality is None or image_quality == "none":
+                        image_quality = getattr(Config, "MERGE_IMAGE_QUALITY", 90)
+
                     output_file = await merge_images(
                         analysis["image_files"],
                         output_format=output_format,
                         mode=mode,
                         columns=columns,
+                        quality=image_quality,
+                        dpi=image_dpi
                     )
 
                     if output_file and await aiopath.exists(output_file):
@@ -8494,11 +8518,23 @@ class TaskConfig:
                             else "jpg"
                         )
 
+                        # Get image DPI from user settings or global settings
+                        image_dpi = self.user_dict.get("MERGE_IMAGE_DPI", None)
+                        if image_dpi is None or image_dpi == "none":
+                            image_dpi = getattr(Config, "MERGE_IMAGE_DPI", "none")
+
+                        # Get image quality from user settings or global settings
+                        image_quality = self.user_dict.get("MERGE_IMAGE_QUALITY", None)
+                        if image_quality is None or image_quality == "none":
+                            image_quality = getattr(Config, "MERGE_IMAGE_QUALITY", 90)
+
                         output_file = await merge_images(
                             analysis["image_files"],
                             output_format=output_format,
                             mode=mode,
                             columns=columns,
+                            quality=image_quality,
+                            dpi=image_dpi
                         )
 
                         if output_file and await aiopath.exists(output_file):

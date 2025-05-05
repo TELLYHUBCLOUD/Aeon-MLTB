@@ -7282,7 +7282,7 @@ async def create_pdf_from_images(
 
 
 async def merge_images(
-    files, output_format="jpg", mode="collage", columns=None, quality=85
+    files, output_format="jpg", mode="collage", columns=None, quality=85, dpi=None
 ):
     """
     Merge multiple image files into a single image.
@@ -7290,9 +7290,11 @@ async def merge_images(
     Args:
         files: List of image file paths
         output_format: Output format (jpg, png, etc.)
+                      If "none", will use the format of the first input file
         mode: 'collage' or 'vertical' or 'horizontal'
-        columns: Number of columns for collage mode (auto-calculated if None)
+        columns: Number of columns for collage mode (auto-calculated if None or "none")
         quality: Output image quality (1-100, only for jpg)
+        dpi: DPI for the output image (only used for certain formats)
 
     Returns:
         str: Path to the merged image file
@@ -7300,6 +7302,42 @@ async def merge_images(
     if not files:
         LOGGER.error("No image files provided for merging")
         return None
+
+    # Handle "none" output format by using the format of the first input file
+    if output_format == "none" and files:
+        # Extract extension from the first file
+        first_file_ext = os.path.splitext(files[0])[1].lower().lstrip('.')
+        if first_file_ext in ["jpg", "jpeg", "png", "gif", "webp", "bmp"]:
+            # Use the extension if it's a valid image format
+            if first_file_ext == "jpeg":
+                output_format = "jpg"
+            else:
+                output_format = first_file_ext
+        else:
+            # Default to jpg if not a recognized image format
+            output_format = "jpg"
+
+    # Handle "none" or string values for numeric parameters
+    if columns == "none" or columns is None:
+        columns = None  # Will be auto-calculated based on number of images
+
+    # Convert quality to int if it's a string or "none"
+    if quality == "none" or quality is None:
+        quality = 85  # Default quality
+    elif isinstance(quality, str):
+        try:
+            quality = int(quality)
+        except ValueError:
+            quality = 85  # Default if conversion fails
+
+    # Handle DPI parameter
+    if dpi == "none" or dpi is None:
+        dpi = 300  # Default DPI
+    elif isinstance(dpi, str):
+        try:
+            dpi = int(dpi)
+        except ValueError:
+            dpi = 300  # Default if conversion fails
 
     # Apply memory limits for PIL operations
     limit_memory_for_pil()
@@ -7573,27 +7611,44 @@ async def merge_images(
 
                 x_offset += img.width
 
-        # Save the merged image
+        # Save the merged image with DPI if specified
+        save_kwargs = {}
+
+        # Add DPI information if provided and not "none"
+        if dpi and dpi != "none":
+            try:
+                dpi_value = int(dpi) if isinstance(dpi, str) else dpi
+                # Convert to tuple as required by PIL
+                save_kwargs["dpi"] = (dpi_value, dpi_value)
+            except (ValueError, TypeError):
+                # If conversion fails, don't set DPI
+                pass
+
         if output_format.lower() in ["jpg", "jpeg"]:
-            merged_image.save(output_file, quality=quality, optimize=True)
+            save_kwargs.update({"quality": quality, "optimize": True})
+            merged_image.save(output_file, **save_kwargs)
         elif output_format.lower() == "png":
-            merged_image.save(output_file, optimize=True)
+            save_kwargs.update({"optimize": True})
+            merged_image.save(output_file, **save_kwargs)
         elif output_format.lower() == "webp":
-            merged_image.save(output_file, quality=quality, method=4)
+            save_kwargs.update({"quality": quality, "method": 4})
+            merged_image.save(output_file, **save_kwargs)
+        elif output_format.lower() == "tiff":
+            save_kwargs.update({"compression": "tiff_lzw"})
+            merged_image.save(output_file, **save_kwargs)
         elif output_format.lower() == "gif":
             if merged_image.mode == "RGBA":
                 # Use transparency mask for GIF
                 mask = Image.eval(
                     merged_image.split()[3], lambda a: 255 if a <= 128 else 0
                 )
-                merged_image.save(
-                    output_file, transparency=255, optimize=True, mask=mask
-                )
+                save_kwargs.update({"transparency": 255, "optimize": True, "mask": mask})
+                merged_image.save(output_file, **save_kwargs)
             else:
-                merged_image.save(output_file)
+                merged_image.save(output_file, **save_kwargs)
         else:
             # Default save for other formats
-            merged_image.save(output_file)
+            merged_image.save(output_file, **save_kwargs)
 
         LOGGER.info(f"Successfully merged {len(images)} images into {output_file}")
 

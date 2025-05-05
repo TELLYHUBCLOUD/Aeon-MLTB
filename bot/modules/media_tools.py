@@ -776,7 +776,8 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         )
 
         # Add Remove Original toggle button
-        remove_original = user_dict.get("MERGE_REMOVE_ORIGINAL", False)
+        # Use global setting as fallback when user hasn't set it explicitly
+        remove_original = user_dict.get("MERGE_REMOVE_ORIGINAL", Config.MERGE_REMOVE_ORIGINAL)
         buttons.data_button(
             f"Remove Original: {'✅ ON' if remove_original else '❌ OFF'}",
             f"mediatools {user_id} tog MERGE_REMOVE_ORIGINAL {'f' if remove_original else 't'}",
@@ -5282,23 +5283,23 @@ async def get_menu(option, message, user_id):
     ):
         current_value = "True (Default)"
     elif option == "MERGE_OUTPUT_FORMAT_VIDEO":
-        current_value = "mkv (Default)"
+        current_value = "none (Default)"
     elif option == "MERGE_OUTPUT_FORMAT_AUDIO":
-        current_value = "mp3 (Default)"
+        current_value = "none (Default)"
     elif option == "MERGE_OUTPUT_FORMAT_IMAGE":
-        current_value = "jpg (Default)"
+        current_value = "none (Default)"
     elif option == "MERGE_OUTPUT_FORMAT_DOCUMENT":
-        current_value = "pdf (Default)"
+        current_value = "none (Default)"
     elif option == "MERGE_OUTPUT_FORMAT_SUBTITLE":
-        current_value = "srt (Default)"
+        current_value = "none (Default)"
     elif option == "MERGE_IMAGE_MODE":
         current_value = "auto (Default)"
     elif option == "MERGE_IMAGE_COLUMNS":
-        current_value = "2 (Default)"
+        current_value = "none (Default)"
     elif option == "MERGE_IMAGE_QUALITY":
         current_value = "90 (Default)"
     elif option == "MERGE_IMAGE_DPI":
-        current_value = "300 (Default)"
+        current_value = "none (Default)"
     elif option == "MERGE_IMAGE_RESIZE":
         current_value = "none (Default)"
     elif option == "MERGE_IMAGE_BACKGROUND":
@@ -5308,7 +5309,7 @@ async def get_menu(option, message, user_id):
     elif option in {"MERGE_VIDEO_QUALITY", "MERGE_VIDEO_PRESET"}:
         current_value = "medium (Default)"
     elif option == "MERGE_VIDEO_CRF":
-        current_value = "23 (Default)"
+        current_value = "none (Default)"
     elif option == "MERGE_VIDEO_PIXEL_FORMAT":
         current_value = "yuv420p (Default)"
     elif option == "MERGE_VIDEO_TUNE":
@@ -5320,17 +5321,17 @@ async def get_menu(option, message, user_id):
     elif option == "MERGE_AUDIO_BITRATE":
         current_value = "192k (Default)"
     elif option == "MERGE_AUDIO_CHANNELS":
-        current_value = "2 (Default)"
+        current_value = "none (Default)"
     elif option == "MERGE_AUDIO_SAMPLING":
         current_value = "44100 (Default)"
     elif option == "MERGE_AUDIO_VOLUME":
-        current_value = "1.0 (Default)"
+        current_value = "none (Default)"
     elif option == "MERGE_SUBTITLE_ENCODING":
         current_value = "utf-8 (Default)"
     elif option == "MERGE_SUBTITLE_FONT":
         current_value = "Arial (Default)"
     elif option == "MERGE_SUBTITLE_FONT_SIZE":
-        current_value = "24 (Default)"
+        current_value = "none (Default)"
     elif option == "MERGE_SUBTITLE_FONT_COLOR":
         current_value = "white (Default)"
     elif option == "MERGE_SUBTITLE_BACKGROUND":
@@ -5340,7 +5341,7 @@ async def get_menu(option, message, user_id):
     elif option == "MERGE_DOCUMENT_ORIENTATION":
         current_value = "portrait (Default)"
     elif option == "MERGE_DOCUMENT_MARGIN":
-        current_value = "50 (Default)"
+        current_value = "none (Default)"
     elif (
         option in {"MERGE_METADATA_TITLE", "MERGE_METADATA_AUTHOR"}
         or option == "MERGE_METADATA_COMMENT"
@@ -6232,7 +6233,13 @@ async def edit_media_tools_settings(client, query):
         await query.answer()
         update_user_ldata(user_id, data[3], data[4] == "t")
         # Determine which menu to return to based on the toggled option
-        if data[3].startswith("WATERMARK_"):
+
+        # Check if we're in the watermark configuration menu
+        # These are the toggles in the watermark_config menu
+        if data[3] in ["AUDIO_WATERMARK_ENABLED", "SUBTITLE_WATERMARK_ENABLED", "WATERMARK_FAST_MODE", "WATERMARK_MAINTAIN_QUALITY"]:
+            # Stay in the watermark_config menu
+            await update_media_tools_settings(query, "watermark_config")
+        elif data[3].startswith("WATERMARK_"):
             await update_media_tools_settings(query, "watermark")
         elif data[3].startswith("MERGE_") or data[3] in [
             "CONCAT_DEMUXER_ENABLED",

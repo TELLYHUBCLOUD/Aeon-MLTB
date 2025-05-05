@@ -62,6 +62,7 @@ from .rss import add_job
 start = 0
 state = "view"
 merge_page = 0  # Track current page for merge menu
+merge_config_page = 0  # Track current page for merge config menu
 handler_dict = {}
 DEFAULT_VALUES = {
     # Set default leech split size to max split size based on owner session premium status
@@ -98,6 +99,55 @@ DEFAULT_VALUES = {
     "SUBTITLE_WATERMARK_ENABLED": False,
     "SUBTITLE_WATERMARK_TEXT": "",
     "SUBTITLE_WATERMARK_STYLE": "normal",
+    # Merge Settings
+    "MERGE_ENABLED": False,
+    "MERGE_PRIORITY": 1,
+    "MERGE_THREADING": True,
+    "MERGE_THREAD_NUMBER": 4,
+    "MERGE_REMOVE_ORIGINAL": True,
+    "CONCAT_DEMUXER_ENABLED": True,
+    "FILTER_COMPLEX_ENABLED": False,
+    # Merge Output Formats
+    "MERGE_OUTPUT_FORMAT_VIDEO": "none",
+    "MERGE_OUTPUT_FORMAT_AUDIO": "none",
+    "MERGE_OUTPUT_FORMAT_IMAGE": "none",
+    "MERGE_OUTPUT_FORMAT_DOCUMENT": "none",
+    "MERGE_OUTPUT_FORMAT_SUBTITLE": "none",
+    # Merge Video Settings
+    "MERGE_VIDEO_CODEC": "none",
+    "MERGE_VIDEO_QUALITY": "none",
+    "MERGE_VIDEO_PRESET": "none",
+    "MERGE_VIDEO_CRF": "none",
+    "MERGE_VIDEO_PIXEL_FORMAT": "none",
+    "MERGE_VIDEO_TUNE": "none",
+    "MERGE_VIDEO_FASTSTART": False,
+    # Merge Audio Settings
+    "MERGE_AUDIO_CODEC": "none",
+    "MERGE_AUDIO_BITRATE": "none",
+    "MERGE_AUDIO_CHANNELS": "none",
+    "MERGE_AUDIO_SAMPLING": "none",
+    "MERGE_AUDIO_VOLUME": "none",
+    # Merge Image Settings
+    "MERGE_IMAGE_MODE": "none",
+    "MERGE_IMAGE_COLUMNS": "none",
+    "MERGE_IMAGE_QUALITY": 90,
+    "MERGE_IMAGE_DPI": "none",
+    "MERGE_IMAGE_RESIZE": "none",
+    "MERGE_IMAGE_BACKGROUND": "none",
+    # Merge Subtitle Settings
+    "MERGE_SUBTITLE_ENCODING": "none",
+    "MERGE_SUBTITLE_FONT": "none",
+    "MERGE_SUBTITLE_FONT_SIZE": "none",
+    "MERGE_SUBTITLE_FONT_COLOR": "none",
+    "MERGE_SUBTITLE_BACKGROUND": "none",
+    # Merge Document Settings
+    "MERGE_DOCUMENT_PAPER_SIZE": "none",
+    "MERGE_DOCUMENT_ORIENTATION": "none",
+    "MERGE_DOCUMENT_MARGIN": "none",
+    # Merge Metadata Settings
+    "MERGE_METADATA_TITLE": "none",
+    "MERGE_METADATA_AUTHOR": "none",
+    "MERGE_METADATA_COMMENT": "none",
     # Compression Settings
     "COMPRESSION_ENABLED": False,
     "COMPRESSION_PRIORITY": 4,
@@ -347,9 +397,15 @@ async def get_buttons(key=None, edit_type=None, page=0, user_id=None):
                     "METADATA_",
                 ]
             ):
-                # If it's a format setting, it's likely from the merge_config menu
+                # If it's a format setting, it's from the merge_config menu
                 buttons.data_button("Back", "botset mediatools_merge_config")
+            elif key in ["MERGE_ENABLED", "MERGE_PRIORITY", "MERGE_THREADING",
+                        "MERGE_THREAD_NUMBER", "MERGE_REMOVE_ORIGINAL",
+                        "CONCAT_DEMUXER_ENABLED", "FILTER_COMPLEX_ENABLED"]:
+                # These are from the main merge menu
+                buttons.data_button("Back", "botset mediatools_merge")
             else:
+                # Default to merge menu for any other merge settings
                 buttons.data_button("Back", "botset mediatools_merge")
             buttons.data_button("Close", "botset close")
 
@@ -3107,11 +3163,21 @@ Configure global metadata settings that will be used when user settings are not 
         ) // items_per_page
 
         # Ensure page is valid
-        current_page = page
+        # Use the global merge_config_page variable if page is not provided
+        if page == 0 and globals()["merge_config_page"] != 0:
+            current_page = globals()["merge_config_page"]
+        else:
+            current_page = page
+            # Update the global merge_config_page variable
+            globals()["merge_config_page"] = current_page
+
+        # Validate page number
         if current_page >= total_pages:
             current_page = 0
+            globals()["merge_config_page"] = 0
         elif current_page < 0:
             current_page = total_pages - 1
+            globals()["merge_config_page"] = total_pages - 1
 
         # Get settings for current page
         start_idx = current_page * items_per_page
@@ -3154,54 +3220,54 @@ Configure global metadata settings that will be used when user settings are not 
                     )
 
             # Add a debug log message# Get current merge configuration settings - Output formats
-        video_format = Config.MERGE_OUTPUT_FORMAT_VIDEO or "mkv (Default)"
-        audio_format = Config.MERGE_OUTPUT_FORMAT_AUDIO or "mp3 (Default)"
-        image_format = Config.MERGE_OUTPUT_FORMAT_IMAGE or "jpg (Default)"
-        document_format = Config.MERGE_OUTPUT_FORMAT_DOCUMENT or "pdf (Default)"
-        subtitle_format = Config.MERGE_OUTPUT_FORMAT_SUBTITLE or "srt (Default)"
+        video_format = Config.MERGE_OUTPUT_FORMAT_VIDEO or DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_VIDEO"] + " (Default)"
+        audio_format = Config.MERGE_OUTPUT_FORMAT_AUDIO or DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_AUDIO"] + " (Default)"
+        image_format = Config.MERGE_OUTPUT_FORMAT_IMAGE or DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_IMAGE"] + " (Default)"
+        document_format = Config.MERGE_OUTPUT_FORMAT_DOCUMENT or DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_DOCUMENT"] + " (Default)"
+        subtitle_format = Config.MERGE_OUTPUT_FORMAT_SUBTITLE or DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_SUBTITLE"] + " (Default)"
 
         # Video settings
-        video_codec = Config.MERGE_VIDEO_CODEC or "copy (Default)"
-        video_quality = Config.MERGE_VIDEO_QUALITY or "medium (Default)"
-        video_preset = Config.MERGE_VIDEO_PRESET or "medium (Default)"
-        video_crf = Config.MERGE_VIDEO_CRF or "23 (Default)"
-        video_pixel_format = Config.MERGE_VIDEO_PIXEL_FORMAT or "yuv420p (Default)"
-        video_tune = Config.MERGE_VIDEO_TUNE or "film (Default)"
+        video_codec = Config.MERGE_VIDEO_CODEC or DEFAULT_VALUES["MERGE_VIDEO_CODEC"] + " (Default)"
+        video_quality = Config.MERGE_VIDEO_QUALITY or DEFAULT_VALUES["MERGE_VIDEO_QUALITY"] + " (Default)"
+        video_preset = Config.MERGE_VIDEO_PRESET or DEFAULT_VALUES["MERGE_VIDEO_PRESET"] + " (Default)"
+        video_crf = Config.MERGE_VIDEO_CRF or DEFAULT_VALUES["MERGE_VIDEO_CRF"] + " (Default)"
+        video_pixel_format = Config.MERGE_VIDEO_PIXEL_FORMAT or DEFAULT_VALUES["MERGE_VIDEO_PIXEL_FORMAT"] + " (Default)"
+        video_tune = Config.MERGE_VIDEO_TUNE or DEFAULT_VALUES["MERGE_VIDEO_TUNE"] + " (Default)"
         video_faststart = "Enabled" if Config.MERGE_VIDEO_FASTSTART else "Disabled"
 
         # Audio settings
-        audio_codec = Config.MERGE_AUDIO_CODEC or "copy (Default)"
-        audio_bitrate = Config.MERGE_AUDIO_BITRATE or "192k (Default)"
-        audio_channels = Config.MERGE_AUDIO_CHANNELS or "2 (Default)"
-        audio_sampling = Config.MERGE_AUDIO_SAMPLING or "44100 (Default)"
-        audio_volume = Config.MERGE_AUDIO_VOLUME or "1.0 (Default)"
+        audio_codec = Config.MERGE_AUDIO_CODEC or DEFAULT_VALUES["MERGE_AUDIO_CODEC"] + " (Default)"
+        audio_bitrate = Config.MERGE_AUDIO_BITRATE or DEFAULT_VALUES["MERGE_AUDIO_BITRATE"] + " (Default)"
+        audio_channels = Config.MERGE_AUDIO_CHANNELS or DEFAULT_VALUES["MERGE_AUDIO_CHANNELS"] + " (Default)"
+        audio_sampling = Config.MERGE_AUDIO_SAMPLING or DEFAULT_VALUES["MERGE_AUDIO_SAMPLING"] + " (Default)"
+        audio_volume = Config.MERGE_AUDIO_VOLUME or DEFAULT_VALUES["MERGE_AUDIO_VOLUME"] + " (Default)"
 
         # Image settings
-        image_mode = Config.MERGE_IMAGE_MODE or "auto (Default)"
-        image_columns = Config.MERGE_IMAGE_COLUMNS or "2 (Default)"
-        image_quality = Config.MERGE_IMAGE_QUALITY or "90 (Default)"
-        image_dpi = Config.MERGE_IMAGE_DPI or "300 (Default)"
-        image_resize = Config.MERGE_IMAGE_RESIZE or "none (Default)"
-        image_background = Config.MERGE_IMAGE_BACKGROUND or "white (Default)"
+        image_mode = Config.MERGE_IMAGE_MODE or DEFAULT_VALUES["MERGE_IMAGE_MODE"] + " (Default)"
+        image_columns = Config.MERGE_IMAGE_COLUMNS or DEFAULT_VALUES["MERGE_IMAGE_COLUMNS"] + " (Default)"
+        image_quality = Config.MERGE_IMAGE_QUALITY or str(DEFAULT_VALUES["MERGE_IMAGE_QUALITY"]) + " (Default)"
+        image_dpi = Config.MERGE_IMAGE_DPI or DEFAULT_VALUES["MERGE_IMAGE_DPI"] + " (Default)"
+        image_resize = Config.MERGE_IMAGE_RESIZE or DEFAULT_VALUES["MERGE_IMAGE_RESIZE"] + " (Default)"
+        image_background = Config.MERGE_IMAGE_BACKGROUND or DEFAULT_VALUES["MERGE_IMAGE_BACKGROUND"] + " (Default)"
 
         # Subtitle settings
-        subtitle_encoding = Config.MERGE_SUBTITLE_ENCODING or "utf-8 (Default)"
-        subtitle_font = Config.MERGE_SUBTITLE_FONT or "Arial (Default)"
-        subtitle_font_size = Config.MERGE_SUBTITLE_FONT_SIZE or "24 (Default)"
-        subtitle_font_color = Config.MERGE_SUBTITLE_FONT_COLOR or "white (Default)"
-        subtitle_background = Config.MERGE_SUBTITLE_BACKGROUND or "black (Default)"
+        subtitle_encoding = Config.MERGE_SUBTITLE_ENCODING or DEFAULT_VALUES["MERGE_SUBTITLE_ENCODING"] + " (Default)"
+        subtitle_font = Config.MERGE_SUBTITLE_FONT or DEFAULT_VALUES["MERGE_SUBTITLE_FONT"] + " (Default)"
+        subtitle_font_size = Config.MERGE_SUBTITLE_FONT_SIZE or DEFAULT_VALUES["MERGE_SUBTITLE_FONT_SIZE"] + " (Default)"
+        subtitle_font_color = Config.MERGE_SUBTITLE_FONT_COLOR or DEFAULT_VALUES["MERGE_SUBTITLE_FONT_COLOR"] + " (Default)"
+        subtitle_background = Config.MERGE_SUBTITLE_BACKGROUND or DEFAULT_VALUES["MERGE_SUBTITLE_BACKGROUND"] + " (Default)"
 
         # Document settings
-        document_paper_size = Config.MERGE_DOCUMENT_PAPER_SIZE or "a4 (Default)"
+        document_paper_size = Config.MERGE_DOCUMENT_PAPER_SIZE or DEFAULT_VALUES["MERGE_DOCUMENT_PAPER_SIZE"] + " (Default)"
         document_orientation = (
-            Config.MERGE_DOCUMENT_ORIENTATION or "portrait (Default)"
+            Config.MERGE_DOCUMENT_ORIENTATION or DEFAULT_VALUES["MERGE_DOCUMENT_ORIENTATION"] + " (Default)"
         )
-        document_margin = Config.MERGE_DOCUMENT_MARGIN or "50 (Default)"
+        document_margin = Config.MERGE_DOCUMENT_MARGIN or DEFAULT_VALUES["MERGE_DOCUMENT_MARGIN"] + " (Default)"
 
         # Metadata settings
-        metadata_title = Config.MERGE_METADATA_TITLE or "(Default: empty)"
-        metadata_author = Config.MERGE_METADATA_AUTHOR or "(Default: empty)"
-        metadata_comment = Config.MERGE_METADATA_COMMENT or "(Default: empty)"
+        metadata_title = Config.MERGE_METADATA_TITLE or DEFAULT_VALUES["MERGE_METADATA_TITLE"] + " (Default)"
+        metadata_author = Config.MERGE_METADATA_AUTHOR or DEFAULT_VALUES["MERGE_METADATA_AUTHOR"] + " (Default)"
+        metadata_comment = Config.MERGE_METADATA_COMMENT or DEFAULT_VALUES["MERGE_METADATA_COMMENT"] + " (Default)"
 
         msg = f"""<b>Merge Configuration</b> | State: {state}
 
@@ -3401,19 +3467,19 @@ async def edit_variable(_, message, pre_message, key):
             elif key == "MERGE_PRIORITY":
                 value = 1
             elif key == "MERGE_VIDEO_CRF":
-                value = 23
+                value = DEFAULT_VALUES["MERGE_VIDEO_CRF"]
             elif key == "MERGE_IMAGE_COLUMNS":
-                value = 2
+                value = DEFAULT_VALUES["MERGE_IMAGE_COLUMNS"]
             elif key == "MERGE_IMAGE_QUALITY":
-                value = 90
+                value = DEFAULT_VALUES["MERGE_IMAGE_QUALITY"]
             elif key == "MERGE_IMAGE_DPI":
-                value = 300
+                value = DEFAULT_VALUES["MERGE_IMAGE_DPI"]
             elif key == "MERGE_SUBTITLE_FONT_SIZE":
-                value = 24
+                value = DEFAULT_VALUES["MERGE_SUBTITLE_FONT_SIZE"]
             elif key == "MERGE_DOCUMENT_MARGIN":
-                value = 50
+                value = DEFAULT_VALUES["MERGE_DOCUMENT_MARGIN"]
             elif key == "MERGE_AUDIO_CHANNELS":
-                value = 2
+                value = DEFAULT_VALUES["MERGE_AUDIO_CHANNELS"]
             elif key == "CONVERT_PRIORITY":
                 value = 3
             elif key == "CONVERT_VIDEO_CRF":
@@ -3462,7 +3528,10 @@ async def edit_variable(_, message, pre_message, key):
         try:
             value = float(value)
         except ValueError:
-            value = 1.0  # Default volume if invalid input
+            if key == "MERGE_AUDIO_VOLUME":
+                value = DEFAULT_VALUES["MERGE_AUDIO_VOLUME"]
+            else:
+                value = 1.0  # Default volume if invalid input
     elif key == "WATERMARK_POSITION" and value not in [
         "top_left",
         "top_right",
@@ -3614,17 +3683,20 @@ async def edit_variable(_, message, pre_message, key):
     # Handle special cases for pages
     if return_menu == "mediatools_merge" and "merge_page" in globals():
         await update_buttons(pre_message, return_menu, page=globals()["merge_page"])
-    elif (
-        return_menu == "mediatools_merge_config"
-        and pre_message.text
-        and "Page:" in pre_message.text
-    ):
-        try:
-            page_info = pre_message.text.split("Page:")[1].strip().split("/")[0]
-            page_no = int(page_info) - 1
-            await update_buttons(pre_message, return_menu, page=page_no)
-        except (ValueError, IndexError):
-            await update_buttons(pre_message, return_menu)
+    elif return_menu == "mediatools_merge_config":
+        if pre_message.text and "Page:" in pre_message.text:
+            try:
+                page_info = pre_message.text.split("Page:")[1].strip().split("/")[0]
+                page_no = int(page_info) - 1
+                # Set the global merge_config_page variable to ensure we return to the correct page
+                globals()["merge_config_page"] = page_no
+                await update_buttons(pre_message, return_menu, page=page_no)
+            except (ValueError, IndexError):
+                # If there's an error parsing the page number, use the stored page
+                await update_buttons(pre_message, return_menu, page=globals()["merge_config_page"])
+        else:
+            # Use the stored page
+            await update_buttons(pre_message, return_menu, page=globals()["merge_config_page"])
     else:
         await update_buttons(pre_message, return_menu)
 
@@ -4059,8 +4131,23 @@ async def edit_bot_settings(client, query):
 
         # Set the state back to what it was
         globals()["state"] = current_state
-        # Always start at page 0 when first entering merge config settings
-        await update_buttons(message, "mediatools_merge_config", page=0)
+
+        # Check if we're coming from a specific config setting
+        # If so, maintain the current page, otherwise start at page 0
+        if message.text and "Merge Configuration" in message.text and "Page:" in message.text:
+            try:
+                page_info = message.text.split("Page:")[1].strip().split("/")[0]
+                page_no = int(page_info) - 1
+                # Set the global merge_config_page variable to ensure we return to the correct page
+                globals()["merge_config_page"] = page_no
+                await update_buttons(message, "mediatools_merge_config", page=page_no)
+            except (ValueError, IndexError):
+                # If there's an error parsing the page number, use the stored page
+                await update_buttons(message, "mediatools_merge_config", page=globals()["merge_config_page"])
+        else:
+            # Reset the page when first entering the menu
+            globals()["merge_config_page"] = 0
+            await update_buttons(message, "mediatools_merge_config", page=0)
     elif data[1] == "mediatools_metadata":
         await query.answer()
         # Get the current state before making changes
@@ -5190,8 +5277,41 @@ async def edit_bot_settings(client, query):
                 )
             ):
                 return_menu = "mediatools_merge_config"
-            else:
+                # Check if we need to return to a specific page in mediatools_merge_config
+                if message.text and "Page:" in message.text:
+                    try:
+                        page_info = message.text.split("Page:")[1].strip().split("/")[0]
+                        page_no = int(page_info) - 1
+                        # Set the global merge_config_page variable to ensure we return to the correct page
+                        globals()["merge_config_page"] = page_no
+                    except (ValueError, IndexError):
+                        pass
+            elif data[2] in ["MERGE_ENABLED", "MERGE_PRIORITY", "MERGE_THREADING",
+                           "MERGE_THREAD_NUMBER", "MERGE_REMOVE_ORIGINAL",
+                           "CONCAT_DEMUXER_ENABLED", "FILTER_COMPLEX_ENABLED"]:
+                # These are from the main merge menu
                 return_menu = "mediatools_merge"
+                # Check if we need to return to a specific page in mediatools_merge
+                if message.text and "Page:" in message.text:
+                    try:
+                        page_info = message.text.split("Page:")[1].strip().split("/")[0]
+                        page_no = int(page_info) - 1
+                        # Set the global merge_page variable to ensure we return to the correct page
+                        globals()["merge_page"] = page_no
+                    except (ValueError, IndexError):
+                        pass
+            else:
+                # Default to merge menu for any other merge settings
+                return_menu = "mediatools_merge"
+                # Check if we need to return to a specific page in mediatools_merge
+                if message.text and "Page:" in message.text:
+                    try:
+                        page_info = message.text.split("Page:")[1].strip().split("/")[0]
+                        page_no = int(page_info) - 1
+                        # Set the global merge_page variable to ensure we return to the correct page
+                        globals()["merge_page"] = page_no
+                    except (ValueError, IndexError):
+                        pass
 
         # Special handling for DEFAULT_AI_PROVIDER is now done earlier in the function
 
@@ -5223,99 +5343,100 @@ async def edit_bot_settings(client, query):
 
     elif data[1] == "default_merge_config":
         await query.answer("Resetting all merge config settings to default...")
-        # Reset all merge config settings to default
+        # Reset all merge config settings to default using DEFAULT_VALUES
+
         # Reset output formats
-        Config.MERGE_OUTPUT_FORMAT_VIDEO = "mkv"
-        Config.MERGE_OUTPUT_FORMAT_AUDIO = "mp3"
-        Config.MERGE_OUTPUT_FORMAT_IMAGE = "jpg"
-        Config.MERGE_OUTPUT_FORMAT_DOCUMENT = "pdf"
-        Config.MERGE_OUTPUT_FORMAT_SUBTITLE = "srt"
+        Config.MERGE_OUTPUT_FORMAT_VIDEO = DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_VIDEO"]
+        Config.MERGE_OUTPUT_FORMAT_AUDIO = DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_AUDIO"]
+        Config.MERGE_OUTPUT_FORMAT_IMAGE = DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_IMAGE"]
+        Config.MERGE_OUTPUT_FORMAT_DOCUMENT = DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_DOCUMENT"]
+        Config.MERGE_OUTPUT_FORMAT_SUBTITLE = DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_SUBTITLE"]
 
         # Reset video settings
-        Config.MERGE_VIDEO_CODEC = "none"
-        Config.MERGE_VIDEO_QUALITY = "none"
-        Config.MERGE_VIDEO_PRESET = "none"
-        Config.MERGE_VIDEO_CRF = 0
-        Config.MERGE_VIDEO_PIXEL_FORMAT = "none"
-        Config.MERGE_VIDEO_TUNE = "none"
-        Config.MERGE_VIDEO_FASTSTART = False
+        Config.MERGE_VIDEO_CODEC = DEFAULT_VALUES["MERGE_VIDEO_CODEC"]
+        Config.MERGE_VIDEO_QUALITY = DEFAULT_VALUES["MERGE_VIDEO_QUALITY"]
+        Config.MERGE_VIDEO_PRESET = DEFAULT_VALUES["MERGE_VIDEO_PRESET"]
+        Config.MERGE_VIDEO_CRF = DEFAULT_VALUES["MERGE_VIDEO_CRF"]
+        Config.MERGE_VIDEO_PIXEL_FORMAT = DEFAULT_VALUES["MERGE_VIDEO_PIXEL_FORMAT"]
+        Config.MERGE_VIDEO_TUNE = DEFAULT_VALUES["MERGE_VIDEO_TUNE"]
+        Config.MERGE_VIDEO_FASTSTART = DEFAULT_VALUES["MERGE_VIDEO_FASTSTART"]
 
         # Reset audio settings
-        Config.MERGE_AUDIO_CODEC = "none"
-        Config.MERGE_AUDIO_BITRATE = "none"
-        Config.MERGE_AUDIO_CHANNELS = 0
-        Config.MERGE_AUDIO_SAMPLING = "none"
-        Config.MERGE_AUDIO_VOLUME = 0.0
+        Config.MERGE_AUDIO_CODEC = DEFAULT_VALUES["MERGE_AUDIO_CODEC"]
+        Config.MERGE_AUDIO_BITRATE = DEFAULT_VALUES["MERGE_AUDIO_BITRATE"]
+        Config.MERGE_AUDIO_CHANNELS = DEFAULT_VALUES["MERGE_AUDIO_CHANNELS"]
+        Config.MERGE_AUDIO_SAMPLING = DEFAULT_VALUES["MERGE_AUDIO_SAMPLING"]
+        Config.MERGE_AUDIO_VOLUME = DEFAULT_VALUES["MERGE_AUDIO_VOLUME"]
 
         # Reset image settings
-        Config.MERGE_IMAGE_MODE = "none"
-        Config.MERGE_IMAGE_COLUMNS = 0
-        Config.MERGE_IMAGE_QUALITY = 0
-        Config.MERGE_IMAGE_DPI = 0
-        Config.MERGE_IMAGE_RESIZE = "none"
-        Config.MERGE_IMAGE_BACKGROUND = "none"
+        Config.MERGE_IMAGE_MODE = DEFAULT_VALUES["MERGE_IMAGE_MODE"]
+        Config.MERGE_IMAGE_COLUMNS = DEFAULT_VALUES["MERGE_IMAGE_COLUMNS"]
+        Config.MERGE_IMAGE_QUALITY = DEFAULT_VALUES["MERGE_IMAGE_QUALITY"]
+        Config.MERGE_IMAGE_DPI = DEFAULT_VALUES["MERGE_IMAGE_DPI"]
+        Config.MERGE_IMAGE_RESIZE = DEFAULT_VALUES["MERGE_IMAGE_RESIZE"]
+        Config.MERGE_IMAGE_BACKGROUND = DEFAULT_VALUES["MERGE_IMAGE_BACKGROUND"]
 
         # Reset subtitle settings
-        Config.MERGE_SUBTITLE_ENCODING = "none"
-        Config.MERGE_SUBTITLE_FONT = "none"
-        Config.MERGE_SUBTITLE_FONT_SIZE = 0
-        Config.MERGE_SUBTITLE_FONT_COLOR = "none"
-        Config.MERGE_SUBTITLE_BACKGROUND = "none"
+        Config.MERGE_SUBTITLE_ENCODING = DEFAULT_VALUES["MERGE_SUBTITLE_ENCODING"]
+        Config.MERGE_SUBTITLE_FONT = DEFAULT_VALUES["MERGE_SUBTITLE_FONT"]
+        Config.MERGE_SUBTITLE_FONT_SIZE = DEFAULT_VALUES["MERGE_SUBTITLE_FONT_SIZE"]
+        Config.MERGE_SUBTITLE_FONT_COLOR = DEFAULT_VALUES["MERGE_SUBTITLE_FONT_COLOR"]
+        Config.MERGE_SUBTITLE_BACKGROUND = DEFAULT_VALUES["MERGE_SUBTITLE_BACKGROUND"]
 
         # Reset document settings
-        Config.MERGE_DOCUMENT_PAPER_SIZE = "none"
-        Config.MERGE_DOCUMENT_ORIENTATION = "none"
-        Config.MERGE_DOCUMENT_MARGIN = 0
+        Config.MERGE_DOCUMENT_PAPER_SIZE = DEFAULT_VALUES["MERGE_DOCUMENT_PAPER_SIZE"]
+        Config.MERGE_DOCUMENT_ORIENTATION = DEFAULT_VALUES["MERGE_DOCUMENT_ORIENTATION"]
+        Config.MERGE_DOCUMENT_MARGIN = DEFAULT_VALUES["MERGE_DOCUMENT_MARGIN"]
 
         # Reset metadata settings
-        Config.MERGE_METADATA_TITLE = "none"
-        Config.MERGE_METADATA_AUTHOR = "none"
-        Config.MERGE_METADATA_COMMENT = "none"
+        Config.MERGE_METADATA_TITLE = DEFAULT_VALUES["MERGE_METADATA_TITLE"]
+        Config.MERGE_METADATA_AUTHOR = DEFAULT_VALUES["MERGE_METADATA_AUTHOR"]
+        Config.MERGE_METADATA_COMMENT = DEFAULT_VALUES["MERGE_METADATA_COMMENT"]
 
-        # Update the database
+        # Update the database with the default values
         await database.update_config(
             {
                 # Output formats
-                "MERGE_OUTPUT_FORMAT_VIDEO": "mkv",
-                "MERGE_OUTPUT_FORMAT_AUDIO": "mp3",
-                "MERGE_OUTPUT_FORMAT_IMAGE": "jpg",
-                "MERGE_OUTPUT_FORMAT_DOCUMENT": "pdf",
-                "MERGE_OUTPUT_FORMAT_SUBTITLE": "srt",
+                "MERGE_OUTPUT_FORMAT_VIDEO": DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_VIDEO"],
+                "MERGE_OUTPUT_FORMAT_AUDIO": DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_AUDIO"],
+                "MERGE_OUTPUT_FORMAT_IMAGE": DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_IMAGE"],
+                "MERGE_OUTPUT_FORMAT_DOCUMENT": DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_DOCUMENT"],
+                "MERGE_OUTPUT_FORMAT_SUBTITLE": DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_SUBTITLE"],
                 # Video settings
-                "MERGE_VIDEO_CODEC": "none",
-                "MERGE_VIDEO_QUALITY": "none",
-                "MERGE_VIDEO_PRESET": "none",
-                "MERGE_VIDEO_CRF": 0,
-                "MERGE_VIDEO_PIXEL_FORMAT": "none",
-                "MERGE_VIDEO_TUNE": "none",
-                "MERGE_VIDEO_FASTSTART": False,
+                "MERGE_VIDEO_CODEC": DEFAULT_VALUES["MERGE_VIDEO_CODEC"],
+                "MERGE_VIDEO_QUALITY": DEFAULT_VALUES["MERGE_VIDEO_QUALITY"],
+                "MERGE_VIDEO_PRESET": DEFAULT_VALUES["MERGE_VIDEO_PRESET"],
+                "MERGE_VIDEO_CRF": DEFAULT_VALUES["MERGE_VIDEO_CRF"],
+                "MERGE_VIDEO_PIXEL_FORMAT": DEFAULT_VALUES["MERGE_VIDEO_PIXEL_FORMAT"],
+                "MERGE_VIDEO_TUNE": DEFAULT_VALUES["MERGE_VIDEO_TUNE"],
+                "MERGE_VIDEO_FASTSTART": DEFAULT_VALUES["MERGE_VIDEO_FASTSTART"],
                 # Audio settings
-                "MERGE_AUDIO_CODEC": "none",
-                "MERGE_AUDIO_BITRATE": "none",
-                "MERGE_AUDIO_CHANNELS": 0,
-                "MERGE_AUDIO_SAMPLING": "none",
-                "MERGE_AUDIO_VOLUME": 0.0,
+                "MERGE_AUDIO_CODEC": DEFAULT_VALUES["MERGE_AUDIO_CODEC"],
+                "MERGE_AUDIO_BITRATE": DEFAULT_VALUES["MERGE_AUDIO_BITRATE"],
+                "MERGE_AUDIO_CHANNELS": DEFAULT_VALUES["MERGE_AUDIO_CHANNELS"],
+                "MERGE_AUDIO_SAMPLING": DEFAULT_VALUES["MERGE_AUDIO_SAMPLING"],
+                "MERGE_AUDIO_VOLUME": DEFAULT_VALUES["MERGE_AUDIO_VOLUME"],
                 # Image settings
-                "MERGE_IMAGE_MODE": "none",
-                "MERGE_IMAGE_COLUMNS": 0,
-                "MERGE_IMAGE_QUALITY": 0,
-                "MERGE_IMAGE_DPI": 0,
-                "MERGE_IMAGE_RESIZE": "none",
-                "MERGE_IMAGE_BACKGROUND": "none",
+                "MERGE_IMAGE_MODE": DEFAULT_VALUES["MERGE_IMAGE_MODE"],
+                "MERGE_IMAGE_COLUMNS": DEFAULT_VALUES["MERGE_IMAGE_COLUMNS"],
+                "MERGE_IMAGE_QUALITY": DEFAULT_VALUES["MERGE_IMAGE_QUALITY"],
+                "MERGE_IMAGE_DPI": DEFAULT_VALUES["MERGE_IMAGE_DPI"],
+                "MERGE_IMAGE_RESIZE": DEFAULT_VALUES["MERGE_IMAGE_RESIZE"],
+                "MERGE_IMAGE_BACKGROUND": DEFAULT_VALUES["MERGE_IMAGE_BACKGROUND"],
                 # Subtitle settings
-                "MERGE_SUBTITLE_ENCODING": "none",
-                "MERGE_SUBTITLE_FONT": "none",
-                "MERGE_SUBTITLE_FONT_SIZE": 0,
-                "MERGE_SUBTITLE_FONT_COLOR": "none",
-                "MERGE_SUBTITLE_BACKGROUND": "none",
+                "MERGE_SUBTITLE_ENCODING": DEFAULT_VALUES["MERGE_SUBTITLE_ENCODING"],
+                "MERGE_SUBTITLE_FONT": DEFAULT_VALUES["MERGE_SUBTITLE_FONT"],
+                "MERGE_SUBTITLE_FONT_SIZE": DEFAULT_VALUES["MERGE_SUBTITLE_FONT_SIZE"],
+                "MERGE_SUBTITLE_FONT_COLOR": DEFAULT_VALUES["MERGE_SUBTITLE_FONT_COLOR"],
+                "MERGE_SUBTITLE_BACKGROUND": DEFAULT_VALUES["MERGE_SUBTITLE_BACKGROUND"],
                 # Document settings
-                "MERGE_DOCUMENT_PAPER_SIZE": "none",
-                "MERGE_DOCUMENT_ORIENTATION": "none",
-                "MERGE_DOCUMENT_MARGIN": 0,
+                "MERGE_DOCUMENT_PAPER_SIZE": DEFAULT_VALUES["MERGE_DOCUMENT_PAPER_SIZE"],
+                "MERGE_DOCUMENT_ORIENTATION": DEFAULT_VALUES["MERGE_DOCUMENT_ORIENTATION"],
+                "MERGE_DOCUMENT_MARGIN": DEFAULT_VALUES["MERGE_DOCUMENT_MARGIN"],
                 # Metadata settings
-                "MERGE_METADATA_TITLE": "none",
-                "MERGE_METADATA_AUTHOR": "none",
-                "MERGE_METADATA_COMMENT": "none",
+                "MERGE_METADATA_TITLE": DEFAULT_VALUES["MERGE_METADATA_TITLE"],
+                "MERGE_METADATA_AUTHOR": DEFAULT_VALUES["MERGE_METADATA_AUTHOR"],
+                "MERGE_METADATA_COMMENT": DEFAULT_VALUES["MERGE_METADATA_COMMENT"],
             }
         )
         # Keep the current page and state
@@ -6415,21 +6536,24 @@ async def edit_bot_settings(client, query):
 
         try:
             if len(data) > 2:
-                page = int(data[2])
+                # Update the global merge_config_page variable
+                globals()["merge_config_page"] = int(data[2])
 
                 # Set the state back to what it was
                 globals()["state"] = current_state
-                await update_buttons(message, "mediatools_merge_config", page=page)
+                await update_buttons(message, "mediatools_merge_config", page=globals()["merge_config_page"])
             else:
                 # If no page number is provided, stay on the current page
                 # Set the state back to what it was
                 globals()["state"] = current_state
-                await update_buttons(message, "mediatools_merge_config")
-        except (ValueError, IndexError):
+                await update_buttons(message, "mediatools_merge_config", page=globals()["merge_config_page"])
+        except (ValueError, IndexError) as e:
             # In case of any error, stay on the current page
+            LOGGER.error(f"Error in start_merge_config handler: {e}")
+
             # Set the state back to what it was
             globals()["state"] = current_state
-            await update_buttons(message, "mediatools_merge_config")
+            await update_buttons(message, "mediatools_merge_config", page=globals()["merge_config_page"])
     elif data[1] == "start_convert":
         await query.answer()
         # Get the current state before making changes
