@@ -108,15 +108,18 @@ class Config:
     # Compression Settings
     COMPRESSION_ENABLED: bool = False
     COMPRESSION_PRIORITY: int = 4
-    COMPRESSION_DELETE_ORIGINAL: bool = False
+    COMPRESSION_DELETE_ORIGINAL: bool = True
 
     # Video Compression Settings
     COMPRESSION_VIDEO_ENABLED: bool = False
     COMPRESSION_VIDEO_PRESET: str = "none"  # none, fast, medium, slow
-    COMPRESSION_VIDEO_CRF: int = 0
+    COMPRESSION_VIDEO_CRF: str = "none"
     COMPRESSION_VIDEO_CODEC: str = "none"
     COMPRESSION_VIDEO_TUNE: str = "none"
     COMPRESSION_VIDEO_PIXEL_FORMAT: str = "none"
+    COMPRESSION_VIDEO_BITDEPTH: str = "none"
+    COMPRESSION_VIDEO_BITRATE: str = "none"
+    COMPRESSION_VIDEO_RESOLUTION: str = "none"
     COMPRESSION_VIDEO_FORMAT: str = (
         "none"  # Output format for video compression (e.g., mp4, mkv)
     )
@@ -126,7 +129,8 @@ class Config:
     COMPRESSION_AUDIO_PRESET: str = "none"  # none, fast, medium, slow
     COMPRESSION_AUDIO_CODEC: str = "none"
     COMPRESSION_AUDIO_BITRATE: str = "none"
-    COMPRESSION_AUDIO_CHANNELS: int = 0
+    COMPRESSION_AUDIO_CHANNELS: str = "none"
+    COMPRESSION_AUDIO_BITDEPTH: str = "none"
     COMPRESSION_AUDIO_FORMAT: str = (
         "none"  # Output format for audio compression (e.g., mp3, aac)
     )
@@ -134,7 +138,7 @@ class Config:
     # Image Compression Settings
     COMPRESSION_IMAGE_ENABLED: bool = False
     COMPRESSION_IMAGE_PRESET: str = "none"  # none, fast, medium, slow
-    COMPRESSION_IMAGE_QUALITY: int = 0
+    COMPRESSION_IMAGE_QUALITY: str = "none"
     COMPRESSION_IMAGE_RESIZE: str = "none"
     COMPRESSION_IMAGE_FORMAT: str = (
         "none"  # Output format for image compression (e.g., jpg, png)
@@ -143,7 +147,7 @@ class Config:
     # Document Compression Settings
     COMPRESSION_DOCUMENT_ENABLED: bool = False
     COMPRESSION_DOCUMENT_PRESET: str = "none"  # none, fast, medium, slow
-    COMPRESSION_DOCUMENT_DPI: int = 0
+    COMPRESSION_DOCUMENT_DPI: str = "none"
     COMPRESSION_DOCUMENT_FORMAT: str = (
         "none"  # Output format for document compression (e.g., pdf)
     )
@@ -159,7 +163,7 @@ class Config:
     # Archive Compression Settings
     COMPRESSION_ARCHIVE_ENABLED: bool = False
     COMPRESSION_ARCHIVE_PRESET: str = "none"  # none, fast, medium, slow
-    COMPRESSION_ARCHIVE_LEVEL: int = 0
+    COMPRESSION_ARCHIVE_LEVEL: str = "none"
     COMPRESSION_ARCHIVE_METHOD: str = "none"
     COMPRESSION_ARCHIVE_FORMAT: str = (
         "none"  # Output format for archive compression (e.g., zip, 7z)

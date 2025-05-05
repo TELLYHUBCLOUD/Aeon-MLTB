@@ -135,28 +135,33 @@ async def reset_tool_configs(tool_name, database):
         # Compression Settings
         "COMPRESSION_ENABLED": False,
         "COMPRESSION_PRIORITY": 4,
+        "COMPRESSION_DELETE_ORIGINAL": True,
         # Video Compression Settings
         "COMPRESSION_VIDEO_ENABLED": False,
         "COMPRESSION_VIDEO_PRESET": "none",
-        "COMPRESSION_VIDEO_CRF": 0,
+        "COMPRESSION_VIDEO_CRF": "none",
         "COMPRESSION_VIDEO_CODEC": "none",
         "COMPRESSION_VIDEO_TUNE": "none",
         "COMPRESSION_VIDEO_PIXEL_FORMAT": "none",
+        "COMPRESSION_VIDEO_BITDEPTH": "none",
+        "COMPRESSION_VIDEO_BITRATE": "none",
+        "COMPRESSION_VIDEO_RESOLUTION": "none",
         # Audio Compression Settings
         "COMPRESSION_AUDIO_ENABLED": False,
         "COMPRESSION_AUDIO_PRESET": "none",
         "COMPRESSION_AUDIO_CODEC": "none",
         "COMPRESSION_AUDIO_BITRATE": "none",
-        "COMPRESSION_AUDIO_CHANNELS": 0,
+        "COMPRESSION_AUDIO_CHANNELS": "none",
+        "COMPRESSION_AUDIO_BITDEPTH": "none",
         # Image Compression Settings
         "COMPRESSION_IMAGE_ENABLED": False,
         "COMPRESSION_IMAGE_PRESET": "none",
-        "COMPRESSION_IMAGE_QUALITY": 0,
+        "COMPRESSION_IMAGE_QUALITY": "none",
         "COMPRESSION_IMAGE_RESIZE": "none",
         # Document Compression Settings
         "COMPRESSION_DOCUMENT_ENABLED": False,
         "COMPRESSION_DOCUMENT_PRESET": "none",
-        "COMPRESSION_DOCUMENT_DPI": 0,
+        "COMPRESSION_DOCUMENT_DPI": "none",
         # Subtitle Compression Settings
         "COMPRESSION_SUBTITLE_ENABLED": False,
         "COMPRESSION_SUBTITLE_PRESET": "none",
@@ -164,7 +169,7 @@ async def reset_tool_configs(tool_name, database):
         # Archive Compression Settings
         "COMPRESSION_ARCHIVE_ENABLED": False,
         "COMPRESSION_ARCHIVE_PRESET": "none",
-        "COMPRESSION_ARCHIVE_LEVEL": 0,
+        "COMPRESSION_ARCHIVE_LEVEL": "none",
         "COMPRESSION_ARCHIVE_METHOD": "none",
         # Trim Settings
         "TRIM_ENABLED": False,

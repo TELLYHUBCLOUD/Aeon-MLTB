@@ -4618,33 +4618,37 @@ async def get_compression_cmd(
     file_path,
     media_type=None,
     video_preset="medium",
-    video_crf=23,
+    video_crf="none",
     video_codec="libx264",
     video_tune="film",
     video_pixel_format="yuv420p",
+    video_bitdepth="none",
+    video_bitrate="none",
+    video_resolution="none",
     video_format="none",
     audio_preset="medium",
     audio_codec="aac",
     audio_bitrate="128k",
-    audio_channels=2,
+    audio_channels="none",
+    audio_bitdepth="none",
     audio_format="none",
     image_preset="medium",
-    image_quality=80,
+    image_quality="none",
     image_resize="none",
     image_format="none",
     document_preset="medium",
-    document_dpi=150,
+    document_dpi="none",
     document_format="none",
     subtitle_preset="medium",
     subtitle_encoding="utf-8",
     subtitle_format="none",
     archive_preset="medium",
-    archive_level=5,
+    archive_level="none",
     archive_method="deflate",
     archive_format="none",
     # delete_original is not used here but kept for API compatibility
     # It's handled in the proceed_compression method
-    delete_original=False,
+    delete_original=True,
 ):
     """Generate FFmpeg command for compressing media files.
 
@@ -4788,8 +4792,14 @@ async def get_compression_cmd(
                         cmd.extend(["-preset", video_preset])
 
                 # Add CRF for quality control
-                if video_crf > 0:
-                    cmd.extend(["-crf", str(video_crf)])
+                if video_crf and str(video_crf).lower() != "none":
+                    try:
+                        crf_val = int(video_crf)
+                        if crf_val > 0:
+                            cmd.extend(["-crf", str(crf_val)])
+                    except (ValueError, TypeError):
+                        # If conversion fails, don't add CRF parameter
+                        pass
 
                 # Add tune parameter
                 if video_tune and video_tune.lower() != "none":
@@ -4799,6 +4809,34 @@ async def get_compression_cmd(
                 # Add pixel format
                 if video_pixel_format and video_pixel_format.lower() != "none":
                     cmd.extend(["-pix_fmt", video_pixel_format])
+
+                # Add video bitdepth if specified
+                if video_bitdepth and str(video_bitdepth).lower() != "none":
+                    # Bitdepth is typically handled via pixel format, so we'll need to adjust
+                    # the pixel format based on the requested bit depth
+                    try:
+                        depth_val = int(video_bitdepth)
+                        if depth_val == 10:
+                            # For 10-bit, use appropriate pixel format based on codec
+                            if video_codec == "libx264":
+                                cmd.extend(["-pix_fmt", "yuv420p10le"])
+                            elif video_codec == "libx265":
+                                cmd.extend(["-pix_fmt", "yuv420p10le"])
+                        elif depth_val == 12:
+                            # For 12-bit, use appropriate pixel format
+                            if video_codec == "libx265":  # x264 doesn't support 12-bit
+                                cmd.extend(["-pix_fmt", "yuv420p12le"])
+                    except (ValueError, TypeError):
+                        # If conversion fails, don't add bitdepth parameter
+                        pass
+
+                # Add video bitrate if specified
+                if video_bitrate and str(video_bitrate).lower() != "none":
+                    cmd.extend(["-b:v", video_bitrate])
+
+                # Add video resolution if specified
+                if video_resolution and str(video_resolution).lower() != "none":
+                    cmd.extend(["-vf", f"scale={video_resolution}"])
 
         # Add audio codec parameters
         if has_audio:
@@ -4810,8 +4848,31 @@ async def get_compression_cmd(
                 cmd.extend(["-b:a", audio_bitrate])
 
             # Add audio channels
-            if audio_channels > 0:
-                cmd.extend(["-ac", str(audio_channels)])
+            if audio_channels and str(audio_channels).lower() != "none":
+                try:
+                    channels_val = int(audio_channels)
+                    if channels_val > 0:
+                        cmd.extend(["-ac", str(channels_val)])
+                except (ValueError, TypeError):
+                    # If conversion fails, don't add channels parameter
+                    pass
+
+            # Add audio bitdepth if specified
+            if audio_bitdepth and str(audio_bitdepth).lower() != "none":
+                try:
+                    depth_val = int(audio_bitdepth)
+                    if depth_val in [16, 24, 32]:
+                        # For PCM audio formats
+                        if audio_codec in ["pcm_s16le", "pcm_s24le", "pcm_s32le"]:
+                            # The codec already specifies the bit depth
+                            pass
+                        elif audio_codec == "flac":
+                            # FLAC supports different bit depths
+                            cmd.extend(["-sample_fmt", f"s{depth_val}"])
+                        # For other codecs, we might need to adjust based on the specific codec
+                except (ValueError, TypeError):
+                    # If conversion fails, don't add bitdepth parameter
+                    pass
 
         # Add subtitle parameters
         if has_subtitle:
@@ -4844,8 +4905,14 @@ async def get_compression_cmd(
             cmd.extend(["-b:a", audio_bitrate])
 
         # Add audio channels
-        if audio_channels > 0:
-            cmd.extend(["-ac", str(audio_channels)])
+        if audio_channels and str(audio_channels).lower() != "none":
+            try:
+                channels_val = int(audio_channels)
+                if channels_val > 0:
+                    cmd.extend(["-ac", str(channels_val)])
+            except (ValueError, TypeError):
+                # If conversion fails, don't add channels parameter
+                pass
 
         # Map all audio streams
         cmd.extend(["-map", "0:a"])
@@ -4854,20 +4921,36 @@ async def get_compression_cmd(
         # For image files
         if file_ext in [".jpg", ".jpeg"]:
             # For JPEG, use quality parameter
-            quality_val = (
-                min(31, 31 - int(int(image_quality) * 0.31))
-                if image_quality > 0
-                else 1
-            )
-            cmd.extend(["-q:v", str(quality_val)])
+            if image_quality and str(image_quality).lower() != "none":
+                try:
+                    quality_val = int(image_quality)
+                    if quality_val > 0:
+                        quality_val = min(31, 31 - int(quality_val * 0.31))
+                    else:
+                        quality_val = 1
+                    cmd.extend(["-q:v", str(quality_val)])
+                except (ValueError, TypeError):
+                    # If conversion fails, use default quality
+                    cmd.extend(["-q:v", "1"])
+            else:
+                # Use default quality
+                cmd.extend(["-q:v", "1"])
         elif file_ext in [".png", ".webp"]:
             # For PNG and WebP, use compression level
-            compression_level = (
-                min(9, 9 - int(int(image_quality) * 0.09))
-                if image_quality > 0
-                else 0
-            )
-            cmd.extend(["-compression_level", str(compression_level)])
+            if image_quality and str(image_quality).lower() != "none":
+                try:
+                    quality_val = int(image_quality)
+                    if quality_val > 0:
+                        compression_level = min(9, 9 - int(quality_val * 0.09))
+                    else:
+                        compression_level = 0
+                    cmd.extend(["-compression_level", str(compression_level)])
+                except (ValueError, TypeError):
+                    # If conversion fails, use default compression
+                    cmd.extend(["-compression_level", "0"])
+            else:
+                # Use default compression
+                cmd.extend(["-compression_level", "0"])
         else:
             # For other image formats, use general quality settings
             cmd.extend(["-q:v", "2"])
@@ -4882,10 +4965,20 @@ async def get_compression_cmd(
             # For PDF files, we'll use a special approach
             # This will be handled separately in the proceed_compression method
             # Just return a special command that will be recognized
+            # Handle document_dpi as "none"
+            dpi_value = "150"  # Default DPI value
+            if document_dpi and str(document_dpi).lower() != "none":
+                try:
+                    dpi_val = int(document_dpi)
+                    if dpi_val > 0:
+                        dpi_value = str(dpi_val)
+                except (ValueError, TypeError):
+                    pass
+
             cmd = [
                 "pdf_compress",
                 file_path,
-                str(document_dpi),
+                dpi_value,
                 document_preset,
                 temp_file,
             ]
@@ -4912,10 +5005,20 @@ async def get_compression_cmd(
     elif media_type == "archive":
         # For archive files, we'll use a special approach
         # This will be handled separately in the proceed_compression method
+        # Handle archive_level as "none"
+        level_value = "5"  # Default compression level
+        if archive_level and str(archive_level).lower() != "none":
+            try:
+                level_val = int(archive_level)
+                if 0 <= level_val <= 9:
+                    level_value = str(level_val)
+            except (ValueError, TypeError):
+                pass
+
         cmd = [
             "archive_compress",
             file_path,
-            str(archive_level),
+            level_value,
             archive_method,
             archive_preset,
             temp_file,

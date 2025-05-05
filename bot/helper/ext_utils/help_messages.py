@@ -1177,6 +1177,9 @@ media_tools_text = {
     "COMPRESSION_VIDEO_CODEC": "Set the video codec for compression. Common codecs: libx264, libx265.\nExample: libx264 - widely compatible codec\nExample: libx265 - better compression but less compatible. Timeout: 60 sec",
     "COMPRESSION_VIDEO_TUNE": "Set the tuning parameter for video compression. Options: film, animation, grain, etc.\nExample: film - for live-action content\nExample: animation - for animated content. Timeout: 60 sec",
     "COMPRESSION_VIDEO_PIXEL_FORMAT": "Set the pixel format for video compression. Common formats: yuv420p, yuv444p.\nExample: yuv420p - most compatible format\nExample: yuv444p - highest quality but larger file size. Timeout: 60 sec",
+    "COMPRESSION_VIDEO_BITDEPTH": "Set the bit depth for video compression. Common values: 8, 10, 12.\nExample: 8 - standard 8-bit video (most compatible)\nExample: 10 - 10-bit video (better color gradients)\nExample: none - use default bit depth. Timeout: 60 sec",
+    "COMPRESSION_VIDEO_BITRATE": "Set the bitrate for video compression. Examples: 1M, 5M, 10M.\nExample: 5M - 5 Mbps (good for 1080p)\nExample: 2M - 2 Mbps (good for 720p)\nExample: none - use automatic bitrate based on CRF. Timeout: 60 sec",
+    "COMPRESSION_VIDEO_RESOLUTION": "Set the resolution for video compression. Format: widthxheight or 'none'.\nExample: 1920x1080 - Full HD\nExample: 1280x720 - HD\nExample: none - keep original resolution. Timeout: 60 sec",
     "COMPRESSION_VIDEO_FORMAT": "Set the output format for compressed videos. Common formats: mp4, mkv, avi, webm.\nExample: mp4 - widely compatible format\nExample: mkv - container that supports almost all codecs\nExample: none - keep original format. Timeout: 60 sec",
     # Audio Compression Settings
     "COMPRESSION_AUDIO_ENABLED": "Enable or disable audio compression. Send 'true' to enable or 'false' to disable. Timeout: 60 sec",
@@ -1184,6 +1187,7 @@ media_tools_text = {
     "COMPRESSION_AUDIO_CODEC": "Set the audio codec for compression. Common codecs: aac, mp3, opus.\nExample: aac - good quality and compatibility\nExample: opus - better compression. Timeout: 60 sec",
     "COMPRESSION_AUDIO_BITRATE": "Set the audio bitrate for compression. Examples: 64k, 128k, 192k.\nExample: 128k - good balance of quality and size\nExample: 64k - smaller files but lower quality. Timeout: 60 sec",
     "COMPRESSION_AUDIO_CHANNELS": "Set the number of audio channels for compression. Common values: 1 (mono), 2 (stereo).\nExample: 2 - stereo audio\nExample: 1 - mono audio (smaller files). Timeout: 60 sec",
+    "COMPRESSION_AUDIO_BITDEPTH": "Set the bit depth for audio compression. Common values: 16, 24, 32.\nExample: 16 - standard CD quality (most compatible)\nExample: 24 - high-resolution audio\nExample: none - use default bit depth. Timeout: 60 sec",
     "COMPRESSION_AUDIO_FORMAT": "Set the output format for compressed audio. Common formats: mp3, m4a, ogg, flac.\nExample: mp3 - widely compatible format\nExample: aac - good quality and compatibility\nExample: none - keep original format. Timeout: 60 sec",
     # Image Compression Settings
     "COMPRESSION_IMAGE_ENABLED": "Enable or disable image compression. Send 'true' to enable or 'false' to disable. Timeout: 60 sec",

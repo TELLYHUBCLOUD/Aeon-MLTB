@@ -20,55 +20,21 @@ STREAMWISH_API = ""  # StreamWish API key for direct links
 EXCLUDED_EXTENSIONS = ""  # File extensions to exclude from processing, separated by space
 INCOMPLETE_TASK_NOTIFIER = False  # Notify about incomplete tasks on bot restart
 YT_DLP_OPTIONS = ""  # Additional yt-dlp options as a JSON string
-USE_SERVICE_ACCOUNTS = False  # Whether to use service accounts for Google Drive
+USER_COOKIES = ""  # Path to cookies file for yt-dlp and other downloaders
 NAME_SUBSTITUTE = ""  # Regex pattern to substitute in filenames
 FFMPEG_CMDS = {}  # Custom FFmpeg commands for different file types
 UPLOAD_PATHS = {}  # Custom upload paths for different file types
-USER_COOKIES = ""  # Path to cookies file for yt-dlp and other downloaders
-IMDB_TEMPLATE = """<b>🎬 Title:</b> <code>{title}</code> [{year}]
- <b>⭐ Rating:</b> <i>{rating}</i>
- <b>🎭 Genre:</b> {genres}
- <b>📅 Released:</b> <a href=\"{url_releaseinfo}\">{release_date}</a>
- <b>🎙️ Languages:</b> {languages}
- <b>🌍 Country:</b> {countries}
- <b>🎬 Type:</b> {kind}
-
- <b>📖 Story Line:</b>
- <blockquote>{plot}</blockquote>
-
- <b>🔗 IMDb URL:</b> <a href=\"{url}\">{url}</a>
- <b>👥 Cast:</b> <a href=\"{url_cast}\">{cast}</a>
-
- <b>👨‍💼 Director:</b> {director}
- <b>✍️ Writer:</b> {writer}
- <b>🎵 Music:</b> {composer}
- <b>🎥 Cinematography:</b> {cinematographer}
-
- <b>⏱️ Runtime:</b> {runtime} minutes
- <b>🏆 Awards:</b> {certificates}
-
- <i>Powered by IMDb</i>"""  # Custom template for IMDB results formatting. If empty, the default template below will be used:
-EQUAL_SPLITS = False  # Create equal-sized parts when splitting files
-LEECH_SUFFIX = ""  # Suffix to add to leeched files
-LEECH_FONT = ""  # Font to use for leech captions
-LEECH_FILENAME = ""  # Custom filename template for leeched files
 MEDIA_STORE = False  # Enable media store for faster thumbnail generation
-LOGIN_PASS = ""  # Password for web login
 MUSIC_SEARCH_CHATS = []  # List of chat IDs where music search is enabled
-
-# INKYPINKY
 DELETE_LINKS = False  # Delete links after download
 FSUB_IDS = ""  # Force subscribe channel IDs, separated by space
 TOKEN_TIMEOUT = 0  # Token timeout in seconds (0 = no timeout)
+LOGIN_PASS = ""  # Password for web login
 PAID_CHANNEL_ID = 0  # Paid channel ID for premium features
 PAID_CHANNEL_LINK = ""  # Invite link for paid channel
 SET_COMMANDS = True  # Set bot commands in Telegram UI
-METADATA_KEY = ""  # Default metadata key for files
-WATERMARK_KEY = ""  # Default watermark text
 LOG_CHAT_ID = 0  # Chat ID where logs will be sent
-LEECH_FILENAME_CAPTION = ""  # Caption template for leeched files
-HYDRA_IP = ""  # Hydra IP address for direct links
-HYDRA_API_KEY = ""  # Hydra API key for direct links
+MEDIAINFO_ENABLED = False  # Enable/disable mediainfo command for detailed media information
 INSTADL_API = ""  # InstaDL API key for Instagram downloads
 
 # GDrive Tools
@@ -76,6 +42,7 @@ GDRIVE_ID = ""  # Google Drive folder/TeamDrive ID where files will be uploaded
 IS_TEAM_DRIVE = False  # Whether the GDRIVE_ID is a TeamDrive
 STOP_DUPLICATE = False  # Skip uploading files that are already in the drive
 INDEX_URL = ""  # Index URL for Google Drive
+USE_SERVICE_ACCOUNTS = False  # Whether to use service accounts for Google Drive
 
 # Rclone
 RCLONE_PATH = ""  # Path to rclone.conf file
@@ -95,6 +62,8 @@ MEGA_EMAIL = ""  # Mega.nz account email
 MEGA_PASSWORD = ""  # Mega.nz account password
 
 # Sabnzbd
+HYDRA_IP = ""  # Hydra IP address for direct links
+HYDRA_API_KEY = ""  # Hydra API key for direct links
 USENET_SERVERS = [  # List of Usenet servers for NZB downloads
     {
         "name": "main",  # Server name
@@ -127,8 +96,13 @@ MEDIA_GROUP = False  # Group media files together when sending
 USER_TRANSMISSION = False  # Use transmission for torrents
 HYBRID_LEECH = False  # Enable hybrid leech (both document and media)
 LEECH_FILENAME_PREFIX = ""  # Prefix to add to leeched filenames
+LEECH_SUFFIX = ""  # Suffix to add to leeched files
+LEECH_FONT = ""  # Font to use for leech captions
+LEECH_FILENAME = ""  # Custom filename template for leeched files
+LEECH_FILENAME_CAPTION = ""  # Caption template for leeched files
 LEECH_DUMP_CHAT = ""  # Chat ID where leeched files will be sent
 THUMBNAIL_LAYOUT = ""  # Layout for thumbnails: empty, top, bottom, or custom
+EQUAL_SPLITS = False  # Create equal-sized parts when splitting files
 
 # qBittorrent/Aria2c
 TORRENT_TIMEOUT = 0  # Timeout for torrent downloads in seconds (0 = no timeout)
@@ -177,28 +151,43 @@ ENABLE_EXTRA_MODULES = True  # Enable additional modules and features
 # Truecaller API Settings
 TRUECALLER_API_URL = ""  # Truecaller API URL for phone number lookup
 
+# Custom template for IMDB results formatting.
+IMDB_TEMPLATE = """<b>🎬 Title:</b> <code>{title}</code> [{year}]
+ <b>⭐ Rating:</b> <i>{rating}</i>
+ <b>🎭 Genre:</b> {genres}
+ <b>📅 Released:</b> <a href=\"{url_releaseinfo}\">{release_date}</a>
+ <b>🎙️ Languages:</b> {languages}
+ <b>🌍 Country:</b> {countries}
+ <b>🎬 Type:</b> {kind}
+
+ <b>📖 Story Line:</b>
+ <blockquote>{plot}</blockquote>
+
+ <b>🔗 IMDb URL:</b> <a href=\"{url}\">{url}</a>
+ <b>👥 Cast:</b> <a href=\"{url_cast}\">{cast}</a>
+
+ <b>👨‍💼 Director:</b> {director}
+ <b>✍️ Writer:</b> {writer}
+ <b>🎵 Music:</b> {composer}
+ <b>🎥 Cinematography:</b> {cinematographer}
+
+ <b>⏱️ Runtime:</b> {runtime} minutes
+ <b>🏆 Awards:</b> {certificates}
+ <i>Powered by IMDb</i>"""
+
 # AI Settings
 DEFAULT_AI_PROVIDER = "mistral"  # Default AI provider for /ask command: mistral, deepseek, chatgpt, gemini
-
-# Mistral AI Settings
 MISTRAL_API_KEY = ""  # Mistral AI API key
 MISTRAL_API_URL = ""  # Custom Mistral AI API URL (optional)
-
-# DeepSeek AI Settings
 DEEPSEEK_API_KEY = ""  # DeepSeek AI API key
 DEEPSEEK_API_URL = ""  # Custom DeepSeek AI API URL (optional)
-
-# ChatGPT Settings
 CHATGPT_API_KEY = ""  # OpenAI API key for ChatGPT
 CHATGPT_API_URL = ""  # Custom ChatGPT API URL (optional)
-
-# Gemini AI Settings
 GEMINI_API_KEY = ""  # Google Gemini API key
 GEMINI_API_URL = ""  # Custom Gemini API URL (optional)
 
 # Media Tools Settings
 MEDIA_TOOLS_ENABLED = True  # Master switch to enable/disable all media tools features
-MEDIAINFO_ENABLED = False  # Enable/disable mediainfo command for detailed media information
 
 # Watermark Settings
 WATERMARK_ENABLED = False  # Master switch to enable/disable watermark feature
@@ -285,50 +274,54 @@ MERGE_METADATA_COMMENT = "none"  # Comment metadata for merged file
 # Compression Settings
 COMPRESSION_ENABLED = False  # Master switch to enable/disable compression feature
 COMPRESSION_PRIORITY = 4  # Processing priority in pipeline (lower numbers run earlier)
-COMPRESSION_DELETE_ORIGINAL = False  # Delete original files after successful compression
+COMPRESSION_DELETE_ORIGINAL = True  # Delete original files after successful compression (default: True, use -del flag to override)
 
 # Video Compression Settings
 COMPRESSION_VIDEO_ENABLED = False  # Enable/disable video compression
 COMPRESSION_VIDEO_PRESET = "none"  # Compression preset: none, fast, medium, slow
-COMPRESSION_VIDEO_CRF = 0  # Constant Rate Factor for quality (0-51, lower is better quality)
+COMPRESSION_VIDEO_CRF = "none"  # Constant Rate Factor for quality (none = use default, 0-51, lower is better quality)
 COMPRESSION_VIDEO_CODEC = "none"  # Video codec: none, libx264, libx265, etc.
 COMPRESSION_VIDEO_TUNE = "none"  # Tune option for specific content: none, film, animation, grain, etc.
 COMPRESSION_VIDEO_PIXEL_FORMAT = "none"  # Pixel format: none, yuv420p, yuv444p, etc.
-COMPRESSION_VIDEO_FORMAT = "none"  # Output format: none, mp4, mkv, avi, etc.
+COMPRESSION_VIDEO_FORMAT = "none"  # Output format: none (use input format), mp4, mkv, avi, etc.
+COMPRESSION_VIDEO_BITDEPTH = "none"  # Video bit depth: none (use input), 8, 10, 12, etc.
+COMPRESSION_VIDEO_BITRATE = "none"  # Video bitrate: none (use input), 1M, 5M, 10M, etc.
+COMPRESSION_VIDEO_RESOLUTION = "none"  # Video resolution: none (use input), 1920x1080, 1280x720, etc.
 
 # Audio Compression Settings
 COMPRESSION_AUDIO_ENABLED = False  # Enable/disable audio compression
 COMPRESSION_AUDIO_PRESET = "none"  # Compression preset: none, fast, medium, slow
 COMPRESSION_AUDIO_CODEC = "none"  # Audio codec: none, aac, mp3, opus, etc.
 COMPRESSION_AUDIO_BITRATE = "none"  # Audio bitrate: none, 128k, 192k, 320k, etc.
-COMPRESSION_AUDIO_CHANNELS = 0  # Number of audio channels: 0 (original), 1 (mono), 2 (stereo), etc.
-COMPRESSION_AUDIO_FORMAT = "none"  # Output format: none, mp3, m4a, flac, etc.
+COMPRESSION_AUDIO_CHANNELS = "none"  # Number of audio channels: none (use input), 1 (mono), 2 (stereo), etc.
+COMPRESSION_AUDIO_FORMAT = "none"  # Output format: none (use input format), mp3, m4a, flac, etc.
+COMPRESSION_AUDIO_BITDEPTH = "none"  # Audio bit depth: none (use input), 16, 24, 32, etc.
 
 # Image Compression Settings
 COMPRESSION_IMAGE_ENABLED = False  # Enable/disable image compression
 COMPRESSION_IMAGE_PRESET = "none"  # Compression preset: none, fast, medium, slow
-COMPRESSION_IMAGE_QUALITY = 0  # Image quality (0-100, higher is better quality)
+COMPRESSION_IMAGE_QUALITY = "none"  # Image quality: none (use default), 0-100 (higher is better quality)
 COMPRESSION_IMAGE_RESIZE = "none"  # Image resize dimensions: none, 1920x1080, 50%, etc.
-COMPRESSION_IMAGE_FORMAT = "none"  # Output format: none, jpg, png, webp, etc.
+COMPRESSION_IMAGE_FORMAT = "none"  # Output format: none (use input format), jpg, png, webp, etc.
 
 # Document Compression Settings
 COMPRESSION_DOCUMENT_ENABLED = False  # Enable/disable document compression
 COMPRESSION_DOCUMENT_PRESET = "none"  # Compression preset: none, fast, medium, slow
-COMPRESSION_DOCUMENT_DPI = 0  # Document DPI: 0 (original), 72, 96, 300, etc.
-COMPRESSION_DOCUMENT_FORMAT = "none"  # Output format: none, pdf, docx, etc.
+COMPRESSION_DOCUMENT_DPI = "none"  # Document DPI: none (use input), 72, 96, 300, etc.
+COMPRESSION_DOCUMENT_FORMAT = "none"  # Output format: none (use input format), pdf, docx, etc.
 
 # Subtitle Compression Settings
 COMPRESSION_SUBTITLE_ENABLED = False  # Enable/disable subtitle compression
 COMPRESSION_SUBTITLE_PRESET = "none"  # Compression preset: none, fast, medium, slow
 COMPRESSION_SUBTITLE_ENCODING = "none"  # Character encoding: none, utf-8, utf-16, etc.
-COMPRESSION_SUBTITLE_FORMAT = "none"  # Output format: none, srt, ass, vtt, etc.
+COMPRESSION_SUBTITLE_FORMAT = "none"  # Output format: none (use input format), srt, ass, vtt, etc.
 
 # Archive Compression Settings
 COMPRESSION_ARCHIVE_ENABLED = False  # Enable/disable archive compression
 COMPRESSION_ARCHIVE_PRESET = "none"  # Compression preset: none, fast, medium, slow
-COMPRESSION_ARCHIVE_LEVEL = 0  # Compression level (0-9, higher is more compression)
+COMPRESSION_ARCHIVE_LEVEL = "none"  # Compression level: none (use default), 0-9 (higher is more compression)
 COMPRESSION_ARCHIVE_METHOD = "none"  # Compression method: none, deflate, lzma, etc.
-COMPRESSION_ARCHIVE_FORMAT = "none"  # Output format: none, zip, 7z, tar.gz, etc.
+COMPRESSION_ARCHIVE_FORMAT = "none"  # Output format: none (use input format), zip, 7z, tar.gz, etc.
 
 # Trim Settings
 TRIM_ENABLED = False  # Master switch to enable/disable trim feature

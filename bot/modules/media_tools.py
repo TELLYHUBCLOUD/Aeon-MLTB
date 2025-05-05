@@ -2936,6 +2936,15 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
             f"mediatools {user_id} menu COMPRESSION_VIDEO_PIXEL_FORMAT",
         )
         buttons.data_button(
+            "Video Bitdepth", f"mediatools {user_id} menu COMPRESSION_VIDEO_BITDEPTH"
+        )
+        buttons.data_button(
+            "Video Bitrate", f"mediatools {user_id} menu COMPRESSION_VIDEO_BITRATE"
+        )
+        buttons.data_button(
+            "Video Resolution", f"mediatools {user_id} menu COMPRESSION_VIDEO_RESOLUTION"
+        )
+        buttons.data_button(
             "Video Format", f"mediatools {user_id} menu COMPRESSION_VIDEO_FORMAT"
         )
 
@@ -2956,6 +2965,9 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         )
         buttons.data_button(
             "Audio Channels", f"mediatools {user_id} menu COMPRESSION_AUDIO_CHANNELS"
+        )
+        buttons.data_button(
+            "Audio Bitdepth", f"mediatools {user_id} menu COMPRESSION_AUDIO_BITDEPTH"
         )
         buttons.data_button(
             "Audio Format", f"mediatools {user_id} menu COMPRESSION_AUDIO_FORMAT"

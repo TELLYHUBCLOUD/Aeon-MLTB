@@ -5317,7 +5317,7 @@ class TaskConfig:
         elif owner_crf is not None and str(owner_crf).lower() != "none":
             crf = owner_crf
         else:
-            crf = 23  # Default CRF value
+            crf = 23  # Default CRF value when "none" is specified
 
         # Get codec with proper None handling
         user_codec = self.user_dict.get("COMPRESSION_VIDEO_CODEC")
@@ -5357,6 +5357,57 @@ class TaskConfig:
             pixel_format = owner_pixel_format
         else:
             pixel_format = "yuv420p"  # Default pixel format
+
+        # Get bitdepth with proper None handling
+        user_bitdepth = self.user_dict.get("COMPRESSION_VIDEO_BITDEPTH")
+        owner_bitdepth = getattr(Config, "COMPRESSION_VIDEO_BITDEPTH", None)
+
+        if (
+            user_bitdepth is not None
+            and str(user_bitdepth).lower() != "none"
+        ):
+            bitdepth = user_bitdepth
+        elif (
+            owner_bitdepth is not None
+            and str(owner_bitdepth).lower() != "none"
+        ):
+            bitdepth = owner_bitdepth
+        else:
+            bitdepth = None  # Default bitdepth (no specific bitdepth)
+
+        # Get bitrate with proper None handling
+        user_bitrate = self.user_dict.get("COMPRESSION_VIDEO_BITRATE")
+        owner_bitrate = getattr(Config, "COMPRESSION_VIDEO_BITRATE", None)
+
+        if (
+            user_bitrate is not None
+            and str(user_bitrate).lower() != "none"
+        ):
+            bitrate = user_bitrate
+        elif (
+            owner_bitrate is not None
+            and str(owner_bitrate).lower() != "none"
+        ):
+            bitrate = owner_bitrate
+        else:
+            bitrate = None  # Default bitrate (no specific bitrate)
+
+        # Get resolution with proper None handling
+        user_resolution = self.user_dict.get("COMPRESSION_VIDEO_RESOLUTION")
+        owner_resolution = getattr(Config, "COMPRESSION_VIDEO_RESOLUTION", None)
+
+        if (
+            user_resolution is not None
+            and str(user_resolution).lower() != "none"
+        ):
+            resolution = user_resolution
+        elif (
+            owner_resolution is not None
+            and str(owner_resolution).lower() != "none"
+        ):
+            resolution = owner_resolution
+        else:
+            resolution = None  # Default resolution (no specific resolution)
 
         # Video format is already initialized in the class constructor
 
@@ -5405,6 +5456,36 @@ class TaskConfig:
             tune,
             "-pix_fmt",
             pixel_format,
+        ]
+
+        # Add bitdepth if specified (via pixel format)
+        if bitdepth and str(bitdepth).lower() != "none":
+            try:
+                depth_val = int(bitdepth)
+                if depth_val == 10:
+                    # For 10-bit, use appropriate pixel format based on codec
+                    if codec == "libx264":
+                        ffmpeg_cmd[-1] = "yuv420p10le"  # Replace the pixel format
+                    elif codec == "libx265":
+                        ffmpeg_cmd[-1] = "yuv420p10le"  # Replace the pixel format
+                elif depth_val == 12:
+                    # For 12-bit, use appropriate pixel format
+                    if codec == "libx265":  # x264 doesn't support 12-bit
+                        ffmpeg_cmd[-1] = "yuv420p12le"  # Replace the pixel format
+            except (ValueError, TypeError):
+                # If conversion fails, don't change pixel format
+                pass
+
+        # Add bitrate if specified
+        if bitrate and str(bitrate).lower() != "none":
+            ffmpeg_cmd.extend(["-b:v", str(bitrate)])
+
+        # Add resolution if specified
+        if resolution and str(resolution).lower() != "none":
+            ffmpeg_cmd.extend(["-s", str(resolution)])
+
+        # Add audio settings
+        ffmpeg_cmd.extend([
             "-c:a",
             "aac",  # Always use AAC for audio
             "-b:a",
@@ -5413,7 +5494,7 @@ class TaskConfig:
             "+faststart",  # Optimize for web streaming
             "-y",  # Overwrite output file if it exists
             out_path,
-        ]
+        ])
 
         # Execute FFmpeg command
         ffmpeg = FFMpeg(self)
@@ -5611,7 +5692,18 @@ class TaskConfig:
         elif owner_channels is not None and str(owner_channels).lower() != "none":
             channels = owner_channels
         else:
-            channels = 2  # Default channels
+            channels = 2  # Default channels when "none" is specified
+
+        # Get bitdepth with proper None handling
+        user_bitdepth = self.user_dict.get("COMPRESSION_AUDIO_BITDEPTH")
+        owner_bitdepth = getattr(Config, "COMPRESSION_AUDIO_BITDEPTH", None)
+
+        if user_bitdepth is not None and str(user_bitdepth).lower() != "none":
+            bitdepth = user_bitdepth
+        elif owner_bitdepth is not None and str(owner_bitdepth).lower() != "none":
+            bitdepth = owner_bitdepth
+        else:
+            bitdepth = None  # Default bitdepth (no specific bitdepth)
 
         # Audio format is already initialized in the class constructor
 
@@ -5680,10 +5772,23 @@ class TaskConfig:
                     bitrate,
                     "-ac",
                     str(channels),
-                    "-movflags",
-                    "+faststart",  # Optimize for streaming
                 ]
             )
+
+            # Add bitdepth if specified
+            if bitdepth and str(bitdepth).lower() != "none":
+                try:
+                    depth_val = int(bitdepth)
+                    if depth_val in [16, 24, 32]:
+                        ffmpeg_cmd.extend(["-sample_fmt", f"s{depth_val}"])
+                except (ValueError, TypeError):
+                    # If conversion fails, don't add bitdepth
+                    pass
+
+            ffmpeg_cmd.extend([
+                "-movflags",
+                "+faststart",  # Optimize for streaming
+            ])
         # For FLAC output
         elif out_ext == ".flac":
             ffmpeg_cmd.extend(
@@ -5694,6 +5799,16 @@ class TaskConfig:
                     "8",  # Maximum compression
                 ]
             )
+
+            # Add bitdepth if specified (FLAC supports 16/24-bit well)
+            if bitdepth and str(bitdepth).lower() != "none":
+                try:
+                    depth_val = int(bitdepth)
+                    if depth_val in [16, 24]:
+                        ffmpeg_cmd.extend(["-sample_fmt", f"s{depth_val}"])
+                except (ValueError, TypeError):
+                    # If conversion fails, don't add bitdepth
+                    pass
         # For OGG output
         elif out_ext == ".ogg":
             ffmpeg_cmd.extend(
@@ -5706,10 +5821,29 @@ class TaskConfig:
             )
         # For WAV output
         elif out_ext == ".wav":
+            # Default to 16-bit PCM
+            pcm_format = "pcm_s16le"
+
+            # Add bitdepth if specified (WAV supports various bit depths)
+            if bitdepth and str(bitdepth).lower() != "none":
+                try:
+                    depth_val = int(bitdepth)
+                    if depth_val == 8:
+                        pcm_format = "pcm_u8"  # 8-bit unsigned PCM
+                    elif depth_val == 16:
+                        pcm_format = "pcm_s16le"  # 16-bit signed PCM
+                    elif depth_val == 24:
+                        pcm_format = "pcm_s24le"  # 24-bit signed PCM
+                    elif depth_val == 32:
+                        pcm_format = "pcm_s32le"  # 32-bit signed PCM
+                except (ValueError, TypeError):
+                    # If conversion fails, use default
+                    pass
+
             ffmpeg_cmd.extend(
                 [
                     "-c:a",
-                    "pcm_s16le",  # 16-bit PCM
+                    pcm_format,
                     "-ar",
                     "44100",  # 44.1kHz sample rate
                 ]
@@ -6011,7 +6145,7 @@ class TaskConfig:
         elif owner_quality is not None and str(owner_quality).lower() != "none":
             quality = owner_quality
         else:
-            quality = 80  # Default quality
+            quality = 80  # Default quality when "none" is specified
 
         # Get resize with proper None handling
         user_resize = self.user_dict.get("COMPRESSION_IMAGE_RESIZE")
@@ -6292,7 +6426,7 @@ class TaskConfig:
             elif owner_dpi is not None and str(owner_dpi).lower() != "none":
                 dpi = owner_dpi
             else:
-                dpi = 150  # Default DPI
+                dpi = 150  # Default DPI when "none" is specified
 
             # Document format is already initialized in the class constructor
 
@@ -7113,7 +7247,7 @@ class TaskConfig:
         elif owner_level is not None and str(owner_level).lower() != "none":
             level = owner_level
         else:
-            level = 5  # Default level
+            level = 5  # Default level when "none" is specified
 
         # Get method with proper None handling
         user_method = self.user_dict.get("COMPRESSION_ARCHIVE_METHOD")
