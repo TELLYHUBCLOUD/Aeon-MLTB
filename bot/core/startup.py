@@ -126,39 +126,49 @@ async def load_settings():
             {"_id": 0},
         )
 
+        # Get the current runtime configuration from database
+        runtime_config = (
+            await database.db.settings.config.find_one(
+                {"_id": TgClient.ID},
+                {"_id": 0},
+            )
+            or {}
+        )
+
         if old_deploy_config is None:
+            # First run, save the current config as deploy config
             await database.db.settings.deployConfig.replace_one(
                 {"_id": TgClient.ID},
                 current_deploy_config,
                 upsert=True,
             )
-        elif old_deploy_config != current_deploy_config:
-            runtime_config = (
-                await database.db.settings.config.find_one(
+
+            # For first run, also save as runtime config if it doesn't exist
+            if not runtime_config:
+                await database.db.settings.config.replace_one(
                     {"_id": TgClient.ID},
-                    {"_id": 0},
+                    current_deploy_config,
+                    upsert=True,
                 )
-                or {}
-            )
-
-            # Find all variables that are new or have changed values
-            changed_vars = {}
+        elif old_deploy_config != current_deploy_config:
+            # Only add new variables that don't exist in runtime_config
+            new_vars = {}
             for k, v in current_deploy_config.items():
-                # Add new variables or update variables with changed values
-                if k not in runtime_config or runtime_config.get(k) != v:
-                    changed_vars[k] = v
+                # Only add variables that don't exist in runtime_config
+                if k not in runtime_config:
+                    new_vars[k] = v
 
-            if changed_vars:
-                # Update runtime configuration with all changed variables
-                runtime_config.update(changed_vars)
+            if new_vars:
+                # Update runtime configuration with only new variables
+                runtime_config.update(new_vars)
                 await database.db.settings.config.replace_one(
                     {"_id": TgClient.ID},
                     runtime_config,
                     upsert=True,
                 )
-                LOGGER.info(f"Updated variables from config.py: {list(changed_vars.keys())}")
+                LOGGER.info(f"Added new variables from config.py: {list(new_vars.keys())}")
 
-            # Update the deploy config with the current config
+            # Update the deploy config with the current config from config.py
             await database.db.settings.deployConfig.replace_one(
                 {"_id": TgClient.ID},
                 current_deploy_config,
@@ -414,6 +424,20 @@ async def load_configurations():
             if stdout:
                 LOGGER.warning("Gunicorn processes still detected, attempting to kill again...")
                 await (await create_subprocess_exec("pkill", "-9", "-f", "gunicorn")).wait()
+
+                # Wait a moment to ensure processes are killed
+                await sleep(2)
+
+                # Check again to make sure they're really gone
+                process = await create_subprocess_exec(
+                    "pgrep", "-f", "gunicorn",
+                    stdout=-1
+                )
+                stdout, _ = await process.communicate()
+                if stdout:
+                    LOGGER.error("Failed to kill gunicorn processes despite multiple attempts")
+                else:
+                    LOGGER.info("Successfully killed all gunicorn processes")
         except Exception as e:
             LOGGER.error(f"Error checking for gunicorn processes: {e}")
     else:
