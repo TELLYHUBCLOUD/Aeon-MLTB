@@ -264,9 +264,8 @@ async def load_settings():
                 user_data[uid] = row
             LOGGER.info("Users data has been imported from Database")
 
-        # Convert TgClient.ID to string for collection name
-        if await database.db.rss[str(TgClient.ID)].find_one():
-            rows = database.db.rss[str(TgClient.ID)].find({})
+        if await database.db.rss[TgClient.ID].find_one():
+            rows = database.db.rss[TgClient.ID].find({})
             async for row in rows:
                 user_id = row["_id"]
                 del row["_id"]
