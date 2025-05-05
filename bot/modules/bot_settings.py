@@ -2565,7 +2565,9 @@ Configure global extract settings that will be used when user settings are not a
                 "COMPRESSION_SUBTITLE_ENABLED",
                 "COMPRESSION_ARCHIVE_ENABLED",
             ]:
-                setting_value = getattr(Config, setting, False)
+                # Use True as default for COMPRESSION_DELETE_ORIGINAL, False for others
+                default_value = True if setting == "COMPRESSION_DELETE_ORIGINAL" else False
+                setting_value = getattr(Config, setting, default_value)
                 status = "✅ ON" if setting_value else "❌ OFF"
 
                 # Format display name with status

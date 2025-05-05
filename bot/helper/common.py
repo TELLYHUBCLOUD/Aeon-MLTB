@@ -2428,18 +2428,20 @@ class TaskConfig:
             self.compression_priority = 4
 
         # Compression Delete Original
+        # Check for user setting first, then global setting, then default to True
         user_compression_delete_original = self.user_dict.get(
-            "COMPRESSION_DELETE_ORIGINAL", True  # Default to True
-        )
-        owner_compression_delete_original = (
-            hasattr(Config, "COMPRESSION_DELETE_ORIGINAL")
-            and Config.COMPRESSION_DELETE_ORIGINAL
+            "COMPRESSION_DELETE_ORIGINAL", None
         )
 
-        if "COMPRESSION_DELETE_ORIGINAL" in self.user_dict:
+        if user_compression_delete_original is not None:
+            # User has explicitly set a value
             self.compression_delete_original = user_compression_delete_original
+        elif hasattr(Config, "COMPRESSION_DELETE_ORIGINAL"):
+            # Fall back to global setting if available
+            self.compression_delete_original = Config.COMPRESSION_DELETE_ORIGINAL
         else:
-            self.compression_delete_original = owner_compression_delete_original
+            # Default to True if neither user nor global setting is available
+            self.compression_delete_original = True
 
         # Initialize compression format attributes
         # Video format

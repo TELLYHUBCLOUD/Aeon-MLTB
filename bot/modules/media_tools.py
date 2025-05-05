@@ -1718,21 +1718,20 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
             compression_priority = "4 (Default)"
 
         # Get delete original status
-        delete_original = user_dict.get("COMPRESSION_DELETE_ORIGINAL", True)  # Default to True
-        owner_delete_original = (
-            hasattr(Config, "COMPRESSION_DELETE_ORIGINAL")
-            and Config.COMPRESSION_DELETE_ORIGINAL
-        )
+        # Check for user setting first, then global setting, then default to True
+        delete_original = user_dict.get("COMPRESSION_DELETE_ORIGINAL", None)
+        if delete_original is None and hasattr(Config, "COMPRESSION_DELETE_ORIGINAL"):
+            delete_original = Config.COMPRESSION_DELETE_ORIGINAL
+        elif delete_original is None:
+            delete_original = True  # Default to True if not specified
 
+        # Determine display string with appropriate label
         if "COMPRESSION_DELETE_ORIGINAL" in user_dict:
-            if delete_original:
-                delete_original_status = "✅ Enabled (User)"
-            else:
-                delete_original_status = "❌ Disabled (User)"
-        elif owner_delete_original:
-            delete_original_status = "✅ Enabled (Global)"
+            delete_original_status = "✅ Enabled (User)" if delete_original else "❌ Disabled (User)"
+        elif hasattr(Config, "COMPRESSION_DELETE_ORIGINAL"):
+            delete_original_status = "✅ Enabled (Global)" if Config.COMPRESSION_DELETE_ORIGINAL else "❌ Disabled (Global)"
         else:
-            delete_original_status = "❌ Disabled (Default)"
+            delete_original_status = "✅ Enabled (Default)"
 
         # Get video compression status
         video_enabled = user_dict.get("COMPRESSION_VIDEO_ENABLED", False)
@@ -2115,7 +2114,13 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         buttons.data_button("End Time", f"mediatools {user_id} menu TRIM_END_TIME")
 
         # Add delete original toggle
-        delete_original = user_dict.get("TRIM_DELETE_ORIGINAL", False)
+        # Check for user setting first, then global setting, then default to True
+        delete_original = user_dict.get("TRIM_DELETE_ORIGINAL", None)
+        if delete_original is None and hasattr(Config, "TRIM_DELETE_ORIGINAL"):
+            delete_original = Config.TRIM_DELETE_ORIGINAL
+        elif delete_original is None:
+            delete_original = True  # Default to True if not specified
+
         buttons.data_button(
             f"Delete Original: {'✅ ON' if delete_original else '❌ OFF'}",
             f"mediatools {user_id} tog TRIM_DELETE_ORIGINAL {'f' if delete_original else 't'}",
@@ -2218,10 +2223,20 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         end_time_str = f"{end_time}" if end_time else "End of file (Default)"
 
         # Get delete original setting
-        delete_original = user_dict.get("TRIM_DELETE_ORIGINAL", True)  # Default to True
+        # Check for user setting first, then global setting, then default to True
+        delete_original = user_dict.get("TRIM_DELETE_ORIGINAL", None)
         if delete_original is None and hasattr(Config, "TRIM_DELETE_ORIGINAL"):
             delete_original = Config.TRIM_DELETE_ORIGINAL
-        delete_original_str = "✅ Enabled" if delete_original else "❌ Disabled"
+        elif delete_original is None:
+            delete_original = True  # Default to True if not specified
+
+        # Determine display string with appropriate label
+        if "TRIM_DELETE_ORIGINAL" in user_dict:
+            delete_original_str = f"{'✅ Enabled' if delete_original else '❌ Disabled'} (User)"
+        elif hasattr(Config, "TRIM_DELETE_ORIGINAL"):
+            delete_original_str = f"{'✅ Enabled' if delete_original else '❌ Disabled'} (Global)"
+        else:
+            delete_original_str = "✅ Enabled (Default)"
 
         # Get video trim settings
         video_codec = user_dict.get("TRIM_VIDEO_CODEC", None)
@@ -2900,7 +2915,13 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
     elif stype == "compression_config":
         # Compression configuration menu
         # Add global delete original toggle
-        delete_original = user_dict.get("COMPRESSION_DELETE_ORIGINAL", True)  # Default to True
+        # Check for user setting first, then global setting, then default to True
+        delete_original = user_dict.get("COMPRESSION_DELETE_ORIGINAL", None)
+        if delete_original is None and hasattr(Config, "COMPRESSION_DELETE_ORIGINAL"):
+            delete_original = Config.COMPRESSION_DELETE_ORIGINAL
+        elif delete_original is None:
+            delete_original = True  # Default to True if not specified
+
         buttons.data_button(
             f"Delete Original: {'✅ ON' if delete_original else '❌ OFF'}",
             f"mediatools {user_id} tog COMPRESSION_DELETE_ORIGINAL {'f' if delete_original else 't'}",
@@ -3046,21 +3067,20 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         btns = buttons.build_menu(2)
 
         # Get delete original setting
-        delete_original = user_dict.get("COMPRESSION_DELETE_ORIGINAL", True)  # Default to True
-        owner_delete_original = (
-            hasattr(Config, "COMPRESSION_DELETE_ORIGINAL")
-            and Config.COMPRESSION_DELETE_ORIGINAL
-        )
+        # Check for user setting first, then global setting, then default to True
+        delete_original = user_dict.get("COMPRESSION_DELETE_ORIGINAL", None)
+        if delete_original is None and hasattr(Config, "COMPRESSION_DELETE_ORIGINAL"):
+            delete_original = Config.COMPRESSION_DELETE_ORIGINAL
+        elif delete_original is None:
+            delete_original = True  # Default to True if not specified
 
+        # Determine display string with appropriate label
         if "COMPRESSION_DELETE_ORIGINAL" in user_dict:
-            if delete_original:
-                delete_original_status = "✅ Enabled (User)"
-            else:
-                delete_original_status = "❌ Disabled (User)"
-        elif owner_delete_original:
-            delete_original_status = "✅ Enabled (Global)"
+            delete_original_status = "✅ Enabled (User)" if delete_original else "❌ Disabled (User)"
+        elif hasattr(Config, "COMPRESSION_DELETE_ORIGINAL"):
+            delete_original_status = "✅ Enabled (Global)" if Config.COMPRESSION_DELETE_ORIGINAL else "❌ Disabled (Global)"
         else:
-            delete_original_status = "❌ Disabled (Default)"
+            delete_original_status = "✅ Enabled (Default)"
 
         # Get video compression settings
         video_preset = user_dict.get("COMPRESSION_VIDEO_PRESET", None)
@@ -3409,7 +3429,13 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         )
 
         # Add global delete original toggle
-        delete_original = user_dict.get("CONVERT_DELETE_ORIGINAL", False)
+        # Check for user setting first, then global setting, then default to True
+        delete_original = user_dict.get("CONVERT_DELETE_ORIGINAL", None)
+        if delete_original is None and hasattr(Config, "CONVERT_DELETE_ORIGINAL"):
+            delete_original = Config.CONVERT_DELETE_ORIGINAL
+        elif delete_original is None:
+            delete_original = True  # Default to True if not specified
+
         buttons.data_button(
             f"Delete Original: {'✅ ON' if delete_original else '❌ OFF'}",
             f"mediatools {user_id} tog CONVERT_DELETE_ORIGINAL {'f' if delete_original else 't'}",
@@ -3441,17 +3467,20 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         convert_priority = user_dict.get("CONVERT_PRIORITY", "3")
 
         # Get delete original status
+        # Check for user setting first, then global setting, then default to True
+        delete_original = user_dict.get("CONVERT_DELETE_ORIGINAL", None)
+        if delete_original is None and hasattr(Config, "CONVERT_DELETE_ORIGINAL"):
+            delete_original = Config.CONVERT_DELETE_ORIGINAL
+        elif delete_original is None:
+            delete_original = True  # Default to True if not specified
+
+        # Determine display string with appropriate label
         if "CONVERT_DELETE_ORIGINAL" in user_dict:
-            delete_original_status = (
-                "✅ Enabled (User)" if delete_original else "❌ Disabled (User)"
-            )
-        elif (
-            hasattr(Config, "CONVERT_DELETE_ORIGINAL")
-            and Config.CONVERT_DELETE_ORIGINAL
-        ):
-            delete_original_status = "✅ Enabled (Global)"
+            delete_original_status = f"{'✅ Enabled' if delete_original else '❌ Disabled'} (User)"
+        elif hasattr(Config, "CONVERT_DELETE_ORIGINAL"):
+            delete_original_status = f"{'✅ Enabled' if delete_original else '❌ Disabled'} (Global)"
         else:
-            delete_original_status = "❌ Disabled"
+            delete_original_status = "✅ Enabled (Default)"
 
         # Get video convert enabled status
         video_convert_enabled = user_dict.get("CONVERT_VIDEO_ENABLED", False)
