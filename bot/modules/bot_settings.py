@@ -444,10 +444,7 @@ async def get_buttons(key=None, edit_type=None, page=0, user_id=None):
             # Get help text for settings
             if key in {
                 "WATERMARK_ENABLED",
-                "WATERMARK_MAINTAIN_QUALITY",
                 "WATERMARK_THREADING",
-                "AUDIO_WATERMARK_ENABLED",
-                "SUBTITLE_WATERMARK_ENABLED",
                 "MERGE_ENABLED",
                 "CONCAT_DEMUXER_ENABLED",
                 "FILTER_COMPLEX_ENABLED",
@@ -1487,8 +1484,13 @@ Configure task monitoring settings to automatically manage downloads based on pe
                 "View", "botset view mediatools_watermark_text", "footer"
             )
 
-        # Add navigation buttons
-        buttons.data_button("Back", "botset mediatools_watermark", "footer")
+        # Add Default button to reset all watermark text settings
+        buttons.data_button("Default", "botset default_watermark_text", "footer")
+
+        # Add navigation buttons with current page in the callback data
+        buttons.data_button(
+            "Back", f"botset back_to_watermark_text {watermark_text_page}", "footer"
+        )
         buttons.data_button("Close", "botset close", "footer")
 
         # Add pagination buttons in a separate row below action buttons
@@ -4487,6 +4489,66 @@ async def edit_bot_settings(client, query):
         # Reset the page when first entering the menu
         globals()["watermark_text_page"] = 0
         await update_buttons(message, "mediatools_watermark_text", page=0)
+
+    elif data[1] == "back_to_watermark_text":
+        await query.answer()
+        # Get the current state before making changes
+        current_state = globals()["state"]
+
+        try:
+            if len(data) > 2:
+                # Update the global watermark_text_page variable with the page from the button
+                globals()["watermark_text_page"] = int(data[2])
+
+            # Set the state back to what it was
+            globals()["state"] = current_state
+            # Return to the watermark menu
+            await update_buttons(message, "mediatools_watermark")
+            return
+        except Exception as e:
+            LOGGER.error(f"Error in back_to_watermark_text: {e}")
+            # If there's an error, just go back to the watermark menu
+            globals()["state"] = current_state
+            await update_buttons(message, "mediatools_watermark")
+            return
+
+    elif data[1] == "default_watermark_text":
+        await query.answer(
+            "Resetting all watermark text settings to default values..."
+        )
+        # Get the current state before making changes
+        current_state = globals()["state"]
+
+        # Reset all watermark text settings to default
+        watermark_text_settings = [
+            # Visual settings
+            "WATERMARK_POSITION",
+            "WATERMARK_SIZE",
+            "WATERMARK_COLOR",
+            "WATERMARK_FONT",
+            "WATERMARK_OPACITY",
+            # Performance settings
+            "WATERMARK_QUALITY",
+            "WATERMARK_SPEED",
+            # Audio watermark settings
+            "AUDIO_WATERMARK_VOLUME",
+            "AUDIO_WATERMARK_INTERVAL",
+            # Subtitle watermark settings
+            "SUBTITLE_WATERMARK_STYLE",
+            "SUBTITLE_WATERMARK_INTERVAL",
+        ]
+
+        # Reset each setting to None (which will use the default value)
+        for setting in watermark_text_settings:
+            setattr(Config, setting, None)
+            await database.update_config({setting: None})
+
+        # Set the state back to what it was
+        globals()["state"] = current_state
+        # Stay on the same page
+        current_page = globals().get("watermark_text_page", 0)
+        await update_buttons(message, "mediatools_watermark_text", page=current_page)
+        return
 
     elif data[1] == "start_watermark_text":
         await query.answer()

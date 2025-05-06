@@ -467,18 +467,8 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         # Fast mode has been removed
         fast_mode_status = "❌ Removed (Use speed parameter instead)"
 
-        # Get maintain quality status
-        user_has_maintain_quality = "WATERMARK_MAINTAIN_QUALITY" in user_dict
-        if user_has_maintain_quality:
-            maintain_quality_status = (
-                "✅ High (User)"
-                if user_dict["WATERMARK_MAINTAIN_QUALITY"]
-                else "❌ Normal (User)"
-            )
-        elif Config.WATERMARK_MAINTAIN_QUALITY:
-            maintain_quality_status = "✅ High (Global)"
-        else:
-            maintain_quality_status = "❌ Normal"
+        # Quality is now controlled by WATERMARK_QUALITY parameter
+        maintain_quality_status = "❌ Removed (Use quality parameter instead)"
 
         # Get opacity value
         user_has_opacity = (
@@ -723,18 +713,8 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         # Fast mode has been removed
         fast_mode_status = "❌ Removed (Use speed parameter instead)"
 
-        # Get maintain quality status
-        user_has_maintain_quality = "WATERMARK_MAINTAIN_QUALITY" in user_dict
-        if user_has_maintain_quality:
-            maintain_quality_status = (
-                "✅ High (User)"
-                if user_dict["WATERMARK_MAINTAIN_QUALITY"]
-                else "❌ Normal (User)"
-            )
-        elif Config.WATERMARK_MAINTAIN_QUALITY:
-            maintain_quality_status = "✅ High (Global)"
-        else:
-            maintain_quality_status = "❌ Normal"
+        # Quality is now controlled by WATERMARK_QUALITY parameter
+        maintain_quality_status = "❌ Removed (Use quality parameter instead)"
 
         # Get opacity value
         user_has_opacity = (
@@ -5429,7 +5409,7 @@ async def get_menu(option, message, user_id):
         current_value = "default.otf (Default)"
     elif option == "WATERMARK_PRIORITY":
         current_value = "2 (Default)"
-    elif option in {"WATERMARK_THREADING"} or option == "WATERMARK_MAINTAIN_QUALITY":
+    elif option in {"WATERMARK_THREADING"}:
         current_value = "True (Default)"
     elif option == "WATERMARK_OPACITY":
         current_value = "1.0 (Default)"
@@ -6453,7 +6433,6 @@ async def edit_media_tools_settings(client, query):
         if data[3] in [
             "AUDIO_WATERMARK_ENABLED",
             "SUBTITLE_WATERMARK_ENABLED",
-            "WATERMARK_MAINTAIN_QUALITY",
         ]:
             # Stay in the watermark_config menu
             await update_media_tools_settings(query, "watermark_config")
@@ -6580,7 +6559,6 @@ async def edit_media_tools_settings(client, query):
             "WATERMARK_PRIORITY",
             "WATERMARK_THREADING",
             "WATERMARK_THREAD_NUMBER",
-            "WATERMARK_MAINTAIN_QUALITY",
             "WATERMARK_OPACITY",
             "WATERMARK_REMOVE_ORIGINAL",
             "AUDIO_WATERMARK_ENABLED",

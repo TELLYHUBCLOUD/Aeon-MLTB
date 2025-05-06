@@ -573,17 +573,9 @@ class TaskConfig:
         # Use WATERMARK_SPEED instead
         self.watermark_fast_mode = False  # For backward compatibility
 
-        # Watermark Maintain Quality
-        if user_watermark_enabled and "WATERMARK_MAINTAIN_QUALITY" in self.user_dict:
-            self.watermark_maintain_quality = self.user_dict[
-                "WATERMARK_MAINTAIN_QUALITY"
-            ]
-        elif self.watermark_enabled and hasattr(
-            Config, "WATERMARK_MAINTAIN_QUALITY"
-        ):
-            self.watermark_maintain_quality = Config.WATERMARK_MAINTAIN_QUALITY
-        else:
-            self.watermark_maintain_quality = True
+        # Watermark Quality is now controlled by WATERMARK_QUALITY parameter
+        # Keep maintain_quality for backward compatibility
+        self.watermark_maintain_quality = True
 
         # Watermark Opacity
         if user_watermark_enabled and "WATERMARK_OPACITY" in self.user_dict:
@@ -8848,9 +8840,8 @@ class TaskConfig:
 
         # Fast mode has been removed, use speed parameter instead
         speed = self.user_dict.get("WATERMARK_SPEED", Config.WATERMARK_SPEED)
-        maintain_quality = self.user_dict.get(
-            "WATERMARK_MAINTAIN_QUALITY", Config.WATERMARK_MAINTAIN_QUALITY
-        )
+        # Quality is now controlled by WATERMARK_QUALITY parameter
+        maintain_quality = True
         opacity = self.user_dict.get("WATERMARK_OPACITY", Config.WATERMARK_OPACITY)
 
         # Determine the source of the watermark settings
@@ -8879,13 +8870,8 @@ class TaskConfig:
             "speed": "user"
             if "WATERMARK_SPEED" in self.user_dict
             else ("owner" if hasattr(Config, "WATERMARK_SPEED") else "default"),
-            "maintain_quality": "user"
-            if "WATERMARK_MAINTAIN_QUALITY" in self.user_dict
-            else (
-                "owner"
-                if hasattr(Config, "WATERMARK_MAINTAIN_QUALITY")
-                else "default"
-            ),
+            # Quality is now controlled by WATERMARK_QUALITY parameter
+            "maintain_quality": "default",
             "opacity": "user"
             if "WATERMARK_OPACITY" in self.user_dict
             else ("owner" if hasattr(Config, "WATERMARK_OPACITY") else "default"),
