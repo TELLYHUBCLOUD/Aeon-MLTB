@@ -6373,8 +6373,7 @@ async def edit_media_tools_settings(client, query):
         await query.answer()
         try:
             if len(data) > 3:
-                # Update the global watermark_config_page variable with the page from the button
-                global watermark_config_page
+                # Update the watermark_config_page variable with the page from the button
                 watermark_config_page = int(data[3])
 
             # Return to the watermark config menu with the correct page
@@ -6418,7 +6417,6 @@ async def edit_media_tools_settings(client, query):
         await database.update_user_data(user_id)
 
         # Stay on the same page
-        global watermark_config_page
         await update_media_tools_settings(
             query, f"watermark_config {watermark_config_page}"
         )
