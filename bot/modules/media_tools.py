@@ -350,19 +350,7 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
             f"mediatools {user_id} tog WATERMARK_REMOVE_ORIGINAL {'f' if remove_original else 't'}",
         )
 
-        # Add Threading toggle
-        threading_enabled = user_dict.get(
-            "WATERMARK_THREADING", Config.WATERMARK_THREADING
-        )
-        buttons.data_button(
-            f"Threading: {'✅ ON' if threading_enabled else '❌ OFF'}",
-            f"mediatools {user_id} tog WATERMARK_THREADING {'f' if threading_enabled else 't'}",
-        )
-
-        # Add Thread Number button
-        buttons.data_button(
-            "Thread Number", f"mediatools {user_id} menu WATERMARK_THREAD_NUMBER"
-        )
+        # Threading toggle and thread number button removed for users
 
         buttons.data_button("Reset", f"mediatools {user_id} reset_watermark")
         buttons.data_button("Remove", f"mediatools {user_id} remove_watermark")
@@ -505,10 +493,6 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
 ┠ <b>Color</b> → <code>{watermark_color}</code>
 ┠ <b>Font</b> → <code>{watermark_font}</code>
 ┠ <b>Opacity</b> → <code>{opacity_value}</code>
-┠ <b>Fast Mode</b> → {fast_mode_status}
-┠ <b>Quality</b> → {maintain_quality_status}
-┠ <b>Threading</b> → {threading_status}
-┠ <b>Thread Number</b> → <code>{thread_number}</code>
 ┖ <b>Remove Original</b> → {remove_original_status}"""
 
     elif stype.startswith("watermark_config"):
@@ -592,7 +576,14 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
             buttons.data_button(display_name, f"mediatools {user_id} menu {setting}")
 
         # Add action buttons in a separate row
-        buttons.data_button("Back", f"mediatools {user_id} watermark", "footer")
+        buttons.data_button(
+            "Default", f"mediatools {user_id} default_watermark_text", "footer"
+        )
+        buttons.data_button(
+            "Back",
+            f"mediatools {user_id} back_to_watermark_config {page_no}",
+            "footer",
+        )
         buttons.data_button("Close", f"mediatools {user_id} close", "footer")
 
         # Add pagination buttons in a separate row below action buttons
@@ -710,11 +701,7 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         else:
             thread_number = "4 (Default)"
 
-        # Fast mode has been removed
-        fast_mode_status = "❌ Removed (Use speed parameter instead)"
-
-        # Quality is now controlled by WATERMARK_QUALITY parameter
-        maintain_quality_status = "❌ Removed (Use quality parameter instead)"
+        # Fast mode and quality have been removed - no need to show status
 
         # Get opacity value
         user_has_opacity = (
@@ -5294,8 +5281,35 @@ async def get_menu(option, message, user_id):
         back_target = "trim"
     elif option == "EXTRACT_PRIORITY":
         back_target = "extract"
-    elif option.startswith("WATERMARK_"):
-        back_target = "watermark_config"
+    elif (
+        option.startswith("WATERMARK_")
+        or option.startswith("AUDIO_WATERMARK_")
+        or option.startswith("SUBTITLE_WATERMARK_")
+    ):
+        # Check if we need to return to a specific page in watermark_config
+        global watermark_config_page
+
+        if message.text and "Page:" in message.text:
+            try:
+                page_info = message.text.split("Page:")[1].strip().split("/")[0]
+                page_no = int(page_info) - 1
+                # Update the global variable
+                watermark_config_page = page_no
+                back_target = f"watermark_config {page_no}"
+            except (ValueError, IndexError) as e:
+                LOGGER.error(
+                    f"Failed to extract page number from message text: {e}, using global watermark_config_page: {watermark_config_page}"
+                )
+                back_target = f"watermark_config {watermark_config_page}"
+        else:
+            # Check if we have a stored page in handler_dict
+            stored_page = handler_dict.get(f"{user_id}_watermark_page")
+            if stored_page is not None:
+                watermark_config_page = stored_page
+                back_target = f"watermark_config {watermark_config_page}"
+            else:
+                # Use the global variable
+                back_target = f"watermark_config {watermark_config_page}"
     elif option.startswith("CONVERT_VIDEO_"):
         back_target = "convert_video"
     elif option.startswith("CONVERT_AUDIO_"):
@@ -6355,7 +6369,61 @@ async def edit_media_tools_settings(client, query):
         await query.answer("Not Yours!", show_alert=True)
         return
 
-    if data[2] == "back":
+    if data[2] == "back_to_watermark_config":
+        await query.answer()
+        try:
+            if len(data) > 3:
+                # Update the global watermark_config_page variable with the page from the button
+                global watermark_config_page
+                watermark_config_page = int(data[3])
+
+            # Return to the watermark config menu with the correct page
+            await update_media_tools_settings(
+                query, f"watermark_config {watermark_config_page}"
+            )
+        except Exception as e:
+            LOGGER.error(f"Error in back_to_watermark_config: {e}")
+            # If there's an error, just go back to the watermark menu
+            await update_media_tools_settings(query, "watermark")
+
+    elif data[2] == "default_watermark_text":
+        await query.answer(
+            "Resetting all watermark text settings to default values..."
+        )
+
+        # Reset all watermark text settings to default
+        watermark_text_settings = [
+            # Visual settings
+            "WATERMARK_POSITION",
+            "WATERMARK_SIZE",
+            "WATERMARK_COLOR",
+            "WATERMARK_FONT",
+            "WATERMARK_OPACITY",
+            # Performance settings
+            "WATERMARK_QUALITY",
+            "WATERMARK_SPEED",
+            # Audio watermark settings
+            "AUDIO_WATERMARK_VOLUME",
+            "AUDIO_WATERMARK_INTERVAL",
+            # Subtitle watermark settings
+            "SUBTITLE_WATERMARK_STYLE",
+            "SUBTITLE_WATERMARK_INTERVAL",
+        ]
+
+        # Reset each setting to None (which will use the default value)
+        for setting in watermark_text_settings:
+            if setting in user_dict:
+                del user_dict[setting]
+
+        await database.update_user_data(user_id)
+
+        # Stay on the same page
+        global watermark_config_page
+        await update_media_tools_settings(
+            query, f"watermark_config {watermark_config_page}"
+        )
+
+    elif data[2] == "back":
         await query.answer()
         await update_media_tools_settings(query)
     elif data[2] == "close":
@@ -6503,6 +6571,12 @@ async def edit_media_tools_settings(client, query):
         await database.update_user_data(user_id)
     elif data[2] == "menu":
         await query.answer()
+        # Store the current page before going to the menu
+        if data[3].startswith(
+            ("WATERMARK_", "AUDIO_WATERMARK_", "SUBTITLE_WATERMARK_")
+        ):
+            # We're in the watermark config menu, store the current page
+            handler_dict[f"{user_id}_watermark_page"] = watermark_config_page
         await get_menu(data[3], message, user_id)
     elif data[2] == "set":
         await query.answer()

@@ -377,7 +377,27 @@ async def get_buttons(key=None, edit_type=None, page=0, user_id=None):
             if key.startswith(
                 ("WATERMARK_", "AUDIO_WATERMARK_", "SUBTITLE_WATERMARK_")
             ):
-                buttons.data_button("Back", "botset mediatools_watermark")
+                # Check if we're in the watermark text menu
+                if globals().get("watermark_text_page", 0) > 0 and key in [
+                    "WATERMARK_POSITION",
+                    "WATERMARK_SIZE",
+                    "WATERMARK_COLOR",
+                    "WATERMARK_FONT",
+                    "WATERMARK_OPACITY",
+                    "WATERMARK_QUALITY",
+                    "WATERMARK_SPEED",
+                    "AUDIO_WATERMARK_VOLUME",
+                    "AUDIO_WATERMARK_INTERVAL",
+                    "SUBTITLE_WATERMARK_STYLE",
+                    "SUBTITLE_WATERMARK_INTERVAL",
+                ]:
+                    # If we're in the watermark text menu, include the current page in the back button
+                    current_page = globals().get("watermark_text_page", 0)
+                    buttons.data_button(
+                        "Back", f"botset back_to_watermark_text {current_page}"
+                    )
+                else:
+                    buttons.data_button("Back", "botset mediatools_watermark")
             elif key.startswith("METADATA_"):
                 buttons.data_button("Back", "botset mediatools_metadata")
             elif key.startswith("TRIM_"):
@@ -3950,7 +3970,22 @@ async def edit_variable(_, message, pre_message, key):
 
     # Determine which menu to return to based on the key
     if key.startswith(("WATERMARK_", "AUDIO_WATERMARK_", "SUBTITLE_WATERMARK_")):
-        return_menu = "mediatools_watermark"
+        # Check if we're in the watermark text menu
+        if pre_message.text and "Watermark Text Settings" in pre_message.text:
+            return_menu = "mediatools_watermark_text"
+            # Check if we need to return to a specific page in watermark_text
+            if pre_message.text and "Page:" in pre_message.text:
+                try:
+                    page_info = (
+                        pre_message.text.split("Page:")[1].strip().split("/")[0]
+                    )
+                    page_no = int(page_info) - 1
+                    # Set the global watermark_text_page variable to ensure we return to the correct page
+                    globals()["watermark_text_page"] = page_no
+                except (ValueError, IndexError):
+                    pass
+        else:
+            return_menu = "mediatools_watermark"
     elif key.startswith("METADATA_"):
         return_menu = "mediatools_metadata"
     elif key.startswith("CONVERT_"):
@@ -4069,6 +4104,14 @@ async def edit_variable(_, message, pre_message, key):
             await update_buttons(
                 pre_message, "mediatools_merge", page=globals()["merge_page"]
             )
+    elif (
+        return_menu == "mediatools_watermark_text"
+        and "watermark_text_page" in globals()
+    ):
+        # Return to the watermark text menu with the correct page
+        await update_buttons(
+            pre_message, return_menu, page=globals()["watermark_text_page"]
+        )
     else:
         await update_buttons(pre_message, return_menu)
 
@@ -4502,8 +4545,12 @@ async def edit_bot_settings(client, query):
 
             # Set the state back to what it was
             globals()["state"] = current_state
-            # Return to the watermark menu
-            await update_buttons(message, "mediatools_watermark")
+            # Return to the watermark text menu with the correct page
+            await update_buttons(
+                message,
+                "mediatools_watermark_text",
+                page=globals()["watermark_text_page"],
+            )
             return
         except Exception as e:
             LOGGER.error(f"Error in back_to_watermark_text: {e}")
