@@ -63,6 +63,7 @@ start = 0
 state = "view"
 merge_page = 0  # Track current page for merge menu
 merge_config_page = 0  # Track current page for merge config menu
+watermark_text_page = 0  # Track current page for watermark text menu
 handler_dict = {}
 DEFAULT_VALUES = {
     # Set default leech split size to max split size based on owner session premium status
@@ -443,7 +444,6 @@ async def get_buttons(key=None, edit_type=None, page=0, user_id=None):
             # Get help text for settings
             if key in {
                 "WATERMARK_ENABLED",
-                "WATERMARK_FAST_MODE",
                 "WATERMARK_MAINTAIN_QUALITY",
                 "WATERMARK_THREADING",
                 "AUDIO_WATERMARK_ENABLED",
@@ -1295,7 +1295,12 @@ Configure task monitoring settings to automatically manage downloads based on pe
             # Format display names for better readability
             if setting == "WATERMARK_KEY":
                 display_name = "Text"
-            elif setting == "WATERMARK_REMOVE_ORIGINAL":
+                # Change the action to open the text menu instead of editing directly
+                buttons.data_button(display_name, "botset watermark_text")
+                continue
+
+            # For other settings
+            if setting == "WATERMARK_REMOVE_ORIGINAL":
                 display_name = "RO"
             else:
                 display_name = (
@@ -1405,7 +1410,189 @@ Configure task monitoring settings to automatically manage downloads based on pe
 
 <b>Note:</b> Use the Text button to access detailed watermark configuration options."""
 
-    elif key == "mediatools_merge" or key == "mediatools_merge_config":
+    elif key == "mediatools_watermark_text":
+        # Get all watermark text settings
+        watermark_text_settings = [
+            # Visual settings
+            "WATERMARK_POSITION",
+            "WATERMARK_SIZE",
+            "WATERMARK_COLOR",
+            "WATERMARK_FONT",
+            "WATERMARK_OPACITY",
+            # Performance settings
+            "WATERMARK_QUALITY",
+            "WATERMARK_SPEED",
+            # Audio watermark settings
+            "AUDIO_WATERMARK_VOLUME",
+            "AUDIO_WATERMARK_INTERVAL",
+            # Subtitle watermark settings
+            "SUBTITLE_WATERMARK_STYLE",
+            "SUBTITLE_WATERMARK_INTERVAL",
+        ]
+
+        # Create pagination
+        watermark_text_page = globals().get("watermark_text_page", 0)
+        items_per_page = 10  # 5 rows * 2 columns
+        total_pages = (
+            len(watermark_text_settings) + items_per_page - 1
+        ) // items_per_page
+
+        # Ensure page is valid
+        if watermark_text_page >= total_pages:
+            watermark_text_page = 0
+            globals()["watermark_text_page"] = 0
+        elif watermark_text_page < 0:
+            watermark_text_page = total_pages - 1
+            globals()["watermark_text_page"] = total_pages - 1
+
+        # Get settings for current page
+        start_idx = watermark_text_page * items_per_page
+        end_idx = min(start_idx + items_per_page, len(watermark_text_settings))
+        current_page_settings = watermark_text_settings[start_idx:end_idx]
+
+        # Add buttons for each setting on current page
+        for setting in current_page_settings:
+            # Format display names for better readability
+            if setting.startswith("AUDIO_WATERMARK_"):
+                display_name = (
+                    "Audio "
+                    + setting.replace("AUDIO_WATERMARK_", "")
+                    .replace("_", " ")
+                    .title()
+                )
+            elif setting.startswith("SUBTITLE_WATERMARK_"):
+                display_name = (
+                    "Subtitle "
+                    + setting.replace("SUBTITLE_WATERMARK_", "")
+                    .replace("_", " ")
+                    .title()
+                )
+            else:
+                display_name = (
+                    setting.replace("WATERMARK_", "").replace("_", " ").title()
+                )
+
+            # No more audio or subtitle watermark enabled settings
+
+            # For non-boolean settings, add edit buttons
+            buttons.data_button(display_name, f"botset editvar {setting}")
+
+        # Add action buttons in a separate row
+        if state == "view":
+            buttons.data_button(
+                "Edit", "botset edit mediatools_watermark_text", "footer"
+            )
+        else:
+            buttons.data_button(
+                "View", "botset view mediatools_watermark_text", "footer"
+            )
+
+        # Add navigation buttons
+        buttons.data_button("Back", "botset mediatools_watermark", "footer")
+        buttons.data_button("Close", "botset close", "footer")
+
+        # Add pagination buttons in a separate row below action buttons
+        if total_pages > 1:
+            for i in range(total_pages):
+                # Make the current page button different
+                if i == watermark_text_page:
+                    buttons.data_button(
+                        f"[{i + 1}]", f"botset start_watermark_text {i}", "page"
+                    )
+                else:
+                    buttons.data_button(
+                        str(i + 1), f"botset start_watermark_text {i}", "page"
+                    )
+
+        # Get current watermark settings for display
+        watermark_position = Config.WATERMARK_POSITION or "top_left (Default)"
+        watermark_size = Config.WATERMARK_SIZE or "20 (Default)"
+        watermark_color = Config.WATERMARK_COLOR or "white (Default)"
+        watermark_font = Config.WATERMARK_FONT or "default.otf (Default)"
+        watermark_opacity = Config.WATERMARK_OPACITY or "1.0 (Default)"
+        watermark_quality = getattr(Config, "WATERMARK_QUALITY", "None (Default)")
+        watermark_speed = getattr(Config, "WATERMARK_SPEED", "None (Default)")
+
+        # Audio watermark settings
+        audio_watermark_volume = getattr(
+            Config, "AUDIO_WATERMARK_VOLUME", "0.3 (Default)"
+        )
+        audio_watermark_interval = getattr(
+            Config, "AUDIO_WATERMARK_INTERVAL", "None (Default)"
+        )
+
+        # Subtitle watermark settings
+        subtitle_watermark_style = getattr(
+            Config, "SUBTITLE_WATERMARK_STYLE", "None (Default)"
+        )
+        subtitle_watermark_interval = getattr(
+            Config, "SUBTITLE_WATERMARK_INTERVAL", "None (Default)"
+        )
+
+        # Determine which category is shown on the current page
+        categories = []
+        if any(
+            setting
+            in [
+                "WATERMARK_POSITION",
+                "WATERMARK_SIZE",
+                "WATERMARK_COLOR",
+                "WATERMARK_FONT",
+                "WATERMARK_OPACITY",
+            ]
+            for setting in current_page_settings
+        ):
+            categories.append("Visual")
+        if any(
+            setting in ["WATERMARK_QUALITY", "WATERMARK_SPEED"]
+            for setting in current_page_settings
+        ):
+            categories.append("Performance")
+        if any(
+            setting.startswith("AUDIO_WATERMARK_")
+            for setting in current_page_settings
+        ):
+            categories.append("Audio")
+        if any(
+            setting.startswith("SUBTITLE_WATERMARK_")
+            for setting in current_page_settings
+        ):
+            categories.append("Subtitle")
+
+        category_text = ", ".join(categories)
+
+        msg = f"""<b>Watermark Text Settings</b> | State: {state}
+
+<b>Visual Settings:</b>
+• <b>Position:</b> <code>{watermark_position}</code>
+• <b>Size:</b> <code>{watermark_size}</code>
+• <b>Color:</b> <code>{watermark_color}</code>
+• <b>Font:</b> <code>{watermark_font}</code>
+• <b>Opacity:</b> <code>{watermark_opacity}</code>
+
+<b>Performance Settings:</b>
+• <b>Quality:</b> <code>{watermark_quality}</code>
+• <b>Speed:</b> <code>{watermark_speed}</code>
+
+<b>Audio Watermark:</b>
+• <b>Volume:</b> <code>{audio_watermark_volume}</code>
+• <b>Interval:</b> <code>{audio_watermark_interval}</code>
+
+<b>Subtitle Watermark:</b>
+• <b>Style:</b> <code>{subtitle_watermark_style}</code>
+• <b>Interval:</b> <code>{subtitle_watermark_interval}</code>
+
+Current page shows: {category_text} settings."""
+
+        # Add page info to message
+        if total_pages > 1:
+            msg += f"\n\n<b>Page:</b> {watermark_text_page + 1}/{total_pages}"
+
+        # Build the menu with 2 columns for settings, 4 columns for action buttons, and 8 columns for pagination
+        btns = buttons.build_menu(2, 8, 4, 8)
+        return msg, btns
+
+    elif key in {"mediatools_merge", "mediatools_merge_config"}:
         # Get all merge settings and organize them by category
         general_settings = [
             "MERGE_ENABLED",
@@ -3510,7 +3697,11 @@ Configure advanced merge settings that will be used when user settings are not a
 
     if key is None:
         button = buttons.build_menu(1)
-    elif key in {"mediatools_merge", "mediatools_merge_config"}:
+    elif key in {
+        "mediatools_merge",
+        "mediatools_merge_config",
+        "mediatools_watermark_text",
+    }:
         # Build the menu with 2 columns for settings, 4 columns for action buttons, and 8 columns for pagination
         button = buttons.build_menu(2, 8, 4, 8)
     elif key in {"mediatools_watermark", "mediatools_convert"}:
@@ -4276,6 +4467,64 @@ async def edit_bot_settings(client, query):
         # Set the state back to what it was
         globals()["state"] = current_state
         await update_buttons(message, "mediatools_watermark")
+
+    elif data[1] == "watermark_text":
+        from bot.helper.ext_utils.bot_utils import is_media_tool_enabled
+
+        await query.answer()
+        # Get the current state before making changes
+        current_state = globals()["state"]
+
+        # Check if watermark is enabled
+        if not is_media_tool_enabled("watermark"):
+            await query.answer(
+                "Watermark tool is disabled by the bot owner.", show_alert=True
+            )
+            return
+
+        # Set the state back to what it was
+        globals()["state"] = current_state
+        # Reset the page when first entering the menu
+        globals()["watermark_text_page"] = 0
+        await update_buttons(message, "mediatools_watermark_text", page=0)
+
+    elif data[1] == "start_watermark_text":
+        await query.answer()
+        # Get the current state before making changes
+        current_state = globals()["state"]
+
+        try:
+            if len(data) > 2:
+                # Update the global watermark_text_page variable
+                globals()["watermark_text_page"] = int(data[2])
+
+                # Set the state back to what it was
+                globals()["state"] = current_state
+                await update_buttons(
+                    message,
+                    "mediatools_watermark_text",
+                    page=globals()["watermark_text_page"],
+                )
+            else:
+                # If no page number is provided, stay on the current page
+                # Set the state back to what it was
+                globals()["state"] = current_state
+                await update_buttons(
+                    message,
+                    "mediatools_watermark_text",
+                    page=globals()["watermark_text_page"],
+                )
+        except (ValueError, IndexError) as e:
+            # In case of any error, stay on the current page
+            LOGGER.error(f"Error in start_watermark_text handler: {e}")
+
+            # Set the state back to what it was
+            globals()["state"] = current_state
+            await update_buttons(
+                message,
+                "mediatools_watermark_text",
+                page=globals()["watermark_text_page"],
+            )
     elif data[1] == "mediatools_merge":
         from bot.helper.ext_utils.bot_utils import is_media_tool_enabled
 
@@ -4437,7 +4686,7 @@ async def edit_bot_settings(client, query):
         Config.WATERMARK_REMOVE_ORIGINAL = True
 
         # Reset audio watermark settings
-        Config.AUDIO_WATERMARK_VOLUME = 0.0
+        Config.AUDIO_WATERMARK_VOLUME = 0.3
         Config.AUDIO_WATERMARK_INTERVAL = 0
 
         # Reset subtitle watermark settings
@@ -4461,7 +4710,7 @@ async def edit_bot_settings(client, query):
                 "WATERMARK_OPACITY": 0.0,
                 "WATERMARK_REMOVE_ORIGINAL": True,
                 # Audio watermark settings
-                "AUDIO_WATERMARK_VOLUME": 0.0,
+                "AUDIO_WATERMARK_VOLUME": 0.3,
                 "AUDIO_WATERMARK_INTERVAL": 0,
                 # Subtitle watermark settings
                 "SUBTITLE_WATERMARK_STYLE": "none",
@@ -6738,11 +6987,35 @@ async def edit_bot_settings(client, query):
     elif data[1] == "edit":
         await query.answer()
         globals()["state"] = "edit"
-        await update_buttons(message, data[2])
+        # Handle pagination for watermark text menu
+        if (
+            data[2] == "mediatools_watermark_text"
+            and "watermark_text_page" in globals()
+        ):
+            await update_buttons(
+                message, data[2], page=globals()["watermark_text_page"]
+            )
+        # Handle pagination for merge menu
+        elif data[2] == "mediatools_merge" and "merge_page" in globals():
+            await update_buttons(message, data[2], page=globals()["merge_page"])
+        else:
+            await update_buttons(message, data[2])
     elif data[1] == "view":
         await query.answer()
         globals()["state"] = "view"
-        await update_buttons(message, data[2])
+        # Handle pagination for watermark text menu
+        if (
+            data[2] == "mediatools_watermark_text"
+            and "watermark_text_page" in globals()
+        ):
+            await update_buttons(
+                message, data[2], page=globals()["watermark_text_page"]
+            )
+        # Handle pagination for merge menu
+        elif data[2] == "mediatools_merge" and "merge_page" in globals():
+            await update_buttons(message, data[2], page=globals()["merge_page"])
+        else:
+            await update_buttons(message, data[2])
     elif data[1] == "start":
         await query.answer()
         # Get the current state before making changes

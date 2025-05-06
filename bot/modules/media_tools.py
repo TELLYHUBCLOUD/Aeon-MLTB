@@ -464,18 +464,8 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         else:
             thread_number = "4 (Default)"
 
-        # Get fast mode status
-        user_has_fast_mode = "WATERMARK_FAST_MODE" in user_dict
-        if user_has_fast_mode:
-            fast_mode_status = (
-                "✅ Enabled (User)"
-                if user_dict["WATERMARK_FAST_MODE"]
-                else "❌ Disabled (User)"
-            )
-        elif Config.WATERMARK_FAST_MODE:
-            fast_mode_status = "✅ Enabled (Global)"
-        else:
-            fast_mode_status = "❌ Disabled"
+        # Fast mode has been removed
+        fast_mode_status = "❌ Removed (Use speed parameter instead)"
 
         # Get maintain quality status
         user_has_maintain_quality = "WATERMARK_MAINTAIN_QUALITY" in user_dict
@@ -532,29 +522,38 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
 ┖ <b>Remove Original</b> → {remove_original_status}"""
 
     elif stype.startswith("watermark_config"):
-        # Get all watermark settings and sort them alphabetically
-        watermark_settings = [
-            # Basic settings
+        # Get all watermark settings organized by category
+        visual_settings = [
             "WATERMARK_KEY",
             "WATERMARK_POSITION",
             "WATERMARK_SIZE",
             "WATERMARK_COLOR",
             "WATERMARK_FONT",
             "WATERMARK_OPACITY",
-            # Quality and speed settings (numerical values instead of toggles)
-            "WATERMARK_QUALITY",
-            "WATERMARK_SPEED",
-            # Audio and subtitle interval settings
-            "AUDIO_WATERMARK_INTERVAL",
-            "SUBTITLE_WATERMARK_INTERVAL",
-            # Audio volume (keeping this as it's useful)
-            "AUDIO_WATERMARK_VOLUME",
-            # Subtitle style (keeping this as it's useful)
-            "SUBTITLE_WATERMARK_STYLE",
         ]
 
-        # Sort settings alphabetically
-        watermark_settings.sort()
+        performance_settings = [
+            "WATERMARK_QUALITY",  # Numerical value instead of toggle
+            "WATERMARK_SPEED",  # Numerical value instead of toggle
+        ]
+
+        audio_settings = [
+            "AUDIO_WATERMARK_INTERVAL",  # New setting
+            "AUDIO_WATERMARK_VOLUME",  # Keeping this as it's useful
+        ]
+
+        subtitle_settings = [
+            "SUBTITLE_WATERMARK_INTERVAL",  # New setting
+            "SUBTITLE_WATERMARK_STYLE",  # Keeping this as it's useful
+        ]
+
+        # Combine all settings in a logical order
+        watermark_settings = (
+            visual_settings
+            + performance_settings
+            + audio_settings
+            + subtitle_settings
+        )
 
         # Pagination setup
         global watermark_config_page
@@ -721,18 +720,8 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         else:
             thread_number = "4 (Default)"
 
-        # Get fast mode status
-        user_has_fast_mode = "WATERMARK_FAST_MODE" in user_dict
-        if user_has_fast_mode:
-            fast_mode_status = (
-                "✅ Enabled (User)"
-                if user_dict["WATERMARK_FAST_MODE"]
-                else "❌ Disabled (User)"
-            )
-        elif Config.WATERMARK_FAST_MODE:
-            fast_mode_status = "✅ Enabled (Global)"
-        else:
-            fast_mode_status = "❌ Disabled"
+        # Fast mode has been removed
+        fast_mode_status = "❌ Removed (Use speed parameter instead)"
 
         # Get maintain quality status
         user_has_maintain_quality = "WATERMARK_MAINTAIN_QUALITY" in user_dict
@@ -772,42 +761,9 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         else:
             remove_original_status = "❌ Disabled"
 
-        # Get audio watermark text
-        audio_watermark_enabled = user_dict.get("AUDIO_WATERMARK_ENABLED", False)
-        user_has_audio_text = (
-            "AUDIO_WATERMARK_TEXT" in user_dict and user_dict["AUDIO_WATERMARK_TEXT"]
-        )
-        owner_has_audio_text = Config.AUDIO_WATERMARK_TEXT
-
-        if user_has_audio_text:
-            audio_watermark_text = f"{user_dict['AUDIO_WATERMARK_TEXT']} (User)"
-        elif (audio_watermark_enabled and owner_has_audio_text) or (
-            Config.AUDIO_WATERMARK_ENABLED and owner_has_audio_text
-        ):
-            audio_watermark_text = f"{Config.AUDIO_WATERMARK_TEXT} (Global)"
-        else:
-            audio_watermark_text = "Same as visual watermark"
-
-        # Get subtitle watermark text
-        subtitle_watermark_enabled = user_dict.get(
-            "SUBTITLE_WATERMARK_ENABLED", False
-        )
-        user_has_subtitle_text = (
-            "SUBTITLE_WATERMARK_TEXT" in user_dict
-            and user_dict["SUBTITLE_WATERMARK_TEXT"]
-        )
-        owner_has_subtitle_text = Config.SUBTITLE_WATERMARK_TEXT
-
-        if user_has_subtitle_text:
-            subtitle_watermark_text = (
-                f"{user_dict['SUBTITLE_WATERMARK_TEXT']} (User)"
-            )
-        elif (subtitle_watermark_enabled and owner_has_subtitle_text) or (
-            Config.SUBTITLE_WATERMARK_ENABLED and owner_has_subtitle_text
-        ):
-            subtitle_watermark_text = f"{Config.SUBTITLE_WATERMARK_TEXT} (Global)"
-        else:
-            subtitle_watermark_text = "Same as visual watermark"
+        # Audio and subtitle watermarks will use the same text as visual watermark
+        audio_watermark_text = "Same as visual watermark"
+        subtitle_watermark_text = "Same as visual watermark"
 
         # Get quality and speed values if they exist
         user_has_quality = (
@@ -850,26 +806,45 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         if total_pages > 1:
             page_info = f"\n\n<b>Page:</b> {page_no + 1}/{total_pages}"
 
-        text = f"""⌬ <b>Configure Watermark Text :</b>
+        # Determine which category is shown on the current page
+        categories = []
+        if any(setting in visual_settings for setting in current_page_settings):
+            categories.append("Visual")
+        if any(setting in performance_settings for setting in current_page_settings):
+            categories.append("Performance")
+        if any(setting in audio_settings for setting in current_page_settings):
+            categories.append("Audio")
+        if any(setting in subtitle_settings for setting in current_page_settings):
+            categories.append("Subtitle")
+
+        category_text = ", ".join(categories)
+
+        text = f"""⌬ <b>Watermark Text Settings :</b>
 ┟ <b>Name</b> → {user_name}
 ┃
 ┠ <b>Select a setting to configure</b>
 ┃
-┠ <b>Current Settings:</b>
+┠ <b>Visual Settings:</b>
 ┠ <b>Text</b> → <code>{watermark_text}</code>
 ┠ <b>Position</b> → <code>{watermark_position}</code>
 ┠ <b>Size</b> → <code>{watermark_size}</code>
 ┠ <b>Color</b> → <code>{watermark_color}</code>
 ┠ <b>Font</b> → <code>{watermark_font}</code>
 ┠ <b>Opacity</b> → <code>{opacity_value}</code>
+┃
+┠ <b>Performance Settings:</b>
 ┠ <b>Quality</b> → <code>{quality_value}</code>
 ┠ <b>Speed</b> → <code>{speed_value}</code>
+┃
+┠ <b>Audio Settings:</b>
 ┠ <b>Audio Interval</b> → <code>{audio_interval}</code>
-┠ <b>Subtitle Interval</b> → <code>{subtitle_interval}</code>
 ┠ <b>Audio Volume</b> → <code>{user_dict.get("AUDIO_WATERMARK_VOLUME", "None (Default)")}</code>
-┠ <b>Threading</b> → {threading_status}
-┠ <b>Thread Number</b> → <code>{thread_number}</code>
-┖ <b>Remove Original</b> → {remove_original_status}{page_info}"""
+┃
+┠ <b>Subtitle Settings:</b>
+┠ <b>Subtitle Interval</b> → <code>{subtitle_interval}</code>
+┠ <b>Subtitle Style</b> → <code>{user_dict.get("SUBTITLE_WATERMARK_STYLE", "None (Default)")}</code>
+┃
+┖ <b>Current page shows:</b> {category_text} settings{page_info}"""
 
     elif stype == "merge":
         # Merge settings menu
@@ -5454,10 +5429,7 @@ async def get_menu(option, message, user_id):
         current_value = "default.otf (Default)"
     elif option == "WATERMARK_PRIORITY":
         current_value = "2 (Default)"
-    elif (
-        option in {"WATERMARK_THREADING", "WATERMARK_FAST_MODE"}
-        or option == "WATERMARK_MAINTAIN_QUALITY"
-    ):
+    elif option in {"WATERMARK_THREADING"} or option == "WATERMARK_MAINTAIN_QUALITY":
         current_value = "True (Default)"
     elif option == "WATERMARK_OPACITY":
         current_value = "1.0 (Default)"
@@ -6481,7 +6453,6 @@ async def edit_media_tools_settings(client, query):
         if data[3] in [
             "AUDIO_WATERMARK_ENABLED",
             "SUBTITLE_WATERMARK_ENABLED",
-            "WATERMARK_FAST_MODE",
             "WATERMARK_MAINTAIN_QUALITY",
         ]:
             # Stay in the watermark_config menu
@@ -6609,7 +6580,6 @@ async def edit_media_tools_settings(client, query):
             "WATERMARK_PRIORITY",
             "WATERMARK_THREADING",
             "WATERMARK_THREAD_NUMBER",
-            "WATERMARK_FAST_MODE",
             "WATERMARK_MAINTAIN_QUALITY",
             "WATERMARK_OPACITY",
             "WATERMARK_REMOVE_ORIGINAL",

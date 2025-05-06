@@ -1096,7 +1096,6 @@ media_tools_text = {
     "WATERMARK_FONT": "Send font name for watermark text. You can use a Google Font name (like 'Roboto', 'Open Sans', etc.) or a font file name if available in the bot's directory. Default: default.otf. Timeout: 60 sec",
     "WATERMARK_PRIORITY": "Set priority for watermark processing. Lower number means higher priority. Example: 1 for highest priority. Timeout: 60 sec",
     "WATERMARK_THREADING": "Enable or disable threading for watermark processing. Send 'true' to enable or 'false' to disable. Timeout: 60 sec",
-    "WATERMARK_FAST_MODE": "Enable or disable fast mode for watermark processing. When enabled, uses ultrafast preset for large files (>100MB). Send 'true' to enable or 'false' to disable. Timeout: 60 sec",
     "WATERMARK_MAINTAIN_QUALITY": "Enable or disable quality maintenance for watermark processing. When enabled, uses higher quality settings (CRF 18 for videos). Send 'true' to enable or 'false' to disable. Timeout: 60 sec",
     "WATERMARK_OPACITY": "Set the opacity level for watermark text (0.0-1.0). Lower values make the watermark more transparent. Example: 0.5 for 50% opacity. Timeout: 60 sec",
     # Merge Settings

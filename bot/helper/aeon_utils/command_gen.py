@@ -83,19 +83,14 @@ async def get_watermark_cmd(
     size=20,
     color="white",  # Default color is white
     font="default.otf",
-    fast_mode=False,  # For backward compatibility
     maintain_quality=True,  # For backward compatibility
     opacity=1.0,
-    audio_watermark_enabled=False,  # Whether to add audio watermark
-    audio_watermark_text=None,  # Text for audio watermark
-    subtitle_watermark_enabled=False,  # Whether to add subtitle watermark
-    subtitle_watermark_text=None,  # Text for subtitle watermark
-    subtitle_watermark_interval=None,  # Interval for subtitle watermark
-    subtitle_watermark_style=None,  # Style for subtitle watermark
     quality=None,  # Numerical quality value instead of maintain_quality toggle
     speed=None,  # Numerical speed value instead of fast_mode toggle
-    audio_watermark_interval=None,  # New parameter for audio watermark interval
+    audio_watermark_interval=None,  # Interval for audio watermark
     audio_watermark_volume=None,  # Volume for audio watermark
+    subtitle_watermark_interval=None,  # Interval for subtitle watermark
+    subtitle_watermark_style=None,  # Style for subtitle watermark
     remove_original=False,  # Whether to remove original file after processing
 ):
     """Generate FFmpeg command for adding watermark to media files with improved handling.
@@ -107,7 +102,7 @@ async def get_watermark_cmd(
         size: Font size
         color: Font color
         font: Font file name or Google Font name
-        fast_mode: Whether to use ultrafast preset for large files
+        speed: Speed setting for encoding (replaces fast_mode)
         maintain_quality: Whether to maintain original quality
         opacity: Opacity of watermark (0.0-1.0)
 
@@ -641,110 +636,77 @@ async def get_watermark_cmd(
                     # Default interval
                     interval = 30
 
-            # Check if audio watermarking is explicitly disabled in config
-            from bot.core.config_manager import Config
-
-            audio_watermark_enabled = (
-                Config.AUDIO_WATERMARK_ENABLED
-                if hasattr(Config, "AUDIO_WATERMARK_ENABLED")
-                else True
-            )
-
-            # Skip audio watermarking if it's explicitly disabled
-            if not audio_watermark_enabled:
-                # Just copy the audio without modification
-                cmd = [
-                    "xtra",
-                    "-hide_banner",
-                    "-loglevel",
-                    "error",
-                    "-progress",
-                    "pipe:1",
-                    "-i",
-                    file,
-                    "-c:a",
-                    "copy",
-                    "-metadata",
-                    f"comment=Watermarked with: {watermark_text}",
-                    "-metadata",
-                    f"title=Original title + {watermark_text}",
-                    "-threads",
-                    f"{thread_count}",
-                    temp_file,
-                ]
+            # Always enable audio watermarking when text is provided
+            # Apply audio watermark
+            if duration <= 30:
+                # For short files, add beep at beginning and end
+                filter_complex = (
+                    f"[0:a]asetpts=PTS-STARTPTS[a];"
+                    f"aevalsrc=0.1*sin({beep_frequency}*2*PI*t):d={beep_duration}:s=44100[beep];"
+                    f"[a][beep]amix=inputs=2:duration=first:weights=1 {beep_volume}[aout]"
+                )
             else:
-                # Apply audio watermark
-                if duration <= 30:
-                    # For short files, add beep at beginning and end
-                    filter_complex = (
-                        f"[0:a]asetpts=PTS-STARTPTS[a];"
-                        f"aevalsrc=0.1*sin({beep_frequency}*2*PI*t):d={beep_duration}:s=44100[beep];"
-                        f"[a][beep]amix=inputs=2:duration=first:weights=1 {beep_volume}[aout]"
-                    )
-                else:
-                    # For longer files, add beeps at intervals based on the interval parameter
-                    beep_points = []
+                # For longer files, add beeps at intervals based on the interval parameter
+                beep_points = []
 
-                    # Calculate number of beeps based on duration and interval
-                    # Ensure we have at least num_beeps (from size parameter) beeps
-                    num_points = max(num_beeps, int(duration / interval))
+                # Calculate number of beeps based on duration and interval
+                # Ensure we have at least num_beeps (from size parameter) beeps
+                num_points = max(num_beeps, int(duration / interval))
 
-                    # Distribute beeps evenly
-                    for i in range(num_points):
-                        point = i * interval
-                        if point < duration:
-                            beep_points.append(point)
+                # Distribute beeps evenly
+                for i in range(num_points):
+                    point = i * interval
+                    if point < duration:
+                        beep_points.append(point)
 
-                    # Create a complex filter to insert beeps at intervals
-                    beep_parts = []
-                    for i, point in enumerate(beep_points):
-                        beep_parts.append(
-                            f"aevalsrc=0.1*sin({beep_frequency}*2*PI*t):d={beep_duration}:s=44100,adelay={int(point * 1000)}|{int(point * 1000)}[beep{i + 1}];"
-                        )
-
-                    # Combine all beeps
-                    beep_inputs = "".join(
-                        f"[beep{i + 1}]" for i in range(len(beep_points))
-                    )
-                    weights = " ".join(["1"] * len(beep_points))
-                    beep_volumes = " ".join([str(beep_volume)] * len(beep_points))
-
-                    filter_complex = (
-                        f"[0:a]asetpts=PTS-STARTPTS[a];"
-                        f"{''.join(beep_parts)}"
-                        f"[a]{beep_inputs}amix=inputs={len(beep_points) + 1}:duration=first:weights={weights} {beep_volumes}[aout]"
+                # Create a complex filter to insert beeps at intervals
+                beep_parts = []
+                for i, point in enumerate(beep_points):
+                    beep_parts.append(
+                        f"aevalsrc=0.1*sin({beep_frequency}*2*PI*t):d={beep_duration}:s=44100,adelay={int(point * 1000)}|{int(point * 1000)}[beep{i + 1}];"
                     )
 
-                # Create command to add beep watermark
-                cmd = [
-                    "xtra",
-                    "-hide_banner",
-                    "-loglevel",
-                    "error",
-                    "-progress",
-                    "pipe:1",
-                    "-i",
-                    file,
-                    "-filter_complex",
-                    filter_complex,
-                    "-map",
-                    "[aout]",
-                    "-c:a",
-                    "aac",
-                    "-b:a",
-                    "192k"
-                    if quality
-                    and str(quality).lower() != "none"
-                    and int(quality) < 20
-                    else "128k",
-                    "-metadata",
-                    f"comment=Watermarked with: {watermark_text}",
-                    "-metadata",
-                    f"title=Original title + {watermark_text}",
-                    "-threads",
-                    f"{thread_count}",
-                    temp_file,
-                ]
+                # Combine all beeps
+                beep_inputs = "".join(
+                    f"[beep{i + 1}]" for i in range(len(beep_points))
+                )
+                weights = " ".join(["1"] * len(beep_points))
+                beep_volumes = " ".join([str(beep_volume)] * len(beep_points))
+
+                filter_complex = (
+                    f"[0:a]asetpts=PTS-STARTPTS[a];"
+                    f"{''.join(beep_parts)}"
+                    f"[a]{beep_inputs}amix=inputs={len(beep_points) + 1}:duration=first:weights={weights} {beep_volumes}[aout]"
+                )
+
+            # Create command to add beep watermark
+            cmd = [
+                "xtra",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-progress",
+                "pipe:1",
+                "-i",
+                file,
+                "-filter_complex",
+                filter_complex,
+                "-map",
+                "[aout]",
+                "-c:a",
+                "aac",
+                "-b:a",
+                "192k"
+                if quality and str(quality).lower() != "none" and int(quality) < 20
+                else "128k",
+                "-metadata",
+                f"comment=Watermarked with: {watermark_text}",
+                "-metadata",
+                f"title=Original title + {watermark_text}",
+                "-threads",
+                f"{thread_count}",
+                temp_file,
+            ]
 
         except Exception as e:
             LOGGER.error(f"Error creating audio watermark command: {e}")
@@ -832,16 +794,8 @@ async def get_watermark_cmd(
         # For subtitle files, we'll add the watermark text to each subtitle entry
         # This requires parsing and modifying the subtitle file
 
-        # Check if subtitle watermarking is explicitly disabled in config
-        from bot.core.config_manager import Config
-
-        # Always enable subtitle watermarking for testing
-        subtitle_watermark_enabled = True
-
-        # Skip subtitle watermarking if it's explicitly disabled
-        if not subtitle_watermark_enabled:
-            # For subtitle files with watermarking disabled, just return the file as is
-            return None, None
+        # Always enable subtitle watermarking when text is provided
+        # No need to check for subtitle_watermark_enabled anymore
 
         try:
             # Read the subtitle file
@@ -942,22 +896,11 @@ async def get_watermark_cmd(
                     if index % frequency != 0:
                         return f"{index}\n{timing}\n{text}\n\n"
 
-                    # Get subtitle_watermark_text from config if available
-                    from bot.core.config_manager import Config
-
-                    config_subtitle_text = (
-                        Config.SUBTITLE_WATERMARK_TEXT
-                        if hasattr(Config, "SUBTITLE_WATERMARK_TEXT")
-                        else None
-                    )
-
-                    # Prepare watermark text - use parameter or config value
+                    # Prepare watermark text
                     watermark_text = key
                     if subtitle_watermark_interval is not None:
                         # Use the interval parameter as text
                         watermark_text = f"{key} ({subtitle_watermark_interval})"
-                    elif config_subtitle_text:
-                        watermark_text = config_subtitle_text
                     if abbreviated and len(watermark_text) > 10:
                         # Use abbreviated version for lower opacity
                         words = watermark_text.split()
@@ -1059,45 +1002,23 @@ async def get_watermark_cmd(
                                     "bottom_center",
                                 ]:
                                     # Add at the end
-                                    # Get subtitle_watermark_text from config if available
-                                    from bot.core.config_manager import Config
-
-                                    config_subtitle_text = (
-                                        Config.SUBTITLE_WATERMARK_TEXT
-                                        if hasattr(Config, "SUBTITLE_WATERMARK_TEXT")
-                                        else None
-                                    )
-
-                                    # Prepare watermark text - use parameter or config value
+                                    # Prepare watermark text
                                     watermark_text = key
                                     if subtitle_watermark_interval is not None:
                                         # Use the interval parameter as text
                                         watermark_text = (
                                             f"{key} ({subtitle_watermark_interval})"
                                         )
-                                    elif config_subtitle_text:
-                                        watermark_text = config_subtitle_text
                                     watermarked_text = f"{text}\\N{watermark_style}[{watermark_text}]{watermark_style}"
                                 else:
                                     # Add at the beginning
-                                    # Get subtitle_watermark_text from config if available
-                                    from bot.core.config_manager import Config
-
-                                    config_subtitle_text = (
-                                        Config.SUBTITLE_WATERMARK_TEXT
-                                        if hasattr(Config, "SUBTITLE_WATERMARK_TEXT")
-                                        else None
-                                    )
-
-                                    # Prepare watermark text - use parameter or config value
+                                    # Prepare watermark text
                                     watermark_text = key
                                     if subtitle_watermark_interval is not None:
                                         # Use the interval parameter as text
                                         watermark_text = (
                                             f"{key} ({subtitle_watermark_interval})"
                                         )
-                                    elif config_subtitle_text:
-                                        watermark_text = config_subtitle_text
                                     watermarked_text = f"{watermark_style}[{watermark_text}]{watermark_style}\\N{text}"
 
                                 # Replace the text part
@@ -1211,22 +1132,11 @@ async def get_watermark_cmd(
                         watermarked_text = f"{text}\n{watermark_style}[{watermark_text}]{watermark_style}"
                     else:
                         # Add at the beginning
-                        # Get subtitle_watermark_text from config if available
-                        from bot.core.config_manager import Config
-
-                        config_subtitle_text = (
-                            Config.SUBTITLE_WATERMARK_TEXT
-                            if hasattr(Config, "SUBTITLE_WATERMARK_TEXT")
-                            else None
-                        )
-
-                        # Prepare watermark text - use parameter or config value
+                        # Prepare watermark text
                         watermark_text = key
                         if subtitle_watermark_interval is not None:
                             # Use the interval parameter as text
                             watermark_text = f"{key} ({subtitle_watermark_interval})"
-                        elif config_subtitle_text:
-                            watermark_text = config_subtitle_text
                         watermarked_text = f"{watermark_style}[{watermark_text}]{watermark_style}\n{text}"
 
                     return f"{timing}{watermarked_text}\n\n"
@@ -1250,22 +1160,11 @@ async def get_watermark_cmd(
                 return None, temp_file
 
             # For other formats, just add a comment if possible
-            # Get subtitle_watermark_text from config if available
-            from bot.core.config_manager import Config
-
-            config_subtitle_text = (
-                Config.SUBTITLE_WATERMARK_TEXT
-                if hasattr(Config, "SUBTITLE_WATERMARK_TEXT")
-                else None
-            )
-
-            # Prepare watermark text - use parameter or config value
+            # Prepare watermark text
             watermark_text = key
             if subtitle_watermark_interval is not None:
                 # Use the interval parameter as text
                 watermark_text = f"{key} ({subtitle_watermark_interval})"
-            elif config_subtitle_text:
-                watermark_text = config_subtitle_text
 
             # Write the modified content to the temp file
             try:

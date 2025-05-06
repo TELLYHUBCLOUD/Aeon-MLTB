@@ -569,13 +569,9 @@ class TaskConfig:
         else:
             self.watermark_threading = True
 
-        # Watermark Fast Mode
-        if user_watermark_enabled and "WATERMARK_FAST_MODE" in self.user_dict:
-            self.watermark_fast_mode = self.user_dict["WATERMARK_FAST_MODE"]
-        elif self.watermark_enabled and hasattr(Config, "WATERMARK_FAST_MODE"):
-            self.watermark_fast_mode = Config.WATERMARK_FAST_MODE
-        else:
-            self.watermark_fast_mode = True
+        # Watermark Fast Mode has been removed
+        # Use WATERMARK_SPEED instead
+        self.watermark_fast_mode = False  # For backward compatibility
 
         # Watermark Maintain Quality
         if user_watermark_enabled and "WATERMARK_MAINTAIN_QUALITY" in self.user_dict:
@@ -8850,10 +8846,8 @@ class TaskConfig:
         color = self.watermark_color
         font = self.watermark_font
 
-        # Get the new watermark settings with the correct priority logic
-        fast_mode = self.user_dict.get(
-            "WATERMARK_FAST_MODE", Config.WATERMARK_FAST_MODE
-        )
+        # Fast mode has been removed, use speed parameter instead
+        speed = self.user_dict.get("WATERMARK_SPEED", Config.WATERMARK_SPEED)
         maintain_quality = self.user_dict.get(
             "WATERMARK_MAINTAIN_QUALITY", Config.WATERMARK_MAINTAIN_QUALITY
         )
@@ -8882,9 +8876,9 @@ class TaskConfig:
             "font": "user"
             if self.user_dict.get("WATERMARK_FONT")
             else ("owner" if Config.WATERMARK_FONT else "default"),
-            "fast_mode": "user"
-            if "WATERMARK_FAST_MODE" in self.user_dict
-            else ("owner" if hasattr(Config, "WATERMARK_FAST_MODE") else "default"),
+            "speed": "user"
+            if "WATERMARK_SPEED" in self.user_dict
+            else ("owner" if hasattr(Config, "WATERMARK_SPEED") else "default"),
             "maintain_quality": "user"
             if "WATERMARK_MAINTAIN_QUALITY" in self.user_dict
             else (
@@ -8924,7 +8918,6 @@ class TaskConfig:
                     size,
                     color,
                     font,
-                    fast_mode,
                     maintain_quality,
                     opacity,
                     self.audio_watermark_enabled,
@@ -8932,6 +8925,12 @@ class TaskConfig:
                     self.subtitle_watermark_enabled,
                     self.subtitle_watermark_text,
                     subtitle_watermark_interval=subtitle_watermark_interval,
+                    subtitle_watermark_style=self.subtitle_watermark_style,
+                    quality=None,
+                    speed=speed,
+                    audio_watermark_interval=self.audio_watermark_interval,
+                    audio_watermark_volume=self.audio_watermark_volume,
+                    remove_original=self.watermark_remove_original,
                 )
                 if cmd:
                     if not checked:
@@ -8957,11 +8956,12 @@ class TaskConfig:
                                 f"Successfully applied watermark to: {watermarked_path} (original kept)"
                             )
                             return watermarked_path
-                        else:
-                            os.replace(temp_file, dl_path)
-                            LOGGER.info(
-                                f"Successfully applied watermark to: {dl_path} (original replaced)"
-                            )
+
+                        # If we're here, we're replacing the original
+                        os.replace(temp_file, dl_path)
+                        LOGGER.info(
+                            f"Successfully applied watermark to: {dl_path} (original replaced)"
+                        )
                     elif await aiopath.exists(temp_file):
                         os.remove(temp_file)
                 else:
@@ -9002,7 +9002,6 @@ class TaskConfig:
                             size,
                             color,
                             font,
-                            fast_mode,
                             maintain_quality,
                             opacity,
                             self.audio_watermark_enabled,
@@ -9010,6 +9009,12 @@ class TaskConfig:
                             self.subtitle_watermark_enabled,
                             self.subtitle_watermark_text,
                             subtitle_watermark_interval=subtitle_watermark_interval,
+                            subtitle_watermark_style=self.subtitle_watermark_style,
+                            quality=None,
+                            speed=speed,
+                            audio_watermark_interval=self.audio_watermark_interval,
+                            audio_watermark_volume=self.audio_watermark_volume,
+                            remove_original=self.watermark_remove_original,
                         )
                         if cmd:
                             if not checked:
