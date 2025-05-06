@@ -6358,6 +6358,7 @@ async def media_tools_settings(_, message):
 @new_task
 async def edit_media_tools_settings(client, query):
     """Handle media tools settings callback queries."""
+    global watermark_config_page, merge_config_page
     from_user = query.from_user
     user_id = from_user.id
     message = query.message

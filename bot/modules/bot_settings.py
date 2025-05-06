@@ -1448,7 +1448,13 @@ Configure task monitoring settings to automatically manage downloads based on pe
         ]
 
         # Create pagination
-        watermark_text_page = globals().get("watermark_text_page", 0)
+        # Use the provided page parameter if available, otherwise use the global variable
+        if page != 0:
+            watermark_text_page = page
+            globals()["watermark_text_page"] = page
+        else:
+            watermark_text_page = globals().get("watermark_text_page", 0)
+
         items_per_page = 10  # 5 rows * 2 columns
         total_pages = (
             len(watermark_text_settings) + items_per_page - 1
@@ -1461,6 +1467,10 @@ Configure task monitoring settings to automatically manage downloads based on pe
         elif watermark_text_page < 0:
             watermark_text_page = total_pages - 1
             globals()["watermark_text_page"] = total_pages - 1
+
+        # Store the current page in handler_dict for backup
+        if user_id:
+            handler_dict[f"{user_id}_watermark_page"] = watermark_text_page
 
         # Get settings for current page
         start_idx = watermark_text_page * items_per_page
@@ -1504,8 +1514,7 @@ Configure task monitoring settings to automatically manage downloads based on pe
                 "View", "botset view mediatools_watermark_text", "footer"
             )
 
-        # Add Default button to reset all watermark text settings
-        buttons.data_button("Default", "botset default_watermark_text", "footer")
+        # Default button removed as requested
 
         # Add navigation buttons with current page in the callback data
         buttons.data_button(
@@ -3982,8 +3991,21 @@ async def edit_variable(_, message, pre_message, key):
                     page_no = int(page_info) - 1
                     # Set the global watermark_text_page variable to ensure we return to the correct page
                     globals()["watermark_text_page"] = page_no
-                except (ValueError, IndexError):
-                    pass
+                    # Store the page in handler_dict for backup
+                    handler_dict[f"{pre_message.chat.id}_watermark_page"] = page_no
+                    LOGGER.debug(
+                        f"Setting watermark_text_page to {page_no} from page info"
+                    )
+                except (ValueError, IndexError) as e:
+                    LOGGER.error(
+                        f"Error extracting page number from message text: {e}"
+                    )
+                    # Keep the current page if there's an error
+            else:
+                # If no page info in the message, use the global variable
+                LOGGER.debug(
+                    f"Using global watermark_text_page: {globals().get('watermark_text_page', 0)}"
+                )
         else:
             return_menu = "mediatools_watermark"
     elif key.startswith("METADATA_"):
@@ -4104,14 +4126,27 @@ async def edit_variable(_, message, pre_message, key):
             await update_buttons(
                 pre_message, "mediatools_merge", page=globals()["merge_page"]
             )
-    elif (
-        return_menu == "mediatools_watermark_text"
-        and "watermark_text_page" in globals()
-    ):
+    elif return_menu == "mediatools_watermark_text":
         # Return to the watermark text menu with the correct page
-        await update_buttons(
-            pre_message, return_menu, page=globals()["watermark_text_page"]
-        )
+        # First check if we have a stored page in handler_dict
+        stored_page = handler_dict.get(f"{pre_message.chat.id}_watermark_page")
+        if stored_page is not None:
+            LOGGER.debug(
+                f"Using stored watermark_text_page from handler_dict: {stored_page}"
+            )
+            await update_buttons(pre_message, return_menu, page=stored_page)
+        # Then check if we have a global page
+        elif "watermark_text_page" in globals():
+            LOGGER.debug(
+                f"Using global watermark_text_page: {globals()['watermark_text_page']}"
+            )
+            await update_buttons(
+                pre_message, return_menu, page=globals()["watermark_text_page"]
+            )
+        # If all else fails, use page 0
+        else:
+            LOGGER.debug("No watermark_text_page found, using page 0")
+            await update_buttons(pre_message, return_menu, page=0)
     else:
         await update_buttons(pre_message, return_menu)
 
@@ -4539,9 +4574,21 @@ async def edit_bot_settings(client, query):
         current_state = globals()["state"]
 
         try:
+            # Check if we have a page number in the callback data
             if len(data) > 2:
                 # Update the global watermark_text_page variable with the page from the button
                 globals()["watermark_text_page"] = int(data[2])
+            # If no page number is provided, try to extract it from the message text
+            elif message.text and "Page:" in message.text:
+                try:
+                    page_info = message.text.split("Page:")[1].strip().split("/")[0]
+                    page_no = int(page_info) - 1
+                    globals()["watermark_text_page"] = page_no
+                except (ValueError, IndexError) as e:
+                    LOGGER.error(
+                        f"Error extracting page number from message text: {e}"
+                    )
+                    # Keep the current page if there's an error
 
             # Set the state back to what it was
             globals()["state"] = current_state
@@ -4559,43 +4606,7 @@ async def edit_bot_settings(client, query):
             await update_buttons(message, "mediatools_watermark")
             return
 
-    elif data[1] == "default_watermark_text":
-        await query.answer(
-            "Resetting all watermark text settings to default values..."
-        )
-        # Get the current state before making changes
-        current_state = globals()["state"]
-
-        # Reset all watermark text settings to default
-        watermark_text_settings = [
-            # Visual settings
-            "WATERMARK_POSITION",
-            "WATERMARK_SIZE",
-            "WATERMARK_COLOR",
-            "WATERMARK_FONT",
-            "WATERMARK_OPACITY",
-            # Performance settings
-            "WATERMARK_QUALITY",
-            "WATERMARK_SPEED",
-            # Audio watermark settings
-            "AUDIO_WATERMARK_VOLUME",
-            "AUDIO_WATERMARK_INTERVAL",
-            # Subtitle watermark settings
-            "SUBTITLE_WATERMARK_STYLE",
-            "SUBTITLE_WATERMARK_INTERVAL",
-        ]
-
-        # Reset each setting to None (which will use the default value)
-        for setting in watermark_text_settings:
-            setattr(Config, setting, None)
-            await database.update_config({setting: None})
-
-        # Set the state back to what it was
-        globals()["state"] = current_state
-        # Stay on the same page
-        current_page = globals().get("watermark_text_page", 0)
-        await update_buttons(message, "mediatools_watermark_text", page=current_page)
-        return
+    # Default watermark text handler removed as requested
 
     elif data[1] == "start_watermark_text":
         await query.answer()
