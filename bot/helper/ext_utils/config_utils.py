@@ -34,18 +34,16 @@ async def reset_tool_configs(tool_name, database):
         "WATERMARK_PRIORITY": 2,
         "WATERMARK_THREADING": True,
         "WATERMARK_THREAD_NUMBER": 4,
-        "WATERMARK_FAST_MODE": True,
-        "WATERMARK_MAINTAIN_QUALITY": True,
+        "WATERMARK_QUALITY": "none",
+        "WATERMARK_SPEED": "none",
         "WATERMARK_OPACITY": 0.0,
         "WATERMARK_REMOVE_ORIGINAL": True,
         # Audio watermark settings
-        "AUDIO_WATERMARK_ENABLED": False,
-        "AUDIO_WATERMARK_TEXT": "",
         "AUDIO_WATERMARK_VOLUME": 0.0,
+        "AUDIO_WATERMARK_INTERVAL": 0,
         # Subtitle watermark settings
-        "SUBTITLE_WATERMARK_ENABLED": False,
-        "SUBTITLE_WATERMARK_TEXT": "",
         "SUBTITLE_WATERMARK_STYLE": "none",
+        "SUBTITLE_WATERMARK_INTERVAL": 0,
         # Merge Settings
         "MERGE_ENABLED": False,
         "MERGE_PRIORITY": 1,

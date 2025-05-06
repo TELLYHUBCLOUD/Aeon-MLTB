@@ -599,7 +599,9 @@ class TaskConfig:
 
         # Watermark Remove Original
         if user_watermark_enabled and "WATERMARK_REMOVE_ORIGINAL" in self.user_dict:
-            self.watermark_remove_original = self.user_dict["WATERMARK_REMOVE_ORIGINAL"]
+            self.watermark_remove_original = self.user_dict[
+                "WATERMARK_REMOVE_ORIGINAL"
+            ]
         elif self.watermark_enabled and hasattr(Config, "WATERMARK_REMOVE_ORIGINAL"):
             self.watermark_remove_original = Config.WATERMARK_REMOVE_ORIGINAL
         else:
@@ -780,11 +782,15 @@ class TaskConfig:
             if self.args.get("-del") == "t" or self.args.get("-del") is True:
                 self.watermark_remove_original = True
                 self.merge_remove_original = True
-                LOGGER.info("Setting watermark_remove_original=True and merge_remove_original=True due to -del flag")
+                LOGGER.info(
+                    "Setting watermark_remove_original=True and merge_remove_original=True due to -del flag"
+                )
             elif self.args.get("-del") == "f" or self.args.get("-del") is False:
                 self.watermark_remove_original = False
                 self.merge_remove_original = False
-                LOGGER.info("Setting watermark_remove_original=False and merge_remove_original=False due to -del flag")
+                LOGGER.info(
+                    "Setting watermark_remove_original=False and merge_remove_original=False due to -del flag"
+                )
 
         # Initialize convert settings with the same priority logic
         self.user_convert_enabled = self.user_dict.get("CONVERT_ENABLED", False)
@@ -5364,15 +5370,9 @@ class TaskConfig:
         user_bitdepth = self.user_dict.get("COMPRESSION_VIDEO_BITDEPTH")
         owner_bitdepth = getattr(Config, "COMPRESSION_VIDEO_BITDEPTH", None)
 
-        if (
-            user_bitdepth is not None
-            and str(user_bitdepth).lower() != "none"
-        ):
+        if user_bitdepth is not None and str(user_bitdepth).lower() != "none":
             bitdepth = user_bitdepth
-        elif (
-            owner_bitdepth is not None
-            and str(owner_bitdepth).lower() != "none"
-        ):
+        elif owner_bitdepth is not None and str(owner_bitdepth).lower() != "none":
             bitdepth = owner_bitdepth
         else:
             bitdepth = None  # Default bitdepth (no specific bitdepth)
@@ -5381,15 +5381,9 @@ class TaskConfig:
         user_bitrate = self.user_dict.get("COMPRESSION_VIDEO_BITRATE")
         owner_bitrate = getattr(Config, "COMPRESSION_VIDEO_BITRATE", None)
 
-        if (
-            user_bitrate is not None
-            and str(user_bitrate).lower() != "none"
-        ):
+        if user_bitrate is not None and str(user_bitrate).lower() != "none":
             bitrate = user_bitrate
-        elif (
-            owner_bitrate is not None
-            and str(owner_bitrate).lower() != "none"
-        ):
+        elif owner_bitrate is not None and str(owner_bitrate).lower() != "none":
             bitrate = owner_bitrate
         else:
             bitrate = None  # Default bitrate (no specific bitrate)
@@ -5398,14 +5392,10 @@ class TaskConfig:
         user_resolution = self.user_dict.get("COMPRESSION_VIDEO_RESOLUTION")
         owner_resolution = getattr(Config, "COMPRESSION_VIDEO_RESOLUTION", None)
 
-        if (
-            user_resolution is not None
-            and str(user_resolution).lower() != "none"
-        ):
+        if user_resolution is not None and str(user_resolution).lower() != "none":
             resolution = user_resolution
         elif (
-            owner_resolution is not None
-            and str(owner_resolution).lower() != "none"
+            owner_resolution is not None and str(owner_resolution).lower() != "none"
         ):
             resolution = owner_resolution
         else:
@@ -5487,16 +5477,18 @@ class TaskConfig:
             ffmpeg_cmd.extend(["-s", str(resolution)])
 
         # Add audio settings
-        ffmpeg_cmd.extend([
-            "-c:a",
-            "aac",  # Always use AAC for audio
-            "-b:a",
-            "128k",  # Default audio bitrate
-            "-movflags",
-            "+faststart",  # Optimize for web streaming
-            "-y",  # Overwrite output file if it exists
-            out_path,
-        ])
+        ffmpeg_cmd.extend(
+            [
+                "-c:a",
+                "aac",  # Always use AAC for audio
+                "-b:a",
+                "128k",  # Default audio bitrate
+                "-movflags",
+                "+faststart",  # Optimize for web streaming
+                "-y",  # Overwrite output file if it exists
+                out_path,
+            ]
+        )
 
         # Execute FFmpeg command
         ffmpeg = FFMpeg(self)
@@ -5787,10 +5779,12 @@ class TaskConfig:
                     # If conversion fails, don't add bitdepth
                     pass
 
-            ffmpeg_cmd.extend([
-                "-movflags",
-                "+faststart",  # Optimize for streaming
-            ])
+            ffmpeg_cmd.extend(
+                [
+                    "-movflags",
+                    "+faststart",  # Optimize for streaming
+                ]
+            )
         # For FLAC output
         elif out_ext == ".flac":
             ffmpeg_cmd.extend(
@@ -8459,7 +8453,7 @@ class TaskConfig:
                         mode=mode,
                         columns=columns,
                         quality=image_quality,
-                        dpi=image_dpi
+                        dpi=image_dpi,
                     )
 
                     if output_file and await aiopath.exists(output_file):
@@ -8688,9 +8682,13 @@ class TaskConfig:
                             image_dpi = getattr(Config, "MERGE_IMAGE_DPI", "none")
 
                         # Get image quality from user settings or global settings
-                        image_quality = self.user_dict.get("MERGE_IMAGE_QUALITY", None)
+                        image_quality = self.user_dict.get(
+                            "MERGE_IMAGE_QUALITY", None
+                        )
                         if image_quality is None or image_quality == "none":
-                            image_quality = getattr(Config, "MERGE_IMAGE_QUALITY", 90)
+                            image_quality = getattr(
+                                Config, "MERGE_IMAGE_QUALITY", 90
+                            )
 
                         output_file = await merge_images(
                             analysis["image_files"],
@@ -8698,7 +8696,7 @@ class TaskConfig:
                             mode=mode,
                             columns=columns,
                             quality=image_quality,
-                            dpi=image_dpi
+                            dpi=image_dpi,
                         )
 
                         if output_file and await aiopath.exists(output_file):
@@ -8912,6 +8910,13 @@ class TaskConfig:
         if self.is_file:
             # Check if the file is a supported media type for watermarking
             if is_mkv(dl_path):  # is_mkv now checks for all supported media types
+                # Get subtitle watermark interval if available
+                subtitle_watermark_interval = None
+                if hasattr(self, "subtitle_watermark_interval"):
+                    subtitle_watermark_interval = self.subtitle_watermark_interval
+                elif hasattr(Config, "SUBTITLE_WATERMARK_INTERVAL"):
+                    subtitle_watermark_interval = Config.SUBTITLE_WATERMARK_INTERVAL
+
                 cmd, temp_file = await get_watermark_cmd(
                     dl_path,
                     key,
@@ -8926,6 +8931,7 @@ class TaskConfig:
                     self.audio_watermark_text,
                     self.subtitle_watermark_enabled,
                     self.subtitle_watermark_text,
+                    subtitle_watermark_interval=subtitle_watermark_interval,
                 )
                 if cmd:
                     if not checked:
@@ -8947,11 +8953,15 @@ class TaskConfig:
                         if not self.watermark_remove_original:
                             watermarked_path = f"{ospath.splitext(dl_path)[0]}_watermarked{ospath.splitext(dl_path)[1]}"
                             os.replace(temp_file, watermarked_path)
-                            LOGGER.info(f"Successfully applied watermark to: {watermarked_path} (original kept)")
+                            LOGGER.info(
+                                f"Successfully applied watermark to: {watermarked_path} (original kept)"
+                            )
                             return watermarked_path
                         else:
                             os.replace(temp_file, dl_path)
-                            LOGGER.info(f"Successfully applied watermark to: {dl_path} (original replaced)")
+                            LOGGER.info(
+                                f"Successfully applied watermark to: {dl_path} (original replaced)"
+                            )
                     elif await aiopath.exists(temp_file):
                         os.remove(temp_file)
                 else:
@@ -8974,6 +8984,17 @@ class TaskConfig:
                     if is_mkv(
                         file_path
                     ):  # is_mkv now checks for all supported media types
+                        # Get subtitle watermark interval if available
+                        subtitle_watermark_interval = None
+                        if hasattr(self, "subtitle_watermark_interval"):
+                            subtitle_watermark_interval = (
+                                self.subtitle_watermark_interval
+                            )
+                        elif hasattr(Config, "SUBTITLE_WATERMARK_INTERVAL"):
+                            subtitle_watermark_interval = (
+                                Config.SUBTITLE_WATERMARK_INTERVAL
+                            )
+
                         cmd, temp_file = await get_watermark_cmd(
                             file_path,
                             key,
@@ -8988,6 +9009,7 @@ class TaskConfig:
                             self.audio_watermark_text,
                             self.subtitle_watermark_enabled,
                             self.subtitle_watermark_text,
+                            subtitle_watermark_interval=subtitle_watermark_interval,
                         )
                         if cmd:
                             if not checked:
@@ -9013,10 +9035,14 @@ class TaskConfig:
                                 if not self.watermark_remove_original:
                                     watermarked_path = f"{ospath.splitext(file_path)[0]}_watermarked{ospath.splitext(file_path)[1]}"
                                     os.replace(temp_file, watermarked_path)
-                                    LOGGER.info(f"Successfully applied watermark to: {watermarked_path} (original kept)")
+                                    LOGGER.info(
+                                        f"Successfully applied watermark to: {watermarked_path} (original kept)"
+                                    )
                                 else:
                                     os.replace(temp_file, file_path)
-                                    LOGGER.info(f"Successfully applied watermark to: {file_path} (original replaced)")
+                                    LOGGER.info(
+                                        f"Successfully applied watermark to: {file_path} (original replaced)"
+                                    )
                             elif await aiopath.exists(temp_file):
                                 os.remove(temp_file)
                         else:

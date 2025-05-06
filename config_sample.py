@@ -9,15 +9,25 @@ DATABASE_URL = ""  # MongoDB URI for storing user data and preferences
 
 # OPTIONAL CONFIG
 TG_PROXY = {}  # Proxy for Telegram connection, format: {'addr': 'ip:port', 'username': 'username', 'password': 'password'}
-USER_SESSION_STRING = ""  # Pyrogram user session string for mirror/leech authentication
+USER_SESSION_STRING = (
+    ""  # Pyrogram user session string for mirror/leech authentication
+)
 DOWNLOAD_DIR = "/usr/src/app/downloads/"  # Directory where downloads will be stored
 CMD_SUFFIX = ""  # Command suffix to distinguish commands, e.g. "1" would make commands like /mirror1
-AUTHORIZED_CHATS = ""  # List of authorized chat IDs where the bot can be used, separated by space
-SUDO_USERS = ""  # List of sudo user IDs who can use admin commands, separated by space
-DEFAULT_UPLOAD = "rc"  # Default upload destination: 'rc' for rclone or 'gd' for Google Drive
+AUTHORIZED_CHATS = (
+    ""  # List of authorized chat IDs where the bot can be used, separated by space
+)
+SUDO_USERS = (
+    ""  # List of sudo user IDs who can use admin commands, separated by space
+)
+DEFAULT_UPLOAD = (
+    "rc"  # Default upload destination: 'rc' for rclone or 'gd' for Google Drive
+)
 FILELION_API = ""  # FileLion API key for direct links
 STREAMWISH_API = ""  # StreamWish API key for direct links
-EXCLUDED_EXTENSIONS = ""  # File extensions to exclude from processing, separated by space
+EXCLUDED_EXTENSIONS = (
+    ""  # File extensions to exclude from processing, separated by space
+)
 INCOMPLETE_TASK_NOTIFIER = False  # Notify about incomplete tasks on bot restart
 YT_DLP_OPTIONS = ""  # Additional yt-dlp options as a JSON string
 USER_COOKIES = ""  # Path to cookies file for yt-dlp and other downloaders
@@ -34,7 +44,9 @@ PAID_CHANNEL_ID = 0  # Paid channel ID for premium features
 PAID_CHANNEL_LINK = ""  # Invite link for paid channel
 SET_COMMANDS = True  # Set bot commands in Telegram UI
 LOG_CHAT_ID = 0  # Chat ID where logs will be sent
-MEDIAINFO_ENABLED = False  # Enable/disable mediainfo command for detailed media information
+MEDIAINFO_ENABLED = (
+    False  # Enable/disable mediainfo command for detailed media information
+)
 INSTADL_API = ""  # InstaDL API key for Instagram downloads
 
 # GDrive Tools
@@ -128,7 +140,9 @@ AUTO_RESTART_ENABLED = False  # Enable automatic bot restart
 AUTO_RESTART_INTERVAL = 24  # Restart interval in hours
 
 # Limits Settings
-STORAGE_THRESHOLD = 0  # Storage threshold in GB, bot will stop if free space falls below this
+STORAGE_THRESHOLD = (
+    0  # Storage threshold in GB, bot will stop if free space falls below this
+)
 TORRENT_LIMIT = 0  # Maximum size for torrent downloads in GB (0 = unlimited)
 DIRECT_LIMIT = 0  # Maximum size for direct link downloads in GB (0 = unlimited)
 YTDLP_LIMIT = 0  # Maximum size for YouTube/video downloads in GB (0 = unlimited)
@@ -187,32 +201,46 @@ GEMINI_API_KEY = ""  # Google Gemini API key
 GEMINI_API_URL = ""  # Custom Gemini API URL (optional)
 
 # Media Tools Settings
-MEDIA_TOOLS_ENABLED = True  # Master switch to enable/disable all media tools features
+MEDIA_TOOLS_ENABLED = (
+    True  # Master switch to enable/disable all media tools features
+)
 
 # Watermark Settings
 WATERMARK_ENABLED = False  # Master switch to enable/disable watermark feature
 WATERMARK_KEY = ""  # Default watermark text to apply to videos
 WATERMARK_POSITION = "none"  # Position of watermark: none, top_left, top_right, bottom_left, bottom_right, center
-WATERMARK_SIZE = 0  # Font size for watermark text (0 = auto-size based on video dimensions)
+WATERMARK_SIZE = (
+    0  # Font size for watermark text (0 = auto-size based on video dimensions)
+)
 WATERMARK_COLOR = "none"  # Watermark text color: none, white, black, red, green, blue, yellow, etc.
 WATERMARK_FONT = "none"  # Font for watermark text: none, Arial.ttf, Roboto, etc. (supports Google Fonts)
 WATERMARK_OPACITY = 1.0  # Watermark opacity: 0.0 (transparent) to 1.0 (opaque)
 WATERMARK_PRIORITY = 2  # Processing priority in pipeline (lower numbers run earlier)
 WATERMARK_THREADING = True  # Use multi-threading for faster watermark processing
 WATERMARK_THREAD_NUMBER = 4  # Number of threads for watermark processing
-WATERMARK_FAST_MODE = True  # Use faster processing mode (may slightly reduce quality)
-WATERMARK_MAINTAIN_QUALITY = True  # Maintain original video quality when adding watermark
-WATERMARK_REMOVE_ORIGINAL = True  # Delete original files after successful watermarking
+WATERMARK_QUALITY = (
+    "none"  # Quality setting for watermark (none = default, or specify a value)
+)
+WATERMARK_SPEED = (
+    "none"  # Speed setting for watermark (none = default, or specify a value)
+)
+WATERMARK_REMOVE_ORIGINAL = (
+    True  # Delete original files after successful watermarking
+)
 
 # Audio Watermark Settings
-AUDIO_WATERMARK_ENABLED = False  # Enable/disable audio watermarking
-AUDIO_WATERMARK_TEXT = ""  # Text for audio watermark (for text-to-speech watermarks)
-AUDIO_WATERMARK_VOLUME = 0.0  # Volume level for audio watermark: 0.0 (silent) to 1.0 (full volume)
+AUDIO_WATERMARK_VOLUME = (
+    0.0  # Volume level for audio watermark: 0.0 (silent) to 1.0 (full volume)
+)
+AUDIO_WATERMARK_INTERVAL = (
+    0  # Interval for audio watermarks (0 = default, or specify number of seconds)
+)
 
 # Subtitle Watermark Settings
-SUBTITLE_WATERMARK_ENABLED = False  # Enable/disable subtitle watermarking
-SUBTITLE_WATERMARK_TEXT = ""  # Text for subtitle watermark
 SUBTITLE_WATERMARK_STYLE = "none"  # Style for subtitle text: none, normal, bold, italic, bold_italic, underline, strikethrough
+SUBTITLE_WATERMARK_INTERVAL = (
+    0  # Interval for subtitle watermarks (0 = default, or specify number of seconds)
+)
 
 # Merge Settings
 MERGE_ENABLED = False  # Master switch to enable/disable merge feature
@@ -220,18 +248,34 @@ MERGE_PRIORITY = 1  # Processing priority in pipeline (lower numbers run earlier
 MERGE_THREADING = True  # Use multi-threading for faster merge processing
 MERGE_THREAD_NUMBER = 4  # Number of threads for merge processing
 MERGE_REMOVE_ORIGINAL = True  # Delete original files after successful merge
-CONCAT_DEMUXER_ENABLED = True  # Enable FFmpeg concat demuxer method (faster, requires same codecs)
-FILTER_COMPLEX_ENABLED = False  # Enable FFmpeg filter_complex method (slower but more compatible)
+CONCAT_DEMUXER_ENABLED = (
+    True  # Enable FFmpeg concat demuxer method (faster, requires same codecs)
+)
+FILTER_COMPLEX_ENABLED = (
+    False  # Enable FFmpeg filter_complex method (slower but more compatible)
+)
 
 # Merge Output Formats
-MERGE_OUTPUT_FORMAT_VIDEO = "none"  # Output format for merged videos: none, mp4, mkv, avi, etc.
-MERGE_OUTPUT_FORMAT_AUDIO = "none"  # Output format for merged audio: none, mp3, m4a, flac, etc.
-MERGE_OUTPUT_FORMAT_IMAGE = "none"  # Output format for merged images: none, jpg, png, pdf, etc.
-MERGE_OUTPUT_FORMAT_DOCUMENT = "none"  # Output format for merged documents: none, pdf, docx, etc.
-MERGE_OUTPUT_FORMAT_SUBTITLE = "none"  # Output format for merged subtitles: none, srt, ass, etc.
+MERGE_OUTPUT_FORMAT_VIDEO = (
+    "none"  # Output format for merged videos: none, mp4, mkv, avi, etc.
+)
+MERGE_OUTPUT_FORMAT_AUDIO = (
+    "none"  # Output format for merged audio: none, mp3, m4a, flac, etc.
+)
+MERGE_OUTPUT_FORMAT_IMAGE = (
+    "none"  # Output format for merged images: none, jpg, png, pdf, etc.
+)
+MERGE_OUTPUT_FORMAT_DOCUMENT = (
+    "none"  # Output format for merged documents: none, pdf, docx, etc.
+)
+MERGE_OUTPUT_FORMAT_SUBTITLE = (
+    "none"  # Output format for merged subtitles: none, srt, ass, etc.
+)
 
 # Merge Video Settings
-MERGE_VIDEO_CODEC = "none"  # Video codec for merged files: none, copy, libx264, libx265, etc.
+MERGE_VIDEO_CODEC = (
+    "none"  # Video codec for merged files: none, copy, libx264, libx265, etc.
+)
 MERGE_VIDEO_QUALITY = "none"  # Video quality preset: none, ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow
 MERGE_VIDEO_PRESET = "none"  # Encoding preset: none, ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow
 MERGE_VIDEO_CRF = "none"  # Constant Rate Factor for quality (0-51, lower is better quality): none, 18, 23, 28, etc.
@@ -240,7 +284,9 @@ MERGE_VIDEO_TUNE = "none"  # Tune option for specific content: none, film, anima
 MERGE_VIDEO_FASTSTART = False  # Enable fast start for web streaming
 
 # Merge Audio Settings
-MERGE_AUDIO_CODEC = "none"  # Audio codec for merged files: none, copy, aac, mp3, opus, etc.
+MERGE_AUDIO_CODEC = (
+    "none"  # Audio codec for merged files: none, copy, aac, mp3, opus, etc.
+)
 MERGE_AUDIO_BITRATE = "none"  # Audio bitrate: none, 128k, 192k, 320k, etc.
 MERGE_AUDIO_CHANNELS = "none"  # Number of audio channels: none, 1, 2, etc.
 MERGE_AUDIO_SAMPLING = "none"  # Audio sampling rate: none, 44100, 48000, etc.
@@ -252,14 +298,20 @@ MERGE_IMAGE_COLUMNS = "none"  # Number of columns for grid mode: none, 2, 3, 4, 
 MERGE_IMAGE_QUALITY = 90  # JPEG quality (0-100)
 MERGE_IMAGE_DPI = "none"  # Image DPI: none, 72, 96, 300, etc.
 MERGE_IMAGE_RESIZE = "none"  # Image resize dimensions: none, 1920x1080, 50%, etc.
-MERGE_IMAGE_BACKGROUND = "none"  # Background color for transparent images: none, white, black, etc.
+MERGE_IMAGE_BACKGROUND = (
+    "none"  # Background color for transparent images: none, white, black, etc.
+)
 
 # Merge Subtitle Settings
 MERGE_SUBTITLE_ENCODING = "none"  # Character encoding: none, utf-8, utf-16, etc.
-MERGE_SUBTITLE_FONT = "none"  # Font for subtitles: none, Arial, Times New Roman, etc.
+MERGE_SUBTITLE_FONT = (
+    "none"  # Font for subtitles: none, Arial, Times New Roman, etc.
+)
 MERGE_SUBTITLE_FONT_SIZE = "none"  # Font size: none, 12, 16, etc.
 MERGE_SUBTITLE_FONT_COLOR = "none"  # Font color: none, white, yellow, etc.
-MERGE_SUBTITLE_BACKGROUND = "none"  # Background color: none, black, transparent, etc.
+MERGE_SUBTITLE_BACKGROUND = (
+    "none"  # Background color: none, black, transparent, etc.
+)
 
 # Merge Document Settings
 MERGE_DOCUMENT_PAPER_SIZE = "none"  # Paper size: none, a4, letter, etc.
@@ -273,7 +325,9 @@ MERGE_METADATA_COMMENT = "none"  # Comment metadata for merged file
 
 # Compression Settings
 COMPRESSION_ENABLED = False  # Master switch to enable/disable compression feature
-COMPRESSION_PRIORITY = 4  # Processing priority in pipeline (lower numbers run earlier)
+COMPRESSION_PRIORITY = (
+    4  # Processing priority in pipeline (lower numbers run earlier)
+)
 COMPRESSION_DELETE_ORIGINAL = True  # Delete original files after successful compression (default: True, use -del flag to override)
 
 # Video Compression Settings
@@ -281,47 +335,81 @@ COMPRESSION_VIDEO_ENABLED = False  # Enable/disable video compression
 COMPRESSION_VIDEO_PRESET = "none"  # Compression preset: none, fast, medium, slow
 COMPRESSION_VIDEO_CRF = "none"  # Constant Rate Factor for quality (none = use default, 0-51, lower is better quality)
 COMPRESSION_VIDEO_CODEC = "none"  # Video codec: none, libx264, libx265, etc.
-COMPRESSION_VIDEO_TUNE = "none"  # Tune option for specific content: none, film, animation, grain, etc.
+COMPRESSION_VIDEO_TUNE = (
+    "none"  # Tune option for specific content: none, film, animation, grain, etc.
+)
 COMPRESSION_VIDEO_PIXEL_FORMAT = "none"  # Pixel format: none, yuv420p, yuv444p, etc.
-COMPRESSION_VIDEO_FORMAT = "none"  # Output format: none (use input format), mp4, mkv, avi, etc.
-COMPRESSION_VIDEO_BITDEPTH = "none"  # Video bit depth: none (use input), 8, 10, 12, etc.
-COMPRESSION_VIDEO_BITRATE = "none"  # Video bitrate: none (use input), 1M, 5M, 10M, etc.
-COMPRESSION_VIDEO_RESOLUTION = "none"  # Video resolution: none (use input), 1920x1080, 1280x720, etc.
+COMPRESSION_VIDEO_FORMAT = (
+    "none"  # Output format: none (use input format), mp4, mkv, avi, etc.
+)
+COMPRESSION_VIDEO_BITDEPTH = (
+    "none"  # Video bit depth: none (use input), 8, 10, 12, etc.
+)
+COMPRESSION_VIDEO_BITRATE = (
+    "none"  # Video bitrate: none (use input), 1M, 5M, 10M, etc.
+)
+COMPRESSION_VIDEO_RESOLUTION = (
+    "none"  # Video resolution: none (use input), 1920x1080, 1280x720, etc.
+)
 
 # Audio Compression Settings
 COMPRESSION_AUDIO_ENABLED = False  # Enable/disable audio compression
 COMPRESSION_AUDIO_PRESET = "none"  # Compression preset: none, fast, medium, slow
 COMPRESSION_AUDIO_CODEC = "none"  # Audio codec: none, aac, mp3, opus, etc.
 COMPRESSION_AUDIO_BITRATE = "none"  # Audio bitrate: none, 128k, 192k, 320k, etc.
-COMPRESSION_AUDIO_CHANNELS = "none"  # Number of audio channels: none (use input), 1 (mono), 2 (stereo), etc.
-COMPRESSION_AUDIO_FORMAT = "none"  # Output format: none (use input format), mp3, m4a, flac, etc.
-COMPRESSION_AUDIO_BITDEPTH = "none"  # Audio bit depth: none (use input), 16, 24, 32, etc.
+COMPRESSION_AUDIO_CHANNELS = (
+    "none"  # Number of audio channels: none (use input), 1 (mono), 2 (stereo), etc.
+)
+COMPRESSION_AUDIO_FORMAT = (
+    "none"  # Output format: none (use input format), mp3, m4a, flac, etc.
+)
+COMPRESSION_AUDIO_BITDEPTH = (
+    "none"  # Audio bit depth: none (use input), 16, 24, 32, etc.
+)
 
 # Image Compression Settings
 COMPRESSION_IMAGE_ENABLED = False  # Enable/disable image compression
 COMPRESSION_IMAGE_PRESET = "none"  # Compression preset: none, fast, medium, slow
-COMPRESSION_IMAGE_QUALITY = "none"  # Image quality: none (use default), 0-100 (higher is better quality)
-COMPRESSION_IMAGE_RESIZE = "none"  # Image resize dimensions: none, 1920x1080, 50%, etc.
-COMPRESSION_IMAGE_FORMAT = "none"  # Output format: none (use input format), jpg, png, webp, etc.
+COMPRESSION_IMAGE_QUALITY = (
+    "none"  # Image quality: none (use default), 0-100 (higher is better quality)
+)
+COMPRESSION_IMAGE_RESIZE = (
+    "none"  # Image resize dimensions: none, 1920x1080, 50%, etc.
+)
+COMPRESSION_IMAGE_FORMAT = (
+    "none"  # Output format: none (use input format), jpg, png, webp, etc.
+)
 
 # Document Compression Settings
 COMPRESSION_DOCUMENT_ENABLED = False  # Enable/disable document compression
 COMPRESSION_DOCUMENT_PRESET = "none"  # Compression preset: none, fast, medium, slow
-COMPRESSION_DOCUMENT_DPI = "none"  # Document DPI: none (use input), 72, 96, 300, etc.
-COMPRESSION_DOCUMENT_FORMAT = "none"  # Output format: none (use input format), pdf, docx, etc.
+COMPRESSION_DOCUMENT_DPI = (
+    "none"  # Document DPI: none (use input), 72, 96, 300, etc.
+)
+COMPRESSION_DOCUMENT_FORMAT = (
+    "none"  # Output format: none (use input format), pdf, docx, etc.
+)
 
 # Subtitle Compression Settings
 COMPRESSION_SUBTITLE_ENABLED = False  # Enable/disable subtitle compression
 COMPRESSION_SUBTITLE_PRESET = "none"  # Compression preset: none, fast, medium, slow
-COMPRESSION_SUBTITLE_ENCODING = "none"  # Character encoding: none, utf-8, utf-16, etc.
-COMPRESSION_SUBTITLE_FORMAT = "none"  # Output format: none (use input format), srt, ass, vtt, etc.
+COMPRESSION_SUBTITLE_ENCODING = (
+    "none"  # Character encoding: none, utf-8, utf-16, etc.
+)
+COMPRESSION_SUBTITLE_FORMAT = (
+    "none"  # Output format: none (use input format), srt, ass, vtt, etc.
+)
 
 # Archive Compression Settings
 COMPRESSION_ARCHIVE_ENABLED = False  # Enable/disable archive compression
 COMPRESSION_ARCHIVE_PRESET = "none"  # Compression preset: none, fast, medium, slow
-COMPRESSION_ARCHIVE_LEVEL = "none"  # Compression level: none (use default), 0-9 (higher is more compression)
+COMPRESSION_ARCHIVE_LEVEL = (
+    "none"  # Compression level: none (use default), 0-9 (higher is more compression)
+)
 COMPRESSION_ARCHIVE_METHOD = "none"  # Compression method: none, deflate, lzma, etc.
-COMPRESSION_ARCHIVE_FORMAT = "none"  # Output format: none (use input format), zip, 7z, tar.gz, etc.
+COMPRESSION_ARCHIVE_FORMAT = (
+    "none"  # Output format: none (use input format), zip, 7z, tar.gz, etc.
+)
 
 # Trim Settings
 TRIM_ENABLED = False  # Master switch to enable/disable trim feature
@@ -332,8 +420,12 @@ TRIM_DELETE_ORIGINAL = True  # Delete original files after successful trimming
 
 # Video Trim Settings
 TRIM_VIDEO_ENABLED = False  # Enable/disable video trimming
-TRIM_VIDEO_CODEC = "none"  # Video codec: none, copy (fastest), libx264, libx265, etc.
-TRIM_VIDEO_PRESET = "none"  # Encoding preset: none, ultrafast, fast, medium, slow, etc.
+TRIM_VIDEO_CODEC = (
+    "none"  # Video codec: none, copy (fastest), libx264, libx265, etc.
+)
+TRIM_VIDEO_PRESET = (
+    "none"  # Encoding preset: none, ultrafast, fast, medium, slow, etc.
+)
 TRIM_VIDEO_FORMAT = "none"  # Output format: none, mp4, mkv, avi, etc.
 
 # Audio Trim Settings
@@ -368,13 +460,19 @@ EXTRACT_DELETE_ORIGINAL = True  # Delete original files after successful extract
 
 # Video Extract Settings
 EXTRACT_VIDEO_ENABLED = False  # Enable/disable video stream extraction
-EXTRACT_VIDEO_CODEC = "none"  # Video codec: none, copy (fastest), libx264, libx265, etc.
+EXTRACT_VIDEO_CODEC = (
+    "none"  # Video codec: none, copy (fastest), libx264, libx265, etc.
+)
 EXTRACT_VIDEO_FORMAT = "none"  # Output format: none, mp4, mkv, avi, etc.
 EXTRACT_VIDEO_INDEX = None  # Stream index to extract: None (all), 0, 1, 2, etc.
 EXTRACT_VIDEO_QUALITY = "none"  # Video quality: none, high, medium, low, etc.
-EXTRACT_VIDEO_PRESET = "none"  # Encoding preset: none, ultrafast, fast, medium, slow, etc.
+EXTRACT_VIDEO_PRESET = (
+    "none"  # Encoding preset: none, ultrafast, fast, medium, slow, etc.
+)
 EXTRACT_VIDEO_BITRATE = "none"  # Video bitrate: none, 1M, 5M, etc.
-EXTRACT_VIDEO_RESOLUTION = "none"  # Video resolution: none, 1920x1080, 1280x720, etc.
+EXTRACT_VIDEO_RESOLUTION = (
+    "none"  # Video resolution: none, 1920x1080, 1280x720, etc.
+)
 EXTRACT_VIDEO_FPS = "none"  # Frame rate: none, 30, 60, etc.
 
 # Audio Extract Settings
@@ -383,7 +481,9 @@ EXTRACT_AUDIO_CODEC = "none"  # Audio codec: none, copy (fastest), aac, mp3, etc
 EXTRACT_AUDIO_FORMAT = "none"  # Output format: none, mp3, m4a, flac, etc.
 EXTRACT_AUDIO_INDEX = None  # Stream index to extract: None (all), 0, 1, 2, etc.
 EXTRACT_AUDIO_BITRATE = "none"  # Audio bitrate: none, 128k, 192k, 320k, etc.
-EXTRACT_AUDIO_CHANNELS = "none"  # Number of audio channels: none, 1 (mono), 2 (stereo), etc.
+EXTRACT_AUDIO_CHANNELS = (
+    "none"  # Number of audio channels: none, 1 (mono), 2 (stereo), etc.
+)
 EXTRACT_AUDIO_SAMPLING = "none"  # Audio sampling rate: none, 44100, 48000, etc.
 EXTRACT_AUDIO_VOLUME = "none"  # Volume adjustment: none, 1.0, 1.5, 0.5, etc.
 
@@ -394,13 +494,17 @@ EXTRACT_SUBTITLE_FORMAT = "none"  # Output format: none, srt, ass, vtt, etc.
 EXTRACT_SUBTITLE_INDEX = None  # Stream index to extract: None (all), 0, 1, 2, etc.
 EXTRACT_SUBTITLE_LANGUAGE = "none"  # Language code: none, eng, spa, etc.
 EXTRACT_SUBTITLE_ENCODING = "none"  # Character encoding: none, utf-8, utf-16, etc.
-EXTRACT_SUBTITLE_FONT = "none"  # Font for subtitles: none, Arial, Times New Roman, etc.
+EXTRACT_SUBTITLE_FONT = (
+    "none"  # Font for subtitles: none, Arial, Times New Roman, etc.
+)
 EXTRACT_SUBTITLE_FONT_SIZE = "none"  # Font size: none, 12, 16, etc.
 
 # Attachment Extract Settings
 EXTRACT_ATTACHMENT_ENABLED = False  # Enable/disable attachment extraction
 EXTRACT_ATTACHMENT_FORMAT = "none"  # Output format: none, original, etc.
-EXTRACT_ATTACHMENT_INDEX = None  # Attachment index to extract: None (all), 0, 1, 2, etc.
+EXTRACT_ATTACHMENT_INDEX = (
+    None  # Attachment index to extract: None (all), 0, 1, 2, etc.
+)
 EXTRACT_ATTACHMENT_FILTER = "none"  # Filter pattern: none, *.ttf, *.png, etc.
 EXTRACT_MAINTAIN_QUALITY = True  # Maintain original quality during extraction
 
@@ -415,42 +519,58 @@ CONVERT_VIDEO_FORMAT = "none"  # Target format: none, mp4, mkv, avi, webm, etc.
 CONVERT_VIDEO_CODEC = "none"  # Video codec: none, libx264, libx265, vp9, etc.
 CONVERT_VIDEO_QUALITY = "none"  # Video quality preset: none, high, medium, low
 CONVERT_VIDEO_CRF = 0  # Constant Rate Factor (0-51, lower is better quality)
-CONVERT_VIDEO_PRESET = "none"  # Encoding preset: none, ultrafast, fast, medium, slow, etc.
+CONVERT_VIDEO_PRESET = (
+    "none"  # Encoding preset: none, ultrafast, fast, medium, slow, etc.
+)
 CONVERT_VIDEO_MAINTAIN_QUALITY = True  # Maintain original quality during conversion
-CONVERT_VIDEO_RESOLUTION = "none"  # Target resolution: none, 1920x1080, 1280x720, etc.
+CONVERT_VIDEO_RESOLUTION = (
+    "none"  # Target resolution: none, 1920x1080, 1280x720, etc.
+)
 CONVERT_VIDEO_FPS = "none"  # Target frame rate: none, 30, 60, etc.
-CONVERT_VIDEO_DELETE_ORIGINAL = True  # Delete original files after successful video conversion
+CONVERT_VIDEO_DELETE_ORIGINAL = (
+    True  # Delete original files after successful video conversion
+)
 
 # Audio Convert Settings
 CONVERT_AUDIO_ENABLED = False  # Enable/disable audio conversion
 CONVERT_AUDIO_FORMAT = "none"  # Target format: none, mp3, m4a, flac, ogg, etc.
 CONVERT_AUDIO_CODEC = "none"  # Audio codec: none, aac, mp3, opus, flac, etc.
 CONVERT_AUDIO_BITRATE = "none"  # Target bitrate: none, 128k, 192k, 320k, etc.
-CONVERT_AUDIO_CHANNELS = 0  # Target channels: 0 (original), 1 (mono), 2 (stereo), etc.
+CONVERT_AUDIO_CHANNELS = (
+    0  # Target channels: 0 (original), 1 (mono), 2 (stereo), etc.
+)
 CONVERT_AUDIO_SAMPLING = 0  # Target sampling rate: 0 (original), 44100, 48000, etc.
 CONVERT_AUDIO_VOLUME = 0.0  # Volume adjustment: 0.0 (original), 1.0, 1.5, 0.5, etc.
-CONVERT_AUDIO_DELETE_ORIGINAL = True  # Delete original files after successful audio conversion
+CONVERT_AUDIO_DELETE_ORIGINAL = (
+    True  # Delete original files after successful audio conversion
+)
 
 # Subtitle Convert Settings
 CONVERT_SUBTITLE_ENABLED = False  # Enable/disable subtitle conversion
 CONVERT_SUBTITLE_FORMAT = "none"  # Target format: none, srt, ass, vtt, etc.
 CONVERT_SUBTITLE_ENCODING = "none"  # Target encoding: none, utf-8, utf-16, etc.
 CONVERT_SUBTITLE_LANGUAGE = "none"  # Target language code: none, eng, spa, etc.
-CONVERT_SUBTITLE_DELETE_ORIGINAL = True  # Delete original files after successful subtitle conversion
+CONVERT_SUBTITLE_DELETE_ORIGINAL = (
+    True  # Delete original files after successful subtitle conversion
+)
 
 # Document Convert Settings
 CONVERT_DOCUMENT_ENABLED = False  # Enable/disable document conversion
 CONVERT_DOCUMENT_FORMAT = "none"  # Target format: none, pdf, docx, txt, etc.
 CONVERT_DOCUMENT_QUALITY = 0  # Document quality (0-100, higher is better)
 CONVERT_DOCUMENT_DPI = 0  # Document DPI: 0 (original), 72, 96, 300, etc.
-CONVERT_DOCUMENT_DELETE_ORIGINAL = True  # Delete original files after successful document conversion
+CONVERT_DOCUMENT_DELETE_ORIGINAL = (
+    True  # Delete original files after successful document conversion
+)
 
 # Archive Convert Settings
 CONVERT_ARCHIVE_ENABLED = False  # Enable/disable archive conversion
 CONVERT_ARCHIVE_FORMAT = "none"  # Target format: none, zip, 7z, tar.gz, etc.
 CONVERT_ARCHIVE_LEVEL = 0  # Compression level (0-9, higher is more compression)
 CONVERT_ARCHIVE_METHOD = "none"  # Compression method: none, deflate, lzma, etc.
-CONVERT_ARCHIVE_DELETE_ORIGINAL = True  # Delete original files after successful archive conversion
+CONVERT_ARCHIVE_DELETE_ORIGINAL = (
+    True  # Delete original files after successful archive conversion
+)
 
 # Metadata Settings
 METADATA_ALL = ""  # Global metadata template for all media types
@@ -463,6 +583,12 @@ METADATA_VIDEO_COMMENT = ""  # Default comment metadata specifically for video f
 METADATA_AUDIO_TITLE = ""  # Default title metadata specifically for audio files
 METADATA_AUDIO_AUTHOR = ""  # Default author metadata specifically for audio files
 METADATA_AUDIO_COMMENT = ""  # Default comment metadata specifically for audio files
-METADATA_SUBTITLE_TITLE = ""  # Default title metadata specifically for subtitle files
-METADATA_SUBTITLE_AUTHOR = ""  # Default author metadata specifically for subtitle files
-METADATA_SUBTITLE_COMMENT = ""  # Default comment metadata specifically for subtitle files
+METADATA_SUBTITLE_TITLE = (
+    ""  # Default title metadata specifically for subtitle files
+)
+METADATA_SUBTITLE_AUTHOR = (
+    ""  # Default author metadata specifically for subtitle files
+)
+METADATA_SUBTITLE_COMMENT = (
+    ""  # Default comment metadata specifically for subtitle files
+)

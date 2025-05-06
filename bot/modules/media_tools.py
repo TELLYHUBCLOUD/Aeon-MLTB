@@ -24,6 +24,7 @@ LOGGER = logging.getLogger(__name__)
 
 handler_dict = {}
 merge_config_page = 0  # Global variable to track merge_config page
+watermark_config_page = 0  # Global variable to track watermark_config page
 
 
 async def get_media_tools_settings(from_user, stype="main", page_no=0):
@@ -78,8 +79,11 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         # 1. The tool is included in MEDIA_TOOLS_ENABLED
         # 2. The tool's individual ENABLED flag is set
         from bot.helper.ext_utils.bot_utils import is_media_tool_enabled
+
         owner_watermark_available = is_media_tool_enabled("watermark")
-        owner_watermark_enabled = owner_watermark_available and Config.WATERMARK_ENABLED
+        owner_watermark_enabled = (
+            owner_watermark_available and Config.WATERMARK_ENABLED
+        )
 
         if user_watermark_enabled:
             watermark_status = "✅ Enabled (User)"
@@ -163,7 +167,9 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         user_compression_enabled = user_dict.get("COMPRESSION_ENABLED", False)
         # Check both if compression is available and enabled globally
         owner_compression_available = is_media_tool_enabled("compression")
-        owner_compression_enabled = owner_compression_available and Config.COMPRESSION_ENABLED
+        owner_compression_enabled = (
+            owner_compression_available and Config.COMPRESSION_ENABLED
+        )
 
         if user_compression_enabled:
             compression_status = "✅ Enabled (User)"
@@ -329,10 +335,35 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
             "✅ Enabled" if watermark_enabled else "❌ Disabled",
             f"mediatools {user_id} tog WATERMARK_ENABLED {'f' if watermark_enabled else 't'}",
         )
-        buttons.data_button("Configure", f"mediatools {user_id} watermark_config")
+        buttons.data_button("Text", f"mediatools {user_id} watermark_config")
         buttons.data_button(
             "Set Priority", f"mediatools {user_id} menu WATERMARK_PRIORITY"
         )
+
+        # Add Remove Original toggle button with short name
+        # Use global setting as fallback when user hasn't set it explicitly
+        remove_original = user_dict.get(
+            "WATERMARK_REMOVE_ORIGINAL", Config.WATERMARK_REMOVE_ORIGINAL
+        )
+        buttons.data_button(
+            f"RO: {'✅ ON' if remove_original else '❌ OFF'}",
+            f"mediatools {user_id} tog WATERMARK_REMOVE_ORIGINAL {'f' if remove_original else 't'}",
+        )
+
+        # Add Threading toggle
+        threading_enabled = user_dict.get(
+            "WATERMARK_THREADING", Config.WATERMARK_THREADING
+        )
+        buttons.data_button(
+            f"Threading: {'✅ ON' if threading_enabled else '❌ OFF'}",
+            f"mediatools {user_id} tog WATERMARK_THREADING {'f' if threading_enabled else 't'}",
+        )
+
+        # Add Thread Number button
+        buttons.data_button(
+            "Thread Number", f"mediatools {user_id} menu WATERMARK_THREAD_NUMBER"
+        )
+
         buttons.data_button("Reset", f"mediatools {user_id} reset_watermark")
         buttons.data_button("Remove", f"mediatools {user_id} remove_watermark")
         buttons.data_button("Back", f"mediatools {user_id} back", "footer")
@@ -500,93 +531,100 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
 ┠ <b>Thread Number</b> → <code>{thread_number}</code>
 ┖ <b>Remove Original</b> → {remove_original_status}"""
 
-    elif stype == "watermark_config":
-        # Watermark configuration menu
-        buttons.data_button("Set Text", f"mediatools {user_id} menu WATERMARK_KEY")
-        buttons.data_button(
-            "Set Position", f"mediatools {user_id} menu WATERMARK_POSITION"
-        )
-        buttons.data_button("Set Size", f"mediatools {user_id} menu WATERMARK_SIZE")
-        buttons.data_button(
-            "Set Color", f"mediatools {user_id} menu WATERMARK_COLOR"
-        )
-        buttons.data_button("Set Font", f"mediatools {user_id} menu WATERMARK_FONT")
-        buttons.data_button(
-            "Set Opacity", f"mediatools {user_id} menu WATERMARK_OPACITY"
-        )
+    elif stype.startswith("watermark_config"):
+        # Get all watermark settings and sort them alphabetically
+        watermark_settings = [
+            # Basic settings
+            "WATERMARK_KEY",
+            "WATERMARK_POSITION",
+            "WATERMARK_SIZE",
+            "WATERMARK_COLOR",
+            "WATERMARK_FONT",
+            "WATERMARK_OPACITY",
+            # Quality and speed settings (numerical values instead of toggles)
+            "WATERMARK_QUALITY",
+            "WATERMARK_SPEED",
+            # Audio and subtitle interval settings
+            "AUDIO_WATERMARK_INTERVAL",
+            "SUBTITLE_WATERMARK_INTERVAL",
+            # Audio volume (keeping this as it's useful)
+            "AUDIO_WATERMARK_VOLUME",
+            # Subtitle style (keeping this as it's useful)
+            "SUBTITLE_WATERMARK_STYLE",
+        ]
 
-        # Add Remove Original toggle button
-        # Use global setting as fallback when user hasn't set it explicitly
-        remove_original = user_dict.get("WATERMARK_REMOVE_ORIGINAL", Config.WATERMARK_REMOVE_ORIGINAL)
-        buttons.data_button(
-            f"Remove Original: {'✅ ON' if remove_original else '❌ OFF'}",
-            f"mediatools {user_id} tog WATERMARK_REMOVE_ORIGINAL {'f' if remove_original else 't'}",
-        )
+        # Sort settings alphabetically
+        watermark_settings.sort()
 
-        # Audio watermark settings
-        audio_watermark_enabled = user_dict.get("AUDIO_WATERMARK_ENABLED", False)
-        buttons.data_button(
-            f"Audio WM: {'✅ ON' if audio_watermark_enabled else '❌ OFF'}",
-            f"mediatools {user_id} tog AUDIO_WATERMARK_ENABLED {'f' if audio_watermark_enabled else 't'}",
-        )
-        buttons.data_button(
-            "Audio Text", f"mediatools {user_id} menu AUDIO_WATERMARK_TEXT"
-        )
+        # Pagination setup
+        global watermark_config_page
 
-        # Subtitle watermark settings
-        subtitle_watermark_enabled = user_dict.get(
-            "SUBTITLE_WATERMARK_ENABLED", False
-        )
-        buttons.data_button(
-            f"Subtitle WM: {'✅ ON' if subtitle_watermark_enabled else '❌ OFF'}",
-            f"mediatools {user_id} tog SUBTITLE_WATERMARK_ENABLED {'f' if subtitle_watermark_enabled else 't'}",
-        )
-        buttons.data_button(
-            "Subtitle Text", f"mediatools {user_id} menu SUBTITLE_WATERMARK_TEXT"
-        )
-
-        # Add Audio Volume button
-        buttons.data_button(
-            "Audio Volume", f"mediatools {user_id} menu AUDIO_WATERMARK_VOLUME"
-        )
-
-        # Add Subtitle Style button
-        buttons.data_button(
-            "Subtitle Style", f"mediatools {user_id} menu SUBTITLE_WATERMARK_STYLE"
-        )
-
-        # Add fast mode toggle - only show as user setting if explicitly set
-        if "WATERMARK_FAST_MODE" in user_dict:
-            fast_mode_enabled = user_dict["WATERMARK_FAST_MODE"]
-            buttons.data_button(
-                f"Fast Mode: {'✅ ON (User)' if fast_mode_enabled else '❌ OFF (User)'}",
-                f"mediatools {user_id} tog WATERMARK_FAST_MODE {'f' if fast_mode_enabled else 't'}",
-            )
+        # If a specific page is requested in the stype parameter, use that
+        if len(stype.split()) > 1:
+            try:
+                page_no = int(stype.split()[1])
+                # Update the global variable
+                watermark_config_page = page_no
+            except (ValueError, IndexError):
+                # Use the global variable
+                page_no = watermark_config_page
         else:
-            fast_mode_enabled = Config.WATERMARK_FAST_MODE
-            buttons.data_button(
-                f"Fast Mode: {'✅ ON (Global)' if fast_mode_enabled else '❌ OFF (Global)'}",
-                f"mediatools {user_id} tog WATERMARK_FAST_MODE {'f' if fast_mode_enabled else 't'}",
-            )
+            # Use the global variable if no page is specified
+            page_no = watermark_config_page
 
-        # Add maintain quality toggle - only show as user setting if explicitly set
-        if "WATERMARK_MAINTAIN_QUALITY" in user_dict:
-            maintain_quality = user_dict["WATERMARK_MAINTAIN_QUALITY"]
-            buttons.data_button(
-                f"Quality: {'✅ High (User)' if maintain_quality else '❌ Normal (User)'}",
-                f"mediatools {user_id} tog WATERMARK_MAINTAIN_QUALITY {'f' if maintain_quality else 't'}",
-            )
-        else:
-            maintain_quality = Config.WATERMARK_MAINTAIN_QUALITY
-            buttons.data_button(
-                f"Quality: {'✅ High (Global)' if maintain_quality else '❌ Normal (Global)'}",
-                f"mediatools {user_id} tog WATERMARK_MAINTAIN_QUALITY {'f' if maintain_quality else 't'}",
-            )
+        # 5 rows per page, 2 columns = 10 items per page
+        items_per_page = 10  # 5 rows * 2 columns
+        total_pages = (
+            len(watermark_settings) + items_per_page - 1
+        ) // items_per_page
 
-        # Always go back to the watermark menu
+        # Ensure page_no is valid
+        if page_no >= total_pages:
+            page_no = 0
+            watermark_config_page = 0  # Update global variable
+        elif page_no < 0:
+            page_no = total_pages - 1
+            watermark_config_page = total_pages - 1  # Update global variable
+
+        # Get settings for current page
+        current_page_settings = watermark_settings[
+            page_no * items_per_page : (page_no * items_per_page) + items_per_page
+        ]
+
+        # Add buttons for each setting on current page
+        for setting in current_page_settings:
+            display_name = (
+                setting.replace("WATERMARK_", "")
+                .replace("AUDIO_WATERMARK_", "AUDIO ")
+                .replace("SUBTITLE_WATERMARK_", "SUBTITLE ")
+                .replace("_", " ")
+                .title()
+            )
+            buttons.data_button(display_name, f"mediatools {user_id} menu {setting}")
+
+        # Add action buttons in a separate row
         buttons.data_button("Back", f"mediatools {user_id} watermark", "footer")
         buttons.data_button("Close", f"mediatools {user_id} close", "footer")
-        btns = buttons.build_menu(2)
+
+        # Add pagination buttons in a separate row below action buttons
+        if total_pages > 1:
+            for i in range(total_pages):
+                # Make the current page button different
+                if i == page_no:
+                    buttons.data_button(
+                        f"[{i + 1}]",
+                        f"mediatools {user_id} watermark_config {i}",
+                        "page",
+                    )
+                else:
+                    buttons.data_button(
+                        str(i + 1),
+                        f"mediatools {user_id} watermark_config {i}",
+                        "page",
+                    )
+
+            # Build the menu with 2 columns for settings, 4 columns for action buttons, and 8 columns for pagination
+            btns = buttons.build_menu(2, 8, 4, 8)
 
         # Get watermark text based on priority
         watermark_enabled = user_dict.get("WATERMARK_ENABLED", False)
@@ -771,27 +809,67 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         else:
             subtitle_watermark_text = "Same as visual watermark"
 
-        text = f"""⌬ <b>Configure Watermark :</b>
+        # Get quality and speed values if they exist
+        user_has_quality = (
+            "WATERMARK_QUALITY" in user_dict and user_dict["WATERMARK_QUALITY"]
+        )
+        if user_has_quality:
+            quality_value = f"{user_dict['WATERMARK_QUALITY']} (User)"
+        else:
+            quality_value = "None (Default)"
+
+        user_has_speed = (
+            "WATERMARK_SPEED" in user_dict and user_dict["WATERMARK_SPEED"]
+        )
+        if user_has_speed:
+            speed_value = f"{user_dict['WATERMARK_SPEED']} (User)"
+        else:
+            speed_value = "None (Default)"
+
+        # Get audio and subtitle interval values if they exist
+        user_has_audio_interval = (
+            "AUDIO_WATERMARK_INTERVAL" in user_dict
+            and user_dict["AUDIO_WATERMARK_INTERVAL"]
+        )
+        if user_has_audio_interval:
+            audio_interval = f"{user_dict['AUDIO_WATERMARK_INTERVAL']} (User)"
+        else:
+            audio_interval = "None (Default)"
+
+        user_has_subtitle_interval = (
+            "SUBTITLE_WATERMARK_INTERVAL" in user_dict
+            and user_dict["SUBTITLE_WATERMARK_INTERVAL"]
+        )
+        if user_has_subtitle_interval:
+            subtitle_interval = f"{user_dict['SUBTITLE_WATERMARK_INTERVAL']} (User)"
+        else:
+            subtitle_interval = "None (Default)"
+
+        # Get page info for message
+        page_info = ""
+        if total_pages > 1:
+            page_info = f"\n\n<b>Page:</b> {page_no + 1}/{total_pages}"
+
+        text = f"""⌬ <b>Configure Watermark Text :</b>
 ┟ <b>Name</b> → {user_name}
 ┃
-┠ <b>Visual Watermark</b>
+┠ <b>Select a setting to configure</b>
+┃
+┠ <b>Current Settings:</b>
 ┠ <b>Text</b> → <code>{watermark_text}</code>
 ┠ <b>Position</b> → <code>{watermark_position}</code>
 ┠ <b>Size</b> → <code>{watermark_size}</code>
 ┠ <b>Color</b> → <code>{watermark_color}</code>
 ┠ <b>Font</b> → <code>{watermark_font}</code>
 ┠ <b>Opacity</b> → <code>{opacity_value}</code>
-┠ <b>Fast Mode</b> → {fast_mode_status}
-┠ <b>Quality</b> → {maintain_quality_status}
+┠ <b>Quality</b> → <code>{quality_value}</code>
+┠ <b>Speed</b> → <code>{speed_value}</code>
+┠ <b>Audio Interval</b> → <code>{audio_interval}</code>
+┠ <b>Subtitle Interval</b> → <code>{subtitle_interval}</code>
+┠ <b>Audio Volume</b> → <code>{user_dict.get("AUDIO_WATERMARK_VOLUME", "None (Default)")}</code>
 ┠ <b>Threading</b> → {threading_status}
 ┠ <b>Thread Number</b> → <code>{thread_number}</code>
-┠ <b>Remove Original</b> → {remove_original_status}
-┃
-┠ <b>Audio Watermark</b> → {"✅ Enabled" if audio_watermark_enabled else "❌ Disabled"}
-┠ <b>Audio Text</b> → <code>{audio_watermark_text}</code>
-┃
-┖ <b>Subtitle Watermark</b> → {"✅ Enabled" if subtitle_watermark_enabled else "❌ Disabled"}
-   <b>Subtitle Text</b> → <code>{subtitle_watermark_text}</code>"""
+┖ <b>Remove Original</b> → {remove_original_status}{page_info}"""
 
     elif stype == "merge":
         # Merge settings menu
@@ -838,7 +916,9 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
 
         # Add Remove Original toggle button
         # Use global setting as fallback when user hasn't set it explicitly
-        remove_original = user_dict.get("MERGE_REMOVE_ORIGINAL", Config.MERGE_REMOVE_ORIGINAL)
+        remove_original = user_dict.get(
+            "MERGE_REMOVE_ORIGINAL", Config.MERGE_REMOVE_ORIGINAL
+        )
         buttons.data_button(
             f"Remove Original: {'✅ ON' if remove_original else '❌ OFF'}",
             f"mediatools {user_id} tog MERGE_REMOVE_ORIGINAL {'f' if remove_original else 't'}",
@@ -1720,16 +1800,24 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         # Get delete original status
         # Check for user setting first, then global setting, then default to True
         delete_original = user_dict.get("COMPRESSION_DELETE_ORIGINAL", None)
-        if delete_original is None and hasattr(Config, "COMPRESSION_DELETE_ORIGINAL"):
+        if delete_original is None and hasattr(
+            Config, "COMPRESSION_DELETE_ORIGINAL"
+        ):
             delete_original = Config.COMPRESSION_DELETE_ORIGINAL
         elif delete_original is None:
             delete_original = True  # Default to True if not specified
 
         # Determine display string with appropriate label
         if "COMPRESSION_DELETE_ORIGINAL" in user_dict:
-            delete_original_status = "✅ Enabled (User)" if delete_original else "❌ Disabled (User)"
+            delete_original_status = (
+                "✅ Enabled (User)" if delete_original else "❌ Disabled (User)"
+            )
         elif hasattr(Config, "COMPRESSION_DELETE_ORIGINAL"):
-            delete_original_status = "✅ Enabled (Global)" if Config.COMPRESSION_DELETE_ORIGINAL else "❌ Disabled (Global)"
+            delete_original_status = (
+                "✅ Enabled (Global)"
+                if Config.COMPRESSION_DELETE_ORIGINAL
+                else "❌ Disabled (Global)"
+            )
         else:
             delete_original_status = "✅ Enabled (Default)"
 
@@ -2232,9 +2320,13 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
 
         # Determine display string with appropriate label
         if "TRIM_DELETE_ORIGINAL" in user_dict:
-            delete_original_str = f"{'✅ Enabled' if delete_original else '❌ Disabled'} (User)"
+            delete_original_str = (
+                f"{'✅ Enabled' if delete_original else '❌ Disabled'} (User)"
+            )
         elif hasattr(Config, "TRIM_DELETE_ORIGINAL"):
-            delete_original_str = f"{'✅ Enabled' if delete_original else '❌ Disabled'} (Global)"
+            delete_original_str = (
+                f"{'✅ Enabled' if delete_original else '❌ Disabled'} (Global)"
+            )
         else:
             delete_original_str = "✅ Enabled (Default)"
 
@@ -2917,7 +3009,9 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         # Add global delete original toggle
         # Check for user setting first, then global setting, then default to True
         delete_original = user_dict.get("COMPRESSION_DELETE_ORIGINAL", None)
-        if delete_original is None and hasattr(Config, "COMPRESSION_DELETE_ORIGINAL"):
+        if delete_original is None and hasattr(
+            Config, "COMPRESSION_DELETE_ORIGINAL"
+        ):
             delete_original = Config.COMPRESSION_DELETE_ORIGINAL
         elif delete_original is None:
             delete_original = True  # Default to True if not specified
@@ -2956,7 +3050,8 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
             "Video Bitrate", f"mediatools {user_id} menu COMPRESSION_VIDEO_BITRATE"
         )
         buttons.data_button(
-            "Video Resolution", f"mediatools {user_id} menu COMPRESSION_VIDEO_RESOLUTION"
+            "Video Resolution",
+            f"mediatools {user_id} menu COMPRESSION_VIDEO_RESOLUTION",
         )
         buttons.data_button(
             "Video Format", f"mediatools {user_id} menu COMPRESSION_VIDEO_FORMAT"
@@ -3069,16 +3164,24 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         # Get delete original setting
         # Check for user setting first, then global setting, then default to True
         delete_original = user_dict.get("COMPRESSION_DELETE_ORIGINAL", None)
-        if delete_original is None and hasattr(Config, "COMPRESSION_DELETE_ORIGINAL"):
+        if delete_original is None and hasattr(
+            Config, "COMPRESSION_DELETE_ORIGINAL"
+        ):
             delete_original = Config.COMPRESSION_DELETE_ORIGINAL
         elif delete_original is None:
             delete_original = True  # Default to True if not specified
 
         # Determine display string with appropriate label
         if "COMPRESSION_DELETE_ORIGINAL" in user_dict:
-            delete_original_status = "✅ Enabled (User)" if delete_original else "❌ Disabled (User)"
+            delete_original_status = (
+                "✅ Enabled (User)" if delete_original else "❌ Disabled (User)"
+            )
         elif hasattr(Config, "COMPRESSION_DELETE_ORIGINAL"):
-            delete_original_status = "✅ Enabled (Global)" if Config.COMPRESSION_DELETE_ORIGINAL else "❌ Disabled (Global)"
+            delete_original_status = (
+                "✅ Enabled (Global)"
+                if Config.COMPRESSION_DELETE_ORIGINAL
+                else "❌ Disabled (Global)"
+            )
         else:
             delete_original_status = "✅ Enabled (Default)"
 
@@ -3356,7 +3459,9 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         video_bitdepth = user_dict.get("COMPRESSION_VIDEO_BITDEPTH", None)
         if video_bitdepth is None and hasattr(Config, "COMPRESSION_VIDEO_BITDEPTH"):
             video_bitdepth = Config.COMPRESSION_VIDEO_BITDEPTH
-        video_bitdepth_str = f"{video_bitdepth}" if video_bitdepth else "none (Default)"
+        video_bitdepth_str = (
+            f"{video_bitdepth}" if video_bitdepth else "none (Default)"
+        )
 
         video_bitrate = user_dict.get("COMPRESSION_VIDEO_BITRATE", None)
         if video_bitrate is None and hasattr(Config, "COMPRESSION_VIDEO_BITRATE"):
@@ -3364,15 +3469,21 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
         video_bitrate_str = f"{video_bitrate}" if video_bitrate else "none (Default)"
 
         video_resolution = user_dict.get("COMPRESSION_VIDEO_RESOLUTION", None)
-        if video_resolution is None and hasattr(Config, "COMPRESSION_VIDEO_RESOLUTION"):
+        if video_resolution is None and hasattr(
+            Config, "COMPRESSION_VIDEO_RESOLUTION"
+        ):
             video_resolution = Config.COMPRESSION_VIDEO_RESOLUTION
-        video_resolution_str = f"{video_resolution}" if video_resolution else "none (Default)"
+        video_resolution_str = (
+            f"{video_resolution}" if video_resolution else "none (Default)"
+        )
 
         # Get audio bitdepth setting
         audio_bitdepth = user_dict.get("COMPRESSION_AUDIO_BITDEPTH", None)
         if audio_bitdepth is None and hasattr(Config, "COMPRESSION_AUDIO_BITDEPTH"):
             audio_bitdepth = Config.COMPRESSION_AUDIO_BITDEPTH
-        audio_bitdepth_str = f"{audio_bitdepth}" if audio_bitdepth else "none (Default)"
+        audio_bitdepth_str = (
+            f"{audio_bitdepth}" if audio_bitdepth else "none (Default)"
+        )
 
         text = f"""⌬ <b>Compression Configuration :</b>
 ┟ <b>Name</b> → {user_name}
@@ -3476,9 +3587,13 @@ async def get_media_tools_settings(from_user, stype="main", page_no=0):
 
         # Determine display string with appropriate label
         if "CONVERT_DELETE_ORIGINAL" in user_dict:
-            delete_original_status = f"{'✅ Enabled' if delete_original else '❌ Disabled'} (User)"
+            delete_original_status = (
+                f"{'✅ Enabled' if delete_original else '❌ Disabled'} (User)"
+            )
         elif hasattr(Config, "CONVERT_DELETE_ORIGINAL"):
-            delete_original_status = f"{'✅ Enabled' if delete_original else '❌ Disabled'} (Global)"
+            delete_original_status = (
+                f"{'✅ Enabled' if delete_original else '❌ Disabled'} (Global)"
+            )
         else:
             delete_original_status = "✅ Enabled (Default)"
 
@@ -5146,7 +5261,11 @@ async def update_media_tools_settings(query, stype="main"):
     # Check if we're in a task context (using -mt flag)
     # We can determine this by checking if there's a task_done button in the original message
     is_task_context = False
-    if hasattr(query, 'message') and hasattr(query.message, 'reply_markup') and query.message.reply_markup:
+    if (
+        hasattr(query, "message")
+        and hasattr(query.message, "reply_markup")
+        and query.message.reply_markup
+    ):
         for row in query.message.reply_markup.inline_keyboard:
             for btn in row:
                 if btn.text == "Done" and "task_done" in btn.callback_data:
@@ -5302,7 +5421,7 @@ async def get_menu(option, message, user_id):
     # Check if we're in a task context (using -mt flag)
     # We can determine this by checking if there's a task_done button in the message's reply markup
     is_task_context = False
-    if hasattr(message, 'reply_markup') and message.reply_markup:
+    if hasattr(message, "reply_markup") and message.reply_markup:
         for row in message.reply_markup.inline_keyboard:
             for btn in row:
                 if btn.text == "Done" and "task_done" in btn.callback_data:
@@ -6244,7 +6363,9 @@ async def media_tools_settings(_, message):
             if db_config and "MEDIA_TOOLS_ENABLED" in db_config:
                 # Update Config with the latest value from database
                 Config.MEDIA_TOOLS_ENABLED = db_config["MEDIA_TOOLS_ENABLED"]
-                LOGGER.info(f"Refreshed MEDIA_TOOLS_ENABLED from database: {Config.MEDIA_TOOLS_ENABLED}")
+                LOGGER.info(
+                    f"Refreshed MEDIA_TOOLS_ENABLED from database: {Config.MEDIA_TOOLS_ENABLED}"
+                )
     except Exception as e:
         LOGGER.error(f"Error refreshing MEDIA_TOOLS_ENABLED from database: {e}")
 
@@ -6357,7 +6478,12 @@ async def edit_media_tools_settings(client, query):
 
         # Check if we're in the watermark configuration menu
         # These are the toggles in the watermark_config menu
-        if data[3] in ["AUDIO_WATERMARK_ENABLED", "SUBTITLE_WATERMARK_ENABLED", "WATERMARK_FAST_MODE", "WATERMARK_MAINTAIN_QUALITY"]:
+        if data[3] in [
+            "AUDIO_WATERMARK_ENABLED",
+            "SUBTITLE_WATERMARK_ENABLED",
+            "WATERMARK_FAST_MODE",
+            "WATERMARK_MAINTAIN_QUALITY",
+        ]:
             # Stay in the watermark_config menu
             await update_media_tools_settings(query, "watermark_config")
         elif data[3].startswith("WATERMARK_"):
@@ -6438,7 +6564,7 @@ async def edit_media_tools_settings(client, query):
 
         # Check if we're in a task context (using -mt flag)
         is_task_context = False
-        if hasattr(message, 'reply_markup') and message.reply_markup:
+        if hasattr(message, "reply_markup") and message.reply_markup:
             for row in message.reply_markup.inline_keyboard:
                 for btn in row:
                     if btn.text == "Done" and "task_done" in btn.callback_data:
@@ -6451,7 +6577,9 @@ async def edit_media_tools_settings(client, query):
         if is_task_context:
             # In task context, add Done and Cancel buttons
             buttons.data_button("Done", f"mediatools {user_id} task_done", "footer")
-            buttons.data_button("Cancel", f"mediatools {user_id} task_cancel", "footer")
+            buttons.data_button(
+                "Cancel", f"mediatools {user_id} task_cancel", "footer"
+            )
         else:
             # In normal context, add Close button
             buttons.data_button("Close", f"mediatools {user_id} close", "footer")

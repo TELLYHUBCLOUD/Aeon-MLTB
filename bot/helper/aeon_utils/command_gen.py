@@ -83,13 +83,20 @@ async def get_watermark_cmd(
     size=20,
     color="white",  # Default color is white
     font="default.otf",
-    fast_mode=False,
-    maintain_quality=True,
+    fast_mode=False,  # For backward compatibility
+    maintain_quality=True,  # For backward compatibility
     opacity=1.0,
-    audio_watermark_enabled=False,
-    audio_watermark_text="",
-    subtitle_watermark_enabled=False,
-    subtitle_watermark_text="",
+    audio_watermark_enabled=False,  # Whether to add audio watermark
+    audio_watermark_text=None,  # Text for audio watermark
+    subtitle_watermark_enabled=False,  # Whether to add subtitle watermark
+    subtitle_watermark_text=None,  # Text for subtitle watermark
+    subtitle_watermark_interval=None,  # Interval for subtitle watermark
+    subtitle_watermark_style=None,  # Style for subtitle watermark
+    quality=None,  # Numerical quality value instead of maintain_quality toggle
+    speed=None,  # Numerical speed value instead of fast_mode toggle
+    audio_watermark_interval=None,  # New parameter for audio watermark interval
+    audio_watermark_volume=None,  # Volume for audio watermark
+    remove_original=False,  # Whether to remove original file after processing
 ):
     """Generate FFmpeg command for adding watermark to media files with improved handling.
 
@@ -248,10 +255,19 @@ async def get_watermark_cmd(
         "-ignore_unknown",
     ]
 
-    # Check file size for fast mode
-    large_file_threshold = 100 * 1024 * 1024  # 100MB
+    # Check if speed parameter is provided
     file_size = os.path.getsize(file)
-    use_fast_mode = fast_mode and file_size > large_file_threshold
+    large_file_threshold = 100 * 1024 * 1024  # 100MB
+
+    # If speed is provided as a numerical value, use it directly
+    # Otherwise, use a default approach based on file size
+    use_fast_mode = False
+    if speed is not None and str(speed).lower() != "none":
+        # Speed parameter provided - will be used directly in the command
+        pass
+    else:
+        # No speed parameter - use default approach
+        use_fast_mode = file_size > large_file_threshold
 
     # Use default thread count
     thread_count = max(1, cpu_no // 2)
@@ -281,58 +297,196 @@ async def get_watermark_cmd(
         # Copy audio and subtitle streams
         cmd.extend(["-c:a", "copy", "-c:s", "copy"])
 
-        # Add quality settings if maintain_quality is enabled
-        if maintain_quality:
-            cmd.extend(["-crf", "18"])  # High quality
+        # Add quality settings based on quality parameter
+        if quality is not None and str(quality).lower() != "none":
+            try:
+                # Try to convert quality to integer (1-51 for x264/x265)
+                quality_val = int(quality)
+                # Ensure it's in valid range (lower is better quality)
+                quality_val = max(1, min(quality_val, 51))
+                cmd.extend(["-crf", str(quality_val)])
+            except (ValueError, TypeError):
+                # If conversion fails, use a default high quality
+                cmd.extend(["-crf", "18"])  # High quality default
+        else:
+            # No quality specified, use a good default
+            cmd.extend(["-crf", "23"])  # Default quality
 
-        # Add fast mode if needed
-        if use_fast_mode:
+        # Add speed settings based on speed parameter
+        if speed is not None and str(speed).lower() != "none":
+            # Valid presets: ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow
+            valid_presets = [
+                "ultrafast",
+                "superfast",
+                "veryfast",
+                "faster",
+                "fast",
+                "medium",
+                "slow",
+                "slower",
+                "veryslow",
+            ]
+
+            # Check if speed is a valid preset name
+            if str(speed).lower() in valid_presets:
+                cmd.extend(["-preset", str(speed).lower()])
+            else:
+                try:
+                    # Try to convert speed to integer (1-9)
+                    speed_val = int(speed)
+                    # Map 1-9 to presets (1=ultrafast, 9=veryslow)
+                    speed_val = max(1, min(speed_val, 9))
+                    preset = valid_presets[speed_val - 1]
+                    cmd.extend(["-preset", preset])
+                except (ValueError, TypeError):
+                    # If conversion fails and it's not a valid preset name, use default
+                    if use_fast_mode:
+                        cmd.extend(["-preset", "ultrafast"])
+                    else:
+                        cmd.extend(["-preset", "medium"])  # Default preset
+        elif use_fast_mode:
+            # No speed specified but fast mode is enabled
             cmd.extend(["-preset", "ultrafast"])
 
     elif media_type == "image":
         # For static images, use the drawtext filter with appropriate output format
-        # Use higher quality settings for better results
+        # Use quality parameter if provided
         if file_ext in [".jpg", ".jpeg"]:
-            # For JPEG, use quality parameter
-            cmd.extend(
-                [
-                    "-vf",
-                    drawtext_filter,
-                    "-q:v",
-                    "1"
-                    if maintain_quality
-                    else "2",  # Highest quality (1-31, lower is better)
-                    "-threads",
-                    f"{thread_count}",
-                    temp_file,
-                ]
-            )
+            # For JPEG, use quality parameter (1-31, lower is better)
+            if quality is not None and str(quality).lower() != "none":
+                try:
+                    # Try to convert quality to integer (1-31 for JPEG)
+                    quality_val = int(quality)
+                    # Ensure it's in valid range (lower is better quality for JPEG)
+                    quality_val = max(1, min(quality_val, 31))
+                    cmd.extend(
+                        [
+                            "-vf",
+                            drawtext_filter,
+                            "-q:v",
+                            str(quality_val),
+                            "-threads",
+                            f"{thread_count}",
+                            temp_file,
+                        ]
+                    )
+                except (ValueError, TypeError):
+                    # If conversion fails, use a default high quality
+                    cmd.extend(
+                        [
+                            "-vf",
+                            drawtext_filter,
+                            "-q:v",
+                            "1",  # Highest quality (1-31, lower is better)
+                            "-threads",
+                            f"{thread_count}",
+                            temp_file,
+                        ]
+                    )
+            else:
+                # No quality specified, use a good default
+                cmd.extend(
+                    [
+                        "-vf",
+                        drawtext_filter,
+                        "-q:v",
+                        "2",  # Good quality default
+                        "-threads",
+                        f"{thread_count}",
+                        temp_file,
+                    ]
+                )
         elif file_ext in [".png", ".webp"]:
-            # For PNG and WebP, preserve transparency
-            cmd.extend(
-                [
-                    "-vf",
-                    drawtext_filter,
-                    "-compression_level",
-                    "0" if maintain_quality else "3",  # Lossless compression
-                    "-threads",
-                    f"{thread_count}",
-                    temp_file,
-                ]
-            )
+            # For PNG and WebP, use compression level (0-9, lower is better quality)
+            if quality is not None and str(quality).lower() != "none":
+                try:
+                    # Try to convert quality to integer (0-9 for PNG/WebP)
+                    quality_val = int(quality)
+                    # For PNG/WebP, map 1-10 quality to 0-9 compression (reverse scale)
+                    # 1=highest quality (0 compression), 10=lowest quality (9 compression)
+                    compression_val = 9 - min(9, max(0, quality_val - 1))
+                    cmd.extend(
+                        [
+                            "-vf",
+                            drawtext_filter,
+                            "-compression_level",
+                            str(compression_val),
+                            "-threads",
+                            f"{thread_count}",
+                            temp_file,
+                        ]
+                    )
+                except (ValueError, TypeError):
+                    # If conversion fails, use a default high quality
+                    cmd.extend(
+                        [
+                            "-vf",
+                            drawtext_filter,
+                            "-compression_level",
+                            "0",  # Lossless compression
+                            "-threads",
+                            f"{thread_count}",
+                            temp_file,
+                        ]
+                    )
+            else:
+                # No quality specified, use a good default
+                cmd.extend(
+                    [
+                        "-vf",
+                        drawtext_filter,
+                        "-compression_level",
+                        "1",  # Good quality default
+                        "-threads",
+                        f"{thread_count}",
+                        temp_file,
+                    ]
+                )
         else:
-            # For other image formats, use general high quality settings
-            cmd.extend(
-                [
-                    "-vf",
-                    drawtext_filter,
-                    "-q:v",
-                    "2" if maintain_quality else "5",  # High quality
-                    "-threads",
-                    f"{thread_count}",
-                    temp_file,
-                ]
-            )
+            # For other image formats, use general quality settings
+            if quality is not None and str(quality).lower() != "none":
+                try:
+                    # Try to convert quality to integer (1-31, lower is better)
+                    quality_val = int(quality)
+                    # Ensure it's in valid range
+                    quality_val = max(1, min(quality_val, 31))
+                    cmd.extend(
+                        [
+                            "-vf",
+                            drawtext_filter,
+                            "-q:v",
+                            str(quality_val),
+                            "-threads",
+                            f"{thread_count}",
+                            temp_file,
+                        ]
+                    )
+                except (ValueError, TypeError):
+                    # If conversion fails, use a default high quality
+                    cmd.extend(
+                        [
+                            "-vf",
+                            drawtext_filter,
+                            "-q:v",
+                            "2",  # High quality
+                            "-threads",
+                            f"{thread_count}",
+                            temp_file,
+                        ]
+                    )
+            else:
+                # No quality specified, use a good default
+                cmd.extend(
+                    [
+                        "-vf",
+                        drawtext_filter,
+                        "-q:v",
+                        "3",  # Good quality default
+                        "-threads",
+                        f"{thread_count}",
+                        temp_file,
+                    ]
+                )
     elif media_type == "animated_image":
         # For animated images (GIFs), we need to use a different approach
         # The issue with the previous approach was that we can't use both -vf and -lavfi
@@ -379,8 +533,8 @@ async def get_watermark_cmd(
                 if data.get("format") and data["format"].get("duration"):
                     duration = float(data["format"]["duration"])
 
-            # Use audio_watermark_text if provided, otherwise use the general watermark text
-            watermark_text = audio_watermark_text if audio_watermark_text else key
+            # Use the key as the watermark text
+            watermark_text = key
 
             # Determine beep parameters based on position and color
             beep_frequency = 1000  # Default frequency in Hz
@@ -389,11 +543,26 @@ async def get_watermark_cmd(
             # Use the audio_watermark_volume parameter if provided, otherwise use default
             from bot.core.config_manager import Config
 
-            beep_volume = (
-                Config.AUDIO_WATERMARK_VOLUME
-                if hasattr(Config, "AUDIO_WATERMARK_VOLUME")
-                else 0.3
-            )
+            # Use provided audio_watermark_volume if available
+            if (
+                audio_watermark_volume is not None
+                and str(audio_watermark_volume).lower() != "none"
+            ):
+                try:
+                    # Try to convert to float (0.0-1.0)
+                    volume_val = float(audio_watermark_volume)
+                    # Ensure it's in valid range
+                    beep_volume = max(0.1, min(volume_val, 1.0))
+                except (ValueError, TypeError):
+                    # If conversion fails, use a default volume
+                    beep_volume = 0.3
+            else:
+                # Use config value if available, otherwise default
+                beep_volume = (
+                    Config.AUDIO_WATERMARK_VOLUME
+                    if hasattr(Config, "AUDIO_WATERMARK_VOLUME")
+                    else 0.3
+                )
 
             # Adjust parameters based on position
             if position in ["top_left", "top_right", "top_center"]:
@@ -438,6 +607,49 @@ async def get_watermark_cmd(
             # Use opacity to determine volume
             beep_volume = beep_volume * opacity
 
+            # Determine interval for beeps based on audio_watermark_interval parameter
+            # Use provided audio_watermark_interval if available
+            if (
+                audio_watermark_interval is not None
+                and str(audio_watermark_interval).lower() != "none"
+            ):
+                try:
+                    # Try to convert to integer (seconds)
+                    interval_val = int(audio_watermark_interval)
+                    # Ensure it's in valid range (minimum 5 seconds)
+                    interval = max(5, interval_val)
+                except (ValueError, TypeError):
+                    # If conversion fails, use a default interval based on duration
+                    if duration < 60:
+                        # For short files, add beeps more frequently
+                        interval = 10
+                    elif duration > 300:
+                        # For long files, add beeps less frequently
+                        interval = 60
+                    else:
+                        # Default interval
+                        interval = 30
+            else:
+                # Use default interval based on duration
+                if duration < 60:
+                    # For short files, add beeps more frequently
+                    interval = 10
+                elif duration > 300:
+                    # For long files, add beeps less frequently
+                    interval = 60
+                else:
+                    # Default interval
+                    interval = 30
+
+            # Check if audio watermarking is explicitly disabled in config
+            from bot.core.config_manager import Config
+
+            audio_watermark_enabled = (
+                Config.AUDIO_WATERMARK_ENABLED
+                if hasattr(Config, "AUDIO_WATERMARK_ENABLED")
+                else True
+            )
+
             # Skip audio watermarking if it's explicitly disabled
             if not audio_watermark_enabled:
                 # Just copy the audio without modification
@@ -470,10 +682,16 @@ async def get_watermark_cmd(
                         f"[a][beep]amix=inputs=2:duration=first:weights=1 {beep_volume}[aout]"
                     )
                 else:
-                    # For longer files, add beeps at intervals
+                    # For longer files, add beeps at intervals based on the interval parameter
                     beep_points = []
-                    for i in range(num_beeps):
-                        point = i * (duration / (num_beeps - 0.5))
+
+                    # Calculate number of beeps based on duration and interval
+                    # Ensure we have at least num_beeps (from size parameter) beeps
+                    num_points = max(num_beeps, int(duration / interval))
+
+                    # Distribute beeps evenly
+                    for i in range(num_points):
+                        point = i * interval
                         if point < duration:
                             beep_points.append(point)
 
@@ -514,7 +732,11 @@ async def get_watermark_cmd(
                     "-c:a",
                     "aac",
                     "-b:a",
-                    "192k" if maintain_quality else "128k",
+                    "192k"
+                    if quality
+                    and str(quality).lower() != "none"
+                    and int(quality) < 20
+                    else "128k",
                     "-metadata",
                     f"comment=Watermarked with: {watermark_text}",
                     "-metadata",
@@ -553,12 +775,55 @@ async def get_watermark_cmd(
         # Copy audio and subtitle streams
         cmd.extend(["-c:a", "copy", "-c:s", "copy"])
 
-        # Add quality settings if maintain_quality is enabled
-        if maintain_quality:
-            cmd.extend(["-crf", "18"])  # High quality
+        # Add quality settings based on quality parameter
+        if quality is not None and str(quality).lower() != "none":
+            try:
+                # Try to convert quality to integer (1-51 for x264/x265)
+                quality_val = int(quality)
+                # Ensure it's in valid range (lower is better quality)
+                quality_val = max(1, min(quality_val, 51))
+                cmd.extend(["-crf", str(quality_val)])
+            except (ValueError, TypeError):
+                # If conversion fails, use a default high quality
+                cmd.extend(["-crf", "18"])  # High quality default
+        else:
+            # No quality specified, use a good default
+            cmd.extend(["-crf", "23"])  # Default quality
 
-        # Add fast mode if needed
-        if use_fast_mode:
+        # Add speed settings based on speed parameter
+        if speed is not None and str(speed).lower() != "none":
+            # Valid presets: ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow
+            valid_presets = [
+                "ultrafast",
+                "superfast",
+                "veryfast",
+                "faster",
+                "fast",
+                "medium",
+                "slow",
+                "slower",
+                "veryslow",
+            ]
+
+            # Check if speed is a valid preset name
+            if str(speed).lower() in valid_presets:
+                cmd.extend(["-preset", str(speed).lower()])
+            else:
+                try:
+                    # Try to convert speed to integer (1-9)
+                    speed_val = int(speed)
+                    # Map 1-9 to presets (1=ultrafast, 9=veryslow)
+                    speed_val = max(1, min(speed_val, 9))
+                    preset = valid_presets[speed_val - 1]
+                    cmd.extend(["-preset", preset])
+                except (ValueError, TypeError):
+                    # If conversion fails and it's not a valid preset name, use default
+                    if use_fast_mode:
+                        cmd.extend(["-preset", "ultrafast"])
+                    else:
+                        cmd.extend(["-preset", "medium"])  # Default preset
+        elif use_fast_mode:
+            # No speed specified but fast mode is enabled
             cmd.extend(["-preset", "ultrafast"])
 
         return cmd, temp_file
@@ -567,6 +832,12 @@ async def get_watermark_cmd(
         # For subtitle files, we'll add the watermark text to each subtitle entry
         # This requires parsing and modifying the subtitle file
 
+        # Check if subtitle watermarking is explicitly disabled in config
+        from bot.core.config_manager import Config
+
+        # Always enable subtitle watermarking for testing
+        subtitle_watermark_enabled = True
+
         # Skip subtitle watermarking if it's explicitly disabled
         if not subtitle_watermark_enabled:
             # For subtitle files with watermarking disabled, just return the file as is
@@ -574,8 +845,17 @@ async def get_watermark_cmd(
 
         try:
             # Read the subtitle file
-            with open(file, encoding="utf-8", errors="ignore") as f:
-                content = f.read()
+            import aiofiles
+
+            try:
+                async with aiofiles.open(
+                    file, encoding="utf-8", errors="ignore"
+                ) as f:
+                    content = await f.read()
+            except ImportError:
+                # Fallback to regular open if aiofiles is not available
+                with open(file, encoding="utf-8", errors="ignore") as f:
+                    content = f.read()
 
             # Create a temporary file for the modified subtitles
             # Use a unique name to avoid conflicts
@@ -586,37 +866,56 @@ async def get_watermark_cmd(
             )
 
             # Determine watermark style based on parameters
-            # First check if we have a specific subtitle style set in config
-            from bot.core.config_manager import Config
+            # First check if we have a specific subtitle style provided as parameter
+            if (
+                subtitle_watermark_style
+                and subtitle_watermark_style.lower() != "none"
+            ):
+                subtitle_style = subtitle_watermark_style
+            else:
+                # Otherwise, check if we have a specific subtitle style set in config
+                from bot.core.config_manager import Config
 
-            subtitle_style = (
-                Config.SUBTITLE_WATERMARK_STYLE
-                if hasattr(Config, "SUBTITLE_WATERMARK_STYLE")
-                else "normal"
-            )
+                subtitle_style = (
+                    Config.SUBTITLE_WATERMARK_STYLE
+                    if hasattr(Config, "SUBTITLE_WATERMARK_STYLE")
+                    else "normal"
+                )
 
             # Set style based on subtitle_style parameter
-            if subtitle_style.lower() == "bold":
+            style_lower = subtitle_style.lower()
+
+            # Text formatting styles
+            if style_lower == "bold":
                 watermark_style = "**"  # Bold style
-            elif subtitle_style.lower() == "italic":
+            elif style_lower == "italic":
                 watermark_style = "_"  # Italic style
-            elif subtitle_style.lower() == "underline":
+            elif style_lower == "underline":
                 watermark_style = "__"  # Underline style
+            elif style_lower == "strikethrough":
+                watermark_style = "~~"  # Strikethrough style
+            elif style_lower == "bold_italic":
+                watermark_style = "***"  # Bold italic style
+            # Color-based styles using emoji
+            elif style_lower == "yellow":
+                watermark_style = "⭐"  # Yellow star
+            elif style_lower == "red":
+                watermark_style = "❤️"  # Red heart symbol
+            elif style_lower == "green":
+                watermark_style = "💚"  # Green heart symbol
+            elif style_lower == "blue":
+                watermark_style = "💙"  # Blue heart symbol
+            elif style_lower == "purple":
+                watermark_style = "💜"  # Purple heart symbol
+            elif style_lower == "orange":
+                watermark_style = "🧡"  # Orange heart symbol
+            elif style_lower == "black":
+                watermark_style = "⚫"  # Black circle
+            elif style_lower == "white":
+                watermark_style = "⚪"  # White circle
+            # Default to no style for "normal" or unrecognized styles
             else:
-                # If no specific style or "normal", use color-based styling
-                watermark_style = ""
-                if color.lower() == "white":
-                    watermark_style = ""  # Default, no special styling
-                elif color.lower() == "black":
-                    watermark_style = "▓"  # Dark background
-                elif color.lower() == "red":
-                    watermark_style = "❤️"  # Red heart symbol
-                elif color.lower() == "green":
-                    watermark_style = "✅"  # Green checkmark
-                elif color.lower() == "blue":
-                    watermark_style = "🔷"  # Blue diamond
-                elif color.lower() == "yellow":
-                    watermark_style = "⭐"  # Yellow star
+                watermark_style = ""  # Default, no special styling
 
             # Use size parameter to determine frequency
             # 10 = every subtitle, 20 = every 2nd, 30 = every 3rd, 40 = every 4th
@@ -625,225 +924,361 @@ async def get_watermark_cmd(
             # Use opacity to determine visibility (1.0 = full text, lower = abbreviated)
             abbreviated = opacity < 0.7
 
-            with open(temp_file, "w", encoding="utf-8") as f:
-                # Check if it's an SRT file (most common)
-                if file_ext.lower() == ".srt":
-                    # Enhanced watermarking: add the watermark text with styling
-                    import re
+            # Check if it's an SRT file (most common)
+            if file_ext.lower() == ".srt":
+                # Enhanced watermarking: add the watermark text with styling
+                import re
 
-                    # Pattern to match SRT entries
-                    pattern = r"(\d+)\r?\n(\d{2}:\d{2}:\d{2},\d{3}\s-->\s\d{2}:\d{2}:\d{2},\d{3})\r?\n(.*?)(?=\r?\n\r?\n\d+|\Z)"
+                # Pattern to match SRT entries
+                pattern = r"(\d+)\r?\n(\d{2}:\d{2}:\d{2},\d{3}\s-->\s\d{2}:\d{2}:\d{2},\d{3})\r?\n(.*?)(?=\r?\n\r?\n\d+|\Z)"
 
-                    # Function to add watermark to each subtitle entry
-                    def add_watermark(match):
-                        index = int(match.group(1))
-                        timing = match.group(2)
-                        text = match.group(3).strip()
+                # Function to add watermark to each subtitle entry
+                def add_watermark(match):
+                    index = int(match.group(1))
+                    timing = match.group(2)
+                    text = match.group(3).strip()
 
-                        # Only add watermark based on frequency
-                        if index % frequency != 0:
-                            return f"{index}\n{timing}\n{text}\n\n"
+                    # Only add watermark based on frequency
+                    if index % frequency != 0:
+                        return f"{index}\n{timing}\n{text}\n\n"
 
-                        # Prepare watermark text - use subtitle_watermark_text if provided
-                        watermark_text = (
-                            subtitle_watermark_text
-                            if subtitle_watermark_text
-                            else key
-                        )
-                        if abbreviated and len(watermark_text) > 10:
-                            # Use abbreviated version for lower opacity
-                            words = watermark_text.split()
-                            if len(words) > 1:
-                                watermark_text = "".join(word[0] for word in words)
-                            else:
-                                watermark_text = watermark_text[:5] + "..."
+                    # Get subtitle_watermark_text from config if available
+                    from bot.core.config_manager import Config
 
-                        # Format with style
-                        formatted_watermark = (
-                            f"{watermark_style}[{watermark_text}]{watermark_style}"
-                        )
+                    config_subtitle_text = (
+                        Config.SUBTITLE_WATERMARK_TEXT
+                        if hasattr(Config, "SUBTITLE_WATERMARK_TEXT")
+                        else None
+                    )
 
-                        # Add watermark based on position
-                        if position in [
-                            "bottom_left",
-                            "bottom_right",
-                            "bottom_center",
-                        ]:
-                            # Add at the end
-                            watermarked_text = f"{text}\n{formatted_watermark}"
-                        elif position in ["top_left", "top_right", "top_center"]:
-                            # Add at the beginning
-                            watermarked_text = f"{formatted_watermark}\n{text}"
-                        elif position == "center":
-                            # Add in the middle of the text if possible
-                            lines = text.split("\n")
-                            if len(lines) > 1:
-                                middle = len(lines) // 2
-                                lines.insert(middle, formatted_watermark)
-                                watermarked_text = "\n".join(lines)
-                            else:
-                                # If single line, add at the end
-                                watermarked_text = f"{text} {formatted_watermark}"
+                    # Prepare watermark text - use parameter or config value
+                    watermark_text = key
+                    if subtitle_watermark_interval is not None:
+                        # Use the interval parameter as text
+                        watermark_text = f"{key} ({subtitle_watermark_interval})"
+                    elif config_subtitle_text:
+                        watermark_text = config_subtitle_text
+                    if abbreviated and len(watermark_text) > 10:
+                        # Use abbreviated version for lower opacity
+                        words = watermark_text.split()
+                        if len(words) > 1:
+                            watermark_text = "".join(word[0] for word in words)
                         else:
-                            # For other positions, add inline
+                            watermark_text = watermark_text[:5] + "..."
+
+                    # Format with style
+                    formatted_watermark = (
+                        f"{watermark_style}[{watermark_text}]{watermark_style}"
+                    )
+
+                    # Add watermark based on position
+                    if position in [
+                        "bottom_left",
+                        "bottom_right",
+                        "bottom_center",
+                    ]:
+                        # Add at the end
+                        watermarked_text = f"{text}\n{formatted_watermark}"
+                    elif position in ["top_left", "top_right", "top_center"]:
+                        # Add at the beginning
+                        watermarked_text = f"{formatted_watermark}\n{text}"
+                    elif position == "center":
+                        # Add in the middle of the text if possible
+                        lines = text.split("\n")
+                        if len(lines) > 1:
+                            middle = len(lines) // 2
+                            lines.insert(middle, formatted_watermark)
+                            watermarked_text = "\n".join(lines)
+                        else:
+                            # If single line, add at the end
                             watermarked_text = f"{text} {formatted_watermark}"
+                    else:
+                        # For other positions, add inline
+                        watermarked_text = f"{text} {formatted_watermark}"
 
-                        return f"{index}\n{timing}\n{watermarked_text}\n\n"
+                    return f"{index}\n{timing}\n{watermarked_text}\n\n"
 
-                    # Apply the watermark
-                    watermarked_content = re.sub(
-                        pattern, add_watermark, content, flags=re.DOTALL
-                    )
-                    f.write(watermarked_content)
-
-                    # For subtitle files, we don't use FFmpeg, so return None for the command
-                    # but keep the temp_file for the result
-                    return None, temp_file
-
-                if file_ext.lower() in [".ass", ".ssa"]:
-                    # For ASS/SSA files, add the watermark to the style or as a separate line
-                    # This is more complex and would require a proper ASS parser
-                    import re
-
-                    # Try to find the Events section
-                    events_match = re.search(
-                        r"(\[Events\].*?)(?=\[|\Z)", content, re.DOTALL
-                    )
-                    if events_match:
-                        events_section = events_match.group(1)
-                        # Find the format line
-                        format_match = re.search(
-                            r"Format:(.*?)$", events_section, re.MULTILINE
-                        )
-                        if format_match:
-                            # Get the format fields
-                            format_fields = [
-                                f.strip() for f in format_match.group(1).split(",")
-                            ]
-
-                            # Find the dialogue lines
-                            dialogue_pattern = r"(Dialogue:.*?)$"
-
-                            # Function to add watermark to dialogue lines
-                            def add_ass_watermark(match):
-                                line = match.group(1)
-                                parts = line.split(",", len(format_fields))
-
-                                # Get the text part (last part)
-                                if len(parts) >= len(format_fields):
-                                    text = parts[-1]
-
-                                    # Add watermark based on position
-                                    if position in [
-                                        "bottom_left",
-                                        "bottom_right",
-                                        "bottom_center",
-                                    ]:
-                                        # Add at the end
-                                        # Use subtitle_watermark_text if provided
-                                        watermark_text = (
-                                            subtitle_watermark_text
-                                            if subtitle_watermark_text
-                                            else key
-                                        )
-                                        watermarked_text = f"{text}\\N{watermark_style}[{watermark_text}]{watermark_style}"
-                                    else:
-                                        # Add at the beginning
-                                        # Use subtitle_watermark_text if provided
-                                        watermark_text = (
-                                            subtitle_watermark_text
-                                            if subtitle_watermark_text
-                                            else key
-                                        )
-                                        watermarked_text = f"{watermark_style}[{watermark_text}]{watermark_style}\\N{text}"
-
-                                    # Replace the text part
-                                    parts[-1] = watermarked_text
-                                    return ",".join(parts)
-                                return line
-
-                            # Apply watermark to every nth dialogue line based on frequency
-                            lines = events_section.split("\n")
-                            dialogue_count = 0
-                            for i in range(len(lines)):
-                                if lines[i].startswith("Dialogue:"):
-                                    dialogue_count += 1
-                                    if dialogue_count % frequency == 0:
-                                        lines[i] = re.sub(
-                                            dialogue_pattern,
-                                            add_ass_watermark,
-                                            lines[i],
-                                        )
-
-                            # Replace the events section in the content
-                            modified_events = "\n".join(lines)
-                            modified_content = content.replace(
-                                events_match.group(1), modified_events
-                            )
-                            f.write(modified_content)
-                            return None, temp_file
-
-                    # If we couldn't parse the ASS file properly, just add a comment
-                    # Use subtitle_watermark_text if provided
-                    watermark_text = (
-                        subtitle_watermark_text if subtitle_watermark_text else key
-                    )
-                    f.write(f"; Watermarked with: {watermark_text}\n{content}")
-                    return None, temp_file
-
-                # For other subtitle formats, try to add watermark based on common patterns
-                # WebVTT format
-                if file_ext.lower() == ".vtt":
-                    import re
-
-                    # Pattern for WebVTT cues
-                    pattern = r"(\d{2}:\d{2}:\d{2}\.\d{3}\s-->\s\d{2}:\d{2}:\d{2}\.\d{3}.*?\n)(.*?)(?=\n\n|\Z)"
-
-                    # Function to add watermark to WebVTT cues
-                    def add_vtt_watermark(match):
-                        timing = match.group(1)
-                        text = match.group(2).strip()
-
-                        # Add watermark based on position
-                        if position in [
-                            "bottom_left",
-                            "bottom_right",
-                            "bottom_center",
-                        ]:
-                            # Add at the end
-                            # Use subtitle_watermark_text if provided
-                            watermark_text = (
-                                subtitle_watermark_text
-                                if subtitle_watermark_text
-                                else key
-                            )
-                            watermarked_text = f"{text}\n{watermark_style}[{watermark_text}]{watermark_style}"
-                        else:
-                            # Add at the beginning
-                            # Use subtitle_watermark_text if provided
-                            watermark_text = (
-                                subtitle_watermark_text
-                                if subtitle_watermark_text
-                                else key
-                            )
-                            watermarked_text = f"{watermark_style}[{watermark_text}]{watermark_style}\n{text}"
-
-                        return f"{timing}{watermarked_text}\n\n"
-
-                    # Apply the watermark
-                    watermarked_content = re.sub(
-                        pattern, add_vtt_watermark, content, flags=re.DOTALL
-                    )
-                    f.write(watermarked_content)
-                    return None, temp_file
-
-                # For other formats, just add a comment if possible
-                # Use subtitle_watermark_text if provided
-                watermark_text = (
-                    subtitle_watermark_text if subtitle_watermark_text else key
+                # Apply the watermark
+                watermarked_content = re.sub(
+                    pattern, add_watermark, content, flags=re.DOTALL
                 )
-                f.write(f"# Watermarked with: {watermark_text}\n{content}")
+
+                # Write the watermarked content to the temp file
+                try:
+                    import aiofiles
+
+                    async with aiofiles.open(temp_file, "w", encoding="utf-8") as f:
+                        await f.write(watermarked_content)
+                except ImportError:
+                    # Fallback to regular open if aiofiles is not available
+                    with open(temp_file, "w", encoding="utf-8") as f:
+                        f.write(watermarked_content)
+
+                # For SRT files, we don't use FFmpeg, so return None for the command
+                # but keep the temp_file for the result
                 return None, temp_file
+
+            # Handle other subtitle formats
+            if file_ext.lower() in [".ass", ".ssa"]:
+                # For ASS/SSA files, add the watermark to the style or as a separate line
+                # This is more complex and would require a proper ASS parser
+                import re
+
+                # Try to find the Events section
+                events_match = re.search(
+                    r"(\[Events\].*?)(?=\[|\Z)", content, re.DOTALL
+                )
+                if events_match:
+                    events_section = events_match.group(1)
+                    # Find the format line
+                    format_match = re.search(
+                        r"Format:(.*?)$", events_section, re.MULTILINE
+                    )
+                    if format_match:
+                        # Get the format fields
+                        format_fields = [
+                            f.strip() for f in format_match.group(1).split(",")
+                        ]
+
+                        # Find the dialogue lines
+                        dialogue_pattern = r"(Dialogue:.*?)$"
+
+                        # Function to add watermark to dialogue lines
+                        def add_ass_watermark(match):
+                            line = match.group(1)
+                            parts = line.split(",", len(format_fields))
+
+                            # Get the text part (last part)
+                            if len(parts) >= len(format_fields):
+                                text = parts[-1]
+
+                                # Add watermark based on position
+                                if position in [
+                                    "bottom_left",
+                                    "bottom_right",
+                                    "bottom_center",
+                                ]:
+                                    # Add at the end
+                                    # Get subtitle_watermark_text from config if available
+                                    from bot.core.config_manager import Config
+
+                                    config_subtitle_text = (
+                                        Config.SUBTITLE_WATERMARK_TEXT
+                                        if hasattr(Config, "SUBTITLE_WATERMARK_TEXT")
+                                        else None
+                                    )
+
+                                    # Prepare watermark text - use parameter or config value
+                                    watermark_text = key
+                                    if subtitle_watermark_interval is not None:
+                                        # Use the interval parameter as text
+                                        watermark_text = (
+                                            f"{key} ({subtitle_watermark_interval})"
+                                        )
+                                    elif config_subtitle_text:
+                                        watermark_text = config_subtitle_text
+                                    watermarked_text = f"{text}\\N{watermark_style}[{watermark_text}]{watermark_style}"
+                                else:
+                                    # Add at the beginning
+                                    # Get subtitle_watermark_text from config if available
+                                    from bot.core.config_manager import Config
+
+                                    config_subtitle_text = (
+                                        Config.SUBTITLE_WATERMARK_TEXT
+                                        if hasattr(Config, "SUBTITLE_WATERMARK_TEXT")
+                                        else None
+                                    )
+
+                                    # Prepare watermark text - use parameter or config value
+                                    watermark_text = key
+                                    if subtitle_watermark_interval is not None:
+                                        # Use the interval parameter as text
+                                        watermark_text = (
+                                            f"{key} ({subtitle_watermark_interval})"
+                                        )
+                                    elif config_subtitle_text:
+                                        watermark_text = config_subtitle_text
+                                    watermarked_text = f"{watermark_style}[{watermark_text}]{watermark_style}\\N{text}"
+
+                                # Replace the text part
+                                parts[-1] = watermarked_text
+                                return ",".join(parts)
+                            return line
+
+                        # Apply watermark to every nth dialogue line based on frequency
+                        lines = events_section.split("\n")
+                        dialogue_count = 0
+                        for i in range(len(lines)):
+                            if lines[i].startswith("Dialogue:"):
+                                dialogue_count += 1
+                                if dialogue_count % frequency == 0:
+                                    lines[i] = re.sub(
+                                        dialogue_pattern,
+                                        add_ass_watermark,
+                                        lines[i],
+                                    )
+
+                        # Replace the events section in the content
+                        modified_events = "\n".join(lines)
+                        modified_content = content.replace(
+                            events_match.group(1), modified_events
+                        )
+
+                        # Write the modified content to the temp file
+                        try:
+                            import aiofiles
+
+                            async with aiofiles.open(
+                                temp_file, "w", encoding="utf-8"
+                            ) as f:
+                                await f.write(modified_content)
+                        except ImportError:
+                            # Fallback to regular open if aiofiles is not available
+                            with open(temp_file, "w", encoding="utf-8") as f:
+                                f.write(modified_content)
+
+                        return None, temp_file
+
+                # If we couldn't parse the ASS file properly, just add a comment
+                # Get subtitle_watermark_text from config if available
+                from bot.core.config_manager import Config
+
+                config_subtitle_text = (
+                    Config.SUBTITLE_WATERMARK_TEXT
+                    if hasattr(Config, "SUBTITLE_WATERMARK_TEXT")
+                    else None
+                )
+
+                # Prepare watermark text - use parameter or config value
+                watermark_text = key
+                if subtitle_watermark_interval is not None:
+                    # Use the interval parameter as text
+                    watermark_text = f"{key} ({subtitle_watermark_interval})"
+                elif config_subtitle_text:
+                    watermark_text = config_subtitle_text
+
+                # Write the modified content to the temp file
+                try:
+                    import aiofiles
+
+                    async with aiofiles.open(temp_file, "w", encoding="utf-8") as f:
+                        await f.write(
+                            f"; Watermarked with: {watermark_text}\n{content}"
+                        )
+                except ImportError:
+                    # Fallback to regular open if aiofiles is not available
+                    with open(temp_file, "w", encoding="utf-8") as f:
+                        f.write(f"; Watermarked with: {watermark_text}\n{content}")
+
+                return None, temp_file
+
+            # For other subtitle formats, try to add watermark based on common patterns
+            # WebVTT format
+            if file_ext.lower() == ".vtt":
+                import re
+
+                # Pattern for WebVTT cues
+                pattern = r"(\d{2}:\d{2}:\d{2}\.\d{3}\s-->\s\d{2}:\d{2}:\d{2}\.\d{3}.*?\n)(.*?)(?=\n\n|\Z)"
+
+                # Function to add watermark to WebVTT cues
+                def add_vtt_watermark(match):
+                    timing = match.group(1)
+                    text = match.group(2).strip()
+
+                    # Add watermark based on position
+                    if position in [
+                        "bottom_left",
+                        "bottom_right",
+                        "bottom_center",
+                    ]:
+                        # Add at the end
+                        # Get subtitle_watermark_text from config if available
+                        from bot.core.config_manager import Config
+
+                        config_subtitle_text = (
+                            Config.SUBTITLE_WATERMARK_TEXT
+                            if hasattr(Config, "SUBTITLE_WATERMARK_TEXT")
+                            else None
+                        )
+
+                        # Prepare watermark text - use parameter or config value
+                        watermark_text = key
+                        if subtitle_watermark_interval is not None:
+                            # Use the interval parameter as text
+                            watermark_text = f"{key} ({subtitle_watermark_interval})"
+                        elif config_subtitle_text:
+                            watermark_text = config_subtitle_text
+                        watermarked_text = f"{text}\n{watermark_style}[{watermark_text}]{watermark_style}"
+                    else:
+                        # Add at the beginning
+                        # Get subtitle_watermark_text from config if available
+                        from bot.core.config_manager import Config
+
+                        config_subtitle_text = (
+                            Config.SUBTITLE_WATERMARK_TEXT
+                            if hasattr(Config, "SUBTITLE_WATERMARK_TEXT")
+                            else None
+                        )
+
+                        # Prepare watermark text - use parameter or config value
+                        watermark_text = key
+                        if subtitle_watermark_interval is not None:
+                            # Use the interval parameter as text
+                            watermark_text = f"{key} ({subtitle_watermark_interval})"
+                        elif config_subtitle_text:
+                            watermark_text = config_subtitle_text
+                        watermarked_text = f"{watermark_style}[{watermark_text}]{watermark_style}\n{text}"
+
+                    return f"{timing}{watermarked_text}\n\n"
+
+                # Apply the watermark
+                watermarked_content = re.sub(
+                    pattern, add_vtt_watermark, content, flags=re.DOTALL
+                )
+
+                # Write the modified content to the temp file
+                try:
+                    import aiofiles
+
+                    async with aiofiles.open(temp_file, "w", encoding="utf-8") as f:
+                        await f.write(watermarked_content)
+                except ImportError:
+                    # Fallback to regular open if aiofiles is not available
+                    with open(temp_file, "w", encoding="utf-8") as f:
+                        f.write(watermarked_content)
+
+                return None, temp_file
+
+            # For other formats, just add a comment if possible
+            # Get subtitle_watermark_text from config if available
+            from bot.core.config_manager import Config
+
+            config_subtitle_text = (
+                Config.SUBTITLE_WATERMARK_TEXT
+                if hasattr(Config, "SUBTITLE_WATERMARK_TEXT")
+                else None
+            )
+
+            # Prepare watermark text - use parameter or config value
+            watermark_text = key
+            if subtitle_watermark_interval is not None:
+                # Use the interval parameter as text
+                watermark_text = f"{key} ({subtitle_watermark_interval})"
+            elif config_subtitle_text:
+                watermark_text = config_subtitle_text
+
+            # Write the modified content to the temp file
+            try:
+                import aiofiles
+
+                async with aiofiles.open(temp_file, "w", encoding="utf-8") as f:
+                    await f.write(f"# Watermarked with: {watermark_text}\n{content}")
+            except ImportError:
+                # Fallback to regular open if aiofiles is not available
+                with open(temp_file, "w", encoding="utf-8") as f:
+                    f.write(f"# Watermarked with: {watermark_text}\n{content}")
+
+            return None, temp_file
 
         except Exception as e:
             LOGGER.error(f"Error watermarking subtitle file: {e}")
@@ -1753,16 +2188,41 @@ async def get_merge_concat_demuxer_cmd(files, output_format="mkv", media_type=No
     # If output_format is "none", use the format of the first input file
     if output_format == "none" and files:
         # Extract extension from the first file
-        first_file_ext = os.path.splitext(files[0])[1].lower().lstrip('.')
+        first_file_ext = os.path.splitext(files[0])[1].lower().lstrip(".")
         if first_file_ext:
             # Use the extension if it's valid
-            if media_type == "video" and first_file_ext in ["mp4", "mkv", "avi", "mov", "webm", "flv"]:
+            if media_type == "video" and first_file_ext in [
+                "mp4",
+                "mkv",
+                "avi",
+                "mov",
+                "webm",
+                "flv",
+            ]:
                 output_format = first_file_ext
-            elif media_type == "audio" and first_file_ext in ["mp3", "aac", "ogg", "wav", "flac", "m4a"]:
+            elif media_type == "audio" and first_file_ext in [
+                "mp3",
+                "aac",
+                "ogg",
+                "wav",
+                "flac",
+                "m4a",
+            ]:
                 output_format = first_file_ext
-            elif media_type == "subtitle" and first_file_ext in ["srt", "ass", "vtt", "sub"]:
+            elif media_type == "subtitle" and first_file_ext in [
+                "srt",
+                "ass",
+                "vtt",
+                "sub",
+            ]:
                 output_format = first_file_ext
-            elif media_type == "image" and first_file_ext in ["jpg", "jpeg", "png", "gif", "webp"]:
+            elif media_type == "image" and first_file_ext in [
+                "jpg",
+                "jpeg",
+                "png",
+                "gif",
+                "webp",
+            ]:
                 output_format = first_file_ext
             else:
                 # Default formats based on media type
@@ -2120,14 +2580,33 @@ async def get_merge_filter_complex_cmd(files, media_type, output_format=None):
     # Handle "none" output format by using the format of the first input file
     if output_format == "none" and files:
         # Extract extension from the first file
-        first_file_ext = os.path.splitext(files[0])[1].lower().lstrip('.')
+        first_file_ext = os.path.splitext(files[0])[1].lower().lstrip(".")
         if first_file_ext:
             # Use the extension if it's valid
-            if media_type == "video" and first_file_ext in ["mp4", "mkv", "avi", "mov", "webm", "flv"]:
+            if media_type == "video" and first_file_ext in [
+                "mp4",
+                "mkv",
+                "avi",
+                "mov",
+                "webm",
+                "flv",
+            ]:
                 output_format = first_file_ext
-            elif media_type == "audio" and first_file_ext in ["mp3", "aac", "ogg", "wav", "flac", "m4a"]:
+            elif media_type == "audio" and first_file_ext in [
+                "mp3",
+                "aac",
+                "ogg",
+                "wav",
+                "flac",
+                "m4a",
+            ]:
                 output_format = first_file_ext
-            elif media_type == "subtitle" and first_file_ext in ["srt", "ass", "vtt", "sub"]:
+            elif media_type == "subtitle" and first_file_ext in [
+                "srt",
+                "ass",
+                "vtt",
+                "sub",
+            ]:
                 output_format = first_file_ext
             else:
                 # Default formats based on media type
@@ -2822,12 +3301,28 @@ async def get_merge_mixed_cmd(
 
         if files_to_check:
             # Extract extension from the first file
-            first_file_ext = os.path.splitext(files_to_check[0])[1].lower().lstrip('.')
+            first_file_ext = (
+                os.path.splitext(files_to_check[0])[1].lower().lstrip(".")
+            )
             if first_file_ext:
                 # Use the extension if it's valid
-                if video_files and first_file_ext in ["mp4", "mkv", "avi", "mov", "webm", "flv"]:
+                if video_files and first_file_ext in [
+                    "mp4",
+                    "mkv",
+                    "avi",
+                    "mov",
+                    "webm",
+                    "flv",
+                ]:
                     output_format = first_file_ext
-                elif audio_files and first_file_ext in ["mp3", "aac", "ogg", "wav", "flac", "m4a"]:
+                elif audio_files and first_file_ext in [
+                    "mp3",
+                    "aac",
+                    "ogg",
+                    "wav",
+                    "flac",
+                    "m4a",
+                ]:
                     output_format = first_file_ext
                 else:
                     # Default to mkv for mixed media
@@ -4824,7 +5319,9 @@ async def get_compression_cmd(
                                 cmd.extend(["-pix_fmt", "yuv420p10le"])
                         elif depth_val == 12:
                             # For 12-bit, use appropriate pixel format
-                            if video_codec == "libx265":  # x264 doesn't support 12-bit
+                            if (
+                                video_codec == "libx265"
+                            ):  # x264 doesn't support 12-bit
                                 cmd.extend(["-pix_fmt", "yuv420p12le"])
                     except (ValueError, TypeError):
                         # If conversion fails, don't add bitdepth parameter

@@ -88,18 +88,16 @@ DEFAULT_VALUES = {
     "WATERMARK_PRIORITY": 2,
     "WATERMARK_THREADING": True,
     "WATERMARK_THREAD_NUMBER": 4,
-    "WATERMARK_FAST_MODE": True,
-    "WATERMARK_MAINTAIN_QUALITY": True,
+    "WATERMARK_QUALITY": "none",
+    "WATERMARK_SPEED": "none",
     "WATERMARK_OPACITY": 0.0,
     "WATERMARK_REMOVE_ORIGINAL": True,
     # Audio Watermark Settings
-    "AUDIO_WATERMARK_ENABLED": False,
-    "AUDIO_WATERMARK_TEXT": "",
     "AUDIO_WATERMARK_VOLUME": 0.0,
+    "AUDIO_WATERMARK_INTERVAL": 0,
     # Subtitle Watermark Settings
-    "SUBTITLE_WATERMARK_ENABLED": False,
-    "SUBTITLE_WATERMARK_TEXT": "",
     "SUBTITLE_WATERMARK_STYLE": "none",
+    "SUBTITLE_WATERMARK_INTERVAL": 0,
     # Merge Settings
     "MERGE_ENABLED": False,
     "MERGE_PRIORITY": 1,
@@ -367,7 +365,12 @@ async def get_buttons(key=None, edit_type=None, page=0, user_id=None):
                     "GEMINI_",
                 )
             )
-            or key in ["CONCAT_DEMUXER_ENABLED", "FILTER_COMPLEX_ENABLED", "DEFAULT_AI_PROVIDER"]
+            or key
+            in [
+                "CONCAT_DEMUXER_ENABLED",
+                "FILTER_COMPLEX_ENABLED",
+                "DEFAULT_AI_PROVIDER",
+            ]
         ):
             msg = ""
             if key.startswith(
@@ -406,12 +409,20 @@ async def get_buttons(key=None, edit_type=None, page=0, user_id=None):
                 # Store the current page in the callback data to ensure we return to the correct page
                 if "merge_config_page" in globals():
                     page = globals()["merge_config_page"]
-                    buttons.data_button("Back", f"botset back_to_merge_config {page}")
+                    buttons.data_button(
+                        "Back", f"botset back_to_merge_config {page}"
+                    )
                 else:
                     buttons.data_button("Back", "botset mediatools_merge_config")
-            elif key in ["MERGE_ENABLED", "MERGE_PRIORITY", "MERGE_THREADING",
-                        "MERGE_THREAD_NUMBER", "MERGE_REMOVE_ORIGINAL",
-                        "CONCAT_DEMUXER_ENABLED", "FILTER_COMPLEX_ENABLED"]:
+            elif key in [
+                "MERGE_ENABLED",
+                "MERGE_PRIORITY",
+                "MERGE_THREADING",
+                "MERGE_THREAD_NUMBER",
+                "MERGE_REMOVE_ORIGINAL",
+                "CONCAT_DEMUXER_ENABLED",
+                "FILTER_COMPLEX_ENABLED",
+            ]:
                 # These are from the main merge menu
                 # Store the current page in the callback data to ensure we return to the correct page
                 if "merge_page" in globals():
@@ -469,6 +480,8 @@ async def get_buttons(key=None, edit_type=None, page=0, user_id=None):
                 help_text = "Send your text which will be used for audio watermarks. If empty, the visual watermark text will be used."
             elif key == "SUBTITLE_WATERMARK_TEXT":
                 help_text = "Send your text which will be used for subtitle watermarks. If empty, the visual watermark text will be used."
+            elif key == "SUBTITLE_WATERMARK_INTERVAL":
+                help_text = "Send interval in seconds for subtitle watermarks. This will add timestamps to watermarks. Set to 0 to disable."
             elif key == "WATERMARK_POSITION":
                 help_text = "Send watermark position. Valid options: top_left, top_right, bottom_left, bottom_right, center."
             elif key in {
@@ -1236,102 +1249,86 @@ Timeout: 60 sec"""
 Configure task monitoring settings to automatically manage downloads based on performance metrics."""
     elif key == "mediatools_watermark":
         # Add buttons for each watermark setting in a 2-column layout
-        # Visual watermark settings
-        visual_settings = [
+        # Main watermark settings
+        main_settings = [
             "WATERMARK_ENABLED",
-            "WATERMARK_KEY",
+            "WATERMARK_KEY",  # Renamed to "Text" in the UI
+            "WATERMARK_REMOVE_ORIGINAL",  # Renamed to "RO" in the UI
+            "WATERMARK_THREADING",
+            "WATERMARK_THREAD_NUMBER",
+            "WATERMARK_PRIORITY",
+        ]
+
+        # Text menu settings (will be in pagination)
+        watermark_text_settings = [
             "WATERMARK_POSITION",
             "WATERMARK_SIZE",
             "WATERMARK_COLOR",
             "WATERMARK_FONT",
-            "WATERMARK_PRIORITY",
-            "WATERMARK_THREADING",
-            "WATERMARK_THREAD_NUMBER",
-            "WATERMARK_FAST_MODE",
-            "WATERMARK_MAINTAIN_QUALITY",
             "WATERMARK_OPACITY",
-            "WATERMARK_REMOVE_ORIGINAL",
+            "WATERMARK_QUALITY",  # New numerical value instead of toggle
+            "WATERMARK_SPEED",  # New numerical value instead of toggle
+            "AUDIO_WATERMARK_INTERVAL",  # New setting
+            "SUBTITLE_WATERMARK_INTERVAL",  # New setting
+            "AUDIO_WATERMARK_VOLUME",  # Keeping this as it's useful
+            "SUBTITLE_WATERMARK_STYLE",  # Keeping this as it's useful
         ]
 
-        # Audio watermark settings
-        audio_settings = [
-            "AUDIO_WATERMARK_ENABLED",
-            "AUDIO_WATERMARK_TEXT",
-            "AUDIO_WATERMARK_VOLUME",
-        ]
+        # Create pagination for text menu settings
+        watermark_text_page = globals().get("watermark_text_page", 0)
+        items_per_page = 10  # 5 rows * 2 columns
+        total_pages = (
+            len(watermark_text_settings) + items_per_page - 1
+        ) // items_per_page
 
-        # Subtitle watermark settings
-        subtitle_settings = [
-            "SUBTITLE_WATERMARK_ENABLED",
-            "SUBTITLE_WATERMARK_TEXT",
-            "SUBTITLE_WATERMARK_STYLE",
-        ]
+        # Ensure page is valid
+        if watermark_text_page >= total_pages:
+            watermark_text_page = 0
+            globals()["watermark_text_page"] = 0
+        elif watermark_text_page < 0:
+            watermark_text_page = total_pages - 1
+            globals()["watermark_text_page"] = total_pages - 1
 
-        # Combine all settings
-        watermark_settings = visual_settings + audio_settings + subtitle_settings
+        # Combine all settings for the main menu
+        watermark_settings = main_settings
         for setting in watermark_settings:
-            if setting.startswith("AUDIO_"):
-                display_name = (
-                    "Audio "
-                    + setting.replace("AUDIO_WATERMARK_", "")
-                    .replace("_", " ")
-                    .title()
-                )
-                # For boolean settings, add toggle buttons
-                if setting == "AUDIO_WATERMARK_ENABLED":
-                    status = "✅ ON" if Config.AUDIO_WATERMARK_ENABLED else "❌ OFF"
-                    display_name = f"Audio Enabled: {status}"
-                    buttons.data_button(
-                        display_name,
-                        f"botset toggle {setting} {not Config.AUDIO_WATERMARK_ENABLED}",
-                    )
-                    continue
-            elif setting.startswith("SUBTITLE_"):
-                display_name = (
-                    "Subtitle "
-                    + setting.replace("SUBTITLE_WATERMARK_", "")
-                    .replace("_", " ")
-                    .title()
-                )
-                # For boolean settings, add toggle buttons
-                if setting == "SUBTITLE_WATERMARK_ENABLED":
-                    status = (
-                        "✅ ON" if Config.SUBTITLE_WATERMARK_ENABLED else "❌ OFF"
-                    )
-                    display_name = f"Subtitle Enabled: {status}"
-                    buttons.data_button(
-                        display_name,
-                        f"botset toggle {setting} {not Config.SUBTITLE_WATERMARK_ENABLED}",
-                    )
-                    continue
+            # Format display names for better readability
+            if setting == "WATERMARK_KEY":
+                display_name = "Text"
+            elif setting == "WATERMARK_REMOVE_ORIGINAL":
+                display_name = "RO"
             else:
                 display_name = (
                     setting.replace("WATERMARK_", "").replace("_", " ").title()
                 )
-                # For boolean settings, add toggle buttons
-                if setting == "WATERMARK_ENABLED":
-                    status = "✅ ON" if Config.WATERMARK_ENABLED else "❌ OFF"
-                    display_name = f"Enabled: {status}"
-                    buttons.data_button(
-                        display_name,
-                        f"botset toggle {setting} {not Config.WATERMARK_ENABLED}",
-                    )
-                    continue
-                if setting in [
-                    "WATERMARK_THREADING",
-                    "WATERMARK_FAST_MODE",
-                    "WATERMARK_MAINTAIN_QUALITY",
-                    "WATERMARK_REMOVE_ORIGINAL",
-                ]:
-                    status = "✅ ON" if getattr(Config, setting) else "❌ OFF"
-                    display_name = f"{display_name}: {status}"
-                    buttons.data_button(
-                        display_name,
-                        f"botset toggle {setting} {not getattr(Config, setting)}",
-                    )
-                    continue
 
-            # For non-boolean settings, use editvar
+            # For boolean settings, add toggle buttons
+            if setting == "WATERMARK_ENABLED":
+                status = "✅ ON" if Config.WATERMARK_ENABLED else "❌ OFF"
+                display_name = f"Enabled: {status}"
+                buttons.data_button(
+                    display_name,
+                    f"botset toggle {setting} {not Config.WATERMARK_ENABLED}",
+                )
+                continue
+
+            if setting in [
+                "WATERMARK_THREADING",
+                "WATERMARK_REMOVE_ORIGINAL",
+            ]:
+                # Get the current value
+                current_value = getattr(Config, setting)
+                status = "✅ ON" if current_value else "❌ OFF"
+                if setting == "WATERMARK_REMOVE_ORIGINAL":
+                    display_name = f"RO: {status}"
+                else:
+                    display_name = f"{display_name}: {status}"
+                buttons.data_button(
+                    display_name, f"botset toggle {setting} {not current_value}"
+                )
+                continue
+
+            # For non-boolean settings, add edit buttons
             buttons.data_button(display_name, f"botset editvar {setting}")
 
         if state == "view":
@@ -1344,7 +1341,7 @@ Configure task monitoring settings to automatically manage downloads based on pe
         buttons.data_button("Back", "botset mediatools", "footer")
         buttons.data_button("Close", "botset close", "footer")
 
-        # Get current visual watermark settings
+        # Get current watermark settings
         watermark_enabled = (
             "✅ Enabled" if Config.WATERMARK_ENABLED else "❌ Disabled"
         )
@@ -1358,65 +1355,55 @@ Configure task monitoring settings to automatically manage downloads based on pe
             "✅ Enabled" if Config.WATERMARK_THREADING else "❌ Disabled"
         )
         watermark_thread_number = Config.WATERMARK_THREAD_NUMBER or "4 (Default)"
-        watermark_fast_mode = (
-            "✅ Enabled" if Config.WATERMARK_FAST_MODE else "❌ Disabled"
-        )
-        watermark_maintain_quality = (
-            "✅ Enabled" if Config.WATERMARK_MAINTAIN_QUALITY else "❌ Disabled"
-        )
         watermark_opacity = Config.WATERMARK_OPACITY or "1.0 (Default)"
         watermark_remove_original = (
             "✅ Enabled" if Config.WATERMARK_REMOVE_ORIGINAL else "❌ Disabled"
         )
 
-        # Get current audio watermark settings
-        audio_watermark_enabled = (
-            "✅ Enabled" if Config.AUDIO_WATERMARK_ENABLED else "❌ Disabled"
-        )
-        audio_watermark_text = (
-            Config.AUDIO_WATERMARK_TEXT or "None (Uses visual watermark text)"
-        )
+        # Get audio volume
         audio_watermark_volume = Config.AUDIO_WATERMARK_VOLUME or "0.3 (Default)"
 
-        # Get current subtitle watermark settings
-        subtitle_watermark_enabled = (
-            "✅ Enabled" if Config.SUBTITLE_WATERMARK_ENABLED else "❌ Disabled"
+        # Get quality and speed values
+        watermark_quality = getattr(Config, "WATERMARK_QUALITY", "None (Default)")
+        watermark_speed = getattr(Config, "WATERMARK_SPEED", "None (Default)")
+
+        # Get audio and subtitle interval values
+        audio_interval = getattr(
+            Config, "AUDIO_WATERMARK_INTERVAL", "None (Default)"
         )
-        subtitle_watermark_text = (
-            Config.SUBTITLE_WATERMARK_TEXT or "None (Uses visual watermark text)"
+        subtitle_interval = getattr(
+            Config, "SUBTITLE_WATERMARK_INTERVAL", "None (Default)"
         )
-        subtitle_watermark_style = (
-            Config.SUBTITLE_WATERMARK_STYLE or "normal (Default)"
+
+        # Get subtitle style
+        subtitle_style = getattr(
+            Config, "SUBTITLE_WATERMARK_STYLE", "None (Default)"
         )
 
         msg = f"""<b>Watermark Settings</b> | State: {state}
 
-<b>Visual Watermark Settings:</b>
-<b>Status:</b> {watermark_enabled}
-<b>Text:</b> <code>{watermark_text}</code>
-<b>Position:</b> <code>{watermark_position}</code>
-<b>Size:</b> <code>{watermark_size}</code>
-<b>Color:</b> <code>{watermark_color}</code>
-<b>Font:</b> <code>{watermark_font}</code>
-<b>Priority:</b> <code>{watermark_priority}</code>
-<b>Threading:</b> {watermark_threading}
-<b>Thread Number:</b> <code>{watermark_thread_number}</code>
-<b>Fast Mode:</b> {watermark_fast_mode}
-<b>Maintain Quality:</b> {watermark_maintain_quality}
-<b>Opacity:</b> <code>{watermark_opacity}</code>
-<b>Remove Original:</b> {watermark_remove_original}
+<b>Main Settings:</b>
+• <b>Status:</b> {watermark_enabled}
+• <b>Text:</b> <code>{watermark_text}</code>
+• <b>Priority:</b> <code>{watermark_priority}</code>
+• <b>Threading:</b> {watermark_threading}
+• <b>Thread Number:</b> <code>{watermark_thread_number}</code>
+• <b>Remove Original (RO):</b> {watermark_remove_original}
 
-<b>Audio Watermark Settings:</b>
-<b>Status:</b> {audio_watermark_enabled}
-<b>Text:</b> <code>{audio_watermark_text}</code>
-<b>Volume:</b> <code>{audio_watermark_volume}</code>
+<b>Text Menu Settings:</b>
+• <b>Position:</b> <code>{watermark_position}</code>
+• <b>Size:</b> <code>{watermark_size}</code>
+• <b>Color:</b> <code>{watermark_color}</code>
+• <b>Font:</b> <code>{watermark_font}</code>
+• <b>Opacity:</b> <code>{watermark_opacity}</code>
+• <b>Quality:</b> <code>{watermark_quality}</code>
+• <b>Speed:</b> <code>{watermark_speed}</code>
+• <b>Audio Interval:</b> <code>{audio_interval}</code>
+• <b>Subtitle Interval:</b> <code>{subtitle_interval}</code>
+• <b>Audio Volume:</b> <code>{audio_watermark_volume}</code>
+• <b>Subtitle Style:</b> <code>{subtitle_style}</code>
 
-<b>Subtitle Watermark Settings:</b>
-<b>Status:</b> {subtitle_watermark_enabled}
-<b>Text:</b> <code>{subtitle_watermark_text}</code>
-<b>Style:</b> <code>{subtitle_watermark_style}</code>
-
-Configure global watermark settings that will be used when user settings are not available."""
+<b>Note:</b> Use the Text button to access detailed watermark configuration options."""
 
     elif key == "mediatools_merge" or key == "mediatools_merge_config":
         # Get all merge settings and organize them by category
@@ -2566,10 +2553,14 @@ Configure global extract settings that will be used when user settings are not a
                 "COMPRESSION_ARCHIVE_ENABLED",
             ]:
                 # Use True as default for COMPRESSION_DELETE_ORIGINAL, False for others
-                default_value = True if setting == "COMPRESSION_DELETE_ORIGINAL" else False
+                default_value = (
+                    True if setting == "COMPRESSION_DELETE_ORIGINAL" else False
+                )
 
                 # Make sure COMPRESSION_DELETE_ORIGINAL exists in Config with the correct default
-                if setting == "COMPRESSION_DELETE_ORIGINAL" and not hasattr(Config, setting):
+                if setting == "COMPRESSION_DELETE_ORIGINAL" and not hasattr(
+                    Config, setting
+                ):
                     Config.COMPRESSION_DELETE_ORIGINAL = True
 
                 setting_value = getattr(Config, setting, default_value)
@@ -3270,54 +3261,151 @@ Configure global metadata settings that will be used when user settings are not 
                     )
 
             # Add a debug log message# Get current merge configuration settings - Output formats
-        video_format = Config.MERGE_OUTPUT_FORMAT_VIDEO or DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_VIDEO"] + " (Default)"
-        audio_format = Config.MERGE_OUTPUT_FORMAT_AUDIO or DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_AUDIO"] + " (Default)"
-        image_format = Config.MERGE_OUTPUT_FORMAT_IMAGE or DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_IMAGE"] + " (Default)"
-        document_format = Config.MERGE_OUTPUT_FORMAT_DOCUMENT or DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_DOCUMENT"] + " (Default)"
-        subtitle_format = Config.MERGE_OUTPUT_FORMAT_SUBTITLE or DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_SUBTITLE"] + " (Default)"
+        video_format = (
+            Config.MERGE_OUTPUT_FORMAT_VIDEO
+            or DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_VIDEO"] + " (Default)"
+        )
+        audio_format = (
+            Config.MERGE_OUTPUT_FORMAT_AUDIO
+            or DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_AUDIO"] + " (Default)"
+        )
+        image_format = (
+            Config.MERGE_OUTPUT_FORMAT_IMAGE
+            or DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_IMAGE"] + " (Default)"
+        )
+        document_format = (
+            Config.MERGE_OUTPUT_FORMAT_DOCUMENT
+            or DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_DOCUMENT"] + " (Default)"
+        )
+        subtitle_format = (
+            Config.MERGE_OUTPUT_FORMAT_SUBTITLE
+            or DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_SUBTITLE"] + " (Default)"
+        )
 
         # Video settings
-        video_codec = Config.MERGE_VIDEO_CODEC or DEFAULT_VALUES["MERGE_VIDEO_CODEC"] + " (Default)"
-        video_quality = Config.MERGE_VIDEO_QUALITY or DEFAULT_VALUES["MERGE_VIDEO_QUALITY"] + " (Default)"
-        video_preset = Config.MERGE_VIDEO_PRESET or DEFAULT_VALUES["MERGE_VIDEO_PRESET"] + " (Default)"
-        video_crf = Config.MERGE_VIDEO_CRF or DEFAULT_VALUES["MERGE_VIDEO_CRF"] + " (Default)"
-        video_pixel_format = Config.MERGE_VIDEO_PIXEL_FORMAT or DEFAULT_VALUES["MERGE_VIDEO_PIXEL_FORMAT"] + " (Default)"
-        video_tune = Config.MERGE_VIDEO_TUNE or DEFAULT_VALUES["MERGE_VIDEO_TUNE"] + " (Default)"
+        video_codec = (
+            Config.MERGE_VIDEO_CODEC
+            or DEFAULT_VALUES["MERGE_VIDEO_CODEC"] + " (Default)"
+        )
+        video_quality = (
+            Config.MERGE_VIDEO_QUALITY
+            or DEFAULT_VALUES["MERGE_VIDEO_QUALITY"] + " (Default)"
+        )
+        video_preset = (
+            Config.MERGE_VIDEO_PRESET
+            or DEFAULT_VALUES["MERGE_VIDEO_PRESET"] + " (Default)"
+        )
+        video_crf = (
+            Config.MERGE_VIDEO_CRF
+            or DEFAULT_VALUES["MERGE_VIDEO_CRF"] + " (Default)"
+        )
+        video_pixel_format = (
+            Config.MERGE_VIDEO_PIXEL_FORMAT
+            or DEFAULT_VALUES["MERGE_VIDEO_PIXEL_FORMAT"] + " (Default)"
+        )
+        video_tune = (
+            Config.MERGE_VIDEO_TUNE
+            or DEFAULT_VALUES["MERGE_VIDEO_TUNE"] + " (Default)"
+        )
         video_faststart = "Enabled" if Config.MERGE_VIDEO_FASTSTART else "Disabled"
 
         # Audio settings
-        audio_codec = Config.MERGE_AUDIO_CODEC or DEFAULT_VALUES["MERGE_AUDIO_CODEC"] + " (Default)"
-        audio_bitrate = Config.MERGE_AUDIO_BITRATE or DEFAULT_VALUES["MERGE_AUDIO_BITRATE"] + " (Default)"
-        audio_channels = Config.MERGE_AUDIO_CHANNELS or DEFAULT_VALUES["MERGE_AUDIO_CHANNELS"] + " (Default)"
-        audio_sampling = Config.MERGE_AUDIO_SAMPLING or DEFAULT_VALUES["MERGE_AUDIO_SAMPLING"] + " (Default)"
-        audio_volume = Config.MERGE_AUDIO_VOLUME or DEFAULT_VALUES["MERGE_AUDIO_VOLUME"] + " (Default)"
+        audio_codec = (
+            Config.MERGE_AUDIO_CODEC
+            or DEFAULT_VALUES["MERGE_AUDIO_CODEC"] + " (Default)"
+        )
+        audio_bitrate = (
+            Config.MERGE_AUDIO_BITRATE
+            or DEFAULT_VALUES["MERGE_AUDIO_BITRATE"] + " (Default)"
+        )
+        audio_channels = (
+            Config.MERGE_AUDIO_CHANNELS
+            or DEFAULT_VALUES["MERGE_AUDIO_CHANNELS"] + " (Default)"
+        )
+        audio_sampling = (
+            Config.MERGE_AUDIO_SAMPLING
+            or DEFAULT_VALUES["MERGE_AUDIO_SAMPLING"] + " (Default)"
+        )
+        audio_volume = (
+            Config.MERGE_AUDIO_VOLUME
+            or DEFAULT_VALUES["MERGE_AUDIO_VOLUME"] + " (Default)"
+        )
 
         # Image settings
-        image_mode = Config.MERGE_IMAGE_MODE or DEFAULT_VALUES["MERGE_IMAGE_MODE"] + " (Default)"
-        image_columns = Config.MERGE_IMAGE_COLUMNS or DEFAULT_VALUES["MERGE_IMAGE_COLUMNS"] + " (Default)"
-        image_quality = Config.MERGE_IMAGE_QUALITY or str(DEFAULT_VALUES["MERGE_IMAGE_QUALITY"]) + " (Default)"
-        image_dpi = Config.MERGE_IMAGE_DPI or DEFAULT_VALUES["MERGE_IMAGE_DPI"] + " (Default)"
-        image_resize = Config.MERGE_IMAGE_RESIZE or DEFAULT_VALUES["MERGE_IMAGE_RESIZE"] + " (Default)"
-        image_background = Config.MERGE_IMAGE_BACKGROUND or DEFAULT_VALUES["MERGE_IMAGE_BACKGROUND"] + " (Default)"
+        image_mode = (
+            Config.MERGE_IMAGE_MODE
+            or DEFAULT_VALUES["MERGE_IMAGE_MODE"] + " (Default)"
+        )
+        image_columns = (
+            Config.MERGE_IMAGE_COLUMNS
+            or DEFAULT_VALUES["MERGE_IMAGE_COLUMNS"] + " (Default)"
+        )
+        image_quality = (
+            Config.MERGE_IMAGE_QUALITY
+            or str(DEFAULT_VALUES["MERGE_IMAGE_QUALITY"]) + " (Default)"
+        )
+        image_dpi = (
+            Config.MERGE_IMAGE_DPI
+            or DEFAULT_VALUES["MERGE_IMAGE_DPI"] + " (Default)"
+        )
+        image_resize = (
+            Config.MERGE_IMAGE_RESIZE
+            or DEFAULT_VALUES["MERGE_IMAGE_RESIZE"] + " (Default)"
+        )
+        image_background = (
+            Config.MERGE_IMAGE_BACKGROUND
+            or DEFAULT_VALUES["MERGE_IMAGE_BACKGROUND"] + " (Default)"
+        )
 
         # Subtitle settings
-        subtitle_encoding = Config.MERGE_SUBTITLE_ENCODING or DEFAULT_VALUES["MERGE_SUBTITLE_ENCODING"] + " (Default)"
-        subtitle_font = Config.MERGE_SUBTITLE_FONT or DEFAULT_VALUES["MERGE_SUBTITLE_FONT"] + " (Default)"
-        subtitle_font_size = Config.MERGE_SUBTITLE_FONT_SIZE or DEFAULT_VALUES["MERGE_SUBTITLE_FONT_SIZE"] + " (Default)"
-        subtitle_font_color = Config.MERGE_SUBTITLE_FONT_COLOR or DEFAULT_VALUES["MERGE_SUBTITLE_FONT_COLOR"] + " (Default)"
-        subtitle_background = Config.MERGE_SUBTITLE_BACKGROUND or DEFAULT_VALUES["MERGE_SUBTITLE_BACKGROUND"] + " (Default)"
+        subtitle_encoding = (
+            Config.MERGE_SUBTITLE_ENCODING
+            or DEFAULT_VALUES["MERGE_SUBTITLE_ENCODING"] + " (Default)"
+        )
+        subtitle_font = (
+            Config.MERGE_SUBTITLE_FONT
+            or DEFAULT_VALUES["MERGE_SUBTITLE_FONT"] + " (Default)"
+        )
+        subtitle_font_size = (
+            Config.MERGE_SUBTITLE_FONT_SIZE
+            or DEFAULT_VALUES["MERGE_SUBTITLE_FONT_SIZE"] + " (Default)"
+        )
+        subtitle_font_color = (
+            Config.MERGE_SUBTITLE_FONT_COLOR
+            or DEFAULT_VALUES["MERGE_SUBTITLE_FONT_COLOR"] + " (Default)"
+        )
+        subtitle_background = (
+            Config.MERGE_SUBTITLE_BACKGROUND
+            or DEFAULT_VALUES["MERGE_SUBTITLE_BACKGROUND"] + " (Default)"
+        )
 
         # Document settings
-        document_paper_size = Config.MERGE_DOCUMENT_PAPER_SIZE or DEFAULT_VALUES["MERGE_DOCUMENT_PAPER_SIZE"] + " (Default)"
-        document_orientation = (
-            Config.MERGE_DOCUMENT_ORIENTATION or DEFAULT_VALUES["MERGE_DOCUMENT_ORIENTATION"] + " (Default)"
+        document_paper_size = (
+            Config.MERGE_DOCUMENT_PAPER_SIZE
+            or DEFAULT_VALUES["MERGE_DOCUMENT_PAPER_SIZE"] + " (Default)"
         )
-        document_margin = Config.MERGE_DOCUMENT_MARGIN or DEFAULT_VALUES["MERGE_DOCUMENT_MARGIN"] + " (Default)"
+        document_orientation = (
+            Config.MERGE_DOCUMENT_ORIENTATION
+            or DEFAULT_VALUES["MERGE_DOCUMENT_ORIENTATION"] + " (Default)"
+        )
+        document_margin = (
+            Config.MERGE_DOCUMENT_MARGIN
+            or DEFAULT_VALUES["MERGE_DOCUMENT_MARGIN"] + " (Default)"
+        )
 
         # Metadata settings
-        metadata_title = Config.MERGE_METADATA_TITLE or DEFAULT_VALUES["MERGE_METADATA_TITLE"] + " (Default)"
-        metadata_author = Config.MERGE_METADATA_AUTHOR or DEFAULT_VALUES["MERGE_METADATA_AUTHOR"] + " (Default)"
-        metadata_comment = Config.MERGE_METADATA_COMMENT or DEFAULT_VALUES["MERGE_METADATA_COMMENT"] + " (Default)"
+        metadata_title = (
+            Config.MERGE_METADATA_TITLE
+            or DEFAULT_VALUES["MERGE_METADATA_TITLE"] + " (Default)"
+        )
+        metadata_author = (
+            Config.MERGE_METADATA_AUTHOR
+            or DEFAULT_VALUES["MERGE_METADATA_AUTHOR"] + " (Default)"
+        )
+        metadata_comment = (
+            Config.MERGE_METADATA_COMMENT
+            or DEFAULT_VALUES["MERGE_METADATA_COMMENT"] + " (Default)"
+        )
 
         msg = f"""<b>Merge Configuration</b> | State: {state}
 
@@ -3597,6 +3685,13 @@ async def edit_variable(_, message, pre_message, key):
         "underline",
     ]:
         value = "normal"  # Default style if invalid input
+    elif key == "SUBTITLE_WATERMARK_INTERVAL":
+        try:
+            value = int(value)
+            # Ensure interval is non-negative
+            value = max(0, value)
+        except ValueError:
+            value = 0  # Default interval if invalid input
     elif key == "EXCLUDED_EXTENSIONS":
         fx = value.split()
         excluded_extensions.clear()
@@ -3702,22 +3797,32 @@ async def edit_variable(_, message, pre_message, key):
             # Check if we need to return to a specific page in mediatools_merge_config
             if pre_message.text and "Page:" in pre_message.text:
                 try:
-                    page_info = pre_message.text.split("Page:")[1].strip().split("/")[0]
+                    page_info = (
+                        pre_message.text.split("Page:")[1].strip().split("/")[0]
+                    )
                     page_no = int(page_info) - 1
                     # Set the global merge_config_page variable to ensure we return to the correct page
                     globals()["merge_config_page"] = page_no
                 except (ValueError, IndexError):
                     pass
-        elif key in ["MERGE_ENABLED", "MERGE_PRIORITY", "MERGE_THREADING",
-                    "MERGE_THREAD_NUMBER", "MERGE_REMOVE_ORIGINAL",
-                    "CONCAT_DEMUXER_ENABLED", "FILTER_COMPLEX_ENABLED"]:
+        elif key in [
+            "MERGE_ENABLED",
+            "MERGE_PRIORITY",
+            "MERGE_THREADING",
+            "MERGE_THREAD_NUMBER",
+            "MERGE_REMOVE_ORIGINAL",
+            "CONCAT_DEMUXER_ENABLED",
+            "FILTER_COMPLEX_ENABLED",
+        ]:
             # These are from the main merge menu
             return_menu = "mediatools_merge"
 
             # Check if we need to return to a specific page in mediatools_merge
             if pre_message.text and "Page:" in pre_message.text:
                 try:
-                    page_info = pre_message.text.split("Page:")[1].strip().split("/")[0]
+                    page_info = (
+                        pre_message.text.split("Page:")[1].strip().split("/")[0]
+                    )
                     page_no = int(page_info) - 1
                     # Set the global merge_page variable to ensure we return to the correct page
                     globals()["merge_page"] = page_no
@@ -3730,7 +3835,9 @@ async def edit_variable(_, message, pre_message, key):
             # Check if we need to return to a specific page in mediatools_merge
             if pre_message.text and "Page:" in pre_message.text:
                 try:
-                    page_info = pre_message.text.split("Page:")[1].strip().split("/")[0]
+                    page_info = (
+                        pre_message.text.split("Page:")[1].strip().split("/")[0]
+                    )
                     page_no = int(page_info) - 1
                     # Set the global merge_page variable to ensure we return to the correct page
                     globals()["merge_page"] = page_no
@@ -3761,10 +3868,14 @@ async def edit_variable(_, message, pre_message, key):
                 await update_buttons(pre_message, "mediatools_merge", page=page_no)
             except (ValueError, IndexError):
                 # If there's an error parsing the page number, use the stored page
-                await update_buttons(pre_message, "mediatools_merge", page=globals()["merge_page"])
+                await update_buttons(
+                    pre_message, "mediatools_merge", page=globals()["merge_page"]
+                )
         else:
             # Use the stored page
-            await update_buttons(pre_message, "mediatools_merge", page=globals()["merge_page"])
+            await update_buttons(
+                pre_message, "mediatools_merge", page=globals()["merge_page"]
+            )
     else:
         await update_buttons(pre_message, return_menu)
 
@@ -4212,7 +4323,9 @@ async def edit_bot_settings(client, query):
                 await update_buttons(message, "mediatools_merge", page=page_no)
             except (ValueError, IndexError):
                 # If there's an error parsing the page number, use the stored page
-                await update_buttons(message, "mediatools_merge", page=globals()["merge_page"])
+                await update_buttons(
+                    message, "mediatools_merge", page=globals()["merge_page"]
+                )
         else:
             # Reset the page when first entering the menu
             globals()["merge_page"] = 0
@@ -4318,20 +4431,18 @@ async def edit_bot_settings(client, query):
         Config.WATERMARK_PRIORITY = 2
         Config.WATERMARK_THREADING = True
         Config.WATERMARK_THREAD_NUMBER = 4
-        Config.WATERMARK_FAST_MODE = True
-        Config.WATERMARK_MAINTAIN_QUALITY = True
+        Config.WATERMARK_QUALITY = "none"
+        Config.WATERMARK_SPEED = "none"
         Config.WATERMARK_OPACITY = 0.0
         Config.WATERMARK_REMOVE_ORIGINAL = True
 
         # Reset audio watermark settings
-        Config.AUDIO_WATERMARK_ENABLED = False
-        Config.AUDIO_WATERMARK_TEXT = ""
         Config.AUDIO_WATERMARK_VOLUME = 0.0
+        Config.AUDIO_WATERMARK_INTERVAL = 0
 
         # Reset subtitle watermark settings
-        Config.SUBTITLE_WATERMARK_ENABLED = False
-        Config.SUBTITLE_WATERMARK_TEXT = ""
         Config.SUBTITLE_WATERMARK_STYLE = "none"
+        Config.SUBTITLE_WATERMARK_INTERVAL = 0
 
         # Update the database
         await database.update_config(
@@ -4345,18 +4456,16 @@ async def edit_bot_settings(client, query):
                 "WATERMARK_PRIORITY": 2,
                 "WATERMARK_THREADING": True,
                 "WATERMARK_THREAD_NUMBER": 4,
-                "WATERMARK_FAST_MODE": True,
-                "WATERMARK_MAINTAIN_QUALITY": True,
+                "WATERMARK_QUALITY": "none",
+                "WATERMARK_SPEED": "none",
                 "WATERMARK_OPACITY": 0.0,
                 "WATERMARK_REMOVE_ORIGINAL": True,
                 # Audio watermark settings
-                "AUDIO_WATERMARK_ENABLED": False,
-                "AUDIO_WATERMARK_TEXT": "",
                 "AUDIO_WATERMARK_VOLUME": 0.0,
+                "AUDIO_WATERMARK_INTERVAL": 0,
                 # Subtitle watermark settings
-                "SUBTITLE_WATERMARK_ENABLED": False,
-                "SUBTITLE_WATERMARK_TEXT": "",
                 "SUBTITLE_WATERMARK_STYLE": "none",
+                "SUBTITLE_WATERMARK_INTERVAL": 0,
             }
         )
         # Update the UI - maintain the current state (edit/view)
@@ -4373,7 +4482,9 @@ async def edit_bot_settings(client, query):
         # General compression settings
         Config.COMPRESSION_ENABLED = DEFAULT_VALUES["COMPRESSION_ENABLED"]
         Config.COMPRESSION_PRIORITY = DEFAULT_VALUES["COMPRESSION_PRIORITY"]
-        Config.COMPRESSION_DELETE_ORIGINAL = DEFAULT_VALUES["COMPRESSION_DELETE_ORIGINAL"]  # This is True by default
+        Config.COMPRESSION_DELETE_ORIGINAL = DEFAULT_VALUES[
+            "COMPRESSION_DELETE_ORIGINAL"
+        ]  # This is True by default
 
         # Video compression settings
         Config.COMPRESSION_VIDEO_ENABLED = DEFAULT_VALUES[
@@ -4450,7 +4561,9 @@ async def edit_bot_settings(client, query):
                 # General compression settings
                 "COMPRESSION_ENABLED": DEFAULT_VALUES["COMPRESSION_ENABLED"],
                 "COMPRESSION_PRIORITY": DEFAULT_VALUES["COMPRESSION_PRIORITY"],
-                "COMPRESSION_DELETE_ORIGINAL": DEFAULT_VALUES["COMPRESSION_DELETE_ORIGINAL"],
+                "COMPRESSION_DELETE_ORIGINAL": DEFAULT_VALUES[
+                    "COMPRESSION_DELETE_ORIGINAL"
+                ],
                 # Video compression settings
                 "COMPRESSION_VIDEO_ENABLED": DEFAULT_VALUES[
                     "COMPRESSION_VIDEO_ENABLED"
@@ -5169,7 +5282,9 @@ async def edit_bot_settings(client, query):
 
         # Maintain the current page when returning to the merge menu
         if "merge_page" in globals():
-            await update_buttons(message, "mediatools_merge", page=globals()["merge_page"])
+            await update_buttons(
+                message, "mediatools_merge", page=globals()["merge_page"]
+            )
         else:
             await update_buttons(message, "mediatools_merge", page=0)
     # This is a duplicate handler, removed to avoid confusion
@@ -5358,21 +5473,31 @@ async def edit_bot_settings(client, query):
                 # Check if we need to return to a specific page in mediatools_merge_config
                 if message.text and "Page:" in message.text:
                     try:
-                        page_info = message.text.split("Page:")[1].strip().split("/")[0]
+                        page_info = (
+                            message.text.split("Page:")[1].strip().split("/")[0]
+                        )
                         page_no = int(page_info) - 1
                         # Set the global merge_config_page variable to ensure we return to the correct page
                         globals()["merge_config_page"] = page_no
                     except (ValueError, IndexError):
                         pass
-            elif data[2] in ["MERGE_ENABLED", "MERGE_PRIORITY", "MERGE_THREADING",
-                           "MERGE_THREAD_NUMBER", "MERGE_REMOVE_ORIGINAL",
-                           "CONCAT_DEMUXER_ENABLED", "FILTER_COMPLEX_ENABLED"]:
+            elif data[2] in [
+                "MERGE_ENABLED",
+                "MERGE_PRIORITY",
+                "MERGE_THREADING",
+                "MERGE_THREAD_NUMBER",
+                "MERGE_REMOVE_ORIGINAL",
+                "CONCAT_DEMUXER_ENABLED",
+                "FILTER_COMPLEX_ENABLED",
+            ]:
                 # These are from the main merge menu
                 return_menu = "mediatools_merge"
                 # Check if we need to return to a specific page in mediatools_merge
                 if message.text and "Page:" in message.text:
                     try:
-                        page_info = message.text.split("Page:")[1].strip().split("/")[0]
+                        page_info = (
+                            message.text.split("Page:")[1].strip().split("/")[0]
+                        )
                         page_no = int(page_info) - 1
                         # Set the global merge_page variable to ensure we return to the correct page
                         globals()["merge_page"] = page_no
@@ -5384,7 +5509,9 @@ async def edit_bot_settings(client, query):
                 # Check if we need to return to a specific page in mediatools_merge
                 if message.text and "Page:" in message.text:
                     try:
-                        page_info = message.text.split("Page:")[1].strip().split("/")[0]
+                        page_info = (
+                            message.text.split("Page:")[1].strip().split("/")[0]
+                        )
                         page_no = int(page_info) - 1
                         # Set the global merge_page variable to ensure we return to the correct page
                         globals()["merge_page"] = page_no
@@ -5404,7 +5531,11 @@ async def edit_bot_settings(client, query):
         globals()["state"] = current_state
 
         # Handle special case for mediatools_merge with pagination
-        if return_menu == "mediatools_merge" and message.text and "Page:" in message.text:
+        if (
+            return_menu == "mediatools_merge"
+            and message.text
+            and "Page:" in message.text
+        ):
             try:
                 page_info = message.text.split("Page:")[1].strip().split("/")[0]
                 page_no = int(page_info) - 1
@@ -5424,11 +5555,21 @@ async def edit_bot_settings(client, query):
         # Reset all merge config settings to default using DEFAULT_VALUES
 
         # Reset output formats
-        Config.MERGE_OUTPUT_FORMAT_VIDEO = DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_VIDEO"]
-        Config.MERGE_OUTPUT_FORMAT_AUDIO = DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_AUDIO"]
-        Config.MERGE_OUTPUT_FORMAT_IMAGE = DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_IMAGE"]
-        Config.MERGE_OUTPUT_FORMAT_DOCUMENT = DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_DOCUMENT"]
-        Config.MERGE_OUTPUT_FORMAT_SUBTITLE = DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_SUBTITLE"]
+        Config.MERGE_OUTPUT_FORMAT_VIDEO = DEFAULT_VALUES[
+            "MERGE_OUTPUT_FORMAT_VIDEO"
+        ]
+        Config.MERGE_OUTPUT_FORMAT_AUDIO = DEFAULT_VALUES[
+            "MERGE_OUTPUT_FORMAT_AUDIO"
+        ]
+        Config.MERGE_OUTPUT_FORMAT_IMAGE = DEFAULT_VALUES[
+            "MERGE_OUTPUT_FORMAT_IMAGE"
+        ]
+        Config.MERGE_OUTPUT_FORMAT_DOCUMENT = DEFAULT_VALUES[
+            "MERGE_OUTPUT_FORMAT_DOCUMENT"
+        ]
+        Config.MERGE_OUTPUT_FORMAT_SUBTITLE = DEFAULT_VALUES[
+            "MERGE_OUTPUT_FORMAT_SUBTITLE"
+        ]
 
         # Reset video settings
         Config.MERGE_VIDEO_CODEC = DEFAULT_VALUES["MERGE_VIDEO_CODEC"]
@@ -5458,12 +5599,20 @@ async def edit_bot_settings(client, query):
         Config.MERGE_SUBTITLE_ENCODING = DEFAULT_VALUES["MERGE_SUBTITLE_ENCODING"]
         Config.MERGE_SUBTITLE_FONT = DEFAULT_VALUES["MERGE_SUBTITLE_FONT"]
         Config.MERGE_SUBTITLE_FONT_SIZE = DEFAULT_VALUES["MERGE_SUBTITLE_FONT_SIZE"]
-        Config.MERGE_SUBTITLE_FONT_COLOR = DEFAULT_VALUES["MERGE_SUBTITLE_FONT_COLOR"]
-        Config.MERGE_SUBTITLE_BACKGROUND = DEFAULT_VALUES["MERGE_SUBTITLE_BACKGROUND"]
+        Config.MERGE_SUBTITLE_FONT_COLOR = DEFAULT_VALUES[
+            "MERGE_SUBTITLE_FONT_COLOR"
+        ]
+        Config.MERGE_SUBTITLE_BACKGROUND = DEFAULT_VALUES[
+            "MERGE_SUBTITLE_BACKGROUND"
+        ]
 
         # Reset document settings
-        Config.MERGE_DOCUMENT_PAPER_SIZE = DEFAULT_VALUES["MERGE_DOCUMENT_PAPER_SIZE"]
-        Config.MERGE_DOCUMENT_ORIENTATION = DEFAULT_VALUES["MERGE_DOCUMENT_ORIENTATION"]
+        Config.MERGE_DOCUMENT_PAPER_SIZE = DEFAULT_VALUES[
+            "MERGE_DOCUMENT_PAPER_SIZE"
+        ]
+        Config.MERGE_DOCUMENT_ORIENTATION = DEFAULT_VALUES[
+            "MERGE_DOCUMENT_ORIENTATION"
+        ]
         Config.MERGE_DOCUMENT_MARGIN = DEFAULT_VALUES["MERGE_DOCUMENT_MARGIN"]
 
         # Reset metadata settings
@@ -5475,17 +5624,29 @@ async def edit_bot_settings(client, query):
         await database.update_config(
             {
                 # Output formats
-                "MERGE_OUTPUT_FORMAT_VIDEO": DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_VIDEO"],
-                "MERGE_OUTPUT_FORMAT_AUDIO": DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_AUDIO"],
-                "MERGE_OUTPUT_FORMAT_IMAGE": DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_IMAGE"],
-                "MERGE_OUTPUT_FORMAT_DOCUMENT": DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_DOCUMENT"],
-                "MERGE_OUTPUT_FORMAT_SUBTITLE": DEFAULT_VALUES["MERGE_OUTPUT_FORMAT_SUBTITLE"],
+                "MERGE_OUTPUT_FORMAT_VIDEO": DEFAULT_VALUES[
+                    "MERGE_OUTPUT_FORMAT_VIDEO"
+                ],
+                "MERGE_OUTPUT_FORMAT_AUDIO": DEFAULT_VALUES[
+                    "MERGE_OUTPUT_FORMAT_AUDIO"
+                ],
+                "MERGE_OUTPUT_FORMAT_IMAGE": DEFAULT_VALUES[
+                    "MERGE_OUTPUT_FORMAT_IMAGE"
+                ],
+                "MERGE_OUTPUT_FORMAT_DOCUMENT": DEFAULT_VALUES[
+                    "MERGE_OUTPUT_FORMAT_DOCUMENT"
+                ],
+                "MERGE_OUTPUT_FORMAT_SUBTITLE": DEFAULT_VALUES[
+                    "MERGE_OUTPUT_FORMAT_SUBTITLE"
+                ],
                 # Video settings
                 "MERGE_VIDEO_CODEC": DEFAULT_VALUES["MERGE_VIDEO_CODEC"],
                 "MERGE_VIDEO_QUALITY": DEFAULT_VALUES["MERGE_VIDEO_QUALITY"],
                 "MERGE_VIDEO_PRESET": DEFAULT_VALUES["MERGE_VIDEO_PRESET"],
                 "MERGE_VIDEO_CRF": DEFAULT_VALUES["MERGE_VIDEO_CRF"],
-                "MERGE_VIDEO_PIXEL_FORMAT": DEFAULT_VALUES["MERGE_VIDEO_PIXEL_FORMAT"],
+                "MERGE_VIDEO_PIXEL_FORMAT": DEFAULT_VALUES[
+                    "MERGE_VIDEO_PIXEL_FORMAT"
+                ],
                 "MERGE_VIDEO_TUNE": DEFAULT_VALUES["MERGE_VIDEO_TUNE"],
                 "MERGE_VIDEO_FASTSTART": DEFAULT_VALUES["MERGE_VIDEO_FASTSTART"],
                 # Audio settings
@@ -5504,12 +5665,22 @@ async def edit_bot_settings(client, query):
                 # Subtitle settings
                 "MERGE_SUBTITLE_ENCODING": DEFAULT_VALUES["MERGE_SUBTITLE_ENCODING"],
                 "MERGE_SUBTITLE_FONT": DEFAULT_VALUES["MERGE_SUBTITLE_FONT"],
-                "MERGE_SUBTITLE_FONT_SIZE": DEFAULT_VALUES["MERGE_SUBTITLE_FONT_SIZE"],
-                "MERGE_SUBTITLE_FONT_COLOR": DEFAULT_VALUES["MERGE_SUBTITLE_FONT_COLOR"],
-                "MERGE_SUBTITLE_BACKGROUND": DEFAULT_VALUES["MERGE_SUBTITLE_BACKGROUND"],
+                "MERGE_SUBTITLE_FONT_SIZE": DEFAULT_VALUES[
+                    "MERGE_SUBTITLE_FONT_SIZE"
+                ],
+                "MERGE_SUBTITLE_FONT_COLOR": DEFAULT_VALUES[
+                    "MERGE_SUBTITLE_FONT_COLOR"
+                ],
+                "MERGE_SUBTITLE_BACKGROUND": DEFAULT_VALUES[
+                    "MERGE_SUBTITLE_BACKGROUND"
+                ],
                 # Document settings
-                "MERGE_DOCUMENT_PAPER_SIZE": DEFAULT_VALUES["MERGE_DOCUMENT_PAPER_SIZE"],
-                "MERGE_DOCUMENT_ORIENTATION": DEFAULT_VALUES["MERGE_DOCUMENT_ORIENTATION"],
+                "MERGE_DOCUMENT_PAPER_SIZE": DEFAULT_VALUES[
+                    "MERGE_DOCUMENT_PAPER_SIZE"
+                ],
+                "MERGE_DOCUMENT_ORIENTATION": DEFAULT_VALUES[
+                    "MERGE_DOCUMENT_ORIENTATION"
+                ],
                 "MERGE_DOCUMENT_MARGIN": DEFAULT_VALUES["MERGE_DOCUMENT_MARGIN"],
                 # Metadata settings
                 "MERGE_METADATA_TITLE": DEFAULT_VALUES["MERGE_METADATA_TITLE"],
@@ -5525,7 +5696,9 @@ async def edit_bot_settings(client, query):
 
         # Maintain the current page when returning to the merge menu
         if "merge_page" in globals():
-            await update_buttons(message, "mediatools_merge", page=globals()["merge_page"])
+            await update_buttons(
+                message, "mediatools_merge", page=globals()["merge_page"]
+            )
         else:
             await update_buttons(message, "mediatools_merge", page=0)
     elif data[1] in [
@@ -6631,14 +6804,18 @@ async def edit_bot_settings(client, query):
                 # If no page number is provided, stay on the current page
                 # Set the state back to what it was
                 globals()["state"] = current_state
-                await update_buttons(message, "mediatools_merge", page=globals()["merge_page"])
+                await update_buttons(
+                    message, "mediatools_merge", page=globals()["merge_page"]
+                )
         except (ValueError, IndexError) as e:
             # In case of any error, stay on the current page
             LOGGER.error(f"Error in start_merge_config handler: {e}")
 
             # Set the state back to what it was
             globals()["state"] = current_state
-            await update_buttons(message, "mediatools_merge", page=globals()["merge_page"])
+            await update_buttons(
+                message, "mediatools_merge", page=globals()["merge_page"]
+            )
     elif data[1] == "back_to_merge":
         await query.answer()
         # Get the current state before making changes
@@ -6651,14 +6828,18 @@ async def edit_bot_settings(client, query):
 
             # Set the state back to what it was
             globals()["state"] = current_state
-            await update_buttons(message, "mediatools_merge", page=globals()["merge_page"])
+            await update_buttons(
+                message, "mediatools_merge", page=globals()["merge_page"]
+            )
         except (ValueError, IndexError) as e:
             # In case of any error, stay on the current page
             LOGGER.error(f"Error in back_to_merge handler: {e}")
 
             # Set the state back to what it was
             globals()["state"] = current_state
-            await update_buttons(message, "mediatools_merge", page=globals()["merge_page"])
+            await update_buttons(
+                message, "mediatools_merge", page=globals()["merge_page"]
+            )
     elif data[1] == "back_to_merge_config":
         await query.answer()
         # Get the current state before making changes
@@ -6673,14 +6854,18 @@ async def edit_bot_settings(client, query):
 
             # Set the state back to what it was
             globals()["state"] = current_state
-            await update_buttons(message, "mediatools_merge", page=globals()["merge_page"])
+            await update_buttons(
+                message, "mediatools_merge", page=globals()["merge_page"]
+            )
         except (ValueError, IndexError) as e:
             # In case of any error, stay on the current page
             LOGGER.error(f"Error in back_to_merge_config handler: {e}")
 
             # Set the state back to what it was
             globals()["state"] = current_state
-            await update_buttons(message, "mediatools_merge", page=globals()["merge_page"])
+            await update_buttons(
+                message, "mediatools_merge", page=globals()["merge_page"]
+            )
     elif data[1] == "start_convert":
         await query.answer()
         # Get the current state before making changes

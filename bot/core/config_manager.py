@@ -339,20 +339,18 @@ class Config:
     WATERMARK_PRIORITY: int = 2
     WATERMARK_THREADING: bool = True
     WATERMARK_THREAD_NUMBER: int = 4
-    WATERMARK_FAST_MODE: bool = True
+    WATERMARK_QUALITY: str = "none"
+    WATERMARK_SPEED: str = "none"
     WATERMARK_OPACITY: float = 0.0
-    WATERMARK_MAINTAIN_QUALITY: bool = True
     WATERMARK_REMOVE_ORIGINAL: bool = True
 
     # Audio Watermark Settings
-    AUDIO_WATERMARK_ENABLED: bool = False
-    AUDIO_WATERMARK_TEXT: str = ""
     AUDIO_WATERMARK_VOLUME: float = 0.0
+    AUDIO_WATERMARK_INTERVAL: int = 0
 
     # Subtitle Watermark Settings
-    SUBTITLE_WATERMARK_ENABLED: bool = False
-    SUBTITLE_WATERMARK_TEXT: str = ""
     SUBTITLE_WATERMARK_STYLE: str = "none"
+    SUBTITLE_WATERMARK_INTERVAL: int = 0
 
     # Merge Settings
     MERGE_ENABLED: bool = False
