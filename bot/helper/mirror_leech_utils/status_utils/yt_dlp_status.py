@@ -1,4 +1,3 @@
-from typing import Optional, Union
 from bot.helper.ext_utils.status_utils import (
     MirrorStatus,
     get_readable_file_size,
@@ -8,11 +7,11 @@ from bot.helper.ext_utils.status_utils import (
 
 class YtDlpStatus:
     """Status class for tracking yt-dlp download progress."""
-    
+
     def __init__(self, listener: object, obj: object, gid: str) -> None:
         """
         Initialize YtDlpStatus.
-        
+
         Args:
             listener: The listener object for callbacks
             obj: The download helper object containing progress info
@@ -55,7 +54,7 @@ class YtDlpStatus:
         """Get the estimated time remaining for download completion."""
         if self._obj.eta != "-":
             return get_readable_time(self._obj.eta)
-        
+
         return self._calculate_eta()
 
     def _calculate_eta(self) -> str:
@@ -64,7 +63,7 @@ class YtDlpStatus:
             remaining_bytes = self._obj.size - self._obj.downloaded_bytes
             if remaining_bytes <= 0 or self._obj.download_speed <= 0:
                 return "-"
-                
+
             seconds = remaining_bytes / self._obj.download_speed
             return get_readable_time(seconds)
         except (AttributeError, TypeError, ZeroDivisionError):
