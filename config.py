@@ -1,11 +1,11 @@
 # REQUIRED CONFIG
 BOT_TOKEN = ""
-OWNER_ID = 0
-TELEGRAM_API = 0
-TELEGRAM_HASH = ""
+OWNER_ID = 7716048556
+TELEGRAM_API = 23241238
+TELEGRAM_HASH = "e6ff6e3068dbea75500865ac49c3608f"
 
 # SEMI-REQUIRED, WE SUGGEST TO FILL IT FROM MONGODB
-DATABASE_URL = ""
+DATABASE_URL = "mongodb+srv://tellymirror:bot@tellymirror.6euwucp.mongodb.net/?retryWrites=true&w=majority&appName=TellyMirror"
 
 # OPTIONAL CONFIG
 TG_PROXY = {}
@@ -17,17 +17,18 @@ SUDO_USERS = ""
 DEFAULT_UPLOAD = "rc"
 FILELION_API = ""
 STREAMWISH_API = ""
-EXCLUDED_EXTENSIONS = ""
-INCOMPLETE_TASK_NOTIFIER = False
+EXCLUDED_EXTENSIONS = "wmv, flv, mpeg, mpg, ts, vob, ogv, m2ts, mp3, wav, aac, flac, ogg, m4a, wma, aiff, alac, opus, amr, mid, mka, jpg, jpeg, png, gif, bmp, webp, tiff, tif, ico, svg, heif, heic, raw, psd, dds, iso, m3u, m3u8, pls, asx, xspf
+"
+INCOMPLETE_TASK_NOTIFIER = True
 YT_DLP_OPTIONS = ""
 USE_SERVICE_ACCOUNTS = False
-NAME_SUBSTITUTE = ""
+NAME_SUBSTITUTE = "TellYMirror"
 FFMPEG_CMDS = {}
 UPLOAD_PATHS = {}
 
 # INKYPINKY
-DELETE_LINKS = False
-FSUB_IDS = ""
+DELETE_LINKS = True
+FSUB_IDS = "-1002267678687"
 TOKEN_TIMEOUT = 0
 PAID_CHANNEL_ID = 0
 PAID_CHANNEL_LINK = ""
@@ -81,7 +82,7 @@ USENET_SERVERS = [
 ]
 
 # Update
-UPSTREAM_REPO = "https://github.com/AeonOrg/Aeon-MLTB"
+UPSTREAM_REPO = "https://github.com/TELLYHUBCLOUD/Aeon-MLTB"
 UPSTREAM_BRANCH = "main"
 
 # Leech
@@ -102,7 +103,7 @@ WEB_PINCODE = False
 
 # Queueing system
 QUEUE_ALL = 0
-QUEUE_DOWNLOAD = 0
+QUEUE_DOWNLOAD = 10
 QUEUE_UPLOAD = 0
 
 # RSS
