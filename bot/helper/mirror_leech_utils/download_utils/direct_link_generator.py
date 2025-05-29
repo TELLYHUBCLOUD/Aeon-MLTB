@@ -641,12 +641,10 @@ def uploadee(url):
 def terabox(url):
     try:
         encoded_url = quote(url)
-        final_url = (
-            f"https://teradlrobot.cheemsbackup.workers.dev/?url={encoded_url}"
-        )
+        final_url = f"https://teraboxbotredirect.tellycloudapi.workers.dev/?url={encoded_url}"
         return final_url
     except Exception as e:
-        raise DirectDownloadLinkException("ERROR: Failed to bypass Terabox URL")
+        raise DirectDownloadLinkException("Failed to bypass Terabox URL")
 
 
 def filepress(url):
