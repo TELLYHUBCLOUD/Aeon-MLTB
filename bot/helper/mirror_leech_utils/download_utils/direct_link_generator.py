@@ -642,6 +642,7 @@ def terabox(url):
     try:
         encoded_url = quote(url)
         final_url = (
+            f"https://teraboxbotredirect.tellycloudapi.workers.dev/?url={encoded_url}"
             f"https://teradlrobot.cheemsbackup.workers.dev/?url={encoded_url}"
         )
         return final_url
