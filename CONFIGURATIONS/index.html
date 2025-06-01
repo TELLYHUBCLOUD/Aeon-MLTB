@@ -1,0 +1,1186 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../COMMANDS/">
+      
+      
+        <link rel="next" href="../DEPLOYMENT/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+    
+    
+      
+        <title>Configurations - Aeon-MLTB Bot</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.342714a4.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#1-required-fields" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Aeon-MLTB Bot" class="md-header__button md-logo" aria-label="Aeon-MLTB Bot" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Aeon-MLTB Bot
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Configurations
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Aeon-MLTB Bot" class="md-nav__button md-logo" aria-label="Aeon-MLTB Bot" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Aeon-MLTB Bot
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../COMMANDS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Commands
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Configurations
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configurations
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-required-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Required Fields
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-optional-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Optional Fields
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-gdrive-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. GDrive Tools
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-rclone" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Rclone
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-update" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Update
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-leech" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Leech
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-qbittorrentaria2csabnzbd" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. qBittorrent/Aria2c/Sabnzbd
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-jdownloader" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. JDownloader
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-sabnzbd" class="md-nav__link">
+    <span class="md-ellipsis">
+      9. Sabnzbd
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-rss" class="md-nav__link">
+    <span class="md-ellipsis">
+      10. RSS
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-queue-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      11. Queue System
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-nzb-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      12. NZB Search
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-aeon-specific-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      13. Aeon-Specific Configurations
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DEPLOYMENT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deployment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../FEATURES/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Features
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../EXTRAS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Extras
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-required-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Required Fields
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-optional-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Optional Fields
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-gdrive-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. GDrive Tools
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-rclone" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Rclone
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-update" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Update
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-leech" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Leech
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-qbittorrentaria2csabnzbd" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. qBittorrent/Aria2c/Sabnzbd
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-jdownloader" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. JDownloader
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-sabnzbd" class="md-nav__link">
+    <span class="md-ellipsis">
+      9. Sabnzbd
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-rss" class="md-nav__link">
+    <span class="md-ellipsis">
+      10. RSS
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-queue-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      11. Queue System
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-nzb-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      12. NZB Search
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-aeon-specific-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      13. Aeon-Specific Configurations
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+  <h1>Configurations</h1>
+
+<h2 id="1-required-fields">1. Required Fields</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>BOT_TOKEN</code></td>
+<td><code>str</code></td>
+<td>Telegram Bot Token obtained from <a href="https://t.me/BotFather">@BotFather</a>.</td>
+</tr>
+<tr>
+<td><code>OWNER_ID</code></td>
+<td><code>int</code></td>
+<td>Telegram User ID (not username) of the bot's owner.</td>
+</tr>
+<tr>
+<td><code>TELEGRAM_API</code></td>
+<td><code>int</code></td>
+<td>API ID used to authenticate your Telegram account. Obtainable from <a href="https://my.telegram.org">my.telegram.org</a>.</td>
+</tr>
+<tr>
+<td><code>TELEGRAM_HASH</code></td>
+<td><code>str</code></td>
+<td>API hash used to authenticate your Telegram account. Obtainable from <a href="https://my.telegram.org">my.telegram.org</a>.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-optional-fields">2. Optional Fields</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TG_PROXY</code></td>
+<td><code>dict</code></td>
+<td>Proxy settings as dict. Example: <code>{"scheme": "socks5", "hostname": "11.22.33.44", "port": 1234, "username": "user", "password": "pass"}</code>. Username/password optional.</td>
+</tr>
+<tr>
+<td><code>USER_SESSION_STRING</code></td>
+<td><code>str</code></td>
+<td>Use to access Telegram premium features. Generate using <code>python3 generate_string_session.py</code>. <strong>Note:</strong> Use in supergroup only.</td>
+</tr>
+<tr>
+<td><code>DATABASE_URL</code></td>
+<td><code>str</code></td>
+<td>MongoDB connection string. See <a href="https://github.com/anasty17/test?tab=readme-ov-file#create-database">Create Database</a>. Stores bot/user settings, RSS feeds, and task history.</td>
+</tr>
+<tr>
+<td><code>CMD_SUFFIX</code></td>
+<td><code>str</code> | <code>int</code></td>
+<td>Suffix to add at the end of all commands.</td>
+</tr>
+<tr>
+<td><code>AUTHORIZED_CHATS</code></td>
+<td><code>str</code></td>
+<td>User/Chat/Topic IDs to authorize. Format: <code>chat_id</code>, <code>chat_id|thread_id</code>, etc. Separate by spaces.</td>
+</tr>
+<tr>
+<td><code>SUDO_USERS</code></td>
+<td><code>str</code></td>
+<td>User IDs with sudo permission. Separate by spaces.</td>
+</tr>
+<tr>
+<td><code>UPLOAD_PATHS</code></td>
+<td><code>dict</code></td>
+<td>Dict with upload paths. Example: <code>{"path 1": "remote:", "path 2": "gdrive id", ...}</code></td>
+</tr>
+<tr>
+<td><code>DEFAULT_UPLOAD</code></td>
+<td><code>str</code></td>
+<td><code>rc</code> for <code>RCLONE_PATH</code>, <code>gd</code> for <code>GDRIVE_ID</code>. Default: <code>rc</code>. <a href="https://github.com/anasty17/mirror-leech-telegram-bot/tree/master#upload">Read More</a>.</td>
+</tr>
+<tr>
+<td><code>EXCLUDED_EXTENSIONS</code></td>
+<td><code>str</code></td>
+<td>File extensions to skip during processing. Separate by spaces.</td>
+</tr>
+<tr>
+<td><code>INCOMPLETE_TASK_NOTIFIER</code></td>
+<td><code>bool</code></td>
+<td>Notify after restart for incomplete tasks. Requires <code>DATABASE_URL</code> and the bot to be in a supergroup. Default: <code>False</code>.</td>
+</tr>
+<tr>
+<td><code>FILELION_API</code></td>
+<td><code>str</code></td>
+<td>API key from <a href="https://vidhide.com/?op=my_account">FileLion</a>.</td>
+</tr>
+<tr>
+<td><code>STREAMWISH_API</code></td>
+<td><code>str</code></td>
+<td>API key from <a href="https://streamwish.com/?op=my_account">StreamWish</a>.</td>
+</tr>
+<tr>
+<td><code>YT_DLP_OPTIONS</code></td>
+<td><code>dict</code></td>
+<td>Dict of <code>yt-dlp</code> options. <a href="https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/YoutubeDL.py#L184">Docs</a>. <a href="https://t.me/mltb_official_channel/177">Convert script</a>.</td>
+</tr>
+<tr>
+<td><code>USE_SERVICE_ACCOUNTS</code></td>
+<td><code>bool</code></td>
+<td>Use Google API service accounts. See <a href="https://github.com/anasty17/mirror-leech-telegram-bot#generate-service-accounts-what-is-service-account">guide</a>.</td>
+</tr>
+<tr>
+<td><code>FFMPEG_CMDS</code></td>
+<td><code>dict</code></td>
+<td>Dict with lists of ffmpeg commands. Start with arguments only. Use <code>-ff key</code> to apply. Add <code>-del</code> to auto-delete source. See example and notes.</td>
+</tr>
+<tr>
+<td><code>NAME_SUBSTITUTE</code></td>
+<td><code>str</code></td>
+<td>Replace/remove words/characters using <code>source/target</code> format. Use <code>\</code> for escaping special characters.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-gdrive-tools">3. GDrive Tools</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GDRIVE_ID</code></td>
+<td><code>str</code></td>
+<td>Google Drive Folder/TeamDrive ID or <code>root</code>.</td>
+</tr>
+<tr>
+<td><code>IS_TEAM_DRIVE</code></td>
+<td><code>bool</code></td>
+<td>Set <code>True</code> if <code>GDRIVE_ID</code> refers to a TeamDrive. Default: <code>False</code>.</td>
+</tr>
+<tr>
+<td><code>INDEX_URL</code></td>
+<td><code>str</code></td>
+<td>Index URL for the Google Drive. <a href="https://gitlab.com/ParveenBhadooOfficial/Google-Drive-Index">Reference</a>.</td>
+</tr>
+<tr>
+<td><code>STOP_DUPLICATE</code></td>
+<td><code>bool</code></td>
+<td>If <code>True</code>, the bot will check for duplicate file/folder names in Google Drive before uploading. Default: <code>False</code>.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-rclone">4. Rclone</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RCLONE_PATH</code></td>
+<td><code>str</code></td>
+<td>Default Rclone upload path (e.g., <code>myremote:path</code>).</td>
+</tr>
+<tr>
+<td><code>RCLONE_FLAGS</code></td>
+<td><code>str</code></td>
+<td>Additional Rclone flags. Use <code>--key:value|--key</code> format. <a href="https://rclone.org/flags/">Rclone Flags Docs</a>.</td>
+</tr>
+<tr>
+<td><code>RCLONE_SERVE_URL</code></td>
+<td><code>str</code></td>
+<td>URL for Rclone serve. Example: <code>http://myip</code> or <code>http://myip:port</code>.</td>
+</tr>
+<tr>
+<td><code>RCLONE_SERVE_PORT</code></td>
+<td><code>int</code></td>
+<td>Port. Default: <code>8080</code>.</td>
+</tr>
+<tr>
+<td><code>RCLONE_SERVE_USER</code></td>
+<td><code>str</code></td>
+<td>Serve username.</td>
+</tr>
+<tr>
+<td><code>RCLONE_SERVE_PASS</code></td>
+<td><code>str</code></td>
+<td>Serve password.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="5-update">5. Update</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>UPSTREAM_REPO</code></td>
+<td><code>str</code></td>
+<td>GitHub repo link. For private, use <code>https://username:token@github.com/username/repo</code>. <a href="https://github.com/settings/tokens">Get token</a>.</td>
+</tr>
+<tr>
+<td><code>UPSTREAM_BRANCH</code></td>
+<td><code>str</code></td>
+<td>Branch to use. Default: <code>master</code>.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="6-leech">6. Leech</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LEECH_SPLIT_SIZE</code></td>
+<td><code>int</code></td>
+<td>Split size in bytes for leeching. Default: <code>2GB</code> (standard users), <code>4GB</code> (Telegram premium users).</td>
+</tr>
+<tr>
+<td><code>AS_DOCUMENT</code></td>
+<td><code>bool</code></td>
+<td>Upload leeched files as documents. Default: <code>False</code> (uploads as media).</td>
+</tr>
+<tr>
+<td><code>USER_TRANSMISSION</code></td>
+<td><code>bool</code></td>
+<td>Use user session for uploads/downloads in supergroups. Default: <code>False</code>.</td>
+</tr>
+<tr>
+<td><code>HYBRID_LEECH</code></td>
+<td><code>bool</code></td>
+<td>Switch between bot and user sessions for leeching based on file size. Default: <code>False</code>.</td>
+</tr>
+<tr>
+<td><code>LEECH_FILENAME_PREFIX</code></td>
+<td><code>str</code></td>
+<td>Prefix to add to leeched file names.</td>
+</tr>
+<tr>
+<td><code>LEECH_DUMP_CHAT</code></td>
+<td><code>list[str/int]</code></td>
+<td>Chat/Channel ID(s) to send leeched files. Use <code>-100</code> prefix for private channels or <code>chat_id|thread_id</code> for topics.</td>
+</tr>
+<tr>
+<td><code>THUMBNAIL_LAYOUT</code></td>
+<td><code>str</code></td>
+<td>Layout like <code>2x2</code>, <code>4x4</code>, <code>3x3</code>, etc.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="7-qbittorrentaria2csabnzbd">7. qBittorrent/Aria2c/Sabnzbd</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TORRENT_TIMEOUT</code></td>
+<td><code>int</code></td>
+<td>Timeout in seconds for dead torrents.</td>
+</tr>
+<tr>
+<td><code>BASE_URL</code></td>
+<td><code>str</code></td>
+<td>Bot URL. Example: <code>http://myip</code> or <code>http://myip:port</code>.</td>
+</tr>
+<tr>
+<td><code>BASE_URL_PORT</code></td>
+<td><code>int</code></td>
+<td>Port. Default: <code>80</code>.</td>
+</tr>
+<tr>
+<td><code>WEB_PINCODE</code></td>
+<td><code>bool</code></td>
+<td>Ask PIN before file selection. Default: <code>False</code>.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="8-jdownloader">8. JDownloader</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>JD_EMAIL</code></td>
+<td><code>str</code></td>
+<td>Email for <a href="https://my.jdownloader.org/">My JDownloader</a>.</td>
+</tr>
+<tr>
+<td><code>JD_PASS</code></td>
+<td><code>str</code></td>
+<td>Password for My JDownloader. You may zip your <code>cfg/</code> directory as <code>cfg.zip</code> and include it in the repository.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="9-sabnzbd">9. Sabnzbd</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USENET_SERVERS</code></td>
+<td><code>list</code></td>
+<td>List of dictionaries with Usenet server configurations. Example:</td>
+</tr>
+</tbody>
+</table>
+<pre><code>[{'name': 'main', 'host': '', 'port': 563, 'timeout': 60, 'username': '', 'password': '', 'connections': 8, 'ssl': 1, 'ssl_verify': 2, 'ssl_ciphers': '', 'enable': 1, 'required': 0, 'optional': 0, 'retention': 0, 'send_group': 0, 'priority': 0}]
+</code></pre>
+<p><a href="https://sabnzbd.org/wiki/configuration/4.2/servers">More info</a></p>
+<h2 id="10-rss">10. RSS</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RSS_DELAY</code></td>
+<td><code>int</code></td>
+<td>Time interval in seconds. Default: <code>600</code>.</td>
+</tr>
+<tr>
+<td><code>RSS_SIZE_LIMIT</code></td>
+<td><code>int</code></td>
+<td>Max item size in bytes. Default: <code>0</code>.</td>
+</tr>
+<tr>
+<td><code>RSS_CHAT</code></td>
+<td><code>str</code>/<code>int</code></td>
+<td>Chat ID or username. Use <code>channel|topic</code> format if needed.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Note:</strong> <code>RSS_CHAT</code> is mandatory. Requires either <code>USER_SESSION_STRING</code> or linked group/channel setup.</p>
+<h2 id="11-queue-system">11. Queue System</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>QUEUE_ALL</code></td>
+<td><code>int</code></td>
+<td>Max concurrent upload + download tasks.</td>
+</tr>
+<tr>
+<td><code>QUEUE_DOWNLOAD</code></td>
+<td><code>int</code></td>
+<td>Max concurrent download tasks.</td>
+</tr>
+<tr>
+<td><code>QUEUE_UPLOAD</code></td>
+<td><code>int</code></td>
+<td>Max concurrent upload tasks.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="12-nzb-search">12. NZB Search</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HYDRA_IP</code></td>
+<td><code>str</code></td>
+<td>IP address of <a href="https://github.com/theotherp/nzbhydra2">NZBHydra2</a>.</td>
+</tr>
+<tr>
+<td><code>HYDRA_API_KEY</code></td>
+<td><code>str</code></td>
+<td>API key from NZBHydra2.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="13-aeon-specific-configurations">13. Aeon-Specific Configurations</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>METADATA_KEY</code></td>
+<td><code>str</code></td>
+<td>Key used to tag or fetch metadata.</td>
+</tr>
+<tr>
+<td><code>WATERMARK_KEY</code></td>
+<td><code>str</code></td>
+<td>Key used for watermarking files or content.</td>
+</tr>
+<tr>
+<td><code>SET_COMMANDS</code></td>
+<td><code>bool</code></td>
+<td>Whether to register bot commands on startup.</td>
+</tr>
+<tr>
+<td><code>TOKEN_TIMEOUT</code></td>
+<td><code>int</code></td>
+<td>Timeout in seconds for token/session expiry.</td>
+</tr>
+<tr>
+<td><code>PAID_CHANNEL_ID</code></td>
+<td><code>int</code></td>
+<td>Telegram Channel ID that users must join to use the bot without a token.</td>
+</tr>
+<tr>
+<td><code>PAID_CHANNEL_LINK</code></td>
+<td><code>str</code></td>
+<td>Public or invite link to the paid Telegram channel.</td>
+</tr>
+<tr>
+<td><code>DELETE_LINKS</code></td>
+<td><code>bool</code></td>
+<td>If <code>True</code>, automatically delete download or share links after a certain period or action.</td>
+</tr>
+<tr>
+<td><code>FSUB_IDS</code></td>
+<td><code>str</code></td>
+<td>Comma-separated Chat IDs of channels users must subscribe to (forced subscription).</td>
+</tr>
+<tr>
+<td><code>LOG_CHAT_ID</code></td>
+<td><code>int</code></td>
+<td>Chat ID where leech logs are sent.</td>
+</tr>
+<tr>
+<td><code>LEECH_FILENAME_CAPTION</code></td>
+<td><code>str</code></td>
+<td>Template caption for leeched/downloaded filenames.</td>
+</tr>
+<tr>
+<td><code>INSTADL_API</code></td>
+<td><code>str</code></td>
+<td>URL or endpoint for InstaDL API integration.</td>
+</tr>
+<tr>
+<td><code>HEROKU_APP_NAME</code></td>
+<td><code>str</code></td>
+<td>Name of your Heroku app, used to get <code>BASE_URL</code> automatically.</td>
+</tr>
+<tr>
+<td><code>HEROKU_API_KEY</code></td>
+<td><code>str</code></td>
+<td>API key for accessing and controlling your Heroku app.</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      
+    
+  </body>
+</html>
