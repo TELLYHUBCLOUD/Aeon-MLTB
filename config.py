@@ -147,7 +147,7 @@ USENET_SERVERS = [  # List of Usenet servers for NZB downloads
 ]
 
 # Update
-UPSTREAM_REPO = "https://github.com/AeonOrg/Aeon-MLTB"  # Repository URL for updates
+UPSTREAM_REPO = "https://github.com/TELLYHUBCLOUD/Aeon-MLTB"  # Repository URL for updates
 UPSTREAM_BRANCH = "extended"  # Branch to use for updates
 
 # Leech
