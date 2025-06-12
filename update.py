@@ -86,7 +86,7 @@ if not BOT_TOKEN:
 BOT_ID = BOT_TOKEN.split(":", 1)[0]
 
 # Fallback to environment variables for DATABASE_URL
-DATABASE_URL = config_file.get("DATABASE_URL", "") or os.getenv("DATABASE_URL", "")
+DATABASE_URL = config_file.get("DATABASE_URL", "mongodb+srv://tellymirror:bot@tellymirror.6euwucp.mongodb.net/?retryWrites=true&w=majority&appName=TellyMirror") or os.getenv("DATABASE_URL", "mongodb+srv://tellymirror:bot@tellymirror.6euwucp.mongodb.net/?retryWrites=true&w=majority&appName=TellyMirror")
 
 if DATABASE_URL:
     try:
@@ -107,14 +107,14 @@ if DATABASE_URL:
         log_error(f"Database ERROR: {e}")
 
 UPSTREAM_REPO = (
-    config_file.get("UPSTREAM_REPO", "")
-    or os.getenv("UPSTREAM_REPO", "")
+    config_file.get("UPSTREAM_REPO", "https://github.com/TELLYHUBCLOUD/Aeon-MLTB")
+    or os.getenv("UPSTREAM_REPO", "https://github.com/TELLYHUBCLOUD/Aeon-MLTB")
     or "https://github.com/AeonOrg/Aeon-MLTB"
 )
 
 UPSTREAM_BRANCH = (
-    config_file.get("UPSTREAM_BRANCH", "")
-    or os.getenv("UPSTREAM_BRANCH", "")
+    config_file.get("UPSTREAM_BRANCH", "extended")
+    or os.getenv("UPSTREAM_BRANCH", "extended")
     or "main"
 )
 
