@@ -577,7 +577,7 @@ class HyperTGDownload:
             total_bytes_combined = 0
 
             async with aiopen(temp_file_path, "wb") as temp_file:
-                for part_index, part_file_path in sorted(
+                for _part_index, part_file_path in sorted(
                     results, key=lambda x: x[0]
                 ):
                     try:
@@ -594,8 +594,7 @@ class HyperTGDownload:
 
                         await remove(part_file_path)
 
-                    except Exception as e:
-                        LOGGER.error(f"❌ Error combining part {part_index}: {e!s}")
+                    except Exception:
                         raise
 
             if prog_task and not prog_task.done():
@@ -620,8 +619,7 @@ class HyperTGDownload:
         except (CancelledError, StopTransmission):
             LOGGER.info("Download cancelled by user")
             return None
-        except Exception as e:
-            LOGGER.error(f"HyperDL download failed: {e!s}")
+        except Exception:
             return None
         finally:
             self._cancel_event.set()
