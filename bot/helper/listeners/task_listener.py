@@ -132,10 +132,14 @@ class TaskListener(TaskConfig):
                             user_dump_int != int(self.up_dest)
                             and user_dump_int != self.user_id
                         ):
-                            await send_message(
-                                user_dump_int,
-                                f"{msg}<blockquote expandable>{fmsg}</blockquote>",
-                            )
+                            # For USER_DUMP: Skip leech completion messages, only send mirror cloud links
+                            if self.is_leech:
+                                # For leech operations, don't send completion messages to USER_DUMP
+                                # Files are already copied by telegram_uploader
+                                pass
+                            else:
+                                # For mirror operations, send only cloud link message without the expandable log
+                                await send_message(user_dump_int, msg)
                     except Exception as e:
                         LOGGER.error(
                             f"Failed to send task details message to user's dump {user_dump}: {e}"
@@ -337,10 +341,22 @@ class TaskListener(TaskConfig):
                 if dest == self.user_id and not self._is_bot_pm_enabled():
                     continue
                 try:
-                    await send_message(
-                        dest,
-                        f"{msg}<blockquote expandable>{fmsg}</blockquote>",
-                    )
+                    # Check if this destination is USER_DUMP
+                    if user_dump and dest == int(user_dump):
+                        # For USER_DUMP: Skip leech completion messages, only send mirror cloud links
+                        if self.is_leech:
+                            # For leech operations, don't send completion messages to USER_DUMP
+                            # Files are already copied by telegram_uploader
+                            pass
+                        else:
+                            # For mirror operations, send only cloud link message without the expandable log
+                            await send_message(dest, msg)
+                    else:
+                        # For other destinations, send the full message with expandable log
+                        await send_message(
+                            dest,
+                            f"{msg}<blockquote expandable>{fmsg}</blockquote>",
+                        )
                 except Exception as e:
                     LOGGER.error(
                         f"Failed to send leech log to destination {dest}: {e}"
@@ -372,7 +388,8 @@ class TaskListener(TaskConfig):
             )
 
     async def on_download_complete(self):
-        await sleep(2)
+        # Give a bit more time for file operations to complete
+        await sleep(3)
         if self.is_cancelled:
             LOGGER.info("Download was cancelled, skipping upload")
             return
@@ -469,16 +486,36 @@ class TaskListener(TaskConfig):
                 gid = download.gid()
             else:
                 return
-        # Check directory contents immediately after download completion
-        if await aiopath.exists(self.dir):
-            try:
-                files = await listdir(self.dir)
-            except Exception as e:
-                LOGGER.error(f"Error listing download directory: {e}")
-        else:
-            LOGGER.error(
-                f"Download directory does not exist immediately after completion: {self.dir}"
-            )
+        # Check directory contents immediately after download completion with retry logic
+        max_retries = 3
+        retry_delay = 2
+
+        for attempt in range(max_retries):
+            if await aiopath.exists(self.dir):
+                try:
+                    files = await listdir(self.dir)
+                    if files:
+                        LOGGER.info(
+                            f"Download directory {self.dir} contains {len(files)} files: {files}"
+                        )
+                        break
+                    LOGGER.warning(
+                        f"Download directory {self.dir} is empty (attempt {attempt + 1}/{max_retries})"
+                    )
+                    if attempt < max_retries - 1:
+                        await sleep(retry_delay)
+                except Exception as e:
+                    LOGGER.error(
+                        f"Error listing download directory (attempt {attempt + 1}/{max_retries}): {e}"
+                    )
+                    if attempt < max_retries - 1:
+                        await sleep(retry_delay)
+            else:
+                LOGGER.error(
+                    f"Download directory does not exist (attempt {attempt + 1}/{max_retries}): {self.dir}"
+                )
+                if attempt < max_retries - 1:
+                    await sleep(retry_delay)
 
         if not (self.is_torrent or self.is_qbit):
             self.seed = False
@@ -591,9 +628,34 @@ class TaskListener(TaskConfig):
 
                     files = await listdir(self.dir)
                     if not files:
-                        LOGGER.error(f"Directory is empty: {self.dir}")
-                        await self.on_upload_error(f"Directory is empty: {self.dir}")
-                        return
+                        # Try waiting a bit more and check again before giving up
+                        LOGGER.warning(
+                            f"Directory appears empty, waiting and retrying: {self.dir}"
+                        )
+                        await sleep(5)
+
+                        # Retry listing files
+                        try:
+                            files = await listdir(self.dir)
+                            if not files:
+                                LOGGER.error(
+                                    f"Directory is empty after retry: {self.dir}"
+                                )
+                                await self.on_upload_error(
+                                    f"Directory is empty: {self.dir}"
+                                )
+                                return
+                            LOGGER.info(
+                                f"Found {len(files)} files after retry: {files}"
+                            )
+                        except Exception as retry_error:
+                            LOGGER.error(
+                                f"Error during retry listing: {retry_error}"
+                            )
+                            await self.on_upload_error(
+                                f"Directory is empty: {self.dir}"
+                            )
+                            return
 
                     self.name = files[-1]
                     if self.name == "yt-dlp-thumb":
@@ -913,6 +975,11 @@ class TaskListener(TaskConfig):
                 pass
 
         if self.is_leech:
+            # Check cancellation before starting Telegram upload
+            if self.is_cancelled:
+                LOGGER.info("Task cancelled before Telegram upload, aborting")
+                return
+
             LOGGER.info(f"Leech Name: {self.name}")
             tg = TelegramUploader(self, up_dir)
             # Store a reference to the telegram uploader for later use (e.g., during cancellation)
@@ -987,6 +1054,11 @@ class TaskListener(TaskConfig):
             # Don't delete the tg reference as we need it for cancellation
             # We'll keep the reference in self.telegram_uploader
         elif self.up_dest == "yt" or self.up_dest.startswith("yt:"):
+            # Check cancellation before starting YouTube upload
+            if self.is_cancelled:
+                LOGGER.info("Task cancelled before YouTube upload, aborting")
+                return
+
             # YouTube upload
             if not getattr(Config, "YOUTUBE_UPLOAD_ENABLED", False):
                 await self.on_upload_error(
@@ -1035,6 +1107,11 @@ class TaskListener(TaskConfig):
             )
             del youtube_upload
         elif self.up_dest == "mg":
+            # Check cancellation before starting MEGA upload
+            if self.is_cancelled:
+                LOGGER.info("Task cancelled before MEGA upload, aborting")
+                return
+
             # Import here to avoid circular imports
             from bot.helper.mirror_leech_utils.mega_utils.upload import (
                 add_mega_upload,
@@ -1063,9 +1140,7 @@ class TaskListener(TaskConfig):
             await add_mega_upload(self, up_path)
         elif self.up_dest == "ddl" or self.up_dest.startswith("ddl:"):
             # DDL upload using DDL engine
-            from bot.helper.common import (
-                validate_ddl_config,
-            )
+            from bot.helper.common import validate_ddl_config
             from bot.helper.mirror_leech_utils.ddl_utils.ddlEngine import DDLUploader
             from bot.helper.mirror_leech_utils.status_utils.ddl_status import (
                 DDLStatus,
@@ -1575,6 +1650,23 @@ class TaskListener(TaskConfig):
                         and self._is_bot_pm_enabled()
                     ):
                         await send_message(self.user_id, msg, button)
+
+                    # Send to user's dump if it's set and not the same as up_dest or user's PM
+                    user_dump = self.user_dict.get("USER_DUMP")
+                    if user_dump:
+                        try:
+                            user_dump_int = int(user_dump)
+                            # Skip if this is the up_dest or user's PM (already sent there)
+                            if (
+                                user_dump_int != int(self.up_dest)
+                                and user_dump_int != self.user_id
+                            ):
+                                # For USER_DUMP: Send only cloud link message without log messages
+                                await send_message(user_dump_int, msg, button)
+                        except Exception as e:
+                            LOGGER.error(
+                                f"Failed to send mirror message to user's dump {user_dump}: {e}"
+                            )
                 except Exception as e:
                     LOGGER.error(
                         f"Failed to send mirror log to specified destination {self.up_dest}: {e}"
@@ -1623,7 +1715,13 @@ class TaskListener(TaskConfig):
                     if dest == self.user_id and not self._is_bot_pm_enabled():
                         continue
                     try:
-                        await send_message(dest, msg, button)
+                        # Check if this destination is USER_DUMP
+                        if user_dump and dest == int(user_dump):
+                            # For USER_DUMP: Send only cloud link message without log messages
+                            await send_message(dest, msg, button)
+                        else:
+                            # For other destinations, send the full message
+                            await send_message(dest, msg, button)
                     except Exception as e:
                         LOGGER.error(
                             f"Failed to send mirror log to destination {dest}: {e}"

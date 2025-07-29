@@ -605,10 +605,20 @@ def parse_ffprobe_info(json_data, file_size, filename):
                 if not display_aspect_ratio:
                     # Calculate simple ratio
                     def gcd(a, b):
-                        return a if b == 0 else gcd(b, a % b)
+                        if b == 0:
+                            return a
+                        try:
+                            return gcd(b, a % b)
+                        except ZeroDivisionError:
+                            return a
 
                     divisor = gcd(width, height)
-                    display_aspect_ratio = f"{width // divisor}:{height // divisor}"
+                    if divisor > 0:
+                        display_aspect_ratio = (
+                            f"{width // divisor}:{height // divisor}"
+                        )
+                    else:
+                        display_aspect_ratio = f"{width}:{height}"
 
                 tc += f"{'Display aspect ratio':<28}: {display_aspect_ratio}\n"
 
@@ -1080,7 +1090,9 @@ async def gen_mediainfo(
 
     try:
         # Initialize the temporary download directory path (only used for downloads)
-        temp_download_path = "Mediainfo/"
+        # Use absolute path to avoid workdir mismatch issues with Pyrogram client
+        current_dir = os.getcwd()
+        temp_download_path = ospath.join(current_dir, "Mediainfo")
 
         # Initialize des_path to None
         des_path = None
@@ -1147,8 +1159,10 @@ async def gen_mediainfo(
                             LOGGER.error(
                                 f"Error creating directory with absolute path {abs_path}: {e2}"
                             )
-                            # Fall back to a different directory
-                            temp_download_path = "downloads/Mediainfo/"
+                            # Fall back to a different directory using absolute path
+                            temp_download_path = ospath.join(
+                                current_dir, "downloads", "Mediainfo"
+                            )
                             if not await aiopath.isdir(temp_download_path):
                                 try:
                                     await mkdir(temp_download_path)
@@ -1160,7 +1174,7 @@ async def gen_mediainfo(
                                         f"Error creating fallback directory {temp_download_path}: {e3}"
                                     )
                                     # Use current working directory as last resort
-                                    temp_download_path = "./"
+                                    temp_download_path = current_dir
                                     LOGGER.warning(
                                         f"Using current directory as fallback: {temp_download_path}"
                                     )
@@ -1207,16 +1221,14 @@ async def gen_mediainfo(
                         else f"mediainfo_{int(time())}"
                     )
 
-                # Clean filename of any problematic characters
-                filename = (
-                    filename.replace(" ", "_").replace("'", "").replace('"', "")
-                )
+                # Clean filename of any problematic characters (keep spaces for better readability)
+                filename = filename.replace("'", "").replace('"', "")
 
                 # Ensure we have a valid temp_download_path
                 if not temp_download_path:
-                    temp_download_path = "Mediainfo/"
+                    temp_download_path = ospath.join(current_dir, "Mediainfo")
                     LOGGER.warning(
-                        "temp_download_path was empty, using default: Mediainfo/"
+                        f"temp_download_path was empty, using default: {temp_download_path}"
                     )
 
                 des_path = ospath.join(temp_download_path, filename)
@@ -1412,9 +1424,8 @@ async def gen_mediainfo(
                 file_name = re.sub(
                     r'[<>:"|?*]', "_", file_name
                 )  # Replace Windows-forbidden characters
-                file_name = re.sub(
-                    r"\s+", "_", file_name
-                )  # Replace multiple spaces with single underscore
+                # Keep spaces in filename for better readability
+                # file_name = re.sub(r"\s+", "_", file_name)  # Commented out to preserve spaces
                 file_name = file_name.strip(
                     "._"
                 )  # Remove leading/trailing dots and underscores
@@ -1428,9 +1439,9 @@ async def gen_mediainfo(
 
                 # Ensure we have a valid temp_download_path
                 if not temp_download_path:
-                    temp_download_path = "Mediainfo/"
+                    temp_download_path = ospath.join(current_dir, "Mediainfo")
                     LOGGER.warning(
-                        "temp_download_path was empty, using default: Mediainfo/"
+                        f"temp_download_path was empty, using default: {temp_download_path}"
                     )
 
                 # Create des_path with error handling
@@ -2102,7 +2113,7 @@ async def gen_mediainfo(
                                     if size_match:
                                         uncompressed_size = int(size_match.group(1))
 
-                        if uncompressed_size > 0:
+                        if uncompressed_size > 0 and file_size > 0:
                             # Calculate compression ratio
                             ratio = uncompressed_size / file_size
                             tc += f"{'Compression ratio':<28}: {ratio:.2f}:1\n"
@@ -3047,11 +3058,7 @@ async def gen_mediainfo(
         LOGGER.error(f"MediaInfo error: {error_message}")
 
         # Clean up any temporary files on error
-        if (
-            des_path
-            and isinstance(des_path, str)
-            and (des_path.startswith("Mediainfo/") or "Mediainfo/" in des_path)
-        ):
+        if des_path and isinstance(des_path, str) and ("Mediainfo" in des_path):
             try:
                 if await aiopath.exists(des_path):
                     await aioremove(des_path)
@@ -3106,10 +3113,8 @@ async def gen_mediainfo(
             and await aiopath.exists(des_path)
             and des_path != media_path
         ):
-            # Only delete files in the Mediainfo/ directory (temporary downloads)
-            if isinstance(des_path, str) and (
-                des_path.startswith("Mediainfo/") or "Mediainfo/" in des_path
-            ):
+            # Only delete files in the Mediainfo directory (temporary downloads)
+            if isinstance(des_path, str) and ("Mediainfo" in des_path):
                 await aioremove(des_path)
             else:
                 pass

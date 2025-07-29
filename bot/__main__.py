@@ -170,6 +170,15 @@ async def main():
     await gather(
         TgClient.start_bot(), TgClient.start_user(), TgClient.start_helper_bots()
     )
+
+    # Load Zotify credentials from database after bot clients are started
+    from .core.startup import load_zotify_credentials_from_db
+
+    try:
+        await load_zotify_credentials_from_db()
+    except Exception as e:
+        LOGGER.error(f"Failed to restore Zotify credentials: {e}")
+
     await gather(load_configurations(), update_variables())
     from .core.torrent_manager import TorrentManager
 
@@ -184,10 +193,7 @@ async def main():
     await start_bot()
     from .core.jdownloader_booter import jdownloader
     from .helper.ext_utils.files_utils import clean_all
-    from .helper.ext_utils.gc_utils import (
-        log_memory_usage,
-        smart_garbage_collection,
-    )
+    from .helper.ext_utils.gc_utils import log_memory_usage, smart_garbage_collection
     from .helper.ext_utils.telegraph_helper import telegraph
     from .helper.mirror_leech_utils.rclone_utils.serve import rclone_serve_booter
     from .modules import (
@@ -238,11 +244,8 @@ async def main():
 
     init_auto_restart()
 
-    # Load user data for limits tracking
-    from .helper.ext_utils.bot_utils import _load_user_data
-
-    LOGGER.info("Loading user data for limits tracking...")
-    await _load_user_data()
+    # User data is already loaded from database in load_settings()
+    # No need to load again from JSON file
 
     # Initialize whisper cleanup task
     LOGGER.info("Initializing whisper cleanup task...")
@@ -302,11 +305,16 @@ async def cleanup():
     # Streaming functionality is integrated with wserver - no separate cleanup needed
     LOGGER.info("Streaming functionality cleanup handled by wserver")
 
-    # Stop database heartbeat task
-    await database.stop_heartbeat()
-
-    # Disconnect from database
-    await database.disconnect()
+    # Stop database heartbeat task and disconnect from database
+    try:
+        await database.stop_heartbeat()
+        await database.disconnect()
+    except Exception as e:
+        # Handle database cleanup errors gracefully
+        if "closed" in str(e).lower():
+            LOGGER.debug(f"Database was already closed during cleanup: {e}")
+        else:
+            LOGGER.error(f"Error during database cleanup: {e}")
 
     LOGGER.info("Cleanup completed")
 
@@ -359,6 +367,19 @@ def handle_loop_exception(loop, context):
             LOGGER.debug(
                 f"Pyrogram session read error (session may be closed): {exception}"
             )
+        # Filter out database closed errors during shutdown/restart
+        elif any(
+            keyword in str(exception).lower()
+            for keyword in [
+                "cannot operate on a closed database",
+                "connection closed",
+                "client is closed",
+                "database is closed",
+            ]
+        ):
+            LOGGER.debug(
+                f"Database connection error (expected during shutdown/restart): {exception}"
+            )
         # Filter out other common Pyrogram session errors
         elif any(
             keyword in str(exception).lower()
@@ -373,6 +394,18 @@ def handle_loop_exception(loop, context):
             LOGGER.debug(
                 f"Pyrogram session error (expected during network issues): {exception}"
             )
+        # Filter out NoneType iteration errors from YT-DLP processing (these are being handled by our fixes)
+        elif "argument of type 'NoneType' is not iterable" in str(exception):
+            future_info = str(context.get("future", ""))
+            if "YtDlp.new_event" in future_info:
+                LOGGER.debug(
+                    f"YT-DLP NoneType iteration error (handled by defensive coding): {exception}"
+                )
+            else:
+                # Log with more details for non-YtDlp NoneType errors to help identify the source
+                LOGGER.warning(
+                    f"NoneType iteration error in {future_info}: {exception}"
+                )
         else:
             LOGGER.error(f"Unhandled loop exception: {exception}")
             LOGGER.error(f"Exception context: {context}")

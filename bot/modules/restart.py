@@ -37,6 +37,11 @@ async def restart_bot(_, message):
 
 async def send_incomplete_task_message(cid, msg_id, msg):
     try:
+        # Check if TgClient.bot is available before attempting to send messages
+        if not TgClient.bot:
+            LOGGER.warning("TgClient.bot not available for incomplete task message")
+            return
+
         if msg.startswith("Restarted Successfully!"):
             restart_msg = await TgClient.bot.edit_message_text(
                 chat_id=cid,
@@ -54,7 +59,13 @@ async def send_incomplete_task_message(cid, msg_id, msg):
                 disable_notification=True,
             )
     except Exception as e:
-        LOGGER.error(e)
+        # Handle client not started errors gracefully
+        if "Client has not been started yet" in str(e):
+            LOGGER.warning(
+                f"Client not started for incomplete task message. This is normal during restart: {e}"
+            )
+        else:
+            LOGGER.error(e)
 
 
 async def restart_notification():
@@ -84,6 +95,12 @@ async def restart_notification():
 
     if await aiopath.isfile(".restartmsg"):
         try:
+            # Check if TgClient.bot is available before attempting to send messages
+            if not TgClient.bot:
+                LOGGER.warning("TgClient.bot not available for restart notification")
+                await remove(".restartmsg")
+                return
+
             # Check if we have a valid message ID
             if msg_id > 0:
                 restart_msg = await TgClient.bot.edit_message_text(
@@ -174,6 +191,15 @@ async def confirm_restart(_, query):
 
             # Close torrent managers
             await TorrentManager.close_all()
+
+            # Stop database heartbeat and disconnect before restart
+            try:
+                await database.stop_heartbeat()
+                await database.disconnect()
+            except Exception as e:
+                # Handle database cleanup errors gracefully during restart
+                if "closed" not in str(e).lower():
+                    LOGGER.error(f"Error during database cleanup in restart: {e}")
 
             # Force garbage collection before closing other services
             if gc_available:

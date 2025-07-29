@@ -957,6 +957,13 @@ class AutoThumbnailHelper:
     ) -> str | None:
         """Enhanced TMDB thumbnail search with better result selection"""
         try:
+            # Convert year to int if it's a string
+            if year is not None and isinstance(year, str):
+                try:
+                    year = int(year)
+                except (ValueError, TypeError):
+                    year = None
+
             if is_tv_show:
                 result = await TMDBHelper.search_tv_show_enhanced(title, year)
             else:
@@ -1110,6 +1117,13 @@ class TMDBHelper:
     ) -> dict | None:
         """Enhanced movie search with better result selection"""
         try:
+            # Convert year to int if it's a string
+            if year is not None and isinstance(year, str):
+                try:
+                    year = int(year)
+                except (ValueError, TypeError):
+                    year = None
+
             # Try multiple search approaches
             search_results = []
 
@@ -1172,6 +1186,13 @@ class TMDBHelper:
     ) -> dict | None:
         """Enhanced TV show search with better result selection"""
         try:
+            # Convert year to int if it's a string
+            if year is not None and isinstance(year, str):
+                try:
+                    year = int(year)
+                except (ValueError, TypeError):
+                    year = None
+
             # Try multiple search approaches
             search_results = []
 
@@ -1233,6 +1254,13 @@ class TMDBHelper:
             if not Config.TMDB_API_KEY:
                 return None
 
+            # Convert year to int if it's a string
+            if year is not None and isinstance(year, str):
+                try:
+                    year = int(year)
+                except (ValueError, TypeError):
+                    year = None
+
             params = {
                 "api_key": Config.TMDB_API_KEY,
                 "query": title,
@@ -1260,12 +1288,21 @@ class TMDBHelper:
                                     result_year = None
                                     if media_type == "movie":
                                         release_date = result.get("release_date")
-                                        if release_date:
-                                            result_year = int(release_date[:4])
+                                        if release_date and len(release_date) >= 4:
+                                            try:
+                                                result_year = int(release_date[:4])
+                                            except (ValueError, TypeError):
+                                                continue
                                     elif media_type == "tv":
                                         first_air_date = result.get("first_air_date")
-                                        if first_air_date:
-                                            result_year = int(first_air_date[:4])
+                                        if (
+                                            first_air_date
+                                            and len(first_air_date) >= 4
+                                        ):
+                                            try:
+                                                result_year = int(first_air_date[:4])
+                                            except (ValueError, TypeError):
+                                                continue
 
                                     # Allow ±2 years tolerance
                                     if result_year and abs(result_year - year) <= 2:
@@ -1338,8 +1375,9 @@ class TMDBHelper:
                 )
 
                 # Word overlap percentage
-                overlap_percentage = len(common_words) / max(
-                    len(search_words), len(result_words)
+                max_words = max(len(search_words), len(result_words))
+                overlap_percentage = (
+                    len(common_words) / max_words if max_words > 0 else 0
                 )
 
                 # Combined similarity score
@@ -1387,7 +1425,9 @@ class TMDBHelper:
             if original_language == "en":
                 score += 8
             # Bonus for Japanese content if anime detected
-            elif original_language == "ja" and cls._is_likely_anime(search_title):
+            elif original_language == "ja" and AutoThumbnailHelper._is_likely_anime(
+                search_title
+            ):
                 score += 12
 
         # Popularity validation (with stricter thresholds)
@@ -1908,7 +1948,7 @@ class TMDBHelper:
                 metadata = {}
 
             # Enhanced title extraction with multiple strategies
-            clean_title = cls._extract_clean_title(filename)
+            clean_title = AutoThumbnailHelper._extract_clean_title(filename)
             if clean_title:
                 metadata["title"] = clean_title
 
@@ -1919,9 +1959,9 @@ class TMDBHelper:
 
             # Enhanced media type detection
             if not metadata.get("type"):
-                if cls._detect_tv_patterns(filename):
+                if AutoThumbnailHelper._detect_tv_patterns(filename):
                     metadata["type"] = "tv"
-                elif cls._is_likely_anime(filename):
+                elif AutoThumbnailHelper._is_likely_anime(filename):
                     metadata["type"] = "anime"
                 else:
                     metadata["type"] = "movie"

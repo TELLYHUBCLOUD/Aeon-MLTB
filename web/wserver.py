@@ -63,8 +63,6 @@ try:
     import asyncio
     import os
 
-    from bot.core.startup import load_settings
-
     async def load_web_server_config():
         try:
             # First, try to load shared configuration from main bot process
@@ -92,8 +90,8 @@ try:
             except Exception as e:
                 LOGGER.warning(f"Failed to load shared configuration: {e}")
 
-            # Then, try to load from database (primary source for runtime configs)
-            await load_settings()
+            # Database settings are already loaded in the main bot process
+            # Web server doesn't need to reload user data
 
             # Debug configuration values after database loading
             db_bin_channel = getattr(Config, "FILE2LINK_BIN_CHANNEL", 0)
@@ -109,12 +107,10 @@ try:
                         Config.FILE2LINK_BIN_CHANNEL = int(env_bin_channel)
 
                     except ValueError:
-                        LOGGER.error(
-                            f"❌ Invalid environment value: {env_bin_channel}"
-                        )
+                        LOGGER.error(f"Invalid environment value: {env_bin_channel}")
                 else:
                     LOGGER.warning(
-                        "❌ No valid FILE2LINK_BIN_CHANNEL found in database or environment"
+                        "No valid FILE2LINK_BIN_CHANNEL found in database or environment"
                     )
             else:
                 # Update Config object with database value
@@ -131,7 +127,7 @@ try:
 
                 except ValueError:
                     LOGGER.error(
-                        f"❌ Invalid emergency fallback value: {env_bin_channel}"
+                        f"Invalid emergency fallback value: {env_bin_channel}"
                     )
 
     # Store the config loading function for later use
@@ -399,7 +395,7 @@ async def lifespan(app: FastAPI):
                 )
                 if not channel_access:
                     LOGGER.error(
-                        "❌ Storage channel access validation failed - File2Link streaming may not work"
+                        "Storage channel access validation failed - File2Link streaming may not work"
                     )
                     LOGGER.error("Please ensure:")
                     LOGGER.error(
