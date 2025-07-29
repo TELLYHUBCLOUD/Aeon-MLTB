@@ -2,19 +2,19 @@ from asyncio import Lock, create_task, sleep
 from secrets import token_hex
 from time import time
 
-# Import errors from pyrogram/electrogram
+# Import errors from kurigram/pyrofork with compatibility
 try:
-    from electrogram.errors import FloodPremiumWait, FloodWait, StopTransmissionError
+    from pyrogram.errors import FloodPremiumWait, FloodWait, StopTransmissionError
 except ImportError:
+    # FloodPremiumWait not available in pyrofork 2.2.11
     try:
-        from pyrogram.errors import (
-            FloodPremiumWait,
-            FloodWait,
-            StopTransmissionError,
-        )
-    except ImportError:
-        from pyrogram.errors import FloodPremiumWait, FloodWait
+        from pyrogram.errors import FloodWait, StopTransmissionError
 
+        FloodPremiumWait = FloodWait  # Use FloodWait as fallback
+    except ImportError:
+        from pyrogram.errors import FloodWait
+
+        FloodPremiumWait = FloodWait  # Use FloodWait as fallback
         StopTransmissionError = None
 
 try:
