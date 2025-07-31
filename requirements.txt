@@ -25,12 +25,12 @@ jinja2
 # Choose ONE of the following Telegram libraries:
 #pyrogram
 #electrogram
-kurigram
+#kurigram
 #nekozee
 #pyrofork
 #pyroblack
-#pyrofork==2.2.11
-#motor  # Required for pyrofork==2.2.11
+pyrofork==2.2.11
+motor  # Required for pyrofork==2.2.11
 langcodes
 lxml
 md2tgmd
