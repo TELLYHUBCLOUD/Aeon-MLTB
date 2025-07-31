@@ -8,7 +8,9 @@ aioqbt
 cloudscraper
 dnspython
 ElectroCrypto
-kurigram
+#kurigram
+pyrofork==2.2.11
+motor
 fastapi
 feedparser
 google-api-python-client
