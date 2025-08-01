@@ -18,9 +18,9 @@ from aioshutil import rmtree
 from natsort import natsorted
 from PIL import Image
 from pyrogram.errors import (
-    BadRequest, 
- #   FloodPremiumWait, 
-    FloodWait, 
+    BadRequest,
+    #   FloodPremiumWait,
+    FloodWait,
     RPCError,
 )
 from pyrogram.types import (
@@ -510,8 +510,8 @@ class TelegramUploader:
                 and await aiopath.exists(thumb)
             ):
                 await remove(thumb)
-       # except (FloodWait, FloodPremiumWait) as f:
-        except (FloodWait) as f:            
+        # except (FloodWait, FloodPremiumWait) as f:
+        except FloodWait as f:
             LOGGER.warning(str(f))
             await sleep(f.value * 1.3)
             if (
