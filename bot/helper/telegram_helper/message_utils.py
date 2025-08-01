@@ -5,7 +5,7 @@ from time import time
 from cachetools import TTLCache
 from pyrogram import Client, enums
 from pyrogram.errors import (
- #   FloodPremiumWait,
+    #   FloodPremiumWait,
     FloodWait,
     MessageEmpty,
     MessageNotModified,
@@ -145,8 +145,8 @@ async def send_rss(text, chat_id, thread_id):
             message_thread_id=thread_id,
             disable_notification=True,
         )
- #   except (FloodWait, FloodPremiumWait) as f:
-    except (FloodWait) as f:        
+    #   except (FloodWait, FloodPremiumWait) as f:
+    except FloodWait as f:
         LOGGER.warning(str(f))
         await sleep(f.value * 1.2)
         return await send_rss(text)
