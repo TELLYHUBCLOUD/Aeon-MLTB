@@ -256,7 +256,7 @@ async def set_aria2(gid, selected_files):
 @app.get("/", response_class=HTMLResponse)
 async def homepage():
     return """
-   
+
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -299,11 +299,11 @@ async def homepage():
         <div class="container">
             <h1>Mirror Leech Telegram Bot</h1>
             <p>
-                See the source on 
+                See the source on
                 <a href="https://www.github.com/anasty17/mirror-leech-telegram-bot" target="_blank">
                     GitHub
                 </a><br>
-                by 
+                by
                 <a href="https://telegram.me/telly_mirror" target="_blank">
                     TellY Mirror
                 </a>
