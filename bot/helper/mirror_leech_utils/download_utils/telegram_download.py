@@ -2,7 +2,7 @@ from asyncio import Lock, sleep
 from secrets import token_hex
 from time import time
 
-from pyrogram.errors import FloodWait #FloodPremiumWait
+from pyrogram.errors import FloodWait  # FloodPremiumWait
 
 from bot import LOGGER, task_dict, task_dict_lock
 from bot.core.aeon_client import TgClient
@@ -78,8 +78,8 @@ class TelegramDownloadHelper:
             )
             if self._listener.is_cancelled:
                 return
-       # except (FloodWait, FloodPremiumWait) as f:
-        except (FloodWait) as f:    
+        # except (FloodWait, FloodPremiumWait) as f:
+        except FloodWait as f:
             LOGGER.warning(str(f))
             await sleep(f.value)
             await self._download(message, path)
