@@ -255,11 +255,63 @@ async def set_aria2(gid, selected_files):
 
 @app.get("/", response_class=HTMLResponse)
 async def homepage():
-    return (
-        "<h1>See mirror-leech-telegram-bot "
-        "<a href='https://www.github.com/anasty17/mirror-leech-telegram-bot'>@GitHub</a> "
-        "By <a href='https://github.com/anasty17'>Anas</a></h1>"
-    )
+    return """
+   
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Mirror Leech Bot</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(to right, #1e3c72, #2a5298);
+                color: white;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                text-align: center;
+            }
+            .container {
+                background-color: rgba(0, 0, 0, 0.4);
+                padding: 40px;
+                border-radius: 15px;
+                box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            }
+            h1 {
+                margin-bottom: 20px;
+                font-size: 2em;
+            }
+            a {
+                color: #00d8ff;
+                text-decoration: none;
+                font-weight: bold;
+            }
+            a:hover {
+                text-decoration: underline;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Mirror Leech Telegram Bot</h1>
+            <p>
+                See the source on 
+                <a href="https://www.github.com/anasty17/mirror-leech-telegram-bot" target="_blank">
+                    GitHub
+                </a><br>
+                by 
+                <a href="https://telegram.me/telly_mirror" target="_blank">
+                    TellY Mirror
+                </a>
+            </p>
+        </div>
+    </body>
+    </html>
+    """
 
 
 @app.exception_handler(Exception)
