@@ -1426,9 +1426,7 @@ class Config:
     HEROKU_API_KEY: str = ""
 
     # Branding Settings
-    CREDIT: str = (
-        "Powered by @TELLY_MIRROR"  # Credit text shown in status messages and RSS feeds
-    )
+    CREDIT: str = "Powered by @TELLY_MIRROR"  # Credit text shown in status messages and RSS feeds
     OWNER_THUMB: str = "https://ibb.co/JRSxJXCv"  # Default thumbnail URL for owner
 
     @classmethod

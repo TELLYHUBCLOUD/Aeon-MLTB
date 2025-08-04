@@ -5128,6 +5128,7 @@ def uploadee(url):
     else:
         raise DirectDownloadLinkException("ERROR: Direct Link not found")
 
+
 def terabox(url):
     if "/file/" in url:
         return url
@@ -5136,13 +5137,15 @@ def terabox(url):
     proxy_base = Config.TERABOX_PROXY
     apis = [
         f"https://nord.teraboxfast.com/?ndus={proxy_base}&url={quote(url)}",
-        f"https://teradl1.tellycloudapi.workers.dev/api/api1?url={quote(url)}"
+        f"https://teradl1.tellycloudapi.workers.dev/api/api1?url={quote(url)}",
     ]
 
     with Session() as session:
         for api_url in apis:
             try:
-                req = session.get(api_url, headers={"User-Agent": user_agent}, timeout=15).json()
+                req = session.get(
+                    api_url, headers={"User-Agent": user_agent}, timeout=15
+                ).json()
             except Exception as e:
                 continue  # Try next API
 
@@ -5155,7 +5158,9 @@ def terabox(url):
                 return req["links"].get("dl2") or req["links"].get("dl1")
 
     # If all APIs fail
-    raise DirectDownloadLinkException("ERROR: File not found or both API requests failed!")
+    raise DirectDownloadLinkException(
+        "ERROR: File not found or both API requests failed!"
+    )
 
 
 def filepress(url):
