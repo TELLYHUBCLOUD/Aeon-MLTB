@@ -113,9 +113,9 @@ UPSTREAM_REPO = (
 )
 
 UPSTREAM_BRANCH = (
-    config_file.get("UPSTREAM_BRANCH", "telly")
-    or os.getenv("UPSTREAM_BRANCH", "telly")
-    or "telly"
+    config_file.get("UPSTREAM_BRANCH", "extended")
+    or os.getenv("UPSTREAM_BRANCH", "")
+    or "extended"
 )
 
 if UPSTREAM_REPO:
