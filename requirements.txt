@@ -1,3 +1,17 @@
+# Choose ONE of the following Telegram libraries:
+#pyrogram
+#kurigram
+#pyrofork
+#pyroblack
+#nekozee
+#electrogram
+pyrofork==2.2.11
+motor  # Required for pyrofork==2.2.11
+#tgcrypto
+tgcrypto-pyrofork # Optional for pyrofork. Comment out other tgcrypto if using this
+#tgcrypto-pyroblack # Optional for pyroblack. Comment out other tgcrypto if using this
+#ElectroCrypto # Optional for elctrogram. Comment out other tgcrypto if using this
+
 asyncio
 aiofiles>=23.1.0
 aioshutil
@@ -7,13 +21,14 @@ aioaria2
 aioqbt
 aient
 beautifulsoup4
-git+https://github.com/cinemagoer/cinemagoer
 cloudscraper
 cryptography>=41.0.0
 codext>=1.15.6
+chardet
 dnspython
+duckduckgo-search
 fastapi
-speedtest-cloudflare-cli
+fake-useragent
 feedparser
 google-api-python-client
 google-auth-httplib2
@@ -21,19 +36,13 @@ google-auth-oauthlib
 gunicorn
 gallery-dl
 httpx
+html2text
 jinja2
-# Choose ONE of the following Telegram libraries:
-#pyrogram
-#electrogram
-#kurigram
-#nekozee
-#pyrofork
-#pyroblack
-pyrofork==2.2.11
-motor  # Required for pyrofork==2.2.11
 langcodes
 lxml
+lxml-html-clean
 md2tgmd
+msgspec
 natsort
 orjson
 pycountry
@@ -48,8 +57,8 @@ pytdbot[tdjson]
 reportlab>=4.0.0
 requests
 speedtest-cli
+speedtest-cloudflare-cli
 tmdb3
-tgcrypto
 telegraph
 tenacity
 toml
@@ -58,5 +67,6 @@ uvloop
 vt-py>=0.17.5
 xattr
 yt-dlp[default,curl-cffi]
+git+https://github.com/cinemagoer/cinemagoer
 git+https://github.com/shabbirmahmud/streamrip.git@dev
 git+https://github.com/DraftKinner/zotify.git@dev
