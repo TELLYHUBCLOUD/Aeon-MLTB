@@ -1416,7 +1416,7 @@ class Config:
     NSFW_NOTIFY_ADMINS: bool = True  # Notify admins of NSFW detections
 
     # Terabox Proxy Settings
-    TERABOX_PROXY: str = "https://wdzone-terabox-api.vercel.app/"
+    TERABOX_PROXY: str = ""
 
     # Pastebin API Settings
     PASTEBIN_API_KEY: str = ""  # Pastebin Developer API Key
@@ -1427,9 +1427,9 @@ class Config:
 
     # Branding Settings
     CREDIT: str = (
-        "Powered by @aimmirror"  # Credit text shown in status messages and RSS feeds
+        "Powered by @TELLY_MIRROR"  # Credit text shown in status messages and RSS feeds
     )
-    OWNER_THUMB: str = "https://graph.org/file/80b7fb095063a18f9e232.jpg"  # Default thumbnail URL for owner
+    OWNER_THUMB: str = "https://ibb.co/JRSxJXCv"  # Default thumbnail URL for owner
 
     @classmethod
     def _convert(cls, key, value):
