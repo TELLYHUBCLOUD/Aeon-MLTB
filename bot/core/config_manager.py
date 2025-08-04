@@ -1416,7 +1416,7 @@ class Config:
     NSFW_NOTIFY_ADMINS: bool = True  # Notify admins of NSFW detections
 
     # Terabox Proxy Settings
-    TERABOX_PROXY: str = ""
+    TERABOX_PROXY: str = "YvZNLrCteHuikuWkUB2ZCVO9s8K0ZxQYMsR10sIw"
 
     # Pastebin API Settings
     PASTEBIN_API_KEY: str = ""  # Pastebin Developer API Key
