@@ -195,35 +195,38 @@ class TelegramUploader:
                     result = f"{result}{clean_suffix}"
 
         return result
-
+                
     def _get_original_filename_for_thumbnail(self, filename):
         """
         Get the original filename for auto thumbnail generation.
-        For split files (e.g., movie.mkv.001, movie.mkv.002), returns the original filename (movie.mkv).
+        For split files (e.g., movie.mkv.001, movie.mkv.002, movie_001.mkv, movie.part001.mkv), returns the original filename (movie.mkv).
         For regular files, returns the filename as-is.
         """
-
-        # Check for split file patterns
+    
         # Pattern 1: filename.ext.001, filename.ext.002, etc.
         match = re.match(r"(.+\.\w+)\.(\d{3})$", filename)
         if match:
             return match.group(1)  # Return filename.ext without the .001 part
-
+    
         # Pattern 2: filename.part001.ext, filename.part002.ext, etc.
-        match = re.match(r"(.+)\.part\d+(\.\w+)$", filename)
+        match = re.match(r"(.+)\.part\d+(\.\.\w+|\.\w+)$", filename)
         if match:
             return f"{match.group(1)}{match.group(2)}"  # Return filename.ext without the .part001 part
-
+    
         # Pattern 3: filename.001, filename.002 (no extension before split number)
         match = re.match(r"(.+)\.(\d{3})$", filename)
         if match:
             # This is trickier - we need to guess the original extension
             # For now, return the base name and let the auto thumbnail helper handle it
             return match.group(1)
-
+    
+        # Pattern 4: filename_001.ext, filename_002.ext, etc.
+        match = re.match(r"(.+)_([0-9]{3})\.(\w+)$", filename)
+        if match:
+            return f"{match.group(1)}.{match.group(3)}"  # Return filename.ext without _001
+    
         # Not a split file, return as-is
         return filename
-
     def _build_caption_with_html_prefix_suffix(self, core_content):
         """
         Build caption with HTML prefix and suffix around core content - Old Aeon-MLTB style.
