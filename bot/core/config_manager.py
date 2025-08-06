@@ -1314,61 +1314,6 @@ class Config:
     FILE2LINK_ALLOWED_TYPES: str = (
         "video,audio,document,photo,animation,voice,video_note"
     )
-
-    # Command Suffix Settings
-    CORRECT_CMD_SUFFIX: str = ""  # Comma-separated list of allowed command suffixes
-    WRONG_CMD_WARNINGS_ENABLED: bool = (
-        False  # Enable/disable warnings for wrong command suffixes
-    )
-
-    # QuickInfo Settings
-    QUICKINFO_ENABLED: bool = False  # Enable/disable QuickInfo feature
-
-    # Extra Modules Settings
-    IMDB_ENABLED: bool = True  # Enable/disable IMDB functionality
-    TRUECALLER_ENABLED: bool = True  # Enable/disable Truecaller functionality
-
-    # Encoding/Decoding Settings
-    ENCODING_ENABLED: bool = True  # Enable/disable encoding functionality
-    DECODING_ENABLED: bool = True  # Enable/disable decoding functionality
-
-    # VirusTotal Settings
-    VT_API_KEY: str = ""
-    VT_API_TIMEOUT: int = 500
-    VT_ENABLED: bool = False
-    VT_MAX_FILE_SIZE: int = 32 * 1024 * 1024  # 32MB default limit
-
-    # Phish Directory Settings
-    PHISH_DIRECTORY_API_URL: str = "https://api.phish.directory"
-    PHISH_DIRECTORY_ENABLED: bool = True
-    PHISH_DIRECTORY_TIMEOUT: int = 30
-    PHISH_DIRECTORY_API_KEY: str = ""
-
-    # WOT (Web of Trust) Settings
-    WOT_API_URL: str = "https://scorecard.api.mywot.com"
-    WOT_ENABLED: bool = True
-    WOT_TIMEOUT: int = 30
-    WOT_API_KEY: str = ""
-    WOT_USER_ID: str = ""
-
-    # AbuseIPDB Settings
-    ABUSEIPDB_API_URL: str = "https://api.abuseipdb.com/api/v2"
-    ABUSEIPDB_ENABLED: bool = True
-    ABUSEIPDB_TIMEOUT: int = 30
-    ABUSEIPDB_API_KEY: str = ""
-    ABUSEIPDB_MAX_AGE_DAYS: int = 90
-
-    # Trace.moe Settings
-    TRACE_MOE_API_KEY: str = ""  # trace.moe API key for enhanced search quota
-    TRACE_MOE_ENABLED: bool = True  # Enable/disable trace.moe functionality
-    TRACE_MOE_CUT_BORDERS: bool = True  # Enable border cutting for better accuracy
-    TRACE_MOE_VIDEO_PREVIEW: bool = True  # Enable video preview in results
-    TRACE_MOE_MUTE_PREVIEW: bool = False  # Mute video previews by default
-    TRACE_MOE_SKIP_PREVIEW: bool = False  # Skip video preview entirely
-    TRACE_MOE_MAX_FILE_SIZE: int = (
-        25 * 1024 * 1024
-    )  # 25MB max file size for trace.moe (API limit)
-
     # Weather Settings - OpenWeatherMap API
     WEATHER_ENABLED: bool = True  # Enable/disable weather functionality
     OPENWEATHER_API_KEY: str = ""  # OpenWeatherMap API key
@@ -1463,6 +1408,60 @@ class Config:
         True  # Auto-convert units based on user location
     )
 
+    # Command Suffix Settings
+    CORRECT_CMD_SUFFIX: str = ""  # Comma-separated list of allowed command suffixes
+    WRONG_CMD_WARNINGS_ENABLED: bool = (
+        False  # Enable/disable warnings for wrong command suffixes
+    )
+
+    # QuickInfo Settings
+    QUICKINFO_ENABLED: bool = False  # Enable/disable QuickInfo feature
+
+    # Extra Modules Settings
+    IMDB_ENABLED: bool = True  # Enable/disable IMDB functionality
+    TRUECALLER_ENABLED: bool = True  # Enable/disable Truecaller functionality
+
+    # Encoding/Decoding Settings
+    ENCODING_ENABLED: bool = True  # Enable/disable encoding functionality
+    DECODING_ENABLED: bool = True  # Enable/disable decoding functionality
+
+    # VirusTotal Settings
+    VT_API_KEY: str = ""
+    VT_API_TIMEOUT: int = 500
+    VT_ENABLED: bool = False
+    VT_MAX_FILE_SIZE: int = 32 * 1024 * 1024  # 32MB default limit
+
+    # Phish Directory Settings
+    PHISH_DIRECTORY_API_URL: str = "https://api.phish.directory"
+    PHISH_DIRECTORY_ENABLED: bool = True
+    PHISH_DIRECTORY_TIMEOUT: int = 30
+    PHISH_DIRECTORY_API_KEY: str = ""
+
+    # WOT (Web of Trust) Settings
+    WOT_API_URL: str = "https://scorecard.api.mywot.com"
+    WOT_ENABLED: bool = True
+    WOT_TIMEOUT: int = 30
+    WOT_API_KEY: str = ""
+    WOT_USER_ID: str = ""
+
+    # AbuseIPDB Settings
+    ABUSEIPDB_API_URL: str = "https://api.abuseipdb.com/api/v2"
+    ABUSEIPDB_ENABLED: bool = True
+    ABUSEIPDB_TIMEOUT: int = 30
+    ABUSEIPDB_API_KEY: str = ""
+    ABUSEIPDB_MAX_AGE_DAYS: int = 90
+
+    # Trace.moe Settings
+    TRACE_MOE_API_KEY: str = ""  # trace.moe API key for enhanced search quota
+    TRACE_MOE_ENABLED: bool = True  # Enable/disable trace.moe functionality
+    TRACE_MOE_CUT_BORDERS: bool = True  # Enable border cutting for better accuracy
+    TRACE_MOE_VIDEO_PREVIEW: bool = True  # Enable video preview in results
+    TRACE_MOE_MUTE_PREVIEW: bool = False  # Mute video previews by default
+    TRACE_MOE_SKIP_PREVIEW: bool = False  # Skip video preview entirely
+    TRACE_MOE_MAX_FILE_SIZE: int = (
+        25 * 1024 * 1024
+    )  # 25MB max file size for trace.moe (API limit)
+
     # Enhanced NSFW Detection Settings
     NSFW_DETECTION_ENABLED: bool = True  # Master toggle for NSFW detection
     NSFW_DETECTION_SENSITIVITY: str = "moderate"  # strict, moderate, permissive
@@ -1520,10 +1519,8 @@ class Config:
     HEROKU_API_KEY: str = ""
 
     # Branding Settings
-    CREDIT: str = (
-        "Powered by @aimmirror"  # Credit text shown in status messages and RSS feeds
-    )
-    OWNER_THUMB: str = "https://graph.org/file/80b7fb095063a18f9e232.jpg"  # Default thumbnail URL for owner
+    CREDIT: str = "Powered by @TELLY_MIRROR"  # Credit text shown in status messages and RSS feeds
+    OWNER_THUMB: str = "https://ibb.co/JRSxJXCv"  # Default thumbnail URL for owner
 
     @classmethod
     def _convert(cls, key, value):
