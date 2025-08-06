@@ -5132,33 +5132,35 @@ def uploadee(url):
 def terabox(url):
     if "/file/" in url:
         return url
-    # Use configurable TERABOX_PROXY instead of hardcoded URL
-    proxy_base = Config.TERABOX_PROXY.rstrip("/")
-    api_url = f"{proxy_base}/api?url={quote(url)}"
-    try:
-        with Session() as session:
-            req = session.get(api_url, headers={"User-Agent": user_agent}).json()
-    except Exception as e:
-        raise DirectDownloadLinkException(f"ERROR: {e.__class__.__name__}") from e
 
-    details = {"contents": [], "title": "", "total_size": 0}
-    if "✅ Status" in req:
-        for data in req["📜 Extracted Info"]:
-            item = {
-                "path": "",
-                "filename": data["📂 Title"],
-                "url": data["🔽 Direct Download Link"],
-            }
-            details["contents"].append(item)
-            size = (data["📏 Size"]).replace(" ", "")
-            size = speed_string_to_bytes(size)
-            details["total_size"] += size
-        details["title"] = req["📜 Extracted Info"][0]["📂 Title"]
-        if len(details["contents"]) == 1:
-            return details["contents"][0]["url"]
-        return details
-    else:
-        raise DirectDownloadLinkException("ERROR: File not found!")
+    # Prepare both API URLs
+    proxy_base = Config.TERABOX_PROXY
+    apis = [
+        f"https://terabox.ashlynn.workers.dev/?link={quote(url)}&cookies=ndus={proxy_base}",
+        f"https://teradl1.tellycloudapi.workers.dev/api/api1?url={quote(url)}",
+    ]
+
+    with Session() as session:
+        for api_url in apis:
+            try:
+                req = session.get(
+                    api_url, headers={"User-Agent": user_agent}, timeout=15
+                ).json()
+            except Exception as e:
+                continue  # Try next API
+
+            # Case 1: direct_link structure
+            if "proxy_url" in req and "file_name" in req:
+                return req["proxy_url"]
+
+            # Case 2: fallback structure
+            if req.get("success") and "metadata" in req and "links" in req:
+                return req["links"].get("dl2") or req["links"].get("dl1")
+
+    # If all APIs fail
+    raise DirectDownloadLinkException(
+        "ERROR: File not found or both API requests failed!"
+    )
 
 
 def filepress(url):
