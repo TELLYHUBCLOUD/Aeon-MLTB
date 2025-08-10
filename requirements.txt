@@ -9,7 +9,7 @@ cloudscraper
 dnspython
 ElectroCrypto
 #kurigram
-pyrofork==2.2.11
+pyrofork
 motor
 fastapi
 feedparser
