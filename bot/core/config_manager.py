@@ -20,11 +20,11 @@ class Config:
     EXCLUDED_EXTENSIONS: str = ""
     FFMPEG_CMDS: ClassVar[dict[str, list[str]]] = {}
     FILELION_API: str = ""
-    GDRIVE_ID: str = ""
-    INCOMPLETE_TASK_NOTIFIER: bool = False
+    GDRIVE_ID: str = "1x95UnKCWRIxmfVS3-Kelen-4WnCVMk6S"
+    INCOMPLETE_TASK_NOTIFIER: bool = True
     INDEX_URL: str = ""
-    JD_EMAIL: str = ""
-    JD_PASS: str = ""
+    JD_EMAIL: str = "tellyhubcloud@gmail.com"
+    JD_PASS: str = "Telly@8400#"
     IS_TEAM_DRIVE: bool = False
     LEECH_DUMP_CHAT: ClassVar[list[str]] = []
     LEECH_FILENAME_PREFIX: str = ""
@@ -47,7 +47,7 @@ class Config:
     RSS_CHAT: str = ""
     RSS_DELAY: int = 600
     RSS_SIZE_LIMIT: int = 0
-    STOP_DUPLICATE: bool = False
+    STOP_DUPLICATE: bool = True
     STREAMWISH_API: str = ""
     SUDO_USERS: str = ""
     TELEGRAM_API: int = 0
@@ -72,7 +72,7 @@ class Config:
     TOKEN_TIMEOUT: int = 0
     PAID_CHANNEL_ID: int = 0
     PAID_CHANNEL_LINK: str = ""
-    DELETE_LINKS: bool = False
+    DELETE_LINKS: bool = True
     FSUB_IDS: str = ""
     LOG_CHAT_ID: int = 0
     LEECH_FILENAME_CAPTION: str = ""
