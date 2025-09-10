@@ -15,6 +15,7 @@ from bot.core.torrent_manager import TorrentManager
 from bot.helper.ext_utils.bot_utils import new_task
 from bot.helper.ext_utils.db_handler import database
 from bot.helper.ext_utils.files_utils import clean_all
+from bot.helper.ext_utils.task_recovery import task_recovery
 from bot.helper.telegram_helper import button_build
 from bot.helper.telegram_helper.message_utils import delete_message, send_message
 
@@ -60,6 +61,11 @@ async def restart_notification():
             chat_id, msg_id = map(int, content.splitlines())
     else:
         chat_id, msg_id = 0, 0
+
+    # Auto-recover incomplete tasks if enabled
+    if Config.AUTO_RESTART_TASKS and Config.INCOMPLETE_TASK_NOTIFIER and Config.DATABASE_URL:
+        LOGGER.info("Starting automatic task recovery...")
+        create_task(task_recovery.recover_incomplete_tasks())
 
     if (
         Config.INCOMPLETE_TASK_NOTIFIER

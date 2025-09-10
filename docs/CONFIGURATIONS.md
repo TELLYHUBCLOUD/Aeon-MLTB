@@ -21,6 +21,7 @@
 | `DEFAULT_UPLOAD`          | `str`          | `rc` for `RCLONE_PATH`, `gd` for `GDRIVE_ID`. Default: `rc`. [Read More](https://github.com/anasty17/mirror-leech-telegram-bot/tree/master#upload). |
 | `EXCLUDED_EXTENSIONS`     | `str`          | File extensions to skip during processing. Separate by spaces. |
 | `INCOMPLETE_TASK_NOTIFIER`| `bool`         | Notify after restart for incomplete tasks. Requires `DATABASE_URL` and the bot to be in a supergroup. Default: `False`. |
+| `AUTO_RESTART_TASKS`      | `bool`         | Automatically restart incomplete tasks after bot restart. Requires `DATABASE_URL` and `INCOMPLETE_TASK_NOTIFIER` to be enabled. Default: `False`. |
 | `FILELION_API`            | `str`          | API key from [FileLion](https://vidhide.com/?op=my_account). |
 | `STREAMWISH_API`          | `str`          | API key from [StreamWish](https://streamwish.com/?op=my_account). |
 | `YT_DLP_OPTIONS`          | `dict`         | Dict of `yt-dlp` options. [Docs](https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/YoutubeDL.py#L184). [Convert script](https://t.me/mltb_official_channel/177). |

@@ -22,6 +22,9 @@ EXCLUDED_EXTENSIONS = (
 INCOMPLETE_TASK_NOTIFIER = (
     False  # Notify for incomplete tasks on restart (requires DATABASE_URL)
 )
+AUTO_RESTART_TASKS = (
+    False  # Automatically restart incomplete tasks on bot restart (requires DATABASE_URL and INCOMPLETE_TASK_NOTIFIER)
+)
 YT_DLP_OPTIONS = {}  # Dictionary of yt-dlp options, e.g., {"format": "bestvideo+bestaudio/best"}
 USE_SERVICE_ACCOUNTS = False
 NAME_SUBSTITUTE = ""  # Replace/remove words: "source1/target1|source2/target2"

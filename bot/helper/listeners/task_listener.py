@@ -99,6 +99,30 @@ class TaskListener(TaskConfig):
                 self.message.link,
                 self.tag,
             )
+            # Store additional task details for recovery
+            task_options = {
+                "-up": self.up_dest,
+                "-n": self.name,
+                "-e": self.extract,
+                "-z": self.compress,
+                "-s": self.select,
+                "-d": self.seed,
+                "-j": self.join,
+                "-sv": self.sample_video,
+                "-ss": self.screen_shots,
+                "-f": self.force_run,
+                "-fd": self.force_download,
+                "-fu": self.force_upload,
+            }
+            # Filter out False/None values
+            filtered_options = {k: v for k, v in task_options.items() if v}
+            
+            await database.update_incomplete_task(
+                self.message.link,
+                self.user_id,
+                "ytdl" if hasattr(self, 'is_ytdlp') and self.is_ytdlp else "mirror",
+                filtered_options
+            )
 
     async def on_download_complete(self):
         await sleep(2)

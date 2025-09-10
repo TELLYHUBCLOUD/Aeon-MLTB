@@ -22,6 +22,7 @@ class Config:
     FILELION_API: str = ""
     GDRIVE_ID: str = ""
     INCOMPLETE_TASK_NOTIFIER: bool = False
+    AUTO_RESTART_TASKS: bool = False
     INDEX_URL: str = ""
     JD_EMAIL: str = ""
     JD_PASS: str = ""
