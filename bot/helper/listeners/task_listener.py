@@ -116,12 +116,12 @@ class TaskListener(TaskConfig):
             }
             # Filter out False/None values
             filtered_options = {k: v for k, v in task_options.items() if v}
-            
+
             await database.update_incomplete_task(
                 self.message.link,
                 self.user_id,
-                "ytdl" if hasattr(self, 'is_ytdlp') and self.is_ytdlp else "mirror",
-                filtered_options
+                "ytdl" if hasattr(self, "is_ytdlp") and self.is_ytdlp else "mirror",
+                filtered_options,
             )
 
     async def on_download_complete(self):

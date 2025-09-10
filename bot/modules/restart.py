@@ -63,7 +63,11 @@ async def restart_notification():
         chat_id, msg_id = 0, 0
 
     # Auto-recover incomplete tasks if enabled
-    if Config.AUTO_RESTART_TASKS and Config.INCOMPLETE_TASK_NOTIFIER and Config.DATABASE_URL:
+    if (
+        Config.AUTO_RESTART_TASKS
+        and Config.INCOMPLETE_TASK_NOTIFIER
+        and Config.DATABASE_URL
+    ):
         LOGGER.info("Starting automatic task recovery...")
         create_task(task_recovery.recover_incomplete_tasks())
 

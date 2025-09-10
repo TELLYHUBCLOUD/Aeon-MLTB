@@ -231,7 +231,9 @@ class DbManager:
         }
         await self.db.tasks[TgClient.ID].insert_one(task_data)
 
-    async def update_incomplete_task(self, link, user_id, task_type="mirror", options=None):
+    async def update_incomplete_task(
+        self, link, user_id, task_type="mirror", options=None
+    ):
         """Updates incomplete task with additional details for recovery."""
         if self._return:
             return
@@ -242,8 +244,7 @@ class DbManager:
         if options:
             update_data["options"] = options
         await self.db.tasks[TgClient.ID].update_one(
-            {"_id": link},
-            {"$set": update_data}
+            {"_id": link}, {"$set": update_data}
         )
 
     async def get_incomplete_tasks_detailed(self):
@@ -252,15 +253,17 @@ class DbManager:
             return []
         tasks = []
         async for task in self.db.tasks[TgClient.ID].find({}):
-            tasks.append({
-                "link": task["_id"],
-                "chat_id": task.get("chat_id"),
-                "tag": task.get("tag"),
-                "user_id": task.get("user_id"),
-                "task_type": task.get("task_type", "mirror"),
-                "options": task.get("options", {}),
-                "timestamp": task.get("timestamp", 0),
-            })
+            tasks.append(
+                {
+                    "link": task["_id"],
+                    "chat_id": task.get("chat_id"),
+                    "tag": task.get("tag"),
+                    "user_id": task.get("user_id"),
+                    "task_type": task.get("task_type", "mirror"),
+                    "options": task.get("options", {}),
+                    "timestamp": task.get("timestamp", 0),
+                }
+            )
         return tasks
 
     async def get_pm_uids(self):
