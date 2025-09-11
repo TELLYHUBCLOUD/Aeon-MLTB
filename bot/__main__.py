@@ -45,20 +45,22 @@ COMMANDS = {
 }
 
 
-COMMAND_OBJECTS = [
-    BotCommand(
-        getattr(BotCommands, cmd)[0]
-        if isinstance(getattr(BotCommands, cmd), list)
-        else getattr(BotCommands, cmd),
-        description,
-    )
-    for cmd, description in COMMANDS.items()
-]
+def get_command_objects():
+    """Generate command objects with current suffix"""
+    commands = BotCommands.get_commands()
+    return [
+        BotCommand(
+            commands[cmd][0] if isinstance(commands[cmd], list) else commands[cmd],
+            description,
+        )
+        for cmd, description in COMMANDS.items()
+    ]
 
 
 async def set_commands():
     if Config.SET_COMMANDS:
-        await TgClient.bot.set_bot_commands(COMMAND_OBJECTS)
+        command_objects = get_command_objects()
+        await TgClient.bot.set_bot_commands(command_objects)
 
 
 async def main():

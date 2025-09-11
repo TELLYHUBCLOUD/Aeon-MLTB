@@ -396,24 +396,24 @@ Timeout: 60 sec""",
 
 help_string = f"""
 NOTE: Try each command without any argument to see more detalis.
-/{BotCommands.MirrorCommand[0]} or /{BotCommands.MirrorCommand[1]}: Start mirroring to cloud.
-/{BotCommands.JdMirrorCommand[0]} or /{BotCommands.JdMirrorCommand[1]}: Start Mirroring to cloud using JDownloader.
-/{BotCommands.NzbMirrorCommand[0]} or /{BotCommands.NzbMirrorCommand[1]}: Start Mirroring to cloud using Sabnzbd.
-/{BotCommands.YtdlCommand[0]} or /{BotCommands.YtdlCommand[1]}: Mirror yt-dlp supported link.
-/{BotCommands.LeechCommand[0]} or /{BotCommands.LeechCommand[1]}: Start leeching to Telegram.
-/{BotCommands.JdLeechCommand[0]} or /{BotCommands.JdLeechCommand[1]}: Start leeching using JDownloader.
-/{BotCommands.NzbLeechCommand[0]} or /{BotCommands.NzbLeechCommand[1]}: Start leeching using Sabnzbd.
-/{BotCommands.YtdlLeechCommand[0]} or /{BotCommands.YtdlLeechCommand[1]}: Leech yt-dlp supported link.
-/{BotCommands.CloneCommand} [drive_url]: Copy file/folder to Google Drive.
-/{BotCommands.CountCommand} [drive_url]: Count file/folder of Google Drive.
-/{BotCommands.DeleteCommand} [drive_url]: Delete file/folder from Google Drive (Only Owner & Sudo).
-/{BotCommands.UserSetCommand} [query]: Users settings.
-/{BotCommands.BotSetCommand} [query]: Bot settings.
-/{BotCommands.SelectCommand}: Select files from torrents by gid or reply.
-/{BotCommands.ForceStartCommand[0]} or /{BotCommands.ForceStartCommand[1]} [gid]: Force start task by gid or reply.
-/{BotCommands.CancelAllCommand} [query]: Cancel all [status] tasks.
-/{BotCommands.ListCommand} [query]: Search in Google Drive(s).
-/{BotCommands.SearchCommand} [query]: Search for torrents with API.
-/{BotCommands.StatusCommand[0]}: Shows a status of all the downloads.
-/{BotCommands.StatsCommand}: Show stats of the machine where the bot is hosted in.
+/mirror or /m: Start mirroring to cloud.
+/jdmirror or /jm: Start Mirroring to cloud using JDownloader.
+/nzbmirror or /nm: Start Mirroring to cloud using Sabnzbd.
+/ytdl or /y: Mirror yt-dlp supported link.
+/leech or /l: Start leeching to Telegram.
+/jdleech or /jl: Start leeching using JDownloader.
+/nzbleech or /nl: Start leeching using Sabnzbd.
+/ytdlleech or /yl: Leech yt-dlp supported link.
+/clone [drive_url]: Copy file/folder to Google Drive.
+/count [drive_url]: Count file/folder of Google Drive.
+/del [drive_url]: Delete file/folder from Google Drive (Only Owner & Sudo).
+/settings [query]: Users settings.
+/botsettings [query]: Bot settings.
+/sel: Select files from torrents by gid or reply.
+/forcestart or /fs [gid]: Force start task by gid or reply.
+/cancelall [query]: Cancel all [status] tasks.
+/list [query]: Search in Google Drive(s).
+/search [query]: Search for torrents with API.
+/status: Shows a status of all the downloads.
+/stats: Show stats of the machine where the bot is hosted in.
 """

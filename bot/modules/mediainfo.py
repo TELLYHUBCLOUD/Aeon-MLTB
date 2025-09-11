@@ -114,9 +114,9 @@ async def mediainfo(_, message):
     reply = message.reply_to_message
     help_msg = (
         "<b>By replying to media:</b>"
-        f"\n<code>/{BotCommands.MediaInfoCommand} media </code>"
+        f"\n<code>/mediainfo media </code>"
         "\n\n<b>By reply/sending download link:</b>"
-        f"\n<code>/{BotCommands.MediaInfoCommand} link </code>"
+        f"\n<code>/mediainfo link </code>"
     )
     if len(message.command) > 1 or (reply and reply.text):
         link = reply.text if reply else message.command[1]

@@ -61,7 +61,7 @@ async def start(client, message):
         msg += f"It will be valid for {get_readable_time(int(Config.TOKEN_TIMEOUT), True)}"
         return await send_message(message, msg)
     elif await CustomFilters.authorized(client, message):
-        help_command = f"/{BotCommands.HelpCommand}"
+        help_command = "/help"
         start_string = f"This bot can mirror all your links|files|torrents to Google Drive or any rclone cloud or to telegram.\n<b>Type {help_command} to get a list of available commands</b>"
         await send_message(message, start_string)
     else:

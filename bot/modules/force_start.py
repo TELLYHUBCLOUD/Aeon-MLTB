@@ -13,7 +13,6 @@ from bot.helper.ext_utils.task_manager import (
     start_dl_from_queued,
     start_up_from_queued,
 )
-from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.message_utils import send_message
 
 
@@ -36,14 +35,14 @@ async def remove_from_queue(_, message):
             return
     elif len(msg) in {1, 2}:
         msg = f"""Reply to an active Command message which was used to start the download/upload.
-<code>/{BotCommands.ForceStartCommand[0]}</code> fd (to remove it from download queue) or fu (to remove it from upload queue) or nothing to start remove it from both download and upload queue.
-Also send <code>/{BotCommands.ForceStartCommand[0]} GID</code> fu|fd or obly gid to force start by removeing the task rom queue!
+<code>/forcestart</code> fd (to remove it from download queue) or fu (to remove it from upload queue) or nothing to start remove it from both download and upload queue.
+Also send <code>/forcestart GID</code> fu|fd or obly gid to force start by removeing the task rom queue!
 Examples:
-<code>/{BotCommands.ForceStartCommand[1]}</code> GID fu (force upload)
-<code>/{BotCommands.ForceStartCommand[1]}</code> GID (force download and upload)
+<code>/fs</code> GID fu (force upload)
+<code>/fs</code> GID (force download and upload)
 By reply to task cmd:
-<code>/{BotCommands.ForceStartCommand[1]}</code> (force download and upload)
-<code>/{BotCommands.ForceStartCommand[1]}</code> fd (force download)
+<code>/fs</code> (force download and upload)
+<code>/fs</code> fd (force download)
 """
         await send_message(message, msg)
         return

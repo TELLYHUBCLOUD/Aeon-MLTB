@@ -8,211 +8,268 @@ from pyrogram.handlers import (
 
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.filters import CustomFilters
-from bot.modules import *
+from bot.modules import (
+    add_sudo,
+    aeon_callback,
+    aioexecute,
+    arg_usage,
+    authorize,
+    bot_help,
+    bot_stats,
+    broadcast,
+    cancel,
+    cancel_all_buttons,
+    cancel_all_update,
+    cancel_multi,
+    clear,
+    clone_node,
+    confirm_restart,
+    confirm_selection,
+    count_node,
+    delete_file,
+    edit_bot_settings,
+    edit_user_settings,
+    execute,
+    gdrive_search,
+    get_rss_menu,
+    get_users_settings,
+    hydra_search,
+    jd_leech,
+    jd_mirror,
+    leech,
+    log,
+    mediainfo,
+    mirror,
+    nzb_leech,
+    nzb_mirror,
+    ping,
+    remove_from_queue,
+    remove_sudo,
+    restart_bot,
+    rss_listener,
+    run_shell,
+    select,
+    select_type,
+    send_bot_settings,
+    send_user_settings,
+    spectrum_handler,
+    speedtest,
+    start,
+    status_pages,
+    task_status,
+    torrent_search,
+    torrent_search_update,
+    unauthorize,
+    ytdl,
+    ytdl_leech,
+)
 
 from .aeon_client import TgClient
 
 
 def add_handlers():
+    # Get current commands with suffix
+    commands = BotCommands.get_commands()
+    
     command_filters = {
         "authorize": (
             authorize,
-            BotCommands.AuthorizeCommand,
+            commands['AuthorizeCommand'],
             CustomFilters.sudo,
         ),
         "unauthorize": (
             unauthorize,
-            BotCommands.UnAuthorizeCommand,
+            commands['UnAuthorizeCommand'],
             CustomFilters.sudo,
         ),
         "add_sudo": (
             add_sudo,
-            BotCommands.AddSudoCommand,
+            commands['AddSudoCommand'],
             CustomFilters.sudo,
         ),
         "remove_sudo": (
             remove_sudo,
-            BotCommands.RmSudoCommand,
+            commands['RmSudoCommand'],
             CustomFilters.sudo,
         ),
         "send_bot_settings": (
             send_bot_settings,
-            BotCommands.BotSetCommand,
+            commands['BotSetCommand'],
             CustomFilters.sudo,
         ),
         "cancel_all_buttons": (
             cancel_all_buttons,
-            BotCommands.CancelAllCommand,
+            commands['CancelAllCommand'],
             CustomFilters.authorized,
         ),
         "clone_node": (
             clone_node,
-            BotCommands.CloneCommand,
+            commands['CloneCommand'],
             CustomFilters.authorized,
         ),
         "aioexecute": (
             aioexecute,
-            BotCommands.AExecCommand,
+            commands['AExecCommand'],
             CustomFilters.sudo,
         ),
         "execute": (
             execute,
-            BotCommands.ExecCommand,
+            commands['ExecCommand'],
             CustomFilters.sudo,
         ),
         "clear": (
             clear,
-            BotCommands.ClearLocalsCommand,
+            commands['ClearLocalsCommand'],
             CustomFilters.sudo,
         ),
         "select": (
             select,
-            BotCommands.SelectCommand,
+            commands['SelectCommand'],
             CustomFilters.authorized,
         ),
         "remove_from_queue": (
             remove_from_queue,
-            BotCommands.ForceStartCommand,
+            commands['ForceStartCommand'],
             CustomFilters.authorized,
         ),
         "count_node": (
             count_node,
-            BotCommands.CountCommand,
+            commands['CountCommand'],
             CustomFilters.authorized,
         ),
         "delete_file": (
             delete_file,
-            BotCommands.DeleteCommand,
+            commands['DeleteCommand'],
             CustomFilters.authorized,
         ),
         "gdrive_search": (
             gdrive_search,
-            BotCommands.ListCommand,
+            commands['ListCommand'],
             CustomFilters.authorized,
         ),
         "mirror": (
             mirror,
-            BotCommands.MirrorCommand,
+            commands['MirrorCommand'],
             CustomFilters.authorized,
         ),
         "jd_mirror": (
             jd_mirror,
-            BotCommands.JdMirrorCommand,
+            commands['JdMirrorCommand'],
             CustomFilters.authorized,
         ),
         "leech": (
             leech,
-            BotCommands.LeechCommand,
+            commands['LeechCommand'],
             CustomFilters.authorized,
         ),
         "jd_leech": (
             jd_leech,
-            BotCommands.JdLeechCommand,
+            commands['JdLeechCommand'],
             CustomFilters.authorized,
         ),
         "get_rss_menu": (
             get_rss_menu,
-            BotCommands.RssCommand,
+            commands['RssCommand'],
             CustomFilters.authorized,
         ),
         "run_shell": (
             run_shell,
-            BotCommands.ShellCommand,
+            commands['ShellCommand'],
             CustomFilters.owner,
         ),
         "start": (
             start,
-            BotCommands.StartCommand,
+            commands['StartCommand'],
             None,
         ),
         "log": (
             log,
-            BotCommands.LogCommand,
+            commands['LogCommand'],
             CustomFilters.sudo,
         ),
         "restart_bot": (
             restart_bot,
-            BotCommands.RestartCommand,
+            commands['RestartCommand'],
             CustomFilters.sudo,
         ),
         "ping": (
             ping,
-            BotCommands.PingCommand,
+            commands['PingCommand'],
             CustomFilters.authorized,
         ),
         "bot_help": (
             bot_help,
-            BotCommands.HelpCommand,
+            commands['HelpCommand'],
             CustomFilters.authorized,
         ),
         "bot_stats": (
             bot_stats,
-            BotCommands.StatsCommand,
+            commands['StatsCommand'],
             CustomFilters.authorized,
         ),
         "task_status": (
             task_status,
-            BotCommands.StatusCommand,
+            commands['StatusCommand'],
             CustomFilters.authorized,
         ),
         "torrent_search": (
             torrent_search,
-            BotCommands.SearchCommand,
+            commands['SearchCommand'],
             CustomFilters.authorized,
         ),
         "get_users_settings": (
             get_users_settings,
-            BotCommands.UsersCommand,
+            commands['UsersCommand'],
             CustomFilters.sudo,
         ),
         "send_user_settings": (
             send_user_settings,
-            BotCommands.UserSetCommand,
+            commands['UserSetCommand'],
             CustomFilters.authorized,
         ),
         "ytdl": (
             ytdl,
-            BotCommands.YtdlCommand,
+            commands['YtdlCommand'],
             CustomFilters.authorized,
         ),
         "ytdl_leech": (
             ytdl_leech,
-            BotCommands.YtdlLeechCommand,
+            commands['YtdlLeechCommand'],
             CustomFilters.authorized,
         ),
         "mediainfo": (
             mediainfo,
-            BotCommands.MediaInfoCommand,
+            commands['MediaInfoCommand'],
             CustomFilters.authorized,
         ),
         "speedtest": (
             speedtest,
-            BotCommands.SpeedTest,
+            commands['SpeedTest'],
             CustomFilters.authorized,
         ),
         "broadcast": (
             broadcast,
-            BotCommands.BroadcastCommand,
+            commands['BroadcastCommand'],
             CustomFilters.owner,
         ),
         "nzb_mirror": (
             nzb_mirror,
-            BotCommands.NzbMirrorCommand,
+            commands['NzbMirrorCommand'],
             CustomFilters.authorized,
         ),
         "nzb_leech": (
             nzb_leech,
-            BotCommands.NzbLeechCommand,
+            commands['NzbLeechCommand'],
             CustomFilters.authorized,
         ),
         "hydra_search": (
             hydra_search,
-            BotCommands.HydraSearchCommand,
+            commands['HydraSearchCommand'],
             CustomFilters.authorized,
         ),
         "spectrum_handler": (
             spectrum_handler,
-            BotCommands.SoxCommand,
+            commands['SoxCommand'],
             CustomFilters.authorized,
         ),
     }
@@ -255,7 +312,7 @@ def add_handlers():
     TgClient.bot.add_handler(
         EditedMessageHandler(
             run_shell,
-            filters=command(BotCommands.ShellCommand, case_sensitive=True)
+            filters=command(commands['ShellCommand'], case_sensitive=True)
             & CustomFilters.owner,
         ),
     )
