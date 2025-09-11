@@ -58,13 +58,32 @@ class SabnzbdClient(JobFunctions):
         if requests_args is None:
             requests_args = {}
         session = self._session()
+        if params is None:
+            params = {}
         params |= kwargs
+
         res = await session.get(
             url="/sabnzbd/api",
             params={**self._default_params, **params},
             **requests_args,
         )
-        response = res.json()
+
+        # Debug: print out what SABnzbd actually returned
+        print("SABnzbd status:", res.status_code)
+        print("SABnzbd headers:", res.headers)
+        print("SABnzbd body:", res.text[:500])
+
+        # Only parse JSON if it’s actually JSON
+        if res.headers.get("content-type", "").startswith("application/json"):
+            try:
+                response = res.json()
+            except Exception as e:
+                raise APIConnectionError(f"Invalid JSON response: {e}\nBody: {res.text[:200]}")
+        else:
+            raise APIConnectionError(
+                f"Non-JSON response from SABnzbd: {res.status_code} {res.text[:200]}"
+            )
+
         if response is None:
             raise APIConnectionError("Failed to connect to API!")
         return response
