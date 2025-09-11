@@ -34,7 +34,7 @@ async def remove_from_queue(_, message):
             await send_message(message, "This is not an active task!")
             return
     elif len(msg) in {1, 2}:
-        msg = f"""Reply to an active Command message which was used to start the download/upload.
+        msg = """Reply to an active Command message which was used to start the download/upload.
 <code>/forcestart</code> fd (to remove it from download queue) or fu (to remove it from upload queue) or nothing to start remove it from both download and upload queue.
 Also send <code>/forcestart GID</code> fu|fd or obly gid to force start by removeing the task rom queue!
 Examples:

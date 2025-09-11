@@ -14,7 +14,6 @@ from bot.core.aeon_client import TgClient
 from bot.helper.aeon_utils.access_check import token_check
 from bot.helper.ext_utils.bot_utils import cmd_exec
 from bot.helper.ext_utils.telegraph_helper import telegraph
-from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.telegram_helper.message_utils import (
     auto_delete_message,
@@ -114,9 +113,9 @@ async def mediainfo(_, message):
     reply = message.reply_to_message
     help_msg = (
         "<b>By replying to media:</b>"
-        f"\n<code>/mediainfo media </code>"
+        "\n<code>/mediainfo media </code>"
         "\n\n<b>By reply/sending download link:</b>"
-        f"\n<code>/mediainfo link </code>"
+        "\n<code>/mediainfo link </code>"
     )
     if len(message.command) > 1 or (reply and reply.text):
         link = reply.text if reply else message.command[1]

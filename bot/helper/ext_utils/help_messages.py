@@ -1,5 +1,4 @@
 from bot.core.aeon_client import TgClient
-from bot.helper.telegram_helper.bot_commands import BotCommands
 
 nsfw_keywords = [
     "poooooornm",
@@ -394,7 +393,7 @@ Timeout: 60 sec""",
     "YT_ADD_TO_PLAYLIST_ID": "Enter the YouTube Playlist ID you want your videos to be added to. If set, newly uploaded videos will be added to this playlist. Leave empty or set to 'None' to not automatically add to a specific playlist (unless creating a new one for a folder upload without this setting). Timeout: 60 sec",
 }
 
-help_string = f"""
+help_string = """
 NOTE: Try each command without any argument to see more detalis.
 /mirror or /m: Start mirroring to cloud.
 /jdmirror or /jm: Start Mirroring to cloud using JDownloader.
