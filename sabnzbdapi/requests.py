@@ -78,7 +78,9 @@ class SabnzbdClient(JobFunctions):
             try:
                 response = res.json()
             except Exception as e:
-                raise APIConnectionError(f"Invalid JSON response: {e}\nBody: {res.text[:200]}")
+                raise APIConnectionError(
+                    f"Invalid JSON response: {e}\nBody: {res.text[:200]}"
+                )
         else:
             raise APIConnectionError(
                 f"Non-JSON response from SABnzbd: {res.status_code} {res.text[:200]}"
