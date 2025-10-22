@@ -126,45 +126,7 @@ async def get_image_watermark_cmd(
     if opacity == 0.0 or (isinstance(opacity, str) and opacity.lower() == "none"):
         opacity = 1.0  # Default opacity
 
-    # Check if file dimensions are divisible by 2 for video files
-    width = 0
-    height = 0
-
-    if media_type == "video":
-        try:
-            # Use ffprobe to get dimensions
-            cmd = [
-                "ffprobe",  # Keep as ffprobe, not xtra
-                "-v",
-                "error",
-                "-select_streams",
-                "v:0",
-                "-show_entries",
-                "stream=width,height",
-                "-of",
-                "json",
-                file,
-            ]
-
-            # Execute the command
-            stdout, _, code = await cmd_exec(cmd)
-
-            if code == 0:
-                data = json.loads(stdout)
-                if data.get("streams"):
-                    width = int(data["streams"][0].get("width", 0))
-                    height = int(data["streams"][0].get("height", 0))
-
-                    # Check if dimensions are divisible by 2
-                    if width % 2 != 0 or height % 2 != 0:
-                        pass
-                    else:
-                        pass
-
-        except Exception:
-            pass
-
-    # Determine output file extension based on input file
+    # Determine output file extension based on input file first
     file_ext = os.path.splitext(file)[1].lower()
 
     # For videos, always use .mkv as temp extension for maximum compatibility
@@ -179,6 +141,43 @@ async def get_image_watermark_cmd(
     else:
         # For images, preserve the original extension
         temp_file = f"{file}.temp{file_ext}"
+
+    # Check if file dimensions are divisible by 2 for video files
+    width = 0
+    height = 0
+
+    if media_type == "video":
+        try:
+            # Use ffprobe to get dimensions
+            probe_cmd = [
+                "ffprobe",  # Keep as ffprobe, not xtra
+                "-v",
+                "error",
+                "-select_streams",
+                "v:0",
+                "-show_entries",
+                "stream=width,height",
+                "-of",
+                "json",
+                file,
+            ]
+
+            # Execute the command
+            stdout, _, code = await cmd_exec(probe_cmd)
+
+            if code == 0 and stdout.strip():
+                try:
+                    data = json.loads(stdout)
+                    if data.get("streams"):
+                        width = int(data["streams"][0].get("width", 0))
+                        height = int(data["streams"][0].get("height", 0))
+                except json.JSONDecodeError as e:
+                    LOGGER.error(f"Failed to parse ffprobe JSON output: {e}")
+                    # Continue with default dimensions (0, 0)
+
+        except Exception:
+            # Continue with default dimensions if probe fails
+            pass
 
     # Set position coordinates based on position parameter
     # For overlay filter, we need to calculate the exact position
@@ -650,50 +649,7 @@ async def get_watermark_cmd(
     if opacity == 0.0 or (isinstance(opacity, str) and opacity.lower() == "none"):
         opacity = 1.0  # Default opacity
 
-    # Check if file dimensions are divisible by 2 for video files
-    needs_padding = True  # Always use padding for safety
-    width = 0
-    height = 0
-
-    if media_type == "video":
-        try:
-            # Use ffprobe to get dimensions
-            cmd = [
-                "ffprobe",  # Keep as ffprobe, not xtra
-                "-v",
-                "error",
-                "-select_streams",
-                "v:0",
-                "-show_entries",
-                "stream=width,height",
-                "-of",
-                "json",
-                file,
-            ]
-
-            # Execute the command
-            stdout, stderr, code = await cmd_exec(cmd)
-
-            if code == 0 and stdout:
-                data = json.loads(stdout)
-                if data.get("streams"):
-                    width = int(data["streams"][0].get("width", 0))
-                    height = int(data["streams"][0].get("height", 0))
-
-                    # Check if dimensions are divisible by 2
-                    if width % 2 != 0 or height % 2 != 0:
-                        needs_padding = True
-                    else:
-                        needs_padding = False
-            else:
-                LOGGER.warning(
-                    f"Failed to get video dimensions for {file}: {stderr}"
-                )
-
-        except Exception as e:
-            LOGGER.warning(f"Error getting video dimensions for {file}: {e}")
-
-    # Determine output file extension based on input file
+    # Determine output file extension based on input file first
     file_ext = os.path.splitext(file)[1].lower()
 
     # For videos, always use .mkv as temp extension for maximum compatibility
@@ -708,6 +664,53 @@ async def get_watermark_cmd(
     else:
         # For images, preserve the original extension
         temp_file = f"{file}.temp{file_ext}"
+
+    # Check if file dimensions are divisible by 2 for video files
+    needs_padding = True  # Always use padding for safety
+    width = 0
+    height = 0
+
+    if media_type == "video":
+        try:
+            # Use ffprobe to get dimensions
+            probe_cmd = [
+                "ffprobe",  # Keep as ffprobe, not xtra
+                "-v",
+                "error",
+                "-select_streams",
+                "v:0",
+                "-show_entries",
+                "stream=width,height",
+                "-of",
+                "json",
+                file,
+            ]
+
+            # Execute the command
+            stdout, stderr, code = await cmd_exec(probe_cmd)
+
+            if code == 0 and stdout.strip():
+                try:
+                    data = json.loads(stdout)
+                    if data.get("streams"):
+                        width = int(data["streams"][0].get("width", 0))
+                        height = int(data["streams"][0].get("height", 0))
+
+                        # Check if dimensions are divisible by 2
+                        if width % 2 != 0 or height % 2 != 0:
+                            needs_padding = True
+                        else:
+                            needs_padding = False
+                except json.JSONDecodeError as e:
+                    LOGGER.error(f"Failed to parse ffprobe JSON output: {e}")
+                    # Continue with default padding
+            else:
+                LOGGER.warning(
+                    f"Failed to get video dimensions for {file}: {stderr}"
+                )
+
+        except Exception as e:
+            LOGGER.warning(f"Error getting video dimensions for {file}: {e}")
 
     # Check if font is a Google Font or a local file
     if font.endswith((".ttf", ".otf")):
@@ -1137,10 +1140,16 @@ async def get_watermark_cmd(
             stdout, stderr, code = await cmd_exec(audio_info_cmd)
             duration = 10  # Default duration if we can't determine
 
-            if code == 0 and stdout:
-                data = json.loads(stdout)
-                if data.get("format") and data["format"].get("duration"):
-                    duration = float(data["format"]["duration"])
+            if code == 0 and stdout.strip():
+                try:
+                    data = json.loads(stdout)
+                    if data.get("format") and data["format"].get("duration"):
+                        duration = float(data["format"]["duration"])
+                except json.JSONDecodeError as e:
+                    LOGGER.error(
+                        f"Failed to parse ffprobe JSON output for duration: {e}"
+                    )
+                    # Keep default duration of 10
             else:
                 LOGGER.warning(f"Failed to get audio duration for {file}: {stderr}")
 
@@ -1300,7 +1309,7 @@ async def get_watermark_cmd(
             # Get file info using ffprobe
             try:
                 probe_cmd = [
-                    "xtra",
+                    "ffprobe",
                     "-v",
                     "quiet",
                     "-print_format",
@@ -1312,7 +1321,28 @@ async def get_watermark_cmd(
                 result = subprocess.run(
                     probe_cmd, capture_output=True, text=True, check=False
                 )
-                file_info = json.loads(result.stdout)
+
+                # Check if ffprobe command was successful and returned output
+                if result.returncode != 0 or not result.stdout.strip():
+                    LOGGER.warning(
+                        f"ffprobe failed for file: {file}, return code: {result.returncode}"
+                    )
+                    if result.stderr:
+                        LOGGER.warning(f"ffprobe stderr: {result.stderr.strip()}")
+                    raise ValueError("ffprobe returned no valid output")
+
+                # Try to parse JSON output
+                try:
+                    file_info = json.loads(result.stdout)
+                except json.JSONDecodeError as json_err:
+                    LOGGER.error(
+                        f"Failed to parse ffprobe JSON output for file: {file}"
+                    )
+                    LOGGER.error(f"JSON error: {json_err}")
+                    LOGGER.error(
+                        f"Raw output: {result.stdout[:200]}..."
+                    )  # Log first 200 chars
+                    raise ValueError("Invalid JSON output from ffprobe")
 
                 # Get format and codec information
                 input_format = file_info.get("format", {}).get("format_name", "")
@@ -1327,7 +1357,10 @@ async def get_watermark_cmd(
                 # Extract file extension from temp_file
                 output_ext = os.path.splitext(temp_file)[1].lower()
             except Exception as e:
-                LOGGER.error(f"Error getting file info: {e}")
+                # Downgrade to warning since we can proceed with defaults and watermarking succeeded later
+                LOGGER.warning(
+                    f"Non-fatal: could not get file info for {file}: {e}. Proceeding with defaults."
+                )
                 input_format = ""
                 audio_codec = None
                 output_ext = os.path.splitext(temp_file)[1].lower()
@@ -2011,9 +2044,11 @@ async def get_metadata_cmd(
     file_metadata.update(
         {
             "filename": filename_without_ext,
-            "ext": os.path.splitext(file_path)[1][1:]
-            if os.path.splitext(file_path)[1]
-            else "",
+            "ext": (
+                os.path.splitext(file_path)[1][1:]
+                if os.path.splitext(file_path)[1]
+                else ""
+            ),
             "filepath": file_path,
             "basename": os.path.basename(file_path),
         }
@@ -3114,12 +3149,18 @@ async def get_merge_concat_demuxer_cmd(
                 result = subprocess.run(
                     cmd, capture_output=True, text=True, check=False
                 )
-                if result.returncode == 0:
-                    data = json.loads(result.stdout)
-                    if data.get("streams"):
-                        codecs.append(data["streams"][0].get("codec_name", ""))
-                    else:
-                        # If we can't determine codec, assume it's different
+                if result.returncode == 0 and result.stdout.strip():
+                    try:
+                        data = json.loads(result.stdout)
+                        if data.get("streams"):
+                            codecs.append(data["streams"][0].get("codec_name", ""))
+                        else:
+                            # If we can't determine codec, assume it's different
+                            codecs.append(f"unknown_{len(codecs)}")
+                    except json.JSONDecodeError as e:
+                        LOGGER.error(
+                            f"Failed to parse ffprobe JSON output for codec detection: {e}"
+                        )
                         codecs.append(f"unknown_{len(codecs)}")
                 else:
                     # If ffprobe fails, assume it's a different codec
@@ -3597,17 +3638,25 @@ async def get_merge_filter_complex_cmd(
                 result = subprocess.run(
                     cmd, capture_output=True, text=True, check=False
                 )
-                if result.returncode == 0:
-                    data = json.loads(result.stdout)
-                    if data.get("streams"):
-                        stream = data["streams"][0]
-                        info["codec"] = stream.get("codec_name", "")
-                        if media_type == "video":
-                            info["width"] = int(stream.get("width", 0))
-                            info["height"] = int(stream.get("height", 0))
-                        else:  # audio
-                            info["sample_rate"] = int(stream.get("sample_rate", 0))
-                            info["channels"] = int(stream.get("channels", 0))
+                if result.returncode == 0 and result.stdout.strip():
+                    try:
+                        data = json.loads(result.stdout)
+                        if data.get("streams"):
+                            stream = data["streams"][0]
+                            info["codec"] = stream.get("codec_name", "")
+                            if media_type == "video":
+                                info["width"] = int(stream.get("width", 0))
+                                info["height"] = int(stream.get("height", 0))
+                            else:  # audio
+                                info["sample_rate"] = int(
+                                    stream.get("sample_rate", 0)
+                                )
+                                info["channels"] = int(stream.get("channels", 0))
+                    except json.JSONDecodeError as e:
+                        LOGGER.error(
+                            f"Failed to parse ffprobe JSON output for media info: {e}"
+                        )
+                        # Keep default empty info
                 media_info.append(info)
 
             # Log the media information for debugging
@@ -6372,9 +6421,9 @@ async def get_trim_cmd(
                 "pdf_trim",
                 file,
                 str(start_page),  # Start page number
-                str(end_page)
-                if end_page
-                else "",  # End page number (empty for last page)
+                (
+                    str(end_page) if end_page else ""
+                ),  # End page number (empty for last page)
                 temp_file,
             ]
             return cmd, temp_file
@@ -6812,11 +6861,13 @@ async def get_compression_cmd(
                 cmd.extend(
                     [
                         "-compression_level",
-                        "10"
-                        if audio_preset == "slow"
-                        else "5"
-                        if audio_preset == "medium"
-                        else "0",
+                        (
+                            "10"
+                            if audio_preset == "slow"
+                            else "5"
+                            if audio_preset == "medium"
+                            else "0"
+                        ),
                     ]
                 )
 

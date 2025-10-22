@@ -117,14 +117,43 @@
 - Generates both streaming (browser player) and direct download links
 - Supports range requests for video seeking
 
-## 9. JDownloader
+## 9. Forwarding Settings
+
+| Variable                | Type        | Description |
+|-------------------------|-------------|-------------|
+| `FORWARD_SOURCE`        | `list[str]` | Source chat IDs/usernames for automatic forwarding. Supports chat IDs (e.g., `-1001234567890`) and usernames (e.g., `@channel1`). Default: `[]`. |
+| `FORWARD_DESTINATION`   | `list[str]` | Destination chat IDs/usernames for automatic forwarding. Supports chat IDs (e.g., `-1001234567890`) and usernames (e.g., `@channel2`). Default: `[]`. |
+
+**Configuration Examples:**
+```python
+# Forward from multiple sources to multiple destinations
+FORWARD_SOURCE = ["-1001234567890", "@source_channel", "@another_source"]
+FORWARD_DESTINATION = ["-1009876543210", "@dest_channel"]
+
+# Simple channel to channel forwarding
+FORWARD_SOURCE = ["@news_channel"]
+FORWARD_DESTINATION = ["@my_backup_channel"]
+```
+
+**Features:**
+- **Automatic Forwarding**: Monitors configured source chats and automatically forwards new messages
+- **Duplicate Prevention**: Tracks forwarded messages to prevent duplicates
+- **Multiple Sources/Destinations**: Supports forwarding from multiple sources to multiple destinations
+- **Manual Forwarding**: Use `/forward` command for one-time bulk forwarding operations
+- **Batch Processing**: Supports both batch mode (50 messages at a time) and direct mode (500 messages per chunk)
+
+**Commands:**
+- `/forward source_chat destination_chat` - Manual forwarding with interactive controls
+- Supports options: `-skip N`, `-range START-END`, `-mode batch|direct`
+
+## 10. JDownloader
 
 | Variable     | Type  | Description |
 |--------------|-------|-------------|
 | `JD_EMAIL`    | `str` | Email for [JDownloader](https://my.jdownloader.org/). |
 | `JD_PASS`     | `str` | Password. You may zip `cfg/` as `cfg.zip` and include in repo. |
 
-## 9. Sabnzbd
+## 11. Sabnzbd
 
 | Variable        | Type   | Description |
 |-----------------|--------|-------------|
@@ -134,7 +163,7 @@
 ```
 [More info](https://sabnzbd.org/wiki/configuration/4.2/servers)
 
-## 10. RSS
+## 11. RSS
 
 | Variable         | Type         | Description |
 |------------------|--------------|-------------|
@@ -144,7 +173,7 @@
 
 **Note:** `RSS_CHAT` is mandatory. Requires either `USER_SESSION_STRING` or linked group/channel setup.
 
-## 11. Queue System
+## 12. Queue System
 
 | Variable          | Type  | Description |
 |-------------------|-------|-------------|
@@ -152,14 +181,14 @@
 | `QUEUE_DOWNLOAD`   | `int` | Max concurrent download tasks. |
 | `QUEUE_UPLOAD`     | `int` | Max concurrent upload tasks. |
 
-## 12. NZB Search
+## 13. NZB Search
 
 | Variable         | Type  | Description |
 |------------------|-------|-------------|
 | `HYDRA_IP`        | `str` | IP of [nzbhydra2](https://github.com/theotherp/nzbhydra2). |
 | `HYDRA_API_KEY`   | `str` | API key from nzbhydra2. |
 
-## 13. DDL (Direct Download Link) Upload Settings
+## 14. DDL (Direct Download Link) Upload Settings
 
 ### Basic DDL Settings
 | Variable              | Type   | Description |
@@ -210,7 +239,7 @@
 - Use `-up ddl:devuploads` to upload specifically to DevUploads
 - Use `-up ddl:mediafire` to upload specifically to MediaFire
 
-## 14. Streamrip Integration
+## 15. Streamrip Integration
 
 ### Basic Settings
 | Variable                    | Type   | Description |
@@ -350,7 +379,7 @@
 | `STREAMRIP_MISC_CHECK_FOR_UPDATES` | `bool` | Check for streamrip updates. Default: `True`. |
 | `STREAMRIP_MISC_VERSION`    | `str`  | Streamrip version. Default: `2.0.6`. |
 
-## 15. Zotify Integration
+## 16. Zotify Integration
 
 ### Basic Settings
 | Variable                    | Type   | Description |
@@ -434,7 +463,7 @@
 | `ZOTIFY_SUPPORTED_QUALITIES` | `list` | List of supported qualities: `["auto", "normal", "high", "very_high"]`. |
 | `ZOTIFY_SUPPORTED_ARTWORK_SIZES` | `list` | List of supported artwork sizes: `["small", "medium", "large"]`. |
 
-## 16. Gallery-dl Integration
+## 17. Gallery-dl Integration
 
 ### Basic Settings
 | Variable                    | Type   | Description |
@@ -1011,7 +1040,7 @@
 | `MERGE_METADATA_AUTHOR` | `str`  | Metadata author for merged files. Default: `none`. |
 | `MERGE_METADATA_COMMENT` | `str` | Metadata comment for merged files. Default: `none`. |
 
-## 15. AI Integration
+## 20. AI Integration
 
 | Variable          | Type   | Description |
 |-------------------|--------|-------------|
@@ -1022,7 +1051,7 @@
 | `AI_MODEL`        | `str`  | AI model to use for responses. |
 | `AI_MAX_TOKENS`   | `int`  | Maximum tokens per AI response. Default: `1000`. |
 
-## 16. Security Tools
+## 21. Security Tools
 
 | Variable              | Type   | Description |
 |-----------------------|--------|-------------|
@@ -1030,7 +1059,7 @@
 | `TRUECALLER_API_KEY`  | `str`  | Truecaller API key for phone number lookup. |
 | `SECURITY_SCAN_AUTO`  | `bool` | Automatically scan downloaded files. Default: `False`. |
 
-## 17. Font Styles
+## 22. Font Styles
 
 | Variable              | Type   | Description |
 |-----------------------|--------|-------------|
@@ -1038,7 +1067,7 @@
 | `FONT_STYLES_ENABLED` | `bool` | Enable/disable font styling functionality. Default: `True`. |
 | `CUSTOM_FONTS`        | `dict` | Custom font definitions as JSON dict. |
 
-## 18. Limits and Monitoring
+## 23. Limits and Monitoring
 
 ### Storage and Download Limits
 | Variable               | Type   | Description |
@@ -1094,7 +1123,7 @@
 | `AUTO_RESTART_ENABLED` | `bool` | Enable automatic restart functionality. Default: `False`. |
 | `AUTO_RESTART_INTERVAL` | `int` | Auto restart interval in hours. Default: `48`. |
 
-## 19. Feature Toggles
+## 24. Feature Toggles
 
 ### Core Features
 | Variable               | Type   | Description |
@@ -1118,7 +1147,7 @@
 | `ARCHIVE_FLAGS_ENABLED` | `bool` | Enable archive operation flags. Default: `True`. |
 | `BULK_ENABLED`         | `bool` | Enable bulk operations (-b flag). Default: `True`. |
 
-## 20. AI and External Services
+## 25. AI and External Services
 
 ### AI Configuration
 | Variable               | Type   | Description |
@@ -1142,7 +1171,7 @@
 | `CORRECT_CMD_SUFFIX`   | `str`  | Comma-separated list of allowed command suffixes. |
 | `WRONG_CMD_WARNINGS_ENABLED` | `bool` | Enable/disable warnings for wrong command suffixes. Default: `False`. |
 
-## 21. Extra fields from Aeon
+## 26. Extra fields from Aeon
 
 | Variable               | Type   | Description |
 |------------------------|--------|-------------|
@@ -1178,7 +1207,7 @@
 | `EQUAL_SPLITS`         | `bool` | Create equal-sized parts when splitting files. Default: `False`. |
 | `STREAMTAPE_ALLOWED_EXTENSIONS` | `list` | Allowed video extensions for Streamtape uploads. |
 
-## 23. Debrid Services Integration
+## 27. Debrid Services Integration
 
 ### Debrid-Link Authentication Settings
 | Variable                    | Type   | Description |
@@ -1195,7 +1224,7 @@
 |-----------------------------|--------|-------------|
 | `TORBOX_API_KEY`            | `str`  | TorBox API key for premium downloads. |
 
-## 24. Media Tools - Advanced Processing
+## 28. Media Tools - Advanced Processing
 
 ### Compression Settings
 | Variable                    | Type   | Description |
@@ -1241,7 +1270,7 @@
 | `COMPRESSION_ARCHIVE_PASSWORD` | `str` | Password for archive protection. Default: `none`. |
 | `COMPRESSION_ARCHIVE_ALGORITHM` | `str` | Archive algorithm (e.g., 7z, zip). Default: `none`. |
 
-## 25. Trim Settings
+## 29. Trim Settings
 
 ### Basic Trim Settings
 | Variable                    | Type   | Description |
@@ -1301,7 +1330,7 @@
 | `TRIM_ARCHIVE_ENABLED`      | `bool` | Enable archive trimming. Default: `False`. |
 | `TRIM_ARCHIVE_FORMAT`       | `str`  | Output format for archive trimming. Default: `none`. |
 
-## 26. Extract Settings
+## 30. Extract Settings
 
 ### Basic Extract Settings
 | Variable                    | Type   | Description |
@@ -1350,7 +1379,7 @@
 | `EXTRACT_ATTACHMENT_INDEX`  | `int`  | Attachment index to extract. Default: `None`. |
 | `EXTRACT_ATTACHMENT_FORMAT` | `str`  | Output format for attachment extraction. Default: `none`. |
 
-## 27. Remove Settings
+## 31. Remove Settings
 
 ### Basic Remove Settings
 | Variable                    | Type   | Description |
@@ -1403,7 +1432,7 @@
 
 
 
-## 29. Swap Settings
+## 32. Swap Settings
 
 ### Basic Swap Settings
 | Variable                    | Type   | Description |
@@ -1436,7 +1465,7 @@
 | `SWAP_SUBTITLE_LANGUAGE_ORDER` | `str` | Language order for subtitle track selection. Default: `eng,hin`. |
 | `SWAP_SUBTITLE_INDEX_ORDER` | `str`  | Index order for subtitle track selection. Default: `0,1`. |
 
-## 30. Convert Settings
+## 33. Convert Settings
 
 ### Basic Convert Settings
 | Variable                    | Type   | Description |
@@ -1483,7 +1512,7 @@
 | `CONVERT_DOCUMENT_FORMAT`   | `str`  | Output format for document conversion. Default: `pdf`. |
 | `CONVERT_DOCUMENT_QUALITY`  | `int`  | Document quality for conversion. Default: `90`. |
 
-## 31. System Performance Settings
+## 34. System Performance Settings
 
 ### Garbage Collection Settings
 | Variable                    | Type   | Description |
@@ -1500,7 +1529,7 @@
 |-----------------------------|--------|-------------|
 | `BULK_ENABLED`              | `bool` | Enable/disable bulk operations (-b flag). Default: `True`. |
 
-## 32. AI and Extra Modules
+## 35. AI and Extra Modules
 
 ### AI Settings
 | Variable                    | Type   | Description |
@@ -1526,7 +1555,7 @@
 | `VT_ENABLED`                | `bool` | Enable/disable VirusTotal functionality. Default: `False`. |
 | `VT_MAX_FILE_SIZE`          | `int`  | Maximum file size for VirusTotal scanning in bytes. Default: `33554432` (32MB). |
 
-## 33. Enhanced NSFW Detection
+## 36. Enhanced NSFW Detection
 
 ### Basic NSFW Settings
 | Variable                    | Type   | Description |
@@ -1581,6 +1610,111 @@
 | `NSFW_STORE_METADATA`       | `bool` | Store detection metadata in database. Default: `True`. |
 | `NSFW_AUTO_DELETE`          | `bool` | Auto-delete detected NSFW content. Default: `False`. |
 | `NSFW_NOTIFY_ADMINS`        | `bool` | Notify admins of NSFW detections. Default: `True`. |
+
+## Weather Settings
+
+### Basic Weather Settings
+| Variable                    | Type   | Description |
+|-----------------------------|--------|-------------|
+| `WEATHER_ENABLED`           | `bool` | Enable/disable weather functionality. Default: `True`. |
+| `OPENWEATHER_API_KEY`       | `str`  | OpenWeatherMap API key (required for weather features). |
+| `WEATHER_PLACE`             | `str`  | Default weather location. Default: `"London,UK"`. |
+| `AUTO_WEATHER`              | `bool` | Enable/disable automatic daily weather updates. Default: `True`. |
+| `WEATHER_RISK_NOTIFICATIONS` | `bool` | Enable/disable weather risk notifications to owner. Default: `True`. |
+| `WEATHER_UNITS`             | `str`  | Units for weather data: `standard`, `metric`, `imperial`. Default: `"metric"`. |
+| `WEATHER_LANGUAGE`          | `str`  | Language code for weather descriptions. Default: `"en"`. |
+| `WEATHER_UPDATE_TIME`       | `str`  | Time for daily weather updates (HH:MM format). Default: `"08:00"`. |
+| `WEATHER_TIMEZONE`          | `str`  | Timezone for weather updates. Default: `"UTC"`. |
+
+### Advanced Weather Features
+| Variable                    | Type   | Description |
+|-----------------------------|--------|-------------|
+| `WEATHER_SHOW_MAPS`         | `bool` | Enable/disable weather maps. Default: `True`. |
+| `WEATHER_SHOW_AIR_QUALITY`  | `bool` | Enable/disable air quality data. Default: `True`. |
+| `WEATHER_SHOW_FIRE_INDEX`   | `bool` | Enable/disable fire weather index (requires special access). Default: `False`. |
+| `WEATHER_HISTORICAL_DAYS`   | `int`  | Days of historical data to show (requires paid plan). Default: `7`. |
+| `WEATHER_FORECAST_DAYS`     | `int`  | Days of forecast to show (max 5 for free plan). Default: `5`. |
+| `WEATHER_MAP_ZOOM`          | `int`  | Default zoom level for weather maps. Default: `10`. |
+| `WEATHER_IMAGE_QUALITY`     | `str`  | Image quality: `low`, `medium`, `high`. Default: `"high"`. |
+| `WEATHER_CACHE_DURATION`    | `int`  | Cache duration in seconds. Default: `600` (10 minutes). |
+
+### Weather Alert Settings
+| Variable                    | Type    | Description |
+|-----------------------------|---------|-------------|
+| `WEATHER_ALERT_TEMPERATURE_HIGH` | `float` | High temperature alert threshold (Celsius). Default: `35.0`. |
+| `WEATHER_ALERT_TEMPERATURE_LOW`  | `float` | Low temperature alert threshold (Celsius). Default: `-10.0`. |
+| `WEATHER_ALERT_WIND_SPEED`       | `float` | High wind speed alert threshold (m/s). Default: `15.0`. |
+| `WEATHER_ALERT_VISIBILITY`       | `int`   | Low visibility alert threshold (meters). Default: `1000`. |
+| `WEATHER_ALERT_AQI`              | `int`   | Air quality alert threshold (1-5 scale). Default: `3`. |
+| `WEATHER_ALERT_FIRE_DANGER`      | `int`   | Fire weather index alert threshold (0-5 scale). Default: `3`. |
+
+### Weather Map Settings
+| Variable                    | Type    | Description |
+|-----------------------------|---------|-------------|
+| `WEATHER_MAP_LAYERS`        | `list`  | Available weather map layers. Default: `["temp_new", "precipitation_new", "pressure_new", "wind_new", "clouds_new"]`. |
+| `WEATHER_MAP_OPACITY`       | `float` | Map layer opacity (0.0-1.0). Default: `0.6`. |
+| `WEATHER_USE_ADVANCED_MAPS` | `bool`  | Use Weather Maps 2.0 (requires paid plan). Default: `False`. |
+| `WEATHER_USE_HOURLY_MAPS`   | `bool`  | Use Weather Maps 2.0 with 1-hour step (requires paid plan). Default: `False`. |
+
+### Air Quality Settings
+| Variable                    | Type   | Description |
+|-----------------------------|--------|-------------|
+| `WEATHER_AQI_FORECAST_DAYS` | `int`  | Days of air quality forecast (max 4). Default: `4`. |
+| `WEATHER_AQI_HISTORICAL_DAYS` | `int` | Days of historical air quality data. Default: `7`. |
+| `WEATHER_SHOW_POLLUTANTS`   | `list` | Pollutants to display. Default: `["co", "no", "no2", "o3", "so2", "pm2_5", "pm10", "nh3"]`. |
+
+### Premium Weather Features
+| Variable                    | Type   | Description |
+|-----------------------------|--------|-------------|
+| `WEATHER_HOURLY_FORECAST_HOURS` | `int` | Hours of hourly forecast (max 96 for 4 days). Default: `96`. |
+| `WEATHER_STATISTICAL_DATA`  | `bool` | Enable statistical weather data (requires paid plan). Default: `False`. |
+| `WEATHER_ROAD_RISK_API`     | `bool` | Enable road risk API (requires paid plan). Default: `False`. |
+| `WEATHER_SOLAR_IRRADIANCE`  | `bool` | Enable solar irradiance data (requires paid plan). Default: `False`. |
+
+## 38. Link Shortener (Bitly Integration)
+
+### Basic Settings
+| Variable                    | Type   | Description |
+|-----------------------------|--------|-------------|
+| `BITLY_ACCESS_TOKEN`        | `str`  | **REQUIRED**: Bitly API access token for link shortening. Get from [Bitly Developer Portal](https://dev.bitly.com/). |
+| `BITLY_GROUP_GUID`          | `str`  | Optional Bitly group GUID for organization and analytics. Get from your Bitly account settings. |
+
+### Features
+- **URL Shortening**: Shorten any valid URL using Bitly API
+- **Custom Aliases**: Support for custom aliases (alphanumeric, hyphens, underscores)
+- **QR Code Generation**: Automatic high-quality PNG QR code generation via Bitly API
+- **Reply Support**: Works with replies to messages containing URLs
+- **Analytics**: Click tracking through Bitly dashboard
+- **Error Handling**: Comprehensive validation and user feedback
+
+### Usage
+```bash
+# Basic shortening
+/shortner https://example.com
+
+# With custom alias
+/shortner https://github.com/user/repo my-repo
+
+# Reply to message containing URL
+/shortner [custom-alias]
+```
+
+### Custom Alias Rules
+- Maximum 50 characters
+- Alphanumeric characters only (a-z, A-Z, 0-9)
+- Hyphens (-) and underscores (_) allowed
+- Must be unique across Bitly platform
+- Case-sensitive
+
+### Setup Instructions
+1. Go to [Bitly Developer Portal](https://dev.bitly.com/)
+2. Sign up or log in to your Bitly account
+3. Create a new application
+4. Generate an access token
+5. Copy the access token to `BITLY_ACCESS_TOKEN`
+6. (Optional) Get your Group GUID from Bitly settings for `BITLY_GROUP_GUID`
+
+**Note**: The link shortener requires a valid Bitly API access token to function. Without proper configuration, the `/shortner` command will display a configuration error message.
 
 
 

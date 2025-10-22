@@ -10,6 +10,8 @@ DATABASE_URL = ""  # MongoDB URI for storing user data and preferences
 # Heroku config for get BASE_URL automatically
 HEROKU_APP_NAME = ""
 HEROKU_API_KEY = ""
+
+# AUTO REDEPLOY CONFIG
 HEROKU_EMAIL = ""  # Your Heroku account email
 HEROKU_TEAM_NAME = (
     ""  # Optional: Your Heroku team name (leave empty if not using teams)
@@ -17,8 +19,6 @@ HEROKU_TEAM_NAME = (
 HEROKU_REGION = (
     "eu"  # Heroku deployment region: "eu" for Europe or "us" for United States
 )
-
-# AUTO REDEPLOY CONFIG
 AUTO_REDEPLOY = False  # Enable/disable automatic redeployment on schedule
 REDEPLOY_INTERVAL_DAYS = 7  # Auto redeploy interval in days (1, 3, 7, 14, or 30)
 
@@ -30,24 +30,72 @@ UPSTREAM_BRANCH = "extended"  # Branch to use for updates
 CREDIT = "Powered by @aimmirror"  # Credit text shown in status messages and RSS feeds (default: "Powered by @aimmirror")
 OWNER_THUMB = "https://graph.org/file/80b7fb095063a18f9e232.jpg"  # Default thumbnail URL for owner (accepts Telegram file links)
 
-# OPTIONAL CONFIG
-TG_PROXY = {}  # Proxy for Telegram connection, format: {'addr': 'ip:port', 'username': 'username', 'password': 'password'}
+# Telegram
 USER_SESSION_STRING = (
     ""  # Pyrogram user session string for mirror/leech authentication
 )
+TG_PROXY = {}  # Proxy for Telegram connection, format: {'addr': 'ip:port', 'username': 'username', 'password': 'password'}
 
-CMD_SUFFIX = ""  # Command suffix to distinguish commands, e.g. "1" would make commands like /mirror1
-CORRECT_CMD_SUFFIX = ""  # Comma-separated list of command suffixes that won't trigger warnings, e.g. "1,2,3"
-WRONG_CMD_WARNINGS_ENABLED = (
-    False  # Enable/disable warnings for wrong command suffixes
+# Authorization
+SUDO_USERS = (
+    ""  # List of sudo user IDs who can use admin commands, separated by space
 )
 AUTHORIZED_CHATS = (
     ""  # List of authorized chat IDs where the bot can be used, separated by space
 )
-SUDO_USERS = (
-    ""  # List of sudo user IDs who can use admin commands, separated by space
-)
+
+# Upload
 DEFAULT_UPLOAD = "gd"  # Default upload destination: 'gd' for Google Drive, 'rc' for rclone, 'ddl' for Direct Download Links
+UPLOAD_PATHS = {}  # Custom upload paths for different file types
+
+# Hyper Download
+HELPER_TOKENS = ""  # Bot tokens for helper bots, separated by space. Format: "token1 token2 token3"
+HYPER_THREADS = 0  # Number of threads for hyper download (0 = auto-detect based on number of helper bots)
+
+# Command Management
+CMD_SUFFIX = ""  # Command suffix to distinguish commands, e.g. "1" would make commands like /mirror1
+WRONG_CMD_WARNINGS_ENABLED = (
+    False  # Enable/disable warnings for wrong command suffixes
+)
+CORRECT_CMD_SUFFIX = ""  # Comma-separated list of command suffixes that won't trigger warnings, e.g. "1,2,3"
+
+# Feature Toggles
+MIRROR_ENABLED = True  # Enable/disable mirror feature
+LEECH_ENABLED = True  # Enable/disable leech feature
+YTDLP_ENABLED = True  # Enable/disable YT-DLP feature
+TORRENT_ENABLED = True  # Enable/disable torrent feature
+TORRENT_SEARCH_ENABLED = True  # Enable/disable torrent search feature
+NZB_ENABLED = True  # Enable/disable NZB feature
+JD_ENABLED = True  # Enable/disable JDownloader feature
+MEGA_ENABLED = True  # Enable/disable Mega.nz downloads
+MEGA_UPLOAD_ENABLED = True  # Enable MEGA upload functionality
+MEGA_SEARCH_ENABLED = True  # Enable/disable MEGA search functionality
+DDL_ENABLED = True  # Enable/disable DDL upload feature
+RCLONE_ENABLED = True  # Enable/disable Rclone feature
+HYPERDL_ENABLED = True  # Enable/disable hyper download feature
+ARCHIVE_FLAGS_ENABLED = (
+    True  # Enable/disable archive operation flags (-z and -e flags)
+)
+MULTI_LINK_ENABLED = True  # Enable/disable multi-link feature (-i flag)
+SAME_DIR_ENABLED = True  # Enable/disable same directory feature (-m flag)
+BULK_ENABLED = True  # Enable/disable bulk operations (-b flag)
+MEDIAINFO_ENABLED = (
+    False  # Enable/disable mediainfo command for detailed media information
+)
+MEDIA_STORE = False  # Enable media store link
+AD_BROADCASTER_ENABLED = (
+    False  # Enable/disable automatic ad broadcasting from FSUB channels to users
+)
+AI_ENABLED = True  # Enable/disable AI functionality
+IMDB_ENABLED = True  # Enable/disable IMDB functionality
+TMDB_ENABLED = True  # Enable/disable TMDB functionality
+TRUECALLER_ENABLED = True  # Enable/disable Truecaller functionality
+MEDIA_SEARCH_ENABLED = True  # Enable/disable media search feature
+
+# Media Search Settings
+MEDIA_SEARCH_CHATS = []  # List of chat IDs where media search is enabled
+
+# -> Direct Link Generators
 FILELION_API = ""  # FileLion API key for direct links
 STREAMWISH_API = ""  # StreamWish API key for direct links
 # Debrid-Link Authentication Settings - Get from https://debrid-link.com/webapp/apikey
@@ -63,20 +111,16 @@ DEBRID_LINK_CLIENT_SECRET = (
     ""  # OAuth2 client_secret (keep secure, server-side only)
 )
 DEBRID_LINK_TOKEN_EXPIRES = 0  # Token expiration timestamp (auto-managed)
-
 # TorBox API Settings - Get from https://torbox.app/settings
 TORBOX_API_KEY = (
     ""  # TorBox API key for premium downloads (torrents, usenet, web downloads)
 )
-
 # Mega-Debrid API Settings - Get from https://www.mega-debrid.eu/
 MEGA_DEBRID_API_TOKEN = ""  # Mega-Debrid API token (if you have one)
 MEGA_DEBRID_LOGIN = ""  # Mega-Debrid login username (alternative to token)
 MEGA_DEBRID_PASSWORD = ""  # Mega-Debrid login password (alternative to token)
-
 # AllDebrid API Settings - Get from https://alldebrid.com/apikey/
 ALLDEBRID_API_KEY = ""  # AllDebrid API key for premium downloads (supports torrents, magnets, and 100+ file hosts)
-
 # Real-Debrid API Settings - Get from https://real-debrid.com/apitoken
 REAL_DEBRID_API_KEY = ""  # Real-Debrid API key for premium downloads (private token)
 REAL_DEBRID_ACCESS_TOKEN = ""  # OAuth2 access token (recommended for apps)
@@ -89,24 +133,17 @@ REAL_DEBRID_CLIENT_SECRET = (
 )
 REAL_DEBRID_TOKEN_EXPIRES = 0  # Token expiration timestamp (auto-managed)
 
+
 EXCLUDED_EXTENSIONS = (
     ""  # File extensions to exclude from processing, separated by space
 )
 INCOMPLETE_TASK_NOTIFIER = False  # Notify about incomplete tasks on bot restart
 SCHEDULED_DELETION_ENABLED = True  # Enable/disable scheduled deletion functionality
 YT_DLP_OPTIONS = {}  # Additional yt-dlp options as a JSON string
-
 NAME_SUBSTITUTE = r""  # Regex pattern to substitute in filenames
 FFMPEG_CMDS = {}  # Custom FFmpeg commands for different file types
-UPLOAD_PATHS = {}  # Custom upload paths for different file types
-MEDIA_STORE = False  # Enable media store for faster thumbnail generation
-MEDIA_SEARCH_ENABLED = True  # Enable/disable media search feature
-MEDIA_SEARCH_CHATS = []  # List of chat IDs where media search is enabled
 DELETE_LINKS = False  # Delete links after download
 FSUB_IDS = ""  # Force subscribe channel IDs, separated by space
-AD_BROADCASTER_ENABLED = (
-    False  # Enable/disable automatic ad broadcasting from FSUB channels to users
-)
 AD_KEYWORDS = ""  # Custom keywords/phrases for ad detection, separated by comma (e.g., "#ad,#ad bangla,#sponsored,InsideAds")
 TOKEN_TIMEOUT = 0  # Token timeout in seconds (0 = no timeout)
 LOGIN_PASS = ""  # Password for web login
@@ -114,25 +151,8 @@ PAID_CHANNEL_ID = 0  # Paid channel ID for premium features
 PAID_CHANNEL_LINK = ""  # Invite link for paid channel
 SET_COMMANDS = True  # Set bot commands in Telegram UI
 LOG_CHAT_ID = 0  # Chat ID where logs will be sent
-MEDIAINFO_ENABLED = (
-    False  # Enable/disable mediainfo command for detailed media information
-)
 INSTADL_API = ""  # InstaDL API key for Instagram downloads
 
-# Feature Toggles
-MIRROR_ENABLED = True  # Enable/disable mirror feature
-LEECH_ENABLED = True  # Enable/disable leech feature
-YTDLP_ENABLED = True  # Enable/disable YT-DLP feature
-TORRENT_ENABLED = True  # Enable/disable torrent feature
-TORRENT_SEARCH_ENABLED = True  # Enable/disable torrent search feature
-NZB_ENABLED = True  # Enable/disable NZB feature
-JD_ENABLED = True  # Enable/disable JDownloader feature
-MEGA_ENABLED = True  # Enable/disable Mega.nz downloads
-RCLONE_ENABLED = True  # Enable/disable Rclone feature
-ARCHIVE_FLAGS_ENABLED = True  # Enable/disable archive operation flags
-MULTI_LINK_ENABLED = True  # Enable/disable multi-link feature
-SAME_DIR_ENABLED = True  # Enable/disable same directory feature
-BULK_ENABLED = True  # Enable/disable bulk operations (-b flag)
 
 # GDrive Tools
 GDRIVE_ID = ""  # Google Drive folder/TeamDrive ID where files will be uploaded
@@ -150,61 +170,30 @@ RCLONE_SERVE_URL = ""  # URL for rclone serve
 RCLONE_SERVE_PORT = 8080  # Port for rclone serve
 RCLONE_SERVE_USER = ""  # Username for rclone serve
 RCLONE_SERVE_PASS = ""  # Password for rclone serve
+
 # JDownloader
 JD_EMAIL = ""  # JDownloader email/username
 JD_PASS = ""  # JDownloader password
 
-# Mega.nz Settings
+# -> Mega.nz Settings
 MEGA_EMAIL = ""  # Mega.nz account email (optional, for premium features)
 MEGA_PASSWORD = ""  # Mega.nz account password (optional, for premium features)
-
-# MEGA Upload Settings
-MEGA_UPLOAD_ENABLED = True  # Enable MEGA upload functionality
-# MEGA_UPLOAD_FOLDER removed - using folder selector instead
 MEGA_UPLOAD_PUBLIC = True  # Generate public links by default
-# MEGA_UPLOAD_PRIVATE removed - not supported by MEGA SDK v4.8.0
-# MEGA_UPLOAD_UNLISTED removed - not supported by MEGA SDK v4.8.0
-# MEGA_UPLOAD_EXPIRY_DAYS removed - premium feature not implemented
-# MEGA_UPLOAD_PASSWORD removed - premium feature not implemented
-# MEGA_UPLOAD_ENCRYPTION_KEY removed - not supported by MEGA SDK v4.8.0
 MEGA_UPLOAD_THUMBNAIL = True  # Generate thumbnails for videos using FFmpeg
-# MEGA_UPLOAD_DELETE_AFTER removed - always delete after upload
 
-
-# MEGA Search Settings
-MEGA_SEARCH_ENABLED = True  # Enable/disable MEGA search functionality
-
-# DDL (Direct Download Link) Upload Settings
-DDL_ENABLED = True  # Enable/disable DDL upload feature
+# -> DDL (Direct Download Link) Upload Settings
 DDL_DEFAULT_SERVER = (
     "gofile"  # Default DDL server: gofile, streamtape, devuploads, mediafire
 )
-
-# Gofile Settings (Enabled automatically when API key is provided)
 GOFILE_API_KEY = ""  # Default Gofile API key (can be overridden per user)
 GOFILE_FOLDER_NAME = ""  # Default folder name for uploads (empty = use filename)
 GOFILE_PUBLIC_LINKS = True  # Generate public links by default
 GOFILE_PASSWORD_PROTECTION = False  # Enable password protection
 GOFILE_DEFAULT_PASSWORD = ""  # Default password for protected uploads
 GOFILE_LINK_EXPIRY_DAYS = 0  # Link expiry in days (0 = no expiry)
-
-# Streamtape Settings (Enabled automatically when API username and password are provided)
 STREAMTAPE_API_USERNAME = ""  # Streamtape API/FTP Username (from account panel)
 STREAMTAPE_API_PASSWORD = ""  # Streamtape API/FTP Password (from account panel)
 STREAMTAPE_FOLDER_NAME = ""  # Default folder name for uploads
-
-# DevUploads Settings (Enabled automatically when API key is provided)
-DEVUPLOADS_API_KEY = ""  # Default DevUploads API key (can be overridden per user)
-DEVUPLOADS_FOLDER_NAME = ""  # Default folder name for uploads (empty = root folder)
-DEVUPLOADS_PUBLIC_FILES = True  # Default public/private setting for uploads (True = public, False = private)
-
-# MediaFire Settings (Enabled automatically when email, password, and app_id are provided)
-MEDIAFIRE_EMAIL = ""  # MediaFire account email for authentication
-MEDIAFIRE_PASSWORD = ""  # MediaFire account password for authentication
-MEDIAFIRE_APP_ID = ""  # MediaFire application ID (required for API access)
-MEDIAFIRE_API_KEY = ""  # MediaFire API key (optional, for enhanced features)
-
-# Streamtape allowed extensions for video uploads
 STREAMTAPE_ALLOWED_EXTENSIONS = [
     ".avi",
     ".mkv",
@@ -225,7 +214,13 @@ STREAMTAPE_ALLOWED_EXTENSIONS = [
     ".ts",
     ".ogm",
 ]  # Allowed video extensions for Streamtape
-
+DEVUPLOADS_API_KEY = ""  # Default DevUploads API key (can be overridden per user)
+DEVUPLOADS_FOLDER_NAME = ""  # Default folder name for uploads (empty = root folder)
+DEVUPLOADS_PUBLIC_FILES = True  # Default public/private setting for uploads (True = public, False = private)
+MEDIAFIRE_EMAIL = ""  # MediaFire account email for authentication
+MEDIAFIRE_PASSWORD = ""  # MediaFire account password for authentication
+MEDIAFIRE_APP_ID = ""  # MediaFire application ID (required for API access)
+MEDIAFIRE_API_KEY = ""  # MediaFire API key (optional, for enhanced features)
 
 # Sabnzbd
 HYDRA_IP = ""  # Hydra IP address for direct links
@@ -271,10 +266,6 @@ LEECH_DUMP_CHAT = []  # Chat IDs ["-100123456789", "b:@mychannel", "u:-100987654
 THUMBNAIL_LAYOUT = ""  # Layout for thumbnails: empty, top, bottom, or custom
 EQUAL_SPLITS = False  # Create equal-sized parts when splitting files
 
-# Hyper Download Settings
-HYPERDL_ENABLED = True  # Enable/disable hyper download feature
-HELPER_TOKENS = ""  # Bot tokens for helper bots, separated by space. Format: "token1 token2 token3"
-HYPER_THREADS = 0  # Number of threads for hyper download (0 = auto-detect based on number of helper bots)
 
 # qBittorrent/Aria2c
 TORRENT_TIMEOUT = 0  # Timeout for torrent downloads in seconds (0 = no timeout)
@@ -288,11 +279,14 @@ FILE2LINK_BASE_URL = ""  # Dedicated base URL for File2Link streaming (optional,
 FILE2LINK_BIN_CHANNEL = 0  # REQUIRED: Private channel ID to store files for streaming (e.g., -1001234567890)
 FILE2LINK_ALLOWED_TYPES = "video,audio,document,photo,animation,voice,video_note"  # Allowed media types for streaming
 
+# Forwarding Settings
+FORWARD_SOURCE = []  # Source chat IDs/usernames for automatic forwarding (e.g., ["-1001234567890", "@channel1"])
+FORWARD_DESTINATION = []  # Destination chat IDs/usernames for automatic forwarding (e.g., ["-1001234567890", "@channel2"])
+
 # Queueing system
 QUEUE_ALL = 0  # Maximum number of concurrent tasks (0 = unlimited)
 QUEUE_DOWNLOAD = 0  # Maximum number of concurrent downloads (0 = unlimited)
 QUEUE_UPLOAD = 0  # Maximum number of concurrent uploads (0 = unlimited)
-
 
 # RSS - Optimized for better resource management
 RSS_DELAY = 900  # Increased delay to 15 minutes for better resource efficiency
@@ -302,7 +296,7 @@ RSS_ENABLED = True  # Enable/disable RSS functionality completely (True=enabled,
 RSS_JOB_INTERVAL = 600  # RSS job periodic runtime interval in seconds (default: 600)
 
 # Resource Management Settings
-PIL_MEMORY_LIMIT = 2048  # Memory limit for PIL image processing in MB
+PIL_MEMORY_LIMIT = 1024  # Memory limit for PIL image processing in MB (reduced for better memory management)
 
 # Auto Restart Settings - Optimized for stability
 AUTO_RESTART_ENABLED = (
@@ -326,7 +320,6 @@ LEECH_LIMIT = 0  # Maximum size for leech operations in GB (0 = unlimited)
 JD_LIMIT = 0  # Maximum size for JDownloader downloads in GB (0 = unlimited)
 NZB_LIMIT = 0  # Maximum size for NZB downloads in GB (0 = unlimited)
 PLAYLIST_LIMIT = 0  # Maximum number of videos in a playlist (0 = unlimited)
-
 ZOTIFY_LIMIT = 0  # Maximum size for Zotify downloads in GB (0 = unlimited)
 DAILY_TASK_LIMIT = 0  # Maximum number of tasks per day per user (0 = unlimited)
 DAILY_MIRROR_LIMIT = 0  # Maximum mirror size in GB per day per user (0 = unlimited)
@@ -361,31 +354,26 @@ TASK_MONITOR_MEMORY_HIGH = 70  # Reduced threshold for better memory management
 TASK_MONITOR_MEMORY_LOW = 50  # Reduced threshold
 
 # Garbage Collection Settings - Control memory management behavior
-GC_ENABLED = True  # Enable/disable garbage collection completely (True=enabled, False=disabled)
+GC_ENABLED = False  # Enable/disable garbage collection completely (True=enabled, False=disabled)
 GC_INTERVAL = 60  # Minimum interval between GC operations in seconds (default: 60)
 GC_THRESHOLD_MB = 150  # Memory threshold in MB to trigger GC (default: 150)
 GC_AGGRESSIVE_MODE = (
     False  # Enable aggressive GC by default (True=more frequent, False=balanced)
 )
 
-# Extra Modules Settings
-AI_ENABLED = True  # Enable/disable AI functionality
-IMDB_ENABLED = True  # Enable/disable IMDB functionality
-TMDB_ENABLED = True  # Enable/disable TMDB functionality
-TRUECALLER_ENABLED = True  # Enable/disable Truecaller functionality
 
 # Encoding/Decoding Settings
 ENCODING_ENABLED = True  # Enable/disable encoding functionality
 DECODING_ENABLED = True  # Enable/disable decoding functionality
 
-# Security Tools Settings
+# -> Security Tools Settings
+# VirusTotal API Settings
 VT_API_KEY = ""  # VirusTotal API key for malware scanning
 VT_API_TIMEOUT = 500  # VirusTotal API timeout in seconds
 VT_ENABLED = False  # Enable/disable VirusTotal functionality
 VT_MAX_FILE_SIZE = (
     33554432  # Maximum file size for VirusTotal scanning in bytes (32MB)
 )
-
 # Phish Directory API Settings
 PHISH_DIRECTORY_API_URL = (
     "https://api.phish.directory"  # Phish Directory API base URL
@@ -395,20 +383,87 @@ PHISH_DIRECTORY_TIMEOUT = 30  # Phish Directory API timeout in seconds
 PHISH_DIRECTORY_API_KEY = (
     ""  # Phish Directory API key (optional, for authenticated endpoints)
 )
-
 # WOT (Web of Trust) API Settings
 WOT_API_URL = "https://scorecard.api.mywot.com"  # WOT API base URL
 WOT_ENABLED = True  # Enable/disable WOT functionality
 WOT_TIMEOUT = 30  # WOT API timeout in seconds
 WOT_API_KEY = ""  # WOT API key (required for API access)
 WOT_USER_ID = ""  # WOT User ID (required for API access)
-
 # AbuseIPDB API Settings
 ABUSEIPDB_API_URL = "https://api.abuseipdb.com/api/v2"  # AbuseIPDB API base URL
 ABUSEIPDB_ENABLED = True  # Enable/disable AbuseIPDB functionality
 ABUSEIPDB_TIMEOUT = 30  # AbuseIPDB API timeout in seconds
 ABUSEIPDB_API_KEY = ""  # AbuseIPDB API key (required for API access)
 ABUSEIPDB_MAX_AGE_DAYS = 90  # Maximum age of reports to consider (1-365 days)
+
+# Weather Settings - OpenWeatherMap API
+WEATHER_ENABLED = True  # Enable/disable weather functionality
+OPENWEATHER_API_KEY = ""  # OpenWeatherMap API key
+WEATHER_PLACE = "London,UK"  # Default weather location
+AUTO_WEATHER = True  # Enable/disable automatic daily weather updates
+WEATHER_RISK_NOTIFICATIONS = (
+    True  # Enable/disable weather risk notifications to owner
+)
+WEATHER_UNITS = "metric"  # Units: standard, metric, imperial
+WEATHER_LANGUAGE = "en"  # Language code for weather descriptions
+WEATHER_UPDATE_TIME = "08:00"  # Time for daily weather updates (HH:MM format)
+WEATHER_TIMEZONE = "UTC"  # Timezone for weather updates
+
+# Advanced Weather Features
+WEATHER_SHOW_MAPS = True  # Enable/disable weather maps
+WEATHER_SHOW_AIR_QUALITY = True  # Enable/disable air quality data
+WEATHER_SHOW_FIRE_INDEX = (
+    False  # Enable/disable fire weather index (requires special access)
+)
+WEATHER_HISTORICAL_DAYS = 7  # Days of historical data to show (requires paid plan)
+WEATHER_FORECAST_DAYS = 5  # Days of forecast to show (max 5 for free plan)
+WEATHER_MAP_ZOOM = 10  # Default zoom level for weather maps
+WEATHER_IMAGE_QUALITY = "high"  # Image quality: low, medium, high
+WEATHER_CACHE_DURATION = 600  # Cache duration in seconds (10 minutes)
+
+# Weather Alert Settings
+WEATHER_ALERT_TEMPERATURE_HIGH = 35.0  # High temperature alert threshold (Celsius)
+WEATHER_ALERT_TEMPERATURE_LOW = -10.0  # Low temperature alert threshold (Celsius)
+WEATHER_ALERT_WIND_SPEED = 15.0  # High wind speed alert threshold (m/s)
+WEATHER_ALERT_VISIBILITY = 1000  # Low visibility alert threshold (meters)
+WEATHER_ALERT_AQI = 3  # Air quality alert threshold (1-5 scale)
+WEATHER_ALERT_FIRE_DANGER = 3  # Fire weather index alert threshold (0-5 scale)
+
+# Weather Map Settings
+WEATHER_MAP_LAYERS = [
+    "temp_new",  # Temperature
+    "precipitation_new",  # Precipitation
+    "pressure_new",  # Pressure
+    "wind_new",  # Wind
+    "clouds_new",  # Clouds
+]  # Available weather map layers
+WEATHER_MAP_OPACITY = 0.6  # Map layer opacity (0.0-1.0)
+WEATHER_USE_ADVANCED_MAPS = False  # Use Weather Maps 2.0 (requires paid plan)
+WEATHER_USE_HOURLY_MAPS = (
+    False  # Use Weather Maps 2.0 with 1-hour step (requires paid plan)
+)
+
+# Air Quality Settings
+WEATHER_AQI_FORECAST_DAYS = 4  # Days of air quality forecast (max 4)
+WEATHER_AQI_HISTORICAL_DAYS = 7  # Days of historical air quality data
+WEATHER_SHOW_POLLUTANTS = [
+    "co",
+    "no",
+    "no2",
+    "o3",
+    "so2",
+    "pm2_5",
+    "pm10",
+    "nh3",
+]  # Pollutants to display
+
+# Premium Features Settings
+WEATHER_HOURLY_FORECAST_HOURS = 96  # Hours of hourly forecast (max 96 for 4 days)
+WEATHER_STATISTICAL_DATA = (
+    False  # Enable statistical weather data (requires paid plan)
+)
+WEATHER_ROAD_RISK_API = False  # Enable road risk API (requires paid plan)
+WEATHER_SOLAR_IRRADIANCE = False  # Enable solar irradiance data (requires paid plan)
 
 # Enhanced NSFW Detection Settings
 NSFW_DETECTION_ENABLED = True  # Master toggle for NSFW detection
@@ -466,6 +521,13 @@ PASTEBIN_API_KEY = (
     ""  # Pastebin Developer API Key (get from https://pastebin.com/doc_api)
 )
 PASTEBIN_ENABLED = False  # Enable/disable Pastebin functionality
+
+# Bitly API Settings
+BITLY_ACCESS_TOKEN = ""  # Bitly API access token for link shortening (get from https://dev.bitly.com/)
+BITLY_GROUP_GUID = ""  # Optional Bitly group GUID for organization
+
+# TinyURL API Settings
+TINYURL_API_TOKEN = ""  # TinyURL API token for link shortening (get from https://tinyurl.com/app/settings/api)
 
 # Custom template for IMDB results formatting.
 IMDB_TEMPLATE = """<b>🎬 Title:</b> <code>{title}</code> [{year}]

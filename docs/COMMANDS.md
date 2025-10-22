@@ -59,6 +59,7 @@ truecaller - Lookup phone numbers using Truecaller
 ask - Chat with AI using the bot
 spectrum - or /sox Generate spectrum from audio
 paste - Paste text to katb.in website
+shortner - Shorten URLs with Bitly API and generate QR codes
 virustotal - Scan files or URLs for viruses using VirusTotal
 phishcheck - Check domains and emails for phishing/security threats
 wot - Check website, domain, and IP reputation using WOT and AbuseIPDB

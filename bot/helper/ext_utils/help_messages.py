@@ -1562,6 +1562,77 @@ NSFW_HELP_DICT = {
     "main": nsfw_detection_help,
 }
 
+# Link Shortener Help
+shortner_help = """<b>🔗 Link Shortener with Multi-API Support</b>
+
+<b>📝 Description:</b>
+Shorten URLs using Bitly or TinyURL APIs with automatic fallback. Bitly provides QR code generation while TinyURL offers fast, reliable shortening. Perfect for sharing links with tracking capabilities and easy mobile access.
+
+<b>🎯 Usage:</b>
+• <code>/shortner &lt;url&gt; [custom_alias]</code> - Shorten URL with optional custom alias
+• Reply to any message containing a URL with <code>/shortner [custom_alias]</code>
+
+<b>✨ Features:</b>
+• <b>Bitly:</b> Professional QR code generation + analytics
+• <b>TinyURL:</b> Fast, reliable shortening + analytics
+• Custom alias support (alphanumeric, hyphens, underscores)
+• Automatic fallback between APIs
+• Click tracking via respective dashboards
+• Automatic URL validation
+• Mobile-optimized design
+
+<b>📱 Examples:</b>
+• <code>/shortner https://example.com</code> - Basic shortening
+• <code>/shortner https://example.com my-link</code> - With custom alias
+• <code>/shortner https://github.com/user/repo project-repo</code> - GitHub link with alias
+
+<b>🎨 QR Code Features:</b>
+• High-resolution PNG format
+• Professional Bitly branding
+• Optimized for mobile scanning
+• Works with all QR code readers
+• Embedded link information
+
+<b>🔧 Custom Alias Rules:</b>
+• Maximum 50 characters
+• Alphanumeric characters only (a-z, A-Z, 0-9)
+• Hyphens (-) and underscores (_) allowed
+• Must be unique across Bitly
+• Case-sensitive
+
+<b>📊 Analytics:</b>
+• Click tracking available on Bitly dashboard
+• Geographic data and referrer information
+• Real-time statistics
+• Historical data retention
+
+<b>⚠️ Requirements:</b>
+• At least one API token must be configured:
+  - BITLY_ACCESS_TOKEN (for QR codes + analytics)
+  - TINYURL_API_TOKEN (for fast shortening + analytics)
+• Internet connection required
+• Valid URL format required
+• Optional: BITLY_GROUP_GUID for Bitly organization accounts
+
+<b>🛡️ Privacy &amp; Security:</b>
+• Links processed through secure Bitly API
+• No local storage of URLs
+• Professional link management
+• Spam and malware protection via Bitly
+
+<b>💡 Pro Tips:</b>
+• Use descriptive custom aliases for better organization
+• QR codes work great for print materials and presentations
+• Shortened links never expire
+• Perfect for social media sharing
+• Track performance through Bitly analytics
+
+<b>📋 Note:</b> This feature requires Bitly API configuration by the administrator."""
+
+SHORTNER_HELP_DICT = {
+    "main": shortner_help,
+}
+
 # Streamrip help content
 streamrip_main = """<b>🎵 Streamrip Downloads</b>
 
@@ -3488,6 +3559,8 @@ special_commands = f"""
 /{BotCommands.WhisperCommand}: Send private whisper messages in group chats (reply to user or use -to flag for multiple targets).
 /{BotCommands.NekoCommand}: Get adorable cat images with voting system 🐱💕 (use /neko or /neko [number] for multiple cats).
 /{BotCommands.WeatherCommand[0]} or /{BotCommands.WeatherCommand[1]} [location]: Get comprehensive weather information with beautiful images, forecasts, air quality data, and interactive features.
+/{BotCommands.ShortnerCommand} [url] [alias]: Shorten URLs with Bitly API and generate professional QR codes with optional custom aliases.
+/{BotCommands.QRCodeCommand} [text/URL] [options]: Generate QR codes from text or URLs with customizable styles, colors, formats (PNG/JPEG/SVG), and error correction levels.
 """
 
 # System Commands page

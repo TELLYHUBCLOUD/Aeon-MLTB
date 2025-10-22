@@ -94,6 +94,7 @@ from bot.modules import (  # Encoding/Decoding imports; index_command removed - 
     paste_text,
     phish_check_command,
     ping,
+    qrcode_command,
     quickinfo_callback,
     quickinfo_command,
     remove_from_queue,
@@ -106,6 +107,7 @@ from bot.modules import (  # Encoding/Decoding imports; index_command removed - 
     select_type,
     send_bot_settings,
     send_user_settings,
+    shortner_command,
     spectrum_handler,
     speedtest,
     start,
@@ -417,6 +419,16 @@ def add_handlers():
         "paste": (
             paste_text,
             BotCommands.PasteCommand,
+            CustomFilters.authorized,
+        ),
+        "shortner": (
+            shortner_command,
+            BotCommands.ShortnerCommand,
+            CustomFilters.authorized,
+        ),
+        "qrcode": (
+            qrcode_command,
+            BotCommands.QRCodeCommand,
             CustomFilters.authorized,
         ),
         "virustotal": (
@@ -895,6 +907,7 @@ def add_handlers():
         "spectrum",
         "sox",
         "paste",
+        "shortner",
         "virustotal",
         "mediatools",
         "mt",

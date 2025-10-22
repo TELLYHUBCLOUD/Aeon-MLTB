@@ -175,9 +175,11 @@ def update_user_ldata(user_id, key, value):
 
 DEFAULT_VALUES = {
     # Set default leech split size to max split size based on owner session premium status
-    "LEECH_SPLIT_SIZE": TgClient.MAX_SPLIT_SIZE
-    if hasattr(Config, "USER_SESSION_STRING") and Config.USER_SESSION_STRING
-    else 2097152000,
+    "LEECH_SPLIT_SIZE": (
+        TgClient.MAX_SPLIT_SIZE
+        if hasattr(Config, "USER_SESSION_STRING") and Config.USER_SESSION_STRING
+        else 2097152000
+    ),
     "RSS_DELAY": 600,
     "UPSTREAM_BRANCH": "main",
     "DEFAULT_UPLOAD": "rc",
@@ -386,7 +388,7 @@ DEFAULT_VALUES = {
     # Audio Watermark Settings
     "AUDIO_WATERMARK_VOLUME": 0.0,
     # Branding Settings
-    "CREDIT": "Powered by @aimmirror",
+    "CREDIT": Config.CREDIT,
     "OWNER_THUMB": "https://graph.org/file/80b7fb095063a18f9e232.jpg",
     "AUDIO_WATERMARK_INTERVAL": 0,
     # Subtitle Watermark Settings
@@ -1724,7 +1726,7 @@ Send one of the following position options:
         filtered_keys.sort()
 
         for k in filtered_keys[start : 10 + start]:
-            if k == "DATABASE_URL" and state != "view":
+            if False:
                 continue
 
             # Always use editvar for Config variables to ensure consistent behavior

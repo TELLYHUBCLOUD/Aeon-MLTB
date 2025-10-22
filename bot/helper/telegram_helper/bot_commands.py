@@ -98,3 +98,7 @@ class BotCommands:
     UnbanCommand = f"unban{i}"
     # Weather Commands
     WeatherCommand = [f"weather{i}", f"w{i}"]
+    # Link Shortener Commands
+    ShortnerCommand = f"shortner{i}"
+    # QR Code Commands
+    QRCodeCommand = f"qrcode{i}"

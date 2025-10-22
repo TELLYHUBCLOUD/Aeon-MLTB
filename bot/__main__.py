@@ -104,6 +104,8 @@ COMMANDS = {
     "GenSessionCommand": "- Generate Pyrogram session string",
     "VirusTotalCommand": "- Scan files or URLs for viruses using VirusTotal",
     "PasteCommand": "- Paste text to katb.in website",
+    "ShortnerCommand": "- Shorten URLs with Bitly API and generate QR codes",
+    "QRCodeCommand": "- Generate QR codes from text or URLs with customizable options",
     "NSFWStatsCommand": "- Get NSFW detection statistics",
     "NSFWTestCommand": "- Test NSFW detection on images",
     # QuickInfo Commands
@@ -175,9 +177,11 @@ if Config.WEATHER_ENABLED:
 # Setup Commands
 COMMAND_OBJECTS = [
     BotCommand(
-        getattr(BotCommands, cmd)[0]
-        if isinstance(getattr(BotCommands, cmd), list)
-        else getattr(BotCommands, cmd),
+        (
+            getattr(BotCommands, cmd)[0]
+            if isinstance(getattr(BotCommands, cmd), list)
+            else getattr(BotCommands, cmd)
+        ),
         description,
     )
     for cmd, description in COMMANDS.items()

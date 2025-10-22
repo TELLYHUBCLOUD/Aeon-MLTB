@@ -8,6 +8,7 @@ from bot.helper.ext_utils.help_messages import (
     NSFW_HELP_DICT,
     OSINT_HELP_DICT,
     PHISH_HELP_DICT,
+    SHORTNER_HELP_DICT,
     STREAMRIP_HELP_DICT,
     TOOL_HELP_DICT,
     TRACE_HELP_DICT,
@@ -163,6 +164,12 @@ async def arg_usage(_, query):
             buttons.data_button("❌ Close", "help close")
             button = buttons.build_menu(1)
             await edit_message(message, OSINT_HELP_DICT["main"], button)
+        elif data[2] == "shortner":
+            # For Shortner commands, show the main help page
+            buttons = ButtonMaker()
+            buttons.data_button("❌ Close", "help close")
+            button = buttons.build_menu(1)
+            await edit_message(message, SHORTNER_HELP_DICT["main"], button)
 
     elif data[1] == "mirror":
         buttons = ButtonMaker()
@@ -255,6 +262,12 @@ async def arg_usage(_, query):
         buttons.data_button("Close", "help close")
         button = buttons.build_menu(2)
         await edit_message(message, OSINT_HELP_DICT[data[2]], button)
+    elif data[1] == "shortner":
+        buttons = ButtonMaker()
+        buttons.data_button("Back", "help back shortner")
+        buttons.data_button("Close", "help close")
+        button = buttons.build_menu(2)
+        await edit_message(message, SHORTNER_HELP_DICT[data[2]], button)
 
     try:
         await query.answer()

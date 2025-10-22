@@ -55,6 +55,7 @@ from .gen_session import (
 )
 from .help import arg_usage, bot_help
 from .imdb import imdb_callback, imdb_search
+from .link_shortner import shortner_command
 
 # index_command removed - media indexing functionality disabled
 from .media_search import (
@@ -66,34 +67,21 @@ from .media_search import (
 from .media_tools import edit_media_tools_settings, media_tools_settings
 from .media_tools_help import media_tools_help_cmd
 from .mediainfo import mediainfo
-from .mirror_leech import (
-    jd_leech,
-    jd_mirror,
-    leech,
-    mirror,
-    nzb_leech,
-    nzb_mirror,
-)
+from .mirror_leech import jd_leech, jd_mirror, leech, mirror, nzb_leech, nzb_mirror
 from .neko import neko_callback_handler, neko_command
-from .nsfw_management import (
-    nsfw_stats_command,
-    nsfw_test_command,
-)
+from .nsfw_management import nsfw_stats_command, nsfw_test_command
 from .nzb_search import hydra_search
 from .osint import osint_callback_handler, osint_command
 from .paste import paste_text
 from .phish_check import phish_check_command
+from .qrcode import qrcode_command
 from .quickinfo import (
     handle_forwarded_message,
     handle_shared_entities,
     quickinfo_callback,
     quickinfo_command,
 )
-from .restart import (
-    confirm_restart,
-    restart_bot,
-    restart_notification,
-)
+from .restart import confirm_restart, restart_bot, restart_notification
 from .rss import get_rss_menu, rss_listener
 from .scrap import scrap_command
 from .search import initiate_search_tools, torrent_search, torrent_search_update
@@ -211,6 +199,7 @@ __all__ = [
     "paste_text",
     "phish_check_command",
     "ping",
+    "qrcode_command",
     "quickinfo_callback",
     # QuickInfo functions
     "quickinfo_command",
@@ -225,6 +214,7 @@ __all__ = [
     "select_type",
     "send_bot_settings",
     "send_user_settings",
+    "shortner_command",
     "spectrum_handler",
     "speedtest",
     "start",

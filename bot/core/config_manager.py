@@ -1091,7 +1091,9 @@ class Config:
     MERGE_METADATA_COMMENT: str = "none"
 
     # Resource Management Settings
-    PIL_MEMORY_LIMIT: int = 2048
+    PIL_MEMORY_LIMIT: int = (
+        1024  # Reduced from 2048MB to 1024MB for better memory management
+    )
 
     # Auto Restart Settings - Optimized for better resource management
     AUTO_RESTART_ENABLED: bool = False  # Disabled by default for better stability
@@ -1100,7 +1102,7 @@ class Config:
     )
 
     # Garbage Collection Settings
-    GC_ENABLED: bool = True  # Enable/disable garbage collection completely
+    GC_ENABLED: bool = False  # Enable/disable garbage collection completely
     GC_INTERVAL: int = 60  # Minimum interval between GC operations in seconds
     GC_THRESHOLD_MB: int = 150  # Memory threshold in MB to trigger GC
     GC_AGGRESSIVE_MODE: bool = False  # Enable aggressive GC by default
@@ -1514,6 +1516,13 @@ class Config:
     # Pastebin API Settings
     PASTEBIN_API_KEY: str = ""  # Pastebin Developer API Key
     PASTEBIN_ENABLED: bool = False  # Enable/disable Pastebin functionality
+
+    # Bitly API Settings
+    BITLY_ACCESS_TOKEN: str = ""  # Bitly API access token for link shortening
+    BITLY_GROUP_GUID: str = ""  # Optional Bitly group GUID for organization
+
+    # TinyURL API Settings
+    TINYURL_API_TOKEN: str = ""  # TinyURL API token for link shortening
 
     HEROKU_APP_NAME: str = ""
     HEROKU_API_KEY: str = ""

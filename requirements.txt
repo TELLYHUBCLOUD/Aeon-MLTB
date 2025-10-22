@@ -55,6 +55,7 @@ python-magic
 pytz
 PyMuPDF
 pytdbot[tdjson]
+qrcode[pil]
 reportlab>=4.0.0
 requests
 speedtest-cli

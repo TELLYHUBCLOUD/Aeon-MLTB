@@ -43,14 +43,32 @@ MAX_CACHE_SIZE = 50  # Reduced from 100 to 50
 
 
 def limit_memory_for_pil():
-    """Apply memory limits for PIL operations based on config."""
+    """Apply memory limits for PIL operations based on config with enhanced safety."""
     try:
         # Get memory limit from config
         memory_limit = Config.PIL_MEMORY_LIMIT
 
         if memory_limit > 0:
+            # Get current memory usage to determine safe limits
+            try:
+                import psutil
+
+                available_memory = psutil.virtual_memory().available / (
+                    1024 * 1024
+                )  # MB
+
+                # Use the smaller of configured limit or 80% of available memory
+                safe_limit = min(memory_limit, int(available_memory * 0.8))
+
+                # Ensure minimum limit of 256MB for basic operations
+                safe_limit = max(safe_limit, 256)
+
+            except ImportError:
+                # Fallback if psutil not available - use conservative limit
+                safe_limit = min(memory_limit, 512)
+
             # Convert MB to bytes for resource limit
-            memory_limit_bytes = memory_limit * 1024 * 1024
+            memory_limit_bytes = safe_limit * 1024 * 1024
 
             # Set soft limit (warning) and hard limit (error)
             resource.setrlimit(
@@ -893,7 +911,7 @@ async def take_ss(video_file, ss_nb) -> bool:
 
 
 async def extract_album_art_with_pil(audio_file, output_path):
-    """Extract album art from audio file using PIL/Pillow.
+    """Extract album art from audio file using PIL/Pillow with memory optimization.
 
     This function attempts to extract embedded album art from audio files using the
     mutagen library and PIL. It works with MP3, FLAC, M4A, and other audio formats.
@@ -905,6 +923,7 @@ async def extract_album_art_with_pil(audio_file, output_path):
     Returns:
         bool: True if extraction was successful, False otherwise
     """
+    img = None
     try:
         # Import necessary libraries
         import io
@@ -937,8 +956,16 @@ async def extract_album_art_with_pil(audio_file, output_path):
             elif hasattr(audio, "tags") and "covr" in audio.tags:
                 picture_data = audio.tags["covr"][0]
 
-        # If we found picture data, save it
+        # If we found picture data, save it with memory optimization
         if picture_data:
+            # Check picture data size to prevent memory issues
+            picture_size_mb = len(picture_data) / (1024 * 1024)
+            if picture_size_mb > 50:  # Skip very large images (>50MB)
+                LOGGER.warning(
+                    f"Skipping large album art ({picture_size_mb:.1f}MB) to prevent memory issues"
+                )
+                return False
+
             # Open the image data with PIL
             img = Image.open(io.BytesIO(picture_data))
 
@@ -946,12 +973,15 @@ async def extract_album_art_with_pil(audio_file, output_path):
             if img.mode != "RGB":
                 img = img.convert("RGB")
 
-            # Resize if too large
+            # Resize if too large to save memory
             if img.width > 800 or img.height > 800:
-                img.thumbnail((800, 800))
+                img.thumbnail((800, 800), Image.Resampling.LANCZOS)
 
-            # Save as JPEG
-            img.save(output_path, "JPEG", quality=90)
+            # Save as JPEG with optimized quality
+            img.save(output_path, "JPEG", quality=85, optimize=True)
+
+            # Explicitly close the image to free memory
+            img.close()
             return True
 
         return False
@@ -959,13 +989,35 @@ async def extract_album_art_with_pil(audio_file, output_path):
     except Exception as e:
         LOGGER.error(f"Error extracting album art with PIL: {e}")
         return False
+    finally:
+        # Ensure image is closed even if an exception occurs
+        if img is not None:
+            with contextlib.suppress(Exception):
+                img.close()
+
+        # Force garbage collection after image processing
+        if smart_garbage_collection is not None:
+            smart_garbage_collection(aggressive=False, for_music_download=True)
 
 
 async def get_audio_thumbnail(audio_file):
-    """Extract thumbnail from audio file using simple approach to avoid audio decoding errors"""
+    """Extract thumbnail from audio file using memory-efficient approach"""
     output_dir = f"{DOWNLOAD_DIR}thumbnails"
     await makedirs(output_dir, exist_ok=True)
     output = ospath.join(output_dir, f"{time()}.jpg")
+
+    # Check file size first to avoid processing very large files
+    try:
+        file_size_mb = (await aiopath.getsize(audio_file)) / (1024 * 1024)
+        if (
+            file_size_mb > 500
+        ):  # Skip very large files (>500MB) to prevent memory issues
+            LOGGER.warning(
+                f"Skipping thumbnail extraction for large audio file ({file_size_mb:.1f}MB)"
+            )
+            return None
+    except Exception:
+        pass
 
     # Simple approach - try to extract embedded album art without audio processing
     cmd = [
@@ -985,18 +1037,31 @@ async def get_audio_thumbnail(audio_file):
     try:
         _, err, code = await wait_for(cmd_exec(cmd), timeout=30)
         if code == 0 and await aiopath.exists(output):
-            if await aiopath.getsize(output) > 0:
-                return output
-            await remove(output)
-    except Exception:
-        pass
+            output_size = await aiopath.getsize(output)
+            if output_size > 0:
+                # Verify the extracted thumbnail isn't too large
+                if output_size > 10 * 1024 * 1024:  # 10MB limit for thumbnails
+                    LOGGER.warning(
+                        f"Extracted thumbnail too large ({output_size / (1024 * 1024):.1f}MB), removing"
+                    )
+                    await remove(output)
+                else:
+                    return output
+            else:
+                await remove(output)
+    except Exception as e:
+        LOGGER.error(f"FFmpeg thumbnail extraction failed: {e}")
 
-    # If extraction fails, try PIL method for embedded album art
+    # If extraction fails, try PIL method for embedded album art with memory safety
     try:
+        # Force garbage collection before PIL operations
+        if smart_garbage_collection is not None:
+            smart_garbage_collection(aggressive=False, for_music_download=True)
+
         if await extract_album_art_with_pil(audio_file, output):
             return output
-    except Exception:
-        pass
+    except Exception as e:
+        LOGGER.error(f"PIL thumbnail extraction failed: {e}")
 
     # If all methods fail, return None to trigger default thumbnail creation
     return None
@@ -4144,10 +4209,23 @@ async def remove_tracks(
 
 
 async def get_video_thumbnail(video_file, duration):
-    """Extract a thumbnail from a video file using simple approach like old Aeon"""
+    """Extract a thumbnail from a video file using memory-efficient approach"""
     output_dir = f"{DOWNLOAD_DIR}thumbnails"
     await makedirs(output_dir, exist_ok=True)
     output = ospath.join(output_dir, f"{time()}.jpg")
+
+    # Check file size first to avoid processing very large files
+    try:
+        file_size_mb = (await aiopath.getsize(video_file)) / (1024 * 1024)
+        if (
+            file_size_mb > 2000
+        ):  # Skip very large files (>2GB) to prevent memory issues
+            LOGGER.warning(
+                f"Skipping thumbnail extraction for large video file ({file_size_mb:.1f}MB)"
+            )
+            return None
+    except Exception:
+        pass
 
     if duration is None:
         duration = (await get_media_info(video_file))[0]
@@ -4155,7 +4233,7 @@ async def get_video_thumbnail(video_file, duration):
         duration = 3
     duration = duration // 2
 
-    # Simple approach - extract thumbnail from middle of video
+    # Memory-efficient approach - extract small thumbnail from middle of video
     cmd = [
         "xtra",
         "-hide_banner",
@@ -4166,23 +4244,38 @@ async def get_video_thumbnail(video_file, duration):
         "-i",
         video_file,
         "-vf",
-        "scale=640:-1",
+        "scale=480:-1",  # Smaller scale to reduce memory usage
         "-q:v",
-        "5",
+        "8",  # Lower quality to reduce memory usage
         "-vframes",
         "1",
+        "-threads",
+        "1",  # Limit threads to reduce memory usage
         "-y",  # Overwrite output
         output,
     ]
 
     try:
-        _, _, code = await cmd_exec(cmd)
+        # Force garbage collection before thumbnail extraction
+        if smart_garbage_collection is not None:
+            smart_garbage_collection(aggressive=False)
+
+        _, _, code = await wait_for(cmd_exec(cmd), timeout=30)
         if code == 0 and await aiopath.exists(output):
-            if await aiopath.getsize(output) > 0:
-                return output
-            await remove(output)
-    except Exception:
-        pass
+            output_size = await aiopath.getsize(output)
+            if output_size > 0:
+                # Verify the extracted thumbnail isn't too large
+                if output_size > 5 * 1024 * 1024:  # 5MB limit for video thumbnails
+                    LOGGER.warning(
+                        f"Extracted video thumbnail too large ({output_size / (1024 * 1024):.1f}MB), removing"
+                    )
+                    await remove(output)
+                else:
+                    return output
+            else:
+                await remove(output)
+    except Exception as e:
+        LOGGER.error(f"Video thumbnail extraction failed: {e}")
 
     # If extraction fails, return None to trigger default thumbnail creation
     return None

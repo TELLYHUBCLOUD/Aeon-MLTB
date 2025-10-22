@@ -982,8 +982,10 @@ class TaskListener(TaskConfig):
 
         self.subproc = None
 
-        # Store MediaInfo link for later use in task completion message
+        # Store MediaInfo link(s) for later use in task completion message
+        # Keep legacy single-link for backward compatibility and add per-file mapping
         self.mediainfo_link = None
+        self.mediainfo_links = {}
 
         add_to_queue, event = await check_running_tasks(self, "up")
         await start_from_queued()
@@ -1367,12 +1369,21 @@ class TaskListener(TaskConfig):
                     user_mediainfo_enabled = (
                         Config.MEDIAINFO_ENABLED
                     )  # Use the pre-generated MediaInfo link if available
-                if (
-                    user_mediainfo_enabled
-                    and hasattr(self, "mediainfo_link")
-                    and self.mediainfo_link
-                ):
-                    msg += f"\n┖ <b>MediaInfo</b> → <a href='https://graph.org/{self.mediainfo_link}'>View</a>"
+                if user_mediainfo_enabled:
+                    # Prefer per-file MediaInfo link mapped to this message URL
+                    mediainfo_link = None
+                    try:
+                        if hasattr(self, "mediainfo_links") and isinstance(
+                            self.mediainfo_links, dict
+                        ):
+                            mediainfo_link = self.mediainfo_links.get(url)
+                    except Exception:
+                        mediainfo_link = None
+                    # Fallback to legacy single link
+                    if not mediainfo_link and hasattr(self, "mediainfo_link"):
+                        mediainfo_link = self.mediainfo_link
+                    if mediainfo_link:
+                        msg += f"\n┖ <b>MediaInfo</b> → <a href='https://graph.org/{mediainfo_link}'>View</a>"
 
             msg += "</blockquote>\n\n"
 
@@ -1426,21 +1437,28 @@ class TaskListener(TaskConfig):
                             "MEDIAINFO_ENABLED", None
                         )
                         if user_mediainfo_enabled is None:
-                            user_mediainfo_enabled = Config.MEDIAINFO_ENABLED  # Use the pre-generated MediaInfo link if available and valid
-                        if (
-                            user_mediainfo_enabled
-                            and hasattr(self, "mediainfo_link")
-                            and self.mediainfo_link
-                            and self.mediainfo_link.strip()
-                        ):
-                            # Support all media types including archives, documents, images, etc.
-                            file_entry += f"\n┖ <b>MediaInfo</b> → <a href='https://graph.org/{self.mediainfo_link}'>View</a>"
-                            # Log that MediaInfo link was successfully added to the message
-                        elif user_mediainfo_enabled and hasattr(
-                            self, "mediainfo_link"
-                        ):
-                            # MediaInfo was attempted but failed or returned empty
-                            pass
+                            user_mediainfo_enabled = Config.MEDIAINFO_ENABLED
+                        if user_mediainfo_enabled:
+                            # Prefer per-file MediaInfo link mapped to this file's URL
+                            per_file_link = None
+                            try:
+                                if hasattr(self, "mediainfo_links") and isinstance(
+                                    self.mediainfo_links, dict
+                                ):
+                                    per_file_link = self.mediainfo_links.get(url)
+                            except Exception:
+                                per_file_link = None
+                            # Fallback to legacy single link
+                            if (
+                                not per_file_link
+                                and hasattr(self, "mediainfo_link")
+                                and self.mediainfo_link
+                                and self.mediainfo_link.strip()
+                            ):
+                                per_file_link = self.mediainfo_link
+                            if per_file_link:
+                                # Support all media types including archives, documents, images, etc.
+                                file_entry += f"\n┖ <b>MediaInfo</b> → <a href='https://graph.org/{per_file_link}'>View</a>"
 
                         file_entry += "\n"
 
@@ -1511,13 +1529,29 @@ class TaskListener(TaskConfig):
                     )
                     if user_mediainfo_enabled is None:
                         user_mediainfo_enabled = Config.MEDIAINFO_ENABLED
-                    if (
-                        user_mediainfo_enabled
-                        and hasattr(self, "mediainfo_link")
-                        and self.mediainfo_link
-                        and self.mediainfo_link.strip()
-                    ):
-                        msg += f"\n<b>MediaInfo</b> → <a href='https://graph.org/{self.mediainfo_link}'>View</a>"
+                    if user_mediainfo_enabled:
+                        mediainfo_link = None
+                        try:
+                            if hasattr(self, "mediainfo_links") and isinstance(
+                                self.mediainfo_links, dict
+                            ):
+                                # Use the first file's URL if files dict exists
+                                if isinstance(files, dict) and files:
+                                    first_url = next(iter(files.keys()))
+                                    mediainfo_link = self.mediainfo_links.get(
+                                        first_url
+                                    )
+                        except Exception:
+                            mediainfo_link = None
+                        if (
+                            not mediainfo_link
+                            and hasattr(self, "mediainfo_link")
+                            and self.mediainfo_link
+                            and self.mediainfo_link.strip()
+                        ):
+                            mediainfo_link = self.mediainfo_link
+                        if mediainfo_link:
+                            msg += f"\n<b>MediaInfo</b> → <a href='https://graph.org/{mediainfo_link}'>View</a>"
 
                     buttons = ButtonMaker()
                     for i, video in enumerate(
@@ -1541,13 +1575,29 @@ class TaskListener(TaskConfig):
                     )
                     if user_mediainfo_enabled is None:
                         user_mediainfo_enabled = Config.MEDIAINFO_ENABLED
-                    if (
-                        user_mediainfo_enabled
-                        and hasattr(self, "mediainfo_link")
-                        and self.mediainfo_link
-                        and self.mediainfo_link.strip()
-                    ):
-                        msg += f"\n<b>MediaInfo</b> → <a href='https://graph.org/{self.mediainfo_link}'>View</a>"
+                    if user_mediainfo_enabled:
+                        mediainfo_link = None
+                        try:
+                            if hasattr(self, "mediainfo_links") and isinstance(
+                                self.mediainfo_links, dict
+                            ):
+                                # For single video, use the uploaded message URL
+                                if isinstance(files, dict) and files:
+                                    first_url = next(iter(files.keys()))
+                                    mediainfo_link = self.mediainfo_links.get(
+                                        first_url
+                                    )
+                        except Exception:
+                            mediainfo_link = None
+                        if (
+                            not mediainfo_link
+                            and hasattr(self, "mediainfo_link")
+                            and self.mediainfo_link
+                            and self.mediainfo_link.strip()
+                        ):
+                            mediainfo_link = self.mediainfo_link
+                        if mediainfo_link:
+                            msg += f"\n<b>MediaInfo</b> → <a href='https://graph.org/{mediainfo_link}'>View</a>"
 
                     buttons = ButtonMaker()
                     buttons.url_button(
@@ -1570,13 +1620,26 @@ class TaskListener(TaskConfig):
                 )
                 if user_mediainfo_enabled is None:
                     user_mediainfo_enabled = Config.MEDIAINFO_ENABLED
-                if (
-                    user_mediainfo_enabled
-                    and hasattr(self, "mediainfo_link")
-                    and self.mediainfo_link
-                    and self.mediainfo_link.strip()
-                ):
-                    msg += f"\n<b>MediaInfo</b> → <a href='https://graph.org/{self.mediainfo_link}'>View</a>"
+                if user_mediainfo_enabled:
+                    mediainfo_link = None
+                    try:
+                        if hasattr(self, "mediainfo_links") and isinstance(
+                            self.mediainfo_links, dict
+                        ):
+                            if isinstance(files, dict) and files:
+                                first_url = next(iter(files.keys()))
+                                mediainfo_link = self.mediainfo_links.get(first_url)
+                    except Exception:
+                        mediainfo_link = None
+                    if (
+                        not mediainfo_link
+                        and hasattr(self, "mediainfo_link")
+                        and self.mediainfo_link
+                        and self.mediainfo_link.strip()
+                    ):
+                        mediainfo_link = self.mediainfo_link
+                    if mediainfo_link:
+                        msg += f"\n<b>MediaInfo</b> → <a href='https://graph.org/{mediainfo_link}'>View</a>"
 
                 # Create buttons for DDL links
                 buttons = ButtonMaker()
@@ -1614,21 +1677,28 @@ class TaskListener(TaskConfig):
                     "MEDIAINFO_ENABLED", None
                 )
                 if user_mediainfo_enabled is None:
-                    user_mediainfo_enabled = (
-                        Config.MEDIAINFO_ENABLED
-                    )  # Use the pre-generated MediaInfo link if available and valid
-                if (
-                    user_mediainfo_enabled
-                    and hasattr(self, "mediainfo_link")
-                    and self.mediainfo_link
-                    and self.mediainfo_link.strip()
-                ):
-                    # Support all media types including archives, documents, images, etc.
-                    msg += f"\n<b>MediaInfo</b> → <a href='https://graph.org/{self.mediainfo_link}'>View</a>"
-                    # Log that MediaInfo link was successfully added to the message
-                elif user_mediainfo_enabled and hasattr(self, "mediainfo_link"):
-                    # MediaInfo was attempted but failed or returned empty
-                    pass
+                    user_mediainfo_enabled = Config.MEDIAINFO_ENABLED
+                if user_mediainfo_enabled:
+                    mediainfo_link = None
+                    try:
+                        if hasattr(self, "mediainfo_links") and isinstance(
+                            self.mediainfo_links, dict
+                        ):
+                            if isinstance(files, dict) and files:
+                                first_url = next(iter(files.keys()))
+                                mediainfo_link = self.mediainfo_links.get(first_url)
+                    except Exception:
+                        mediainfo_link = None
+                    if (
+                        not mediainfo_link
+                        and hasattr(self, "mediainfo_link")
+                        and self.mediainfo_link
+                        and self.mediainfo_link.strip()
+                    ):
+                        mediainfo_link = self.mediainfo_link
+                    if mediainfo_link:
+                        # Support all media types including archives, documents, images, etc.
+                        msg += f"\n<b>MediaInfo</b> → <a href='https://graph.org/{mediainfo_link}'>View</a>"
                 if link or (
                     rclone_path and Config.RCLONE_SERVE_URL and not self.private_link
                 ):
