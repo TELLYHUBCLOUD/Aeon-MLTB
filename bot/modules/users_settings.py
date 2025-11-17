@@ -149,15 +149,21 @@ async def get_user_settings(from_user, stype="main"):
 🎨 Thumbnail Layout: <b>{thumb_layout}</b>
 """
     elif stype == "rclone":
-        buttons.data_button("📁 Rclone Config", f"userset {user_id} menu RCLONE_CONFIG")
+        buttons.data_button(
+            "📁 Rclone Config", f"userset {user_id} menu RCLONE_CONFIG"
+        )
         buttons.data_button(
             "📂 Default Rclone Path",
             f"userset {user_id} menu RCLONE_PATH",
         )
-        buttons.data_button("🚩 Rclone Flags", f"userset {user_id} menu RCLONE_FLAGS")
+        buttons.data_button(
+            "🚩 Rclone Flags", f"userset {user_id} menu RCLONE_FLAGS"
+        )
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
-        rccmsg = "✅ Exists" if await aiopath.exists(rclone_conf) else "❌ Not Exists"
+        rccmsg = (
+            "✅ Exists" if await aiopath.exists(rclone_conf) else "❌ Not Exists"
+        )
         if user_dict.get("RCLONE_PATH", False):
             rccpath = user_dict["RCLONE_PATH"]
         elif Config.RCLONE_PATH:
@@ -176,8 +182,12 @@ async def get_user_settings(from_user, stype="main"):
 📂 Rclone Path: <code>{rccpath}</code>
 🚩 Rclone Flags: <code>{rcflags}</code>"""
     elif stype == "gdrive":
-        buttons.data_button("🔑 token.pickle", f"userset {user_id} menu TOKEN_PICKLE")
-        buttons.data_button("💾 Default Gdrive ID", f"userset {user_id} menu GDRIVE_ID")
+        buttons.data_button(
+            "🔑 token.pickle", f"userset {user_id} menu TOKEN_PICKLE"
+        )
+        buttons.data_button(
+            "💾 Default Gdrive ID", f"userset {user_id} menu GDRIVE_ID"
+        )
         buttons.data_button("🔗 Index URL", f"userset {user_id} menu INDEX_URL")
         if user_dict.get("STOP_DUPLICATE", False) or (
             "STOP_DUPLICATE" not in user_dict and Config.STOP_DUPLICATE
@@ -195,7 +205,9 @@ async def get_user_settings(from_user, stype="main"):
             sd_msg = "❌ Disabled"
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
-        tokenmsg = "✅ Exists" if await aiopath.exists(token_pickle) else "❌ Not Exists"
+        tokenmsg = (
+            "✅ Exists" if await aiopath.exists(token_pickle) else "❌ Not Exists"
+        )
         if user_dict.get("GDRIVE_ID", False):
             gdrive_id = user_dict["GDRIVE_ID"]
         elif GDID := Config.GDRIVE_ID:
@@ -293,7 +305,9 @@ async def get_user_settings(from_user, stype="main"):
         else:
             upload_paths = "None"
 
-        buttons.data_button("📤 Upload Paths", f"userset {user_id} menu UPLOAD_PATHS")
+        buttons.data_button(
+            "📤 Upload Paths", f"userset {user_id} menu UPLOAD_PATHS"
+        )
 
         if user_dict.get("DEFAULT_UPLOAD", ""):
             default_upload = user_dict["DEFAULT_UPLOAD"]
@@ -441,7 +455,7 @@ async def add_one(_, message, option):
             else:
                 update_user_ldata(user_id, option, value)
         except Exception as e:
-            await send_message(message, f"❌ Error: {str(e)}")
+            await send_message(message, f"❌ Error: {e!s}")
             return
     else:
         await send_message(message, "❌ It must be dict!")
@@ -483,7 +497,7 @@ async def set_option(_, message, option):
             try:
                 value = eval(value)
             except Exception as e:
-                await send_message(message, f"❌ Error: {str(e)}")
+                await send_message(message, f"❌ Error: {e!s}")
                 return
         else:
             await send_message(message, "❌ It must be dict!")
@@ -688,7 +702,9 @@ async def edit_user_settings(client, query):
         await query.answer()
         buttons = ButtonMaker()
         if data[3] == "THUMBNAIL":
-            text = "📤 Send a photo to save it as custom thumbnail. ⏱️ Timeout: 60 sec"
+            text = (
+                "📤 Send a photo to save it as custom thumbnail. ⏱️ Timeout: 60 sec"
+            )
         elif data[3] == "RCLONE_CONFIG":
             text = "📤 Send rclone.conf. ⏱️ Timeout: 60 sec"
         else:
