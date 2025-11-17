@@ -1,6 +1,7 @@
 from asyncio import gather
 from re import search as research
 from time import time
+
 from aiofiles.os import path as aiopath
 from psutil import (
     boot_time,
@@ -11,6 +12,7 @@ from psutil import (
     swap_memory,
     virtual_memory,
 )
+
 from bot import bot_start_time
 from bot.helper.ext_utils.bot_utils import cmd_exec, new_task
 from bot.helper.ext_utils.status_utils import (
@@ -22,6 +24,7 @@ from bot.helper.telegram_helper.message_utils import (
     delete_message,
     send_message,
 )
+
 commands = {
     "aria2": (["xria", "--version"], r"aria2 version ([\d.]+)"),
     "qBittorrent": (["xnox", "--version"], r"qBittorrent v([\d.]+)"),
@@ -32,6 +35,8 @@ commands = {
     "ffmpeg": (["xtra", "-version"], r"ffmpeg version (n[\d.]+)"),
     "7z": (["7z", "i"], r"7-Zip ([\d.]+)"),
 }
+
+
 @new_task
 async def bot_stats(_, message):
     total, used, free, disk = disk_usage("/")
@@ -71,6 +76,8 @@ async def bot_stats(_, message):
     reply_message = await send_message(message, stats)
     await delete_message(message)
     await auto_delete_message(reply_message)
+
+
 async def get_version_async(command, regex):
     try:
         out, err, code = await cmd_exec(command)
@@ -80,6 +87,8 @@ async def get_version_async(command, regex):
         return match.group(1) if match else "Version not found"
     except Exception as e:
         return f"Exception: {e!s}"
+
+
 @new_task
 async def get_packages_version():
     tasks = [
