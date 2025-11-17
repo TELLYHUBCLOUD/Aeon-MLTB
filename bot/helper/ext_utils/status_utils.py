@@ -270,13 +270,15 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
         buttons.data_button("➡️ Next", f"status {sid} nex", position="header")
         if tasks_no > 30:
             for i in [1, 2, 4, 6, 8, 10, 15]:
-                buttons.data_button(f"↔️ {i}", f"status {sid} ps {i}", position="footer")
+                buttons.data_button(
+                    f"↔️ {i}", f"status {sid} ps {i}", position="footer"
+                )
     if status != "All" or tasks_no > 20:
         for label, status_value in list(STATUSES.items()):
             if status_value != status:
                 buttons.data_button(label, f"status {sid} st {status_value}")
     button = buttons.build_menu(8)
-    msg += f"\n━━━━━━━━━━━━━━━━━━━━\n"
+    msg += "\n━━━━━━━━━━━━━━━━━━━━\n"
     msg += f"🖥️ <b>CPU:</b> {cpu_percent()}% | 💿 <b>FREE:</b> {get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)}"
     msg += f"\n🐏 <b>RAM:</b> {virtual_memory().percent}% | ⏰ <b>UPTIME:</b> {get_readable_time(time() - bot_start_time)}"
     return msg, button
