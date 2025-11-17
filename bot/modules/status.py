@@ -57,10 +57,11 @@ async def task_status(_, message):
     if count == 0:
         currentTime = get_readable_time(time() - bot_start_time)
         free = get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)
-        msg = "No Active Tasks!\n"
+        msg = "🎯 <b>No Active Tasks!</b>\n"
+        msg += "━━━━━━━━━━━━━━━━━━━━\n"
         msg += (
-            f"\n<b>CPU:</b> {cpu_percent()}% | <b>FREE:</b> {free}"
-            f"\n<b>RAM:</b> {virtual_memory().percent}% | <b>UPTIME:</b> {currentTime}"
+            f"🖥 <b>CPU:</b> {cpu_percent()}% | 💾 <b>FREE:</b> {free}\n"
+            f"🎚 <b>RAM:</b> {virtual_memory().percent}% | ⏱ <b>UPTIME:</b> {currentTime}"
         )
         reply_message = await send_message(message, msg)
         await auto_delete_message(message, reply_message)
@@ -186,16 +187,22 @@ async def status_pages(_, query):
                     case _:
                         tasks["Download"] += 1
 
-        msg = f"""<b>DL:</b> {tasks["Download"]} | <b>UP:</b> {tasks["Upload"]} | <b>SD:</b> {tasks["Seed"]} | <b>AR:</b> {tasks["Archive"]}
-<b>EX:</b> {tasks["Extract"]} | <b>SP:</b> {tasks["Split"]} | <b>QD:</b> {tasks["QueueDl"]} | <b>QU:</b> {tasks["QueueUp"]}
-<b>CL:</b> {tasks["Clone"]} | <b>CK:</b> {tasks["CheckUp"]} | <b>PA:</b> {tasks["Pause"]} | <b>SV:</b> {tasks["SamVid"]}
-<b>CM:</b> {tasks["ConvertMedia"]} | <b>FF:</b> {tasks["FFmpeg"]} | <b>MD:</b> {tasks["Metadata"]} | <b>WM:</b> {tasks["Watermark"]}
-<b>ET:</b> {tasks["EmbedThumb"]} | <b>YT:</b> {tasks["YtUp"]}
+        msg = f"""📊 <b>Task Overview</b>
+━━━━━━━━━━━━━━━━━━━━
 
-<b>ODLS:</b> {get_readable_file_size(dl_speed)}/s
-<b>OULS:</b> {get_readable_file_size(up_speed)}/s
-<b>OSDS:</b> {get_readable_file_size(seed_speed)}/s
+📥 <b>DL:</b> {tasks["Download"]} | 📤 <b>UP:</b> {tasks["Upload"]} | 🌱 <b>SD:</b> {tasks["Seed"]} | 🗜 <b>AR:</b> {tasks["Archive"]}
+📦 <b>EX:</b> {tasks["Extract"]} | ✂️ <b>SP:</b> {tasks["Split"]} | ⏳ <b>QD:</b> {tasks["QueueDl"]} | ⏳ <b>QU:</b> {tasks["QueueUp"]}
+📋 <b>CL:</b> {tasks["Clone"]} | ✅ <b>CK:</b> {tasks["CheckUp"]} | ⏸ <b>PA:</b> {tasks["Pause"]} | 🎬 <b>SV:</b> {tasks["SamVid"]}
+🎞 <b>CM:</b> {tasks["ConvertMedia"]} | 🎵 <b>FF:</b> {tasks["FFmpeg"]} | 📝 <b>MD:</b> {tasks["Metadata"]} | 💧 <b>WM:</b> {tasks["Watermark"]}
+🖼 <b>ET:</b> {tasks["EmbedThumb"]} | 🎥 <b>YT:</b> {tasks["YtUp"]}
+
+━━━━━━━━━━━━━━━━━━━━
+⚡️ <b>Speed Statistics</b>
+
+⬇️ <b>Download:</b> {get_readable_file_size(dl_speed)}/s
+⬆️ <b>Upload:</b> {get_readable_file_size(up_speed)}/s
+🌱 <b>Seeding:</b> {get_readable_file_size(seed_speed)}/s
 """
         button = ButtonMaker()
-        button.data_button("Back", f"status {data[1]} ref")
+        button.data_button("🔙 Back", f"status {data[1]} ref")
         await edit_message(message, msg, button.build_menu())
