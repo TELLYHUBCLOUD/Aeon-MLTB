@@ -3,7 +3,6 @@ from bot.helper.telegram_helper.bot_commands import BotCommands
 
 nsfw_keywords = [
     "fgjgfjgfhjgffgh",
-
 ]
 
 mirror = """<b>Send link along with command line or </b>
