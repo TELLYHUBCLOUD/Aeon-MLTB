@@ -18,7 +18,14 @@ class DbManager:
         """Initializes the DbManager, setting initial connection state."""
         self._return = True
         self._conn = None
-        self.db = None
+
+    @property
+    def db(self):
+        """Dynamically returns the correct database based on current TgClient.ID"""
+        if self._conn is None:
+            return None
+        db_id = TgClient.ID
+        return self._conn[f'tellyaeon{db_id}']
 
     async def connect(self):
         """Establishes a connection to the MongoDB database using DATABASE_URL."""
@@ -29,16 +36,12 @@ class DbManager:
                 Config.DATABASE_URL,
                 server_api=ServerApi("1"),
             )
-            db_id = TgClient.ID
-            # FIX 1: Syntax sahi kiya hai
-            self.db = self._conn[f"tellyaeon{db_id}"]
             self._return = False
             LOGGER.info("Successfully connected to the database.")
         except PyMongoError as e:
             LOGGER.error(f"Error in DB connection: {e}")
-            self.db = None
-            self._return = True
             self._conn = None
+            self._return = True
 
     async def disconnect(self):
         """Closes the MongoDB connection."""
