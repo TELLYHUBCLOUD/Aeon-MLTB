@@ -125,7 +125,9 @@ class DbManager:
     async def update_nzb_config(self):
         if self._return:
             return
-        async with aiopen("sabnzbd/SABnzbd.ini", "rb") as pf:  # Fixed: removed '+' mode
+        async with aiopen(
+            "sabnzbd/SABnzbd.ini", "rb"
+        ) as pf:  # Fixed: removed '+' mode
             nzb_conf = await pf.read()
         await self.db.settings.nzb.replace_one(
             {"_id": TgClient.ID},
@@ -144,7 +146,7 @@ class DbManager:
         data = data.copy()
         for key in ("THUMBNAIL", "RCLONE_CONFIG", "TOKEN_PICKLE", "TOKEN", "TIME"):
             data.pop(key, None)
-        
+
         # Fixed: Proper aggregation pipeline syntax
         await self.db.users.update_one(
             {"_id": user_id},
@@ -160,7 +162,12 @@ class DbManager:
                                         "cond": {
                                             "$in": [
                                                 "$$field.k",
-                                                ["THUMBNAIL", "RCLONE_CONFIG", "TOKEN_PICKLE", "_id"],
+                                                [
+                                                    "THUMBNAIL",
+                                                    "RCLONE_CONFIG",
+                                                    "TOKEN_PICKLE",
+                                                    "_id",
+                                                ],
                                             ],
                                         },
                                     },
@@ -234,7 +241,9 @@ class DbManager:
         """
         if self._return:
             return
-        if not await self.db.pm_users[TgClient.ID].find_one({"_id": user_id}):  # Fixed: removed bool()
+        if not await self.db.pm_users[TgClient.ID].find_one(
+            {"_id": user_id}
+        ):  # Fixed: removed bool()
             await self.db.pm_users[TgClient.ID].insert_one({"_id": user_id})
             LOGGER.info(f"New PM user added: {user_id}")
 
@@ -302,15 +311,15 @@ class DbManager:
                 cid = row["cid"]
                 tag = row["tag"]
                 link = row["_id"]
-                
+
                 if cid not in notifier_dict:
                     notifier_dict[cid] = {}
-                
+
                 if tag not in notifier_dict[cid]:
                     notifier_dict[cid][tag] = []
-                
+
                 notifier_dict[cid][tag].append(link)
-        
+
         await self.db.tasks[TgClient.ID].drop()
         return notifier_dict
 
