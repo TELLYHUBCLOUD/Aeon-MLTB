@@ -25,7 +25,7 @@ class DbManager:
         if self._conn is None:
             return None
         db_id = TgClient.ID
-        return self._conn[f'tellyaeon{db_id}']
+        return self._conn[f"tellyaeon{db_id}"]
 
     async def connect(self):
         """Establishes a connection to the MongoDB database using DATABASE_URL."""
