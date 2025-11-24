@@ -1,5 +1,4 @@
 from importlib import import_module
-
 from aiofiles import open as aiopen
 from aiofiles.os import path as aiopath
 from motor.motor_asyncio import AsyncIOMotorClient as AsyncMongoClient
@@ -18,14 +17,7 @@ class DbManager:
         """Initializes the DbManager, setting initial connection state."""
         self._return = True
         self._conn = None
-
-    @property
-    def db(self):
-        """Dynamically returns the correct database based on current TgClient.ID"""
-        if self._conn is None:
-            return None
-        db_id = TgClient.ID if TgClient.ID else "default"
-        return self._conn[f"tellyaeon{db_id}"]
+        self.db = None
 
     async def connect(self):
         """Establishes a connection to the MongoDB database using DATABASE_URL."""
@@ -36,12 +28,16 @@ class DbManager:
                 Config.DATABASE_URL,
                 server_api=ServerApi("1"),
             )
+            db_id = TgClient.ID
+            # FIX 1: Syntax sahi kiya hai
+            self.db = self._conn[f'tellyaeon{db_id}']
             self._return = False
             LOGGER.info("Successfully connected to the database.")
         except PyMongoError as e:
             LOGGER.error(f"Error in DB connection: {e}")
-            self._conn = None
+            self.db = None
             self._return = True
+            self._conn = None
 
     async def disconnect(self):
         """Closes the MongoDB connection."""
@@ -52,9 +48,6 @@ class DbManager:
         self._conn = None
 
     async def update_deploy_config(self):
-        """Updates or creates the deployment configuration in the database
-        based on the current 'config.py' settings.
-        """
         if self._return:
             return
         settings = import_module("config")
@@ -138,16 +131,14 @@ class DbManager:
         )
 
     async def update_user_data(self, user_id):
-        """Updates user-specific data in the database, excluding certain sensitive keys
-        like tokens from the main user_data dict before persisting.
-        It preserves existing THUMBNAIL, RCLONE_CONFIG, TOKEN_PICKLE from DB if not in memory.
-        """
         if self._return:
             return
         data = user_data.get(user_id, {})
         data = data.copy()
+        # Sensitive data ko remove kar rahe hain taki DB mein save na ho (except agar DB mein already ho)
         for key in ("THUMBNAIL", "RCLONE_CONFIG", "TOKEN_PICKLE", "TOKEN", "TIME"):
             data.pop(key, None)
+        
         pipeline = [
             {
                 "$replaceRoot": {
@@ -177,9 +168,7 @@ class DbManager:
                 },
             },
         ]
-        await self.db.users[TgClient.ID].update_one(
-            {"_id": user_id}, pipeline, upsert=True
-        )
+        await self.db.users.update_one({"_id": user_id}, pipeline, upsert=True)
 
     async def update_user_doc(self, user_id, key, path=""):
         if self._return:
@@ -187,13 +176,13 @@ class DbManager:
         if path:
             async with aiopen(path, "rb+") as doc:
                 doc_bin = await doc.read()
-            await self.db.users[TgClient.ID].update_one(
+            await self.db.users.update_one(
                 {"_id": user_id},
                 {"$set": {key: doc_bin}},
                 upsert=True,
             )
         else:
-            await self.db.users[TgClient.ID].update_one(
+            await self.db.users.update_one(
                 {"_id": user_id},
                 {"$unset": {key: ""}},
                 upsert=True,
@@ -203,7 +192,8 @@ class DbManager:
         if self._return:
             return
         for user_id in list(rss_dict.keys()):
-            await self.db.rss[TgClient.ID].replace_one(
+            # FIX 2: [TgClient.ID] hata diya gaya hai
+            await self.db.rss.replace_one(
                 {"_id": user_id},
                 rss_dict[user_id],
                 upsert=True,
@@ -212,7 +202,8 @@ class DbManager:
     async def rss_update(self, user_id):
         if self._return:
             return
-        await self.db.rss[TgClient.ID].replace_one(
+        # FIX 2
+        await self.db.rss.replace_one(
             {"_id": user_id},
             rss_dict[user_id],
             upsert=True,
@@ -221,39 +212,41 @@ class DbManager:
     async def rss_delete(self, user_id):
         if self._return:
             return
-        await self.db.rss[TgClient.ID].delete_one({"_id": user_id})
+        # FIX 2
+        await self.db.rss.delete_one({"_id": user_id})
 
     async def add_incomplete_task(self, cid, link, tag):
         if self._return:
             return
-        await self.db.tasks[TgClient.ID].insert_one(
+        # FIX 2
+        await self.db.tasks.insert_one(
             {"_id": link, "cid": cid, "tag": tag},
         )
 
     async def get_pm_uids(self):
         if self._return:
-            return []
-        return [doc["_id"] async for doc in self.db.pm_users[TgClient.ID].find({})]
+            return None
+        # FIX 2
+        return [doc["_id"] async for doc in self.db.pm_users.find({})]
 
     async def update_pm_users(self, user_id):
-        """Adds a user_id to the pm_users collection if not already present,
-        logging the addition.
-        """
         if self._return:
             return
-        if not bool(await self.db.pm_users[TgClient.ID].find_one({"_id": user_id})):
-            await self.db.pm_users[TgClient.ID].insert_one({"_id": user_id})
+        # FIX 2
+        if not bool(await self.db.pm_users.find_one({"_id": user_id})):
+            await self.db.pm_users.insert_one({"_id": user_id})
             LOGGER.info(f"New PM user added: {user_id}")
 
     async def rm_pm_user(self, user_id):
         if self._return:
             return
-        await self.db.pm_users[TgClient.ID].delete_one({"_id": user_id})
+        # FIX 2
+        await self.db.pm_users.delete_one({"_id": user_id})
 
     async def update_user_tdata(self, user_id, token, time):
         if self._return:
             return
-        await self.db.access_token[TgClient.ID].update_one(
+        await self.db.access_token.update_one(
             {"_id": user_id},
             {"$set": {"TOKEN": token, "TIME": time}},
             upsert=True,
@@ -262,7 +255,7 @@ class DbManager:
     async def update_user_token(self, user_id, token):
         if self._return:
             return
-        await self.db.access_token[TgClient.ID].update_one(
+        await self.db.access_token.update_one(
             {"_id": user_id},
             {"$set": {"TOKEN": token}},
             upsert=True,
@@ -271,9 +264,7 @@ class DbManager:
     async def get_token_expiry(self, user_id):
         if self._return:
             return None
-        user_data = await self.db.access_token[TgClient.ID].find_one(
-            {"_id": user_id}
-        )
+        user_data = await self.db.access_token.find_one({"_id": user_id})
         if user_data:
             return user_data.get("TIME")
         return None
@@ -281,14 +272,12 @@ class DbManager:
     async def delete_user_token(self, user_id):
         if self._return:
             return
-        await self.db.access_token[TgClient.ID].delete_one({"_id": user_id})
+        await self.db.access_token.delete_one({"_id": user_id})
 
     async def get_user_token(self, user_id):
         if self._return:
             return None
-        user_data = await self.db.access_token[TgClient.ID].find_one(
-            {"_id": user_id}
-        )
+        user_data = await self.db.access_token.find_one({"_id": user_id})
         if user_data:
             return user_data.get("TOKEN")
         return None
@@ -296,19 +285,21 @@ class DbManager:
     async def delete_all_access_tokens(self):
         if self._return:
             return
-        await self.db.access_token[TgClient.ID].delete_many({})
+        await self.db.access_token.delete_many({})
 
     async def rm_complete_task(self, link):
         if self._return:
             return
-        await self.db.tasks[TgClient.ID].delete_one({"_id": link})
+        # FIX 2
+        await self.db.tasks.delete_one({"_id": link})
 
     async def get_incomplete_tasks(self):
         notifier_dict = {}
         if self._return:
             return notifier_dict
-        if await self.db.tasks[TgClient.ID].find_one():
-            rows = self.db.tasks[TgClient.ID].find({})
+        # FIX 2
+        if await self.db.tasks.find_one():
+            rows = self.db.tasks.find({})
             async for row in rows:
                 if row["cid"] in list(notifier_dict.keys()):
                     if row["tag"] in list(notifier_dict[row["cid"]]):
@@ -317,13 +308,15 @@ class DbManager:
                         notifier_dict[row["cid"]][row["tag"]] = [row["_id"]]
                 else:
                     notifier_dict[row["cid"]] = {row["tag"]: [row["_id"]]}
-        await self.db.tasks[TgClient.ID].drop()
+        # FIX 2: Dropping the specific collection
+        await self.db.tasks.drop()
         return notifier_dict
 
     async def trunc_table(self, name):
         if self._return:
             return
-        await self.db[name][TgClient.ID].drop()
+        # FIX 2: Access collection by name variable
+        await self.db[name].drop()
 
 
 database = DbManager()
