@@ -106,7 +106,7 @@ class DbManager:
             return
         db_path = path.replace(".", "__")
         if await aiopath.exists(path):
-            async with aiopen(path, "rb+") as pf:
+            async with aiopen(path, "rb") as pf:  # Fixed: removed '+' mode
                 pf_bin = await pf.read()
             await self.db.settings.files.update_one(
                 {"_id": TgClient.ID},
@@ -125,7 +125,7 @@ class DbManager:
     async def update_nzb_config(self):
         if self._return:
             return
-        async with aiopen("sabnzbd/SABnzbd.ini", "rb+") as pf:
+        async with aiopen("sabnzbd/SABnzbd.ini", "rb") as pf:  # Fixed: removed '+' mode
             nzb_conf = await pf.read()
         await self.db.settings.nzb.replace_one(
             {"_id": TgClient.ID},
@@ -144,12 +144,14 @@ class DbManager:
         data = data.copy()
         for key in ("THUMBNAIL", "RCLONE_CONFIG", "TOKEN_PICKLE", "TOKEN", "TIME"):
             data.pop(key, None)
-        pipeline = [
-            {
-                "$replaceRoot": {
-                    "newRoot": {
+        
+        # Fixed: Proper aggregation pipeline syntax
+        await self.db.users.update_one(
+            {"_id": user_id},
+            [
+                {
+                    "$set": {
                         "$mergeObjects": [
-                            data,
                             {
                                 "$arrayToObject": {
                                     "$filter": {
@@ -158,28 +160,25 @@ class DbManager:
                                         "cond": {
                                             "$in": [
                                                 "$$field.k",
-                                                [
-                                                    "THUMBNAIL",
-                                                    "RCLONE_CONFIG",
-                                                    "TOKEN_PICKLE",
-                                                ],
+                                                ["THUMBNAIL", "RCLONE_CONFIG", "TOKEN_PICKLE", "_id"],
                                             ],
                                         },
                                     },
                                 },
                             },
+                            data,
                         ],
                     },
                 },
-            },
-        ]
-        await self.db.users.update_one({"_id": user_id}, pipeline, upsert=True)
+            ],
+            upsert=True,
+        )
 
     async def update_user_doc(self, user_id, key, path=""):
         if self._return:
             return
         if path:
-            async with aiopen(path, "rb+") as doc:
+            async with aiopen(path, "rb") as doc:  # Fixed: removed '+' mode
                 doc_bin = await doc.read()
             await self.db.users.update_one(
                 {"_id": user_id},
@@ -226,7 +225,7 @@ class DbManager:
 
     async def get_pm_uids(self):
         if self._return:
-            return None
+            return []  # Fixed: return empty list instead of None
         return [doc["_id"] async for doc in self.db.pm_users[TgClient.ID].find({})]
 
     async def update_pm_users(self, user_id):
@@ -235,7 +234,7 @@ class DbManager:
         """
         if self._return:
             return
-        if not bool(await self.db.pm_users[TgClient.ID].find_one({"_id": user_id})):
+        if not await self.db.pm_users[TgClient.ID].find_one({"_id": user_id}):  # Fixed: removed bool()
             await self.db.pm_users[TgClient.ID].insert_one({"_id": user_id})
             LOGGER.info(f"New PM user added: {user_id}")
 
@@ -300,13 +299,18 @@ class DbManager:
         if await self.db.tasks[TgClient.ID].find_one():
             rows = self.db.tasks[TgClient.ID].find({})
             async for row in rows:
-                if row["cid"] in list(notifier_dict.keys()):
-                    if row["tag"] in list(notifier_dict[row["cid"]]):
-                        notifier_dict[row["cid"]][row["tag"]].append(row["_id"])
-                    else:
-                        notifier_dict[row["cid"]][row["tag"]] = [row["_id"]]
-                else:
-                    notifier_dict[row["cid"]] = {row["tag"]: [row["_id"]]}
+                cid = row["cid"]
+                tag = row["tag"]
+                link = row["_id"]
+                
+                if cid not in notifier_dict:
+                    notifier_dict[cid] = {}
+                
+                if tag not in notifier_dict[cid]:
+                    notifier_dict[cid][tag] = []
+                
+                notifier_dict[cid][tag].append(link)
+        
         await self.db.tasks[TgClient.ID].drop()
         return notifier_dict
 
