@@ -29,7 +29,7 @@ class DbManager:
                 Config.DATABASE_URL,
                 server_api=ServerApi("1"),
             )
-            self.db = self._conn[f"tellyaeon{TgClient.ID}"]
+            self.db = self._conn[f'tellyaeon{TgClient.ID}']
             self._return = False
             LOGGER.info("Successfully connected to the database.")
         except PyMongoError as e:
@@ -172,9 +172,7 @@ class DbManager:
                 },
             },
         ]
-        await self.db.users[TgClient.ID].update_one(
-            {"_id": user_id}, pipeline, upsert=True
-        )
+        await self.db.users[TgClient.ID].update_one({"_id": user_id}, pipeline, upsert=True)
 
     async def update_user_doc(self, user_id, key, path=""):
         if self._return:
@@ -266,9 +264,7 @@ class DbManager:
     async def get_token_expiry(self, user_id):
         if self._return:
             return None
-        user_data = await self.db.access_token[TgClient.ID].find_one(
-            {"_id": user_id}
-        )
+        user_data = await self.db.access_token[TgClient.ID].find_one({"_id": user_id})
         if user_data:
             return user_data.get("TIME")
         return None
@@ -281,9 +277,7 @@ class DbManager:
     async def get_user_token(self, user_id):
         if self._return:
             return None
-        user_data = await self.db.access_token[TgClient.ID].find_one(
-            {"_id": user_id}
-        )
+        user_data = await self.db.access_token[TgClient.ID].find_one({"_id": user_id})
         if user_data:
             return user_data.get("TOKEN")
         return None
