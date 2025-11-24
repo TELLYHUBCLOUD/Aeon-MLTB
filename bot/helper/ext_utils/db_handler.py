@@ -29,7 +29,7 @@ class DbManager:
                 Config.DATABASE_URL,
                 server_api=ServerApi("1"),
             )
-            self.db = self._conn.luna
+            self.db = self._conn[f'tellyaeon{TgClient.ID}']
             self._return = False
             LOGGER.info("Successfully connected to the database.")
         except PyMongoError as e:
@@ -172,7 +172,7 @@ class DbManager:
                 },
             },
         ]
-        await self.db.users.update_one({"_id": user_id}, pipeline, upsert=True)
+        await self.db.users[TgClient.ID].update_one({"_id": user_id}, pipeline, upsert=True)
 
     async def update_user_doc(self, user_id, key, path=""):
         if self._return:
@@ -180,13 +180,13 @@ class DbManager:
         if path:
             async with aiopen(path, "rb+") as doc:
                 doc_bin = await doc.read()
-            await self.db.users.update_one(
+            await self.db.users[TgClient.ID].update_one(
                 {"_id": user_id},
                 {"$set": {key: doc_bin}},
                 upsert=True,
             )
         else:
-            await self.db.users.update_one(
+            await self.db.users[TgClient.ID].update_one(
                 {"_id": user_id},
                 {"$unset": {key: ""}},
                 upsert=True,
@@ -225,7 +225,7 @@ class DbManager:
 
     async def get_pm_uids(self):
         if self._return:
-            return None
+            return []
         return [doc["_id"] async for doc in self.db.pm_users[TgClient.ID].find({})]
 
     async def update_pm_users(self, user_id):
@@ -246,7 +246,7 @@ class DbManager:
     async def update_user_tdata(self, user_id, token, time):
         if self._return:
             return
-        await self.db.access_token.update_one(
+        await self.db.access_token[TgClient.ID].update_one(
             {"_id": user_id},
             {"$set": {"TOKEN": token, "TIME": time}},
             upsert=True,
@@ -255,7 +255,7 @@ class DbManager:
     async def update_user_token(self, user_id, token):
         if self._return:
             return
-        await self.db.access_token.update_one(
+        await self.db.access_token[TgClient.ID].update_one(
             {"_id": user_id},
             {"$set": {"TOKEN": token}},
             upsert=True,
@@ -264,7 +264,7 @@ class DbManager:
     async def get_token_expiry(self, user_id):
         if self._return:
             return None
-        user_data = await self.db.access_token.find_one({"_id": user_id})
+        user_data = await self.db.access_token[TgClient.ID].find_one({"_id": user_id})
         if user_data:
             return user_data.get("TIME")
         return None
@@ -272,12 +272,12 @@ class DbManager:
     async def delete_user_token(self, user_id):
         if self._return:
             return
-        await self.db.access_token.delete_one({"_id": user_id})
+        await self.db.access_token[TgClient.ID].delete_one({"_id": user_id})
 
     async def get_user_token(self, user_id):
         if self._return:
             return None
-        user_data = await self.db.access_token.find_one({"_id": user_id})
+        user_data = await self.db.access_token[TgClient.ID].find_one({"_id": user_id})
         if user_data:
             return user_data.get("TOKEN")
         return None
@@ -285,7 +285,7 @@ class DbManager:
     async def delete_all_access_tokens(self):
         if self._return:
             return
-        await self.db.access_token.delete_many({})
+        await self.db.access_token[TgClient.ID].delete_many({})
 
     async def rm_complete_task(self, link):
         if self._return:
