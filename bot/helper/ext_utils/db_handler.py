@@ -29,7 +29,7 @@ class DbManager:
                 Config.DATABASE_URL,
                 server_api=ServerApi("1"),
             )
-            dbid = Config.DATABASE_NUM
+            dbid = TgClient.ID
             self.db = self._conn[f"tellyaeon{dbid}"]
             self._return = False
             LOGGER.info("Successfully connected to the database.")
