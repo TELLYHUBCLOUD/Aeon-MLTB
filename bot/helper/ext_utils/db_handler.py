@@ -30,7 +30,7 @@ class DbManager:
                 server_api=ServerApi("1"),
             )
             dbid = Config.DATABASE_NUM
-            self.db = self._conn[f'tellyaeon{dbid}']
+            self.db = self._conn[f"tellyaeon{dbid}"]
             self._return = False
             LOGGER.info("Successfully connected to the database.")
         except PyMongoError as e:
