@@ -1,4 +1,5 @@
 from importlib import import_module
+
 from aiofiles import open as aiopen
 from aiofiles.os import path as aiopath
 from motor.motor_asyncio import AsyncIOMotorClient as AsyncMongoClient
@@ -30,7 +31,7 @@ class DbManager:
             )
             db_id = TgClient.ID
             # FIX 1: Syntax sahi kiya hai
-            self.db = self._conn[f'tellyaeon{db_id}']
+            self.db = self._conn[f"tellyaeon{db_id}"]
             self._return = False
             LOGGER.info("Successfully connected to the database.")
         except PyMongoError as e:
@@ -138,7 +139,7 @@ class DbManager:
         # Sensitive data ko remove kar rahe hain taki DB mein save na ho (except agar DB mein already ho)
         for key in ("THUMBNAIL", "RCLONE_CONFIG", "TOKEN_PICKLE", "TOKEN", "TIME"):
             data.pop(key, None)
-        
+
         pipeline = [
             {
                 "$replaceRoot": {
