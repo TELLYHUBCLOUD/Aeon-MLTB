@@ -16,7 +16,7 @@ class Config:
     BOT_TOKEN: str = ""
     CMD_SUFFIX: str = ""
     DATABASE_URL: str = ""
-    DATABASE_NUM: str = ""  
+    DATABASE_NUM: str = ""
     DEFAULT_UPLOAD: str = "gd"
     EXCLUDED_EXTENSIONS: str = ""
     FFMPEG_CMDS: ClassVar[dict[str, list[str]]] = {}
