@@ -24,8 +24,8 @@ class DbManager:
         """Dynamically returns the correct database based on current TgClient.ID"""
         if self._conn is None:
             return None
-        db_id = TgClient.ID if TgClient.ID else 'default'
-        return self._conn[f'tellyaeon{db_id}']
+        db_id = TgClient.ID if TgClient.ID else "default"
+        return self._conn[f"tellyaeon{db_id}"]
 
     async def connect(self):
         """Establishes a connection to the MongoDB database using DATABASE_URL."""
@@ -177,7 +177,9 @@ class DbManager:
                 },
             },
         ]
-        await self.db.users[TgClient.ID].update_one({"_id": user_id}, pipeline, upsert=True)
+        await self.db.users[TgClient.ID].update_one(
+            {"_id": user_id}, pipeline, upsert=True
+        )
 
     async def update_user_doc(self, user_id, key, path=""):
         if self._return:
@@ -269,7 +271,9 @@ class DbManager:
     async def get_token_expiry(self, user_id):
         if self._return:
             return None
-        user_data = await self.db.access_token[TgClient.ID].find_one({"_id": user_id})
+        user_data = await self.db.access_token[TgClient.ID].find_one(
+            {"_id": user_id}
+        )
         if user_data:
             return user_data.get("TIME")
         return None
@@ -282,7 +286,9 @@ class DbManager:
     async def get_user_token(self, user_id):
         if self._return:
             return None
-        user_data = await self.db.access_token[TgClient.ID].find_one({"_id": user_id})
+        user_data = await self.db.access_token[TgClient.ID].find_one(
+            {"_id": user_id}
+        )
         if user_data:
             return user_data.get("TOKEN")
         return None
