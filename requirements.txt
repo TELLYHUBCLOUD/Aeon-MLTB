@@ -59,7 +59,7 @@ requests
 speedtest-cli
 speedtest-cloudflare-cli
 tmdb3
-qrcode
+qrcode[pil]
 telegraph
 tenacity
 toml
