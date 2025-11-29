@@ -172,8 +172,8 @@ def get_progress_bar_string(pct):
         pct = float(pct.strip("%"))
     p = min(max(pct, 0), 100)
     c_full = int((p + 5) // 10)
-    p_str = "✧" * c_full
-    p_str += "✦" * (10 - c_full)
+    p_str = "✦" * c_full
+    p_str += "✧" * (10 - c_full)
     return f"〖{p_str}〗"
 
 
@@ -297,7 +297,7 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
     button = buttons.build_menu(8)
 
     # Bot stats section with side symbols
-    msg += "•---------------•\n"
+    msg += "•---------------------------•\n"
     msg += "⧉ <b>𝐁𝐨𝐭 𝐒𝐭𝐚𝐭𝐬</b>\n"
     msg += f"╭●🖥️ <b>CPU:</b> {cpu_percent()}%\n"
     msg += f"╞●🐏 <b>RAM:</b> {virtual_memory().percent}%\n"
