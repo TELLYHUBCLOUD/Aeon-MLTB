@@ -220,7 +220,7 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
             msg += f"<b>{index + start_position}. {tstatus}</b>\n"
 
         # File name
-        msg += f"<code>{escape(f'{task.name()}')}</code>\n"
+        msg += f"<blockquote>{escape(f'{task.name()}')}</blockquote>\n"
 
         # Start the boxed section
         if task.listener.subname:
@@ -298,7 +298,7 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
 
     # Bot stats section with side symbols
     msg += "•---------------------------•\n"
-    msg += "⧉ <b>𝐁𝐨𝐭 𝐒𝐭𝐚𝐭𝐬</b>\n"
+    msg += "<blockquote>⧉ <b>𝐁𝐨𝐭 𝐒𝐭𝐚𝐭𝐬</b></blockquote>\n"
     msg += f"╭●🖥️ <b>CPU:</b> {cpu_percent()}%\n"
     msg += f"╞●🐏 <b>RAM:</b> {virtual_memory().percent}%\n"
     msg += f"╞●⏰ <b>UPTIME:</b> {get_readable_time(time() - bot_start_time)}\n"
