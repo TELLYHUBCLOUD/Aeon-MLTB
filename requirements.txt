@@ -1,15 +1,14 @@
 # Choose ONE of the following Telegram libraries:
 #pyrogram
-#git+https://github.com/KurimuzonAkuma/pyrogram
-kurigram
+#kurigram
 #pyrofork
 #pyroblack
 #nekozee
 #electrogram
-#pyrofork==2.2.11
-#motor  # Required for pyrofork==2.2.11
-tgcrypto
-#tgcrypto-pyrofork # Optional for pyrofork. Comment out other tgcrypto if using this
+pyrofork==2.2.11
+motor  # Required for pyrofork==2.2.11
+#tgcrypto
+tgcrypto-pyrofork # Optional for pyrofork. Comment out other tgcrypto if using this
 #tgcrypto-pyroblack # Optional for pyroblack. Comment out other tgcrypto if using this
 #ElectroCrypto # Optional for elctrogram. Comment out other tgcrypto if using this
 
@@ -55,12 +54,12 @@ python-magic
 pytz
 PyMuPDF
 pytdbot[tdjson]
-qrcode[pil]
 reportlab>=4.0.0
 requests
 speedtest-cli
 speedtest-cloudflare-cli
 tmdb3
+qrcode[pil]
 telegraph
 tenacity
 toml
