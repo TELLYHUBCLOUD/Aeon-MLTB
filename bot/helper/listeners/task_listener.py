@@ -905,6 +905,17 @@ class TaskListener(TaskConfig):
             self.size = await get_path_size(up_dir)
             self.clear()
 
+        if hasattr(self, "is_md_leech") and self.is_md_leech:
+            from bot.helper.ext_utils.media_utils import process_md_leech
+
+            up_path = await process_md_leech(up_path)
+            if self.is_cancelled:
+                return
+            self.is_file = await aiopath.isfile(up_path)
+            self.name = up_path.replace(f"{up_dir}/", "").split("/", 1)[0]
+            self.size = await get_path_size(up_dir)
+            self.clear()
+
         if self.name_sub:
             up_path = await self.substitute(up_path)
             if self.is_cancelled:

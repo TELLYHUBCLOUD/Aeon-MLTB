@@ -94,6 +94,7 @@ class Mirror(TaskListener):
         self.is_leech = is_leech
         self.is_jd = is_jd
         self.is_nzb = is_nzb
+        self.is_md_leech = False  # Initialize is_md_leech
 
     async def new_event(self):
         # Ensure user_dict is never None to prevent AttributeError
@@ -1303,3 +1304,15 @@ async def nzb_leech(client, message):
     bot_loop.create_task(
         Mirror(client, message, is_leech=True, is_nzb=True).new_event(),
     )
+
+
+@new_task
+async def md_leech_node(client, message):
+    mirror = Mirror(client, message, is_leech=True)
+    mirror.is_md_leech = True
+    await mirror.new_event()
+
+
+bot.add_handler(
+    MessageHandler(md_leech_node, filters=command(BotCommands.MdLeechCommand) & authorize)
+)

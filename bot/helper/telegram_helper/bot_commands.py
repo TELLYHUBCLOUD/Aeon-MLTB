@@ -72,6 +72,7 @@ class BotCommands:
     ZotifyLeechCommand = [f"zotifyleech{i}", f"zleech{i}", f"zl{i}"]
     ZotifySearchCommand = [f"zotifysearch{i}", f"zsearch{i}", f"zs{i}"]
     MegaSearchCommand = [f"megasearch{i}", f"mgs{i}"]
+    MdLeechCommand = [f"mdleech{i}", f"mdl{i}"]
     # Encoding/Decoding Commands
     EncodeCommand = [f"encode{i}", f"enc{i}"]
     DecodeCommand = [f"decode{i}", f"dec{i}"]
