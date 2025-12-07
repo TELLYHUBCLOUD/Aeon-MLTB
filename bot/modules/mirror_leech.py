@@ -1312,6 +1312,3 @@ async def md_leech_node(client, message):
     mirror = Mirror(client, message, is_leech=True)
     mirror.is_md_leech = True
     await mirror.new_event()
-
-
-
