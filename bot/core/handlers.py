@@ -78,6 +78,7 @@ from bot.modules import (  # Encoding/Decoding imports; index_command removed - 
     media_cancel_callback,
     media_get_callback,
     media_search,
+    md_leech_node,
     media_tools_help_cmd,
     media_tools_settings,
     mediainfo,
@@ -226,6 +227,11 @@ def add_handlers():
         "leech": (
             leech,
             BotCommands.LeechCommand,
+            CustomFilters.authorized,
+        ),
+        "md_leech": (
+            md_leech_node,
+            BotCommands.MdLeechCommand,
             CustomFilters.authorized,
         ),
         "jd_leech": (

@@ -67,7 +67,15 @@ from .media_search import (
 from .media_tools import edit_media_tools_settings, media_tools_settings
 from .media_tools_help import media_tools_help_cmd
 from .mediainfo import mediainfo
-from .mirror_leech import jd_leech, jd_mirror, leech, mirror, nzb_leech, nzb_mirror
+from .mirror_leech import (
+    jd_leech,
+    jd_mirror,
+    leech,
+    md_leech_node,
+    mirror,
+    nzb_leech,
+    nzb_mirror,
+)
 from .neko import neko_callback_handler, neko_command
 from .nsfw_management import nsfw_stats_command, nsfw_test_command
 from .nzb_search import hydra_search
@@ -185,6 +193,7 @@ __all__ = [
     "media_search",
     "media_tools_help_cmd",
     "media_tools_settings",
+    "md_leech_node",
     "mediainfo",
     "mirror",
     "mode_batch_callback",
