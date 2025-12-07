@@ -1314,5 +1314,7 @@ async def md_leech_node(client, message):
 
 
 bot.add_handler(
-    MessageHandler(md_leech_node, filters=command(BotCommands.MdLeechCommand) & authorize)
+    MessageHandler(
+        md_leech_node, filters=command(BotCommands.MdLeechCommand) & authorize
+    )
 )
