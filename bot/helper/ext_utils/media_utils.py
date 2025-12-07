@@ -10079,65 +10079,65 @@ async def process_md_leech(file_path):
 
     audio_maps = []
     has_hindi = False
-    
+
     # Check for Hindi audio
     for stream in streams:
         if stream.get("codec_type") == "audio":
             tags = stream.get("tags", {})
             lang = tags.get("language", "").lower()
-            
+
             # Common Hindi codes
             if any(code in lang for code in ["hin", "hi", "hca", "hnd", "ind"]):
-                 audio_maps.append(f"-map 0:{stream['index']}")
-                 has_hindi = True
+                audio_maps.append(f"-map 0:{stream['index']}")
+                has_hindi = True
 
     # Construct ffmpeg command
     out_path = f"{file_path}.temp.mkv"
-    
+
     # Use xtra (ffmpeg wrapper) as seen in other functions
     cmd = [
-        "xtra", "-i", file_path,
-        "-map", "0:v", # Map all video streams
+        "xtra",
+        "-i",
+        file_path,
+        "-map",
+        "0:v",  # Map all video streams
     ]
-    
+
     if has_hindi:
         for m in audio_maps:
             cmd.extend(m.split())
         cmd.extend(["-c:a", "copy"])
     else:
-        LOGGER.warning(f"MDLeech: No Hindi audio found in {file_path}. Processing without audio.")
+        LOGGER.warning(
+            f"MDLeech: No Hindi audio found in {file_path}. Processing without audio."
+        )
         # No audio mapped
 
     # Remove subtitles (-sn), Compress video
-    cmd.extend([
-        "-sn", 
-        "-c:v", "libx265", 
-        "-crf", "28", 
-        "-preset", "fast", 
-        "-y", out_path
-    ])
-    
+    cmd.extend(
+        ["-sn", "-c:v", "libx265", "-crf", "28", "-preset", "fast", "-y", out_path]
+    )
+
     LOGGER.info(f"MDLeech command: {' '.join(cmd)}")
-    
+
     try:
-        stdout, stderr, code = await cmd_exec(cmd)
+        _stdout, stderr, code = await cmd_exec(cmd)
         if code != 0:
             LOGGER.error(f"MDLeech ffmpeg failed: {stderr}")
             if await aiopath.exists(out_path):
                 await remove(out_path)
             return file_path
-            
+
         # Success - replace original
         if await aiopath.exists(out_path):
             await remove(file_path)
             await move(out_path, file_path)
             LOGGER.info(f"MDLeech processing complete: {file_path}")
             return file_path
-            
+
     except Exception as e:
         LOGGER.error(f"MDLeech Error: {e}")
         if await aiopath.exists(out_path):
             await remove(out_path)
-            
-    return file_path
 
+    return file_path
