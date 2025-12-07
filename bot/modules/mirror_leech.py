@@ -12,6 +12,7 @@ from bot.helper.ext_utils.bot_utils import (
     COMMAND_USAGE,
     arg_parser,
     get_content_type,
+    new_task,
     sync_to_async,
 )
 from bot.helper.ext_utils.exceptions import DirectDownloadLinkException
