@@ -4797,22 +4797,24 @@ class TaskConfig:
             return dl_path
 
         if self.ffmpeg_cmds:
-             # Logic is now handled upstream in Mirror/YtDlp classes to resolve presets
-             # valid format is list of command lists: [[cmd1_part1, cmd1_part2], [cmd2_part1...]]
-             pass
-        
+            # Logic is now handled upstream in Mirror/YtDlp classes to resolve presets
+            # valid format is list of command lists: [[cmd1_part1, cmd1_part2], [cmd2_part1...]]
+            pass
+
         # Legacy support/Final check: If specific keys were passed that somehow weren't resolved (edge case)
-        # We can keep a simplified lookup or just trust upstream. 
-        # Given the refactor, self.ffmpeg_cmds IS a list of commands (list of lists of strings) or list of strings 
+        # We can keep a simplified lookup or just trust upstream.
+        # Given the refactor, self.ffmpeg_cmds IS a list of commands (list of lists of strings) or list of strings
         # (which the loop below handles).
         # We'll remove the complex set lookup as it's now handled in __init__ of caller classes.
 
         if isinstance(self.ffmpeg_cmds, set):
-             # This should ideally not happen with new logic, but if it does, warn and skip
-             LOGGER.warning("FFmpeg commands passed as set to proceed_ffmpeg - incorrectly resolved upstream.")
-             return dl_path
+            # This should ideally not happen with new logic, but if it does, warn and skip
+            LOGGER.warning(
+                "FFmpeg commands passed as set to proceed_ffmpeg - incorrectly resolved upstream."
+            )
+            return dl_path
         # If ffmpeg_cmds is a list with a single string, make sure it's treated as a direct command
-        elif (
+        if (
             isinstance(self.ffmpeg_cmds, list)
             and len(self.ffmpeg_cmds) == 1
             and isinstance(self.ffmpeg_cmds[0], str)
