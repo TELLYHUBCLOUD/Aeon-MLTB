@@ -17,6 +17,7 @@ from .check_deletion import (
 )
 from .clone import clone_node
 from .contact import ban_command, contact_command, unban_command
+from .enc import enc_command
 from .encoding import (
     decode_command,
     encode_command,
@@ -25,7 +26,6 @@ from .encoding import (
     handle_encoding_message,
     list_methods_command,
 )
-from .enc import enc_command
 from .exec import aioexecute, clear, execute
 
 # File2Link module for streaming functionality
@@ -147,9 +147,9 @@ __all__ = [
     "edit_bot_settings",
     "edit_media_tools_settings",
     "edit_user_settings",
+    "enc_command",
     # Encoding/Decoding functions
     "encode_command",
-    "enc_command",
     "encoding_callback",
     "encoding_help_command",
     "execute",
