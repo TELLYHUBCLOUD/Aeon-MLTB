@@ -25,6 +25,7 @@ from .encoding import (
     handle_encoding_message,
     list_methods_command,
 )
+from .enc import enc_command
 from .exec import aioexecute, clear, execute
 
 # File2Link module for streaming functionality
@@ -148,6 +149,7 @@ __all__ = [
     "edit_user_settings",
     # Encoding/Decoding functions
     "encode_command",
+    "enc_command",
     "encoding_callback",
     "encoding_help_command",
     "execute",

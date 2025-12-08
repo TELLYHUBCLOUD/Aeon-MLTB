@@ -10099,23 +10099,24 @@ async def get_pdf_info(pdf_path):
         return None
 
 
-async def process_md_leech(file_path, listener=None, ffmpeg_obj=None):
+async def get_md_leech_cmd(file_path):
     """
-    Process file for MDLeech command:
+    Generate FFmpeg command for MDLeech:
     1. Keep only Hindi audio.
     2. Remove all subtitles.
     3. Compress video with crf 28 preset fast.
+    4. Return command list for proceed_ffmpeg.
     """
-    LOGGER.info(f"Processing MDLeech for: {file_path}")
+    LOGGER.info(f"Generating MDLeech command for: {file_path}")
 
     if not await aiopath.exists(file_path):
-        return file_path
+        return None
 
     # Get streams info
     streams = await get_streams(file_path)
     if not streams:
         LOGGER.error(f"MDLeech: Could not probe file: {file_path}")
-        return file_path
+        return None
 
     audio_maps = []
     has_hindi = False
@@ -10131,14 +10132,11 @@ async def process_md_leech(file_path, listener=None, ffmpeg_obj=None):
                 audio_maps.append(f"-map 0:{stream['index']}")
                 has_hindi = True
 
-    # Construct ffmpeg command
-    out_path = f"{file_path}.temp.mkv"
-
-    # Use xtra (ffmpeg wrapper) as seen in other functions
+    # Construct ffmpeg command arguments
+    # We use "input.mp4" as placeholder which proceed_ffmpeg handles
     cmd = [
-        "xtra",
         "-i",
-        file_path,
+        "input.mp4",
         "-map",
         "0:v",  # Map all video streams
     ]
@@ -10153,47 +10151,45 @@ async def process_md_leech(file_path, listener=None, ffmpeg_obj=None):
         )
         # No audio mapped
 
-    # Remove subtitles (-sn), Compress video
+    # Remove subtitles (-sn), Compress video, Add -del to replace original
     cmd.extend(
-        ["-sn", "-c:v", "libx265", "-crf", "28", "-preset", "fast", "-y", out_path]
+        ["-sn", "-c:v", "libx265", "-crf", "28", "-preset", "fast", "-del"]
     )
+    
+    return cmd
 
-    LOGGER.info(f"MDLeech command: {' '.join(cmd)}")
 
-    try:
-        if ffmpeg_obj:
-            success = await ffmpeg_obj.run_ffmpeg_cmd(cmd, file_path, out_path)
-            if not success:
-                if await aiopath.exists(out_path):
-                    await remove(out_path)
-                return file_path
-        elif listener:
-            from bot.helper.ext_utils.media_utils import FFMpeg
+async def get_enc_cmd(file_path):
+    """
+    Generate FFmpeg command for Enc command:
+    1. Map all streams (Video, Audio, Subtitle).
+    2. Encode Video: libx265, CRF 26, Preset fast.
+    3. Copy Audio and Subtitles.
+    4. Return command list for proceed_ffmpeg.
+    """
+    LOGGER.info(f"Generating Enc command for: {file_path}")
 
-            ffmpeg = FFMpeg(listener)
-            success = await ffmpeg.run_ffmpeg_cmd(cmd, file_path, out_path)
-            if not success:
-                if await aiopath.exists(out_path):
-                    await remove(out_path)
-                return file_path
-        else:
-            _stdout, stderr, code = await cmd_exec(cmd)
-            if code != 0:
-                LOGGER.error(f"MDLeech ffmpeg failed: {stderr}")
-                if await aiopath.exists(out_path):
-                    await remove(out_path)
-                return file_path
+    if not await aiopath.exists(file_path):
+        return None
 
-        # Success - replace original
-        if await aiopath.exists(out_path):
-            await remove(file_path)
-            await move(out_path, file_path)
-            LOGGER.info(f"MDLeech processing complete: {file_path}")
-            return file_path
+    # Construct ffmpeg command arguments
+    # We use "input.mp4" as placeholder which proceed_ffmpeg handles
+    cmd = [
+        "-i",
+        "input.mp4",
+        "-map",
+        "0",
+        "-c:v",
+        "libx265",
+        "-crf",
+        "26",
+        "-preset",
+        "fast",
+        "-c:a",
+        "copy",
+        "-c:s",
+        "copy",
+        "-del",
+    ]
 
-    except Exception as e:
-        LOGGER.error(f"MDLeech Error: {e}")
-        if await aiopath.exists(out_path):
-            await remove(out_path)
-
-    return file_path
+    return cmd

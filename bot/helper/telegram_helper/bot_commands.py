@@ -74,7 +74,8 @@ class BotCommands:
     MegaSearchCommand = [f"megasearch{i}", f"mgs{i}"]
     MdLeechCommand = [f"mdleech{i}", f"mdl{i}"]
     # Encoding/Decoding Commands
-    EncodeCommand = [f"encode{i}", f"enc{i}"]
+    EncodeCommand = [f"encode{i}"]
+    EncCommand = [f"enc{i}"]
     DecodeCommand = [f"decode{i}", f"dec{i}"]
     # QuickInfo Commands
     QuickInfoCommand = [f"quickinfo{i}", f"qi{i}"]

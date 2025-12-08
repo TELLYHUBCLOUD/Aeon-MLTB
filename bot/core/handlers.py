@@ -43,6 +43,7 @@ from bot.modules import (  # Encoding/Decoding imports; index_command removed - 
     edit_media_tools_settings,
     edit_user_settings,
     encode_command,
+    enc_command,
     encoding_callback,
     execute,
     file2link_command,
@@ -626,6 +627,17 @@ def add_handlers():
             ),
         }
         command_filters.update(encoding_handlers)
+    
+    # Add video encoding handler
+    if Config.LEECH_ENABLED:
+        enc_handler = {
+             "enc": (
+                enc_command,
+                BotCommands.EncCommand,
+                CustomFilters.authorized,
+             )
+        }
+        command_filters.update(enc_handler)
 
     if Config.DECODING_ENABLED:
         decoding_handlers = {

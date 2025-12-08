@@ -43,7 +43,6 @@ from bot.helper.mirror_leech_utils.rclone_utils.transfer import RcloneTransferHe
 from bot.helper.mirror_leech_utils.status_utils.gdrive_status import (
     GoogleDriveStatus,
 )
-from bot.helper.mirror_leech_utils.status_utils.ffmpeg_status import FFmpegStatus
 from bot.helper.mirror_leech_utils.status_utils.queue_status import QueueStatus
 from bot.helper.mirror_leech_utils.status_utils.rclone_status import RcloneStatus
 from bot.helper.mirror_leech_utils.status_utils.telegram_status import TelegramStatus
@@ -907,13 +906,28 @@ class TaskListener(TaskConfig):
             self.clear()
 
         if hasattr(self, "is_md_leech") and self.is_md_leech:
-            from bot.helper.ext_utils.media_utils import FFMpeg, process_md_leech
+            from bot.helper.ext_utils.media_utils import get_md_leech_cmd
 
-            ffmpeg = FFMpeg(self)
-            async with task_dict_lock:
-                task_dict[self.mid] = FFmpegStatus(self, ffmpeg, gid, "MDLeech")
+            cmd = await get_md_leech_cmd(up_path)
+            if cmd:
+                self.ffmpeg_cmds = [cmd]
+                up_path = await self.proceed_ffmpeg(up_path, gid)
+            
+            if self.is_cancelled:
+                return
+            self.is_file = await aiopath.isfile(up_path)
+            self.name = up_path.replace(f"{up_dir}/", "").split("/", 1)[0]
+            self.size = await get_path_size(up_dir)
+            self.clear()
 
-            up_path = await process_md_leech(up_path, ffmpeg_obj=ffmpeg)
+        if hasattr(self, "is_enc") and self.is_enc:
+            from bot.helper.ext_utils.media_utils import get_enc_cmd
+
+            cmd = await get_enc_cmd(up_path)
+            if cmd:
+                self.ffmpeg_cmds = [cmd]
+                up_path = await self.proceed_ffmpeg(up_path, gid)
+            
             if self.is_cancelled:
                 return
             self.is_file = await aiopath.isfile(up_path)
