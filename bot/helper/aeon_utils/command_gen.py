@@ -10228,10 +10228,6 @@ async def get_remove_cmd(
     # Add output file
     cmd.append(temp_file)
 
-    # Add delete original flag if requested
-    if delete_original:
-        cmd.append("-del")
-
     return cmd, temp_file
 
 

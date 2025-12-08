@@ -11947,6 +11947,10 @@ class TaskConfig:
                     LOGGER.info(f"Successfully removed tracks from: {dl_path}")
                     # If original file was deleted, return the new file path
                     if self.remove_delete_original:
+                        try:
+                            await remove(dl_path)
+                        except Exception as e:
+                            LOGGER.warning(f"Failed to remove original file: {e}")
                         return output_path
                 else:
                     LOGGER.warning(f"Failed to remove tracks from: {dl_path}")
