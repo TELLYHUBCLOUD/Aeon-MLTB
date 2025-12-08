@@ -12,7 +12,6 @@ from bot.helper.ext_utils.bot_utils import (
     COMMAND_USAGE,
     arg_parser,
     get_content_type,
-    new_task,
     sync_to_async,
 )
 from bot.helper.ext_utils.exceptions import DirectDownloadLinkException
@@ -666,12 +665,15 @@ class Mirror(TaskListener):
             # Standardize to list of strings
             raw_input = args["-ff"]
             self.ffmpeg_cmds = []
-            
+
             # Helper to get commands from keys
             def get_cmds_from_key(key):
                 if Config.FFMPEG_CMDS and key in Config.FFMPEG_CMDS:
                     return Config.FFMPEG_CMDS[key]
-                if self.user_dict.get("FFMPEG_CMDS") and key in self.user_dict["FFMPEG_CMDS"]:
+                if (
+                    self.user_dict.get("FFMPEG_CMDS")
+                    and key in self.user_dict["FFMPEG_CMDS"]
+                ):
                     return self.user_dict["FFMPEG_CMDS"][key]
                 return None
 
@@ -684,12 +686,12 @@ class Mirror(TaskListener):
                             for cmd in cmds:
                                 self.ffmpeg_cmds.append(cmd)
                         else:
-                             # Treat as direct command if not found
-                             pass # Set usually implies presets, invalid keys are ignored or logged
+                            # Treat as direct command if not found
+                            pass  # Set usually implies presets, invalid keys are ignored or logged
 
                 # 2. Handle List (could be mix of keys and commands, or direct command list)
                 elif isinstance(raw_input, list):
-                     for item in raw_input:
+                    for item in raw_input:
                         if isinstance(item, str):
                             # Try lookup first
                             cmds = get_cmds_from_key(item)
@@ -699,36 +701,40 @@ class Mirror(TaskListener):
                             else:
                                 # Treat as direct command string
                                 import shlex
+
                                 self.ffmpeg_cmds.append(shlex.split(item))
                         elif isinstance(item, list):
-                             # Already split command
-                             self.ffmpeg_cmds.append(item)
+                            # Already split command
+                            self.ffmpeg_cmds.append(item)
 
                 # 3. Handle Single String (Key or Command)
                 elif isinstance(raw_input, str):
                     # Try lookup
                     cmds = get_cmds_from_key(raw_input)
                     if cmds:
-                         for cmd in cmds:
+                        for cmd in cmds:
                             self.ffmpeg_cmds.append(cmd)
                     else:
                         # Direct command
                         import shlex
-                        # Check for multi-line/semicolon separated logic if needed, 
+
+                        # Check for multi-line/semicolon separated logic if needed,
                         # but usually it's one command or preset
-                        if " " in raw_input and not any(k in raw_input for k in (Config.FFMPEG_CMDS or {})):
-                             # It's a command string like "-c copy"
-                             self.ffmpeg_cmds.append(shlex.split(raw_input))
+                        if " " in raw_input and not any(
+                            k in raw_input for k in (Config.FFMPEG_CMDS or {})
+                        ):
+                            # It's a command string like "-c copy"
+                            self.ffmpeg_cmds.append(shlex.split(raw_input))
                         else:
-                             # Maybe a key that wasn't found or a simple command
-                             self.ffmpeg_cmds.append(shlex.split(raw_input))
+                            # Maybe a key that wasn't found or a simple command
+                            self.ffmpeg_cmds.append(shlex.split(raw_input))
 
                 LOGGER.info(f"Resolved FFmpeg commands: {self.ffmpeg_cmds}")
 
             except Exception as e:
                 self.ffmpeg_cmds = []
                 LOGGER.error(f"Error processing FFmpeg command: {e}")
-        
+
         if not isinstance(self.seed, bool):
             dargs = self.seed.split(":")
             ratio = dargs[0] or None

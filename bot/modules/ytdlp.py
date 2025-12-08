@@ -865,12 +865,15 @@ class YtDlp(TaskListener):
             # Standardize to list of strings
             raw_input = args["-ff"]
             self.ffmpeg_cmds = []
-            
+
             # Helper to get commands from keys
             def get_cmds_from_key(key):
                 if Config.FFMPEG_CMDS and key in Config.FFMPEG_CMDS:
                     return Config.FFMPEG_CMDS[key]
-                if self.user_dict.get("FFMPEG_CMDS") and key in self.user_dict["FFMPEG_CMDS"]:
+                if (
+                    self.user_dict.get("FFMPEG_CMDS")
+                    and key in self.user_dict["FFMPEG_CMDS"]
+                ):
                     return self.user_dict["FFMPEG_CMDS"][key]
                 return None
 
@@ -883,11 +886,11 @@ class YtDlp(TaskListener):
                             for cmd in cmds:
                                 self.ffmpeg_cmds.append(cmd)
                         else:
-                             pass 
+                            pass
 
                 # 2. Handle List (could be mix of keys and commands, or direct command list)
                 elif isinstance(raw_input, list):
-                     for item in raw_input:
+                    for item in raw_input:
                         if isinstance(item, str):
                             cmds = get_cmds_from_key(item)
                             if cmds:
@@ -895,22 +898,26 @@ class YtDlp(TaskListener):
                                     self.ffmpeg_cmds.append(cmd)
                             else:
                                 import shlex
+
                                 self.ffmpeg_cmds.append(shlex.split(item))
                         elif isinstance(item, list):
-                             self.ffmpeg_cmds.append(item)
+                            self.ffmpeg_cmds.append(item)
 
                 # 3. Handle Single String (Key or Command)
                 elif isinstance(raw_input, str):
                     cmds = get_cmds_from_key(raw_input)
                     if cmds:
-                         for cmd in cmds:
+                        for cmd in cmds:
                             self.ffmpeg_cmds.append(cmd)
                     else:
                         import shlex
-                        if " " in raw_input and not any(k in raw_input for k in (Config.FFMPEG_CMDS or {})):
-                             self.ffmpeg_cmds.append(shlex.split(raw_input))
+
+                        if " " in raw_input and not any(
+                            k in raw_input for k in (Config.FFMPEG_CMDS or {})
+                        ):
+                            self.ffmpeg_cmds.append(shlex.split(raw_input))
                         else:
-                             self.ffmpeg_cmds.append(shlex.split(raw_input))
+                            self.ffmpeg_cmds.append(shlex.split(raw_input))
 
                 LOGGER.info(f"Resolved FFmpeg commands: {self.ffmpeg_cmds}")
 
