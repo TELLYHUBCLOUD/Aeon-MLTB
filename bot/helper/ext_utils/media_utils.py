@@ -10099,7 +10099,7 @@ async def get_pdf_info(pdf_path):
         return None
 
 
-async def process_md_leech(file_path):
+async def process_md_leech(file_path, listener=None):
     """
     Process file for MDLeech command:
     1. Keep only Hindi audio.
@@ -10161,12 +10161,22 @@ async def process_md_leech(file_path):
     LOGGER.info(f"MDLeech command: {' '.join(cmd)}")
 
     try:
-        _stdout, stderr, code = await cmd_exec(cmd)
-        if code != 0:
-            LOGGER.error(f"MDLeech ffmpeg failed: {stderr}")
-            if await aiopath.exists(out_path):
-                await remove(out_path)
-            return file_path
+        if listener:
+            from bot.helper.ext_utils.media_utils import FFMpeg
+
+            ffmpeg = FFMpeg(listener)
+            success = await ffmpeg.run_ffmpeg_cmd(cmd, file_path, out_path)
+            if not success:
+                if await aiopath.exists(out_path):
+                    await remove(out_path)
+                return file_path
+        else:
+            _stdout, stderr, code = await cmd_exec(cmd)
+            if code != 0:
+                LOGGER.error(f"MDLeech ffmpeg failed: {stderr}")
+                if await aiopath.exists(out_path):
+                    await remove(out_path)
+                return file_path
 
         # Success - replace original
         if await aiopath.exists(out_path):

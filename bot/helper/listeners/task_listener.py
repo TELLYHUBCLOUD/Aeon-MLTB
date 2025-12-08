@@ -908,7 +908,7 @@ class TaskListener(TaskConfig):
         if hasattr(self, "is_md_leech") and self.is_md_leech:
             from bot.helper.ext_utils.media_utils import process_md_leech
 
-            up_path = await process_md_leech(up_path)
+            up_path = await process_md_leech(up_path, listener=self)
             if self.is_cancelled:
                 return
             self.is_file = await aiopath.isfile(up_path)
