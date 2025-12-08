@@ -5176,6 +5176,43 @@ class FFMpeg:
             )
             return []
 
+    async def run_ffmpeg_cmd(self, cmd, dl_path, output_path):
+        """Run a specific FFmpeg command with progress tracking."""
+        self.clear()
+        self._total_time = (await get_media_info(dl_path))[0]
+        
+        try:
+            self._listener.subproc = await create_subprocess_exec(
+                *cmd,
+                stdout=PIPE,
+                stderr=PIPE,
+            )
+            
+            await self._ffmpeg_progress()
+            _, stderr = await self._listener.subproc.communicate()
+            code = self._listener.subproc.returncode
+
+            if self._listener.is_cancelled:
+                return False
+
+            if code == 0:
+                if await aiopath.exists(output_path) and await aiopath.getsize(output_path) > 0:
+                    return True
+                else:
+                    LOGGER.error(f"FFmpeg command successful but output file missing or empty: {output_path}")
+                    return False
+            else:
+                 try:
+                     stderr = stderr.decode().strip()
+                 except Exception:
+                     stderr = "Unable to decode stderr"
+                 LOGGER.error(f"Error running ffmpeg cmd: {stderr}")
+                 return False
+
+        except Exception as e:
+            LOGGER.error(f"Exception running ffmpeg cmd: {e}")
+            return False
+
     async def ffmpeg_cmds(self, ffmpeg, f_path, user_provided_files=None):
         """Process one or more FFmpeg commands.
 
