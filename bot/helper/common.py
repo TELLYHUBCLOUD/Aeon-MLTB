@@ -4796,31 +4796,21 @@ class TaskConfig:
         if not self.ffmpeg_cmds:
             return dl_path
 
-        # If ffmpeg_cmds is a set, look up the commands in the config
+        if self.ffmpeg_cmds:
+             # Logic is now handled upstream in Mirror/YtDlp classes to resolve presets
+             # valid format is list of command lists: [[cmd1_part1, cmd1_part2], [cmd2_part1...]]
+             pass
+        
+        # Legacy support/Final check: If specific keys were passed that somehow weren't resolved (edge case)
+        # We can keep a simplified lookup or just trust upstream. 
+        # Given the refactor, self.ffmpeg_cmds IS a list of commands (list of lists of strings) or list of strings 
+        # (which the loop below handles).
+        # We'll remove the complex set lookup as it's now handled in __init__ of caller classes.
+
         if isinstance(self.ffmpeg_cmds, set):
-            LOGGER.info(f"Looking up FFmpeg commands for keys: {self.ffmpeg_cmds}")
-            if self.user_dict.get("FFMPEG_CMDS", None):
-                ffmpeg_dict = self.user_dict["FFMPEG_CMDS"]
-                self.ffmpeg_cmds = [
-                    value
-                    for key in list(self.ffmpeg_cmds)
-                    if key in ffmpeg_dict
-                    for value in ffmpeg_dict[key]
-                ]
-            elif "FFMPEG_CMDS" not in self.user_dict and Config.FFMPEG_CMDS:
-                ffmpeg_dict = Config.FFMPEG_CMDS
-                self.ffmpeg_cmds = [
-                    value
-                    for key in list(self.ffmpeg_cmds)
-                    if key in ffmpeg_dict
-                    for value in ffmpeg_dict[key]
-                ]
-            else:
-                LOGGER.error(
-                    f"No FFmpeg commands found for keys: {self.ffmpeg_cmds}"
-                )
-                self.ffmpeg_cmds = None
-                return dl_path
+             # This should ideally not happen with new logic, but if it does, warn and skip
+             LOGGER.warning("FFmpeg commands passed as set to proceed_ffmpeg - incorrectly resolved upstream.")
+             return dl_path
         # If ffmpeg_cmds is a list with a single string, make sure it's treated as a direct command
         elif (
             isinstance(self.ffmpeg_cmds, list)

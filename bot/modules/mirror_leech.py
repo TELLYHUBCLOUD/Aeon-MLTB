@@ -75,6 +75,7 @@ class Mirror(TaskListener):
         is_leech=False,
         is_jd=False,
         is_nzb=False,
+        is_md_leech=False,
         same_dir=None,
         bulk=None,
         multi_tag=None,
@@ -95,7 +96,7 @@ class Mirror(TaskListener):
         self.is_leech = is_leech
         self.is_jd = is_jd
         self.is_nzb = is_nzb
-        self.is_md_leech = False  # Initialize is_md_leech
+        self.is_md_leech = is_md_leech
 
     async def new_event(self):
         # Ensure user_dict is never None to prevent AttributeError
@@ -662,130 +663,73 @@ class Mirror(TaskListener):
             self.seed = False
 
         try:
-            if args["-ff"]:
-                # Process multiple commands or presets
-                if isinstance(args["-ff"], str):
-                    # Check if it contains multiple presets separated by spaces
-                    if " " in args["-ff"]:
-                        preset_names = args["-ff"].split()
-                        self.ffmpeg_cmds = []
-                        for preset_name in preset_names:
-                            # Look for preset in config
-                            if (
-                                Config.FFMPEG_CMDS
-                                and preset_name in Config.FFMPEG_CMDS
-                            ):
-                                self.ffmpeg_cmds.append(
-                                    Config.FFMPEG_CMDS[preset_name]
-                                )
-                                LOGGER.info(
-                                    f"Added FFmpeg command from owner config: {preset_name}"
-                                )
-                            elif (
-                                self.user_dict.get("FFMPEG_CMDS")
-                                and preset_name in self.user_dict["FFMPEG_CMDS"]
-                            ):
-                                self.ffmpeg_cmds.append(
-                                    self.user_dict["FFMPEG_CMDS"][preset_name]
-                                )
-                                LOGGER.info(
-                                    f"Added FFmpeg command from user config: {preset_name}"
-                                )
-                            else:
-                                # If not found as preset, treat as direct command
-                                import shlex
+        if args["-ff"]:
+            # Standardize to list of strings
+            raw_input = args["-ff"]
+            self.ffmpeg_cmds = []
+            
+            # Helper to get commands from keys
+            def get_cmds_from_key(key):
+                if Config.FFMPEG_CMDS and key in Config.FFMPEG_CMDS:
+                    return Config.FFMPEG_CMDS[key]
+                if self.user_dict.get("FFMPEG_CMDS") and key in self.user_dict["FFMPEG_CMDS"]:
+                    return self.user_dict["FFMPEG_CMDS"][key]
+                return None
 
-                                self.ffmpeg_cmds.append(shlex.split(preset_name))
-                                LOGGER.info(
-                                    f"Added direct FFmpeg command: {preset_name}"
-                                )
-                    # Single preset or command
-                    # Check if it's a key in the FFmpeg commands dictionary
-                    elif (
-                        Config.FFMPEG_CMDS and args["-ff"] in Config.FFMPEG_CMDS
-                    ) or (
-                        self.user_dict.get("FFMPEG_CMDS")
-                        and args["-ff"] in self.user_dict["FFMPEG_CMDS"]
-                    ):
-                        # If it's a key in the config, get the command from the config
-                        if Config.FFMPEG_CMDS and args["-ff"] in Config.FFMPEG_CMDS:
-                            self.ffmpeg_cmds = [Config.FFMPEG_CMDS[args["-ff"]]]
-                            LOGGER.info(
-                                f"Using FFmpeg command key from owner config: {self.ffmpeg_cmds}"
-                            )
-                        elif (
-                            self.user_dict.get("FFMPEG_CMDS")
-                            and args["-ff"] in self.user_dict["FFMPEG_CMDS"]
-                        ):
-                            self.ffmpeg_cmds = [
-                                self.user_dict["FFMPEG_CMDS"][args["-ff"]]
-                            ]
-                            LOGGER.info(
-                                f"Using FFmpeg command key from user config: {self.ffmpeg_cmds}"
-                            )
-                    else:
-                        # If it's not a key, treat it as a direct command
-                        import shlex
-
-                        self.ffmpeg_cmds = [shlex.split(args["-ff"])]
-                        LOGGER.info(
-                            f"Using direct FFmpeg command: {self.ffmpeg_cmds}"
-                        )
-                elif isinstance(args["-ff"], set):
-                    # If it's already a set, convert to list for sequential processing
-                    self.ffmpeg_cmds = list(args["-ff"])
-                    LOGGER.info(f"Using FFmpeg command keys: {self.ffmpeg_cmds}")
-                else:
-                    # For any other type, try to evaluate it
-                    # This handles cases like: ["-i mltb.mkv -c copy mltb.mkv", "-i mltb.m4a -c:a libmp3lame mltb.mp3"]
-                    # or [["cmd1", "arg1"], ["cmd2", "arg2"]]
-                    try:
-                        evaluated_cmds = eval(args["-ff"])
-                        LOGGER.info(f"Evaluated FFmpeg commands: {evaluated_cmds}")
-                    except Exception as e:
-                        LOGGER.error(f"Error evaluating FFmpeg commands: {e}")
-                        evaluated_cmds = []
-
-                    # Handle different formats
-                    if isinstance(evaluated_cmds, list):
-                        # Check if it's a list of strings or a list of lists
-                        if all(isinstance(item, str) for item in evaluated_cmds):
-                            # List of command strings
-                            import shlex
-
-                            self.ffmpeg_cmds = [
-                                shlex.split(cmd) for cmd in evaluated_cmds
-                            ]
-                        elif all(isinstance(item, list) for item in evaluated_cmds):
-                            # List of command lists
-                            self.ffmpeg_cmds = evaluated_cmds
+            try:
+                # 1. Handle Set of keys (e.g., from multiple flags)
+                if isinstance(raw_input, set):
+                    for key in raw_input:
+                        cmds = get_cmds_from_key(key)
+                        if cmds:
+                            for cmd in cmds:
+                                self.ffmpeg_cmds.append(cmd)
                         else:
-                            # Mixed list - try to handle each item appropriately
-                            self.ffmpeg_cmds = []
-                            for item in evaluated_cmds:
-                                if isinstance(item, str):
-                                    import shlex
+                             # Treat as direct command if not found
+                             pass # Set usually implies presets, invalid keys are ignored or logged
 
-                                    self.ffmpeg_cmds.append(shlex.split(item))
-                                elif isinstance(item, list):
-                                    self.ffmpeg_cmds.append(item)
-                                else:
-                                    # Try to convert to string and split
-                                    import shlex
+                # 2. Handle List (could be mix of keys and commands, or direct command list)
+                elif isinstance(raw_input, list):
+                     for item in raw_input:
+                        if isinstance(item, str):
+                            # Try lookup first
+                            cmds = get_cmds_from_key(item)
+                            if cmds:
+                                for cmd in cmds:
+                                    self.ffmpeg_cmds.append(cmd)
+                            else:
+                                # Treat as direct command string
+                                import shlex
+                                self.ffmpeg_cmds.append(shlex.split(item))
+                        elif isinstance(item, list):
+                             # Already split command
+                             self.ffmpeg_cmds.append(item)
 
-                                    self.ffmpeg_cmds.append(shlex.split(str(item)))
+                # 3. Handle Single String (Key or Command)
+                elif isinstance(raw_input, str):
+                    # Try lookup
+                    cmds = get_cmds_from_key(raw_input)
+                    if cmds:
+                         for cmd in cmds:
+                            self.ffmpeg_cmds.append(cmd)
                     else:
-                        # Single command
+                        # Direct command
                         import shlex
+                        # Check for multi-line/semicolon separated logic if needed, 
+                        # but usually it's one command or preset
+                        if " " in raw_input and not any(k in raw_input for k in (Config.FFMPEG_CMDS or {})):
+                             # It's a command string like "-c copy"
+                             self.ffmpeg_cmds.append(shlex.split(raw_input))
+                        else:
+                             # Maybe a key that wasn't found or a simple command
+                             self.ffmpeg_cmds.append(shlex.split(raw_input))
 
-                        self.ffmpeg_cmds = [shlex.split(str(evaluated_cmds))]
+                LOGGER.info(f"Resolved FFmpeg commands: {self.ffmpeg_cmds}")
 
-                    LOGGER.info(
-                        f"Using evaluated FFmpeg commands: {self.ffmpeg_cmds}"
-                    )
-        except Exception as e:
-            self.ffmpeg_cmds = None
-            LOGGER.error(f"Error processing FFmpeg command: {e}")
+            except Exception as e:
+                self.ffmpeg_cmds = []
+                LOGGER.error(f"Error processing FFmpeg command: {e}")
+        
         if not isinstance(self.seed, bool):
             dargs = self.seed.split(":")
             ratio = dargs[0] or None
@@ -1307,8 +1251,12 @@ async def nzb_leech(client, message):
     )
 
 
-@new_task
 async def md_leech_node(client, message):
-    mirror = Mirror(client, message, is_leech=True)
-    mirror.is_md_leech = True
-    await mirror.new_event()
+    if not Config.LEECH_ENABLED:
+        await send_message(
+            message, "❌ Leech operations are disabled by the administrator."
+        )
+        return
+    bot_loop.create_task(
+        Mirror(client, message, is_leech=True, is_md_leech=True).new_event()
+    )
