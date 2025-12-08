@@ -1656,6 +1656,7 @@ class TelegramUploader:
                     )
                     return None
 
+                LOGGER.info(f"Starting document upload: {self._up_path} with thumb: {thumb}")
                 self._sent_msg = await self._sent_msg.reply_document(
                     document=self._up_path,
                     quote=True,
@@ -1707,8 +1708,13 @@ class TelegramUploader:
                     )
 
                 if thumb is not None and thumb != "none":
-                    with Image.open(thumb) as img:
-                        width, height = img.size
+                    try:
+                        with Image.open(thumb) as img:
+                            width, height = img.size
+                    except Exception as e:
+                        LOGGER.error(f"Failed to open thumbnail {thumb}: {e}")
+                        width, height = 480, 320
+                        thumb = None
                 else:
                     width = 480
                     height = 320
@@ -1725,6 +1731,7 @@ class TelegramUploader:
                     )
                     return None
 
+                LOGGER.info(f"Starting video upload: {self._up_path} with thumb: {thumb}")
                 self._sent_msg = await self._sent_msg.reply_video(
                     video=self._up_path,
                     quote=True,
@@ -1928,6 +1935,7 @@ class TelegramUploader:
                             )
                             return None
 
+                        LOGGER.info(f"Starting photo upload: {self._up_path}")
                         self._sent_msg = await self._sent_msg.reply_photo(
                             photo=self._up_path,
                             quote=True,
