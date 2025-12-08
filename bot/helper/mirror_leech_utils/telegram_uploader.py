@@ -1656,7 +1656,9 @@ class TelegramUploader:
                     )
                     return None
 
-                LOGGER.info(f"Starting document upload: {self._up_path} with thumb: {thumb}")
+                LOGGER.info(
+                    f"Starting document upload: {self._up_path} with thumb: {thumb}"
+                )
                 self._sent_msg = await self._sent_msg.reply_document(
                     document=self._up_path,
                     quote=True,
@@ -1731,7 +1733,9 @@ class TelegramUploader:
                     )
                     return None
 
-                LOGGER.info(f"Starting video upload: {self._up_path} with thumb: {thumb}")
+                LOGGER.info(
+                    f"Starting video upload: {self._up_path} with thumb: {thumb}"
+                )
                 self._sent_msg = await self._sent_msg.reply_video(
                     video=self._up_path,
                     quote=True,
