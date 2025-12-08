@@ -662,7 +662,6 @@ class Mirror(TaskListener):
             # Reset torrent seed flag
             self.seed = False
 
-        try:
         if args["-ff"]:
             # Standardize to list of strings
             raw_input = args["-ff"]
