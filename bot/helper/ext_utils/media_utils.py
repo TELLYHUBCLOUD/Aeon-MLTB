@@ -4891,6 +4891,20 @@ class FFMpeg:
         self._last_processed_time = 0
         self._last_processed_bytes = 0
 
+    async def run_ffmpeg_cmd(self, cmd, status):
+        self._start_time = time()
+        self._last_processed_time = time()
+        self._check_time = time()
+        await self._listener.on_download_start(status)
+        self._listener.subproc = await create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        await self._ffmpeg_progress()
+        await self._listener.subproc.communicate()
+        return self._listener.subproc.returncode
+
     async def _ffmpeg_progress(self):
         while not (
             self._listener.subproc.returncode is not None
