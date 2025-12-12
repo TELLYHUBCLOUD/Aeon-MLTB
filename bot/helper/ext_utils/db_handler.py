@@ -9,31 +9,29 @@ from aiofiles import open as aiopen
 # Initialize USING_MOTOR flag
 USING_MOTOR = False
 
-# Smart import: Use pymongo's AsyncMongoClient if available (kurigram/newer pymongo),
-# otherwise fall back to motor's AsyncIOMotorClient (pyrofork/older pymongo)
+# Smart import: Prefer motor's AsyncIOMotorClient (standard for async mongo)
 try:
-    from pymongo import AsyncMongoClient
+    from motor.motor_asyncio import AsyncIOMotorClient as AsyncMongoClient
     from pymongo.errors import (
         ConnectionFailure,
         PyMongoError,
         ServerSelectionTimeoutError,
     )
     from pymongo.server_api import ServerApi
-
 except ImportError:
+    # Fallback to pymongo's AsyncMongoClient (if available in newer versions/forks)
     try:
-        from motor.motor_asyncio import AsyncIOMotorClient as AsyncMongoClient
+        from pymongo import AsyncMongoClient
         from pymongo.errors import (
             ConnectionFailure,
             PyMongoError,
             ServerSelectionTimeoutError,
         )
         from pymongo.server_api import ServerApi
-
     except ImportError:
         raise ImportError(
-            "Neither pymongo.AsyncMongoClient nor motor.motor_asyncio.AsyncIOMotorClient is available. "
-            "Please install either a newer version of pymongo (>=4.5) or motor."
+            "Neither motor.motor_asyncio.AsyncIOMotorClient nor pymongo.AsyncMongoClient is available. "
+            "Please install motor (pip install motor)."
         )
 
 from bot import LOGGER, qbit_options, rss_dict, user_data
