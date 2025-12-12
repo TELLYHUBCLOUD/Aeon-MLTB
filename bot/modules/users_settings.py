@@ -4411,7 +4411,14 @@ Cookies allow you to access restricted content on YouTube, Instagram, Twitter, a
         update_user_ldata(user_id, data[3], data[4] == "t")
         if data[3] == "STOP_DUPLICATE":
             back_to = "gdrive"
-        elif data[3] in ["USER_TOKENS", "MEDIAINFO_ENABLED", "BOT_PM"]:
+        elif data[3] in [
+            "USER_TOKENS",
+            "MEDIAINFO_ENABLED",
+            "BOT_PM",
+            "FFMPEG_ENABLED",
+        ]:
+            if data[3] == "FFMPEG_ENABLED":
+                Config.FFMPEG_ENABLED = data[4] == "t"
             back_to = "main"
         elif data[3] in [
             "MEGA_UPLOAD_PUBLIC",
