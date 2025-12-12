@@ -3552,7 +3552,7 @@ special_commands = f"""
 /{BotCommands.AskCommand}: Chat with AI using the bot (Mistral or DeepSeek).
 /{BotCommands.TruecallerCommand}: Lookup phone numbers using Truecaller.
 /{BotCommands.OSINTCommand}: Comprehensive OSINT intelligence suite with phone, IP, email, user, and vehicle lookup capabilities (Sudo only).
-/{BotCommands.EncodeCommand[0]} or /{BotCommands.EncodeCommand[1]} [query]: Encode text using various encoding methods (Base64, Binary, Cryptography, etc.).
+/{BotCommands.EncodeCommand[0]} [query]: Encode text using various encoding methods (Base64, Binary, Cryptography, etc.).
 /{BotCommands.DecodeCommand[0]} or /{BotCommands.DecodeCommand[1]} [query]: Decode text using various decoding methods.
 /{BotCommands.QuickInfoCommand[0]} or /{BotCommands.QuickInfoCommand[1]} [chat]: Get chat/user information with interactive buttons.
 /{BotCommands.File2LinkCommand}: Convert Telegram media files into direct streaming links with browser player support.
