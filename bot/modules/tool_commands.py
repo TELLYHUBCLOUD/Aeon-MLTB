@@ -482,7 +482,7 @@ async def create_animated_sticker_fallback(
     try:
         if not Config.FFMPEG_ENABLED:
             return False, duration_info
-            
+
         cmd = [
             Config.FFMPEG_CMD,
             "-i",
@@ -723,8 +723,8 @@ async def convert_video_to_video_note_simple(
     """Fallback simple video note conversion (square format)."""
     try:
         if not Config.FFMPEG_ENABLED:
-             LOGGER.warning("FFmpeg is disabled in configuration")
-             return False
+            LOGGER.warning("FFmpeg is disabled in configuration")
+            return False
 
         LOGGER.info("Using fallback simple video note conversion")
 

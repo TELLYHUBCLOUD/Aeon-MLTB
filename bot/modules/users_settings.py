@@ -3506,7 +3506,9 @@ API Key: <code>{mediafire_api_key_display}</code> ({mediafire_api_key_source})
         if Config.YTDLP_ENABLED or Config.GALLERY_DL_ENABLED:
             text_parts.append(f"-> User Cookies: <b>{cookies_status}</b>")
 
-        text_parts.append(f"-> FFmpeg: <b>{'Enabled' if Config.FFMPEG_ENABLED else 'Disabled'}</b>")
+        text_parts.append(
+            f"-> FFmpeg: <b>{'Enabled' if Config.FFMPEG_ENABLED else 'Disabled'}</b>"
+        )
 
         # Only show FFmpeg settings if media tools are enabled
         if is_media_tool_enabled("xtra"):
