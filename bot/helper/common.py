@@ -4792,6 +4792,11 @@ class TaskConfig:
         inputs = {}  # Dictionary to store temporary input files from Telegram links
         cmds = []
 
+        # Check if FFmpeg is enabled globally
+        if not Config.FFMPEG_ENABLED:
+            # LOGGER.warning("FFmpeg is disabled in config. Skipping FFmpeg processing.")
+            return dl_path
+
         # Check if ffmpeg_cmds is empty or None
         if not self.ffmpeg_cmds:
             return dl_path

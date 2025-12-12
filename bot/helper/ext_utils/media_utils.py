@@ -4895,7 +4895,8 @@ class FFMpeg:
         self._start_time = time()
         self._last_processed_time = time()
         self._check_time = time()
-        await self._listener.on_download_start(status)
+        await self._listener.on_download_start()
+        LOGGER.info(f"Running FFmpeg command: {status}")
         self._listener.subproc = await create_subprocess_exec(
             *cmd,
             stdout=asyncio.subprocess.PIPE,
