@@ -232,6 +232,10 @@ async def convert_video_to_gif(
 ) -> tuple[bool, str]:
     """Convert video to GIF using FFmpeg."""
     try:
+        if not Config.FFMPEG_ENABLED:
+            LOGGER.warning("FFmpeg is disabled in configuration")
+            return False, ""
+
         # Get video info
         duration, _, _ = await get_media_info(input_path)
 
@@ -244,7 +248,7 @@ async def convert_video_to_gif(
             duration_info = f" (trimmed from {duration:.1f}s to 10s)"
 
         cmd = [
-            "xtra",
+            Config.FFMPEG_CMD,
             "-i",
             input_path,
             "-t",
@@ -264,7 +268,7 @@ async def convert_video_to_gif(
             return False
 
         cmd = [
-            "xtra",
+            Config.FFMPEG_CMD,
             "-i",
             input_path,
             "-i",
@@ -322,6 +326,10 @@ async def create_sticker_from_media(
                 return True, duration_info
 
         elif media_type == "video":
+            if not Config.FFMPEG_ENABLED:
+                LOGGER.warning("FFmpeg is disabled in configuration")
+                return False, ""
+
             # Get video duration for info
             try:
                 duration, _, _ = await get_media_info(input_path)
@@ -338,7 +346,7 @@ async def create_sticker_from_media(
             # - Must be truly animated (not just a single frame)
 
             cmd = [
-                "xtra",
+                Config.FFMPEG_CMD,
                 "-i",
                 input_path,
                 "-t",
@@ -386,7 +394,7 @@ async def create_sticker_from_media(
             try:
                 # Use ffprobe to check if it's animated
                 probe_cmd = [
-                    "xtra",
+                    Config.FFMPEG_CMD,
                     "-i",
                     output_path,
                     "-hide_banner",
@@ -472,8 +480,11 @@ async def create_animated_sticker_fallback(
 ) -> tuple[bool, str]:
     """Fallback method for creating animated stickers with simpler settings."""
     try:
+        if not Config.FFMPEG_ENABLED:
+            return False, duration_info
+            
         cmd = [
-            "xtra",
+            Config.FFMPEG_CMD,
             "-i",
             input_path,
             "-t",
@@ -539,9 +550,12 @@ async def create_emoji_from_media(
                 return True
 
         elif media_type == "video":
+            if not Config.FFMPEG_ENABLED:
+                return False
+
             # Convert video to animated emoji (100x100 WebP)
             cmd = [
-                "xtra",
+                Config.FFMPEG_CMD,
                 "-i",
                 input_path,
                 "-t",
@@ -579,6 +593,10 @@ async def convert_audio_to_voice(
 ) -> tuple[bool, str]:
     """Convert audio to Telegram voice message format (OGG Opus) with 1-minute limit."""
     try:
+        if not Config.FFMPEG_ENABLED:
+            LOGGER.warning("FFmpeg is disabled in configuration")
+            return False, ""
+
         # Get audio duration
         duration, _, _ = await get_media_info(input_path)
 
@@ -591,7 +609,7 @@ async def convert_audio_to_voice(
             duration_info = f" (trimmed from {duration:.1f}s to 60s)"
 
         cmd = [
-            "xtra",
+            Config.FFMPEG_CMD,
             "-i",
             input_path,
             "-t",
@@ -627,6 +645,10 @@ async def convert_audio_to_voice(
 async def convert_video_to_video_note(input_path: str, output_path: str) -> bool:
     """Convert video to Telegram video note format (circular video like native recording)."""
     try:
+        if not Config.FFMPEG_ENABLED:
+            LOGGER.warning("FFmpeg is disabled in configuration")
+            return False
+
         # Get video info
         _duration, _width, _height = await get_media_info(input_path)
 
@@ -639,7 +661,7 @@ async def convert_video_to_video_note(input_path: str, output_path: str) -> bool
         # Create a proper square video note that Telegram will render as circular
         # The key is to create a perfect square video with optimal settings
         cmd = [
-            "xtra",
+            Config.FFMPEG_CMD,
             "-i",
             input_path,
             "-vf",
@@ -700,10 +722,14 @@ async def convert_video_to_video_note_simple(
 ) -> bool:
     """Fallback simple video note conversion (square format)."""
     try:
+        if not Config.FFMPEG_ENABLED:
+             LOGGER.warning("FFmpeg is disabled in configuration")
+             return False
+
         LOGGER.info("Using fallback simple video note conversion")
 
         cmd = [
-            "xtra",
+            Config.FFMPEG_CMD,
             "-i",
             input_path,
             "-vf",

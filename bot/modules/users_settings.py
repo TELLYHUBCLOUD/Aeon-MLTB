@@ -3344,6 +3344,12 @@ API Key: <code>{mediafire_api_key_display}</code> ({mediafire_api_key_source})
         if is_media_tool_enabled("metadata"):
             buttons.data_button("Metadata", f"userset {user_id} metadata")
 
+        # FFmpeg Toggle
+        buttons.data_button(
+            f"FFmpeg: {'✅ ON' if Config.FFMPEG_ENABLED else '❌ OFF'}",
+            f"userset {user_id} tog FFMPEG_ENABLED {'f' if Config.FFMPEG_ENABLED else 't'}",
+        )
+
         # Only show FFmpeg Cmds button if ffmpeg tool is enabled
         if is_media_tool_enabled("xtra"):
             buttons.data_button("FFmpeg Cmds", f"userset {user_id} menu FFMPEG_CMDS")
@@ -3499,6 +3505,8 @@ API Key: <code>{mediafire_api_key_display}</code> ({mediafire_api_key_source})
         # Show cookies status if either YT-DLP or Gallery-dl is enabled
         if Config.YTDLP_ENABLED or Config.GALLERY_DL_ENABLED:
             text_parts.append(f"-> User Cookies: <b>{cookies_status}</b>")
+
+        text_parts.append(f"-> FFmpeg: <b>{'Enabled' if Config.FFMPEG_ENABLED else 'Disabled'}</b>")
 
         # Only show FFmpeg settings if media tools are enabled
         if is_media_tool_enabled("xtra"):
