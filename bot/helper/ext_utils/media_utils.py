@@ -15,7 +15,7 @@ from time import time
 
 import aiofiles
 import fitz  # PyMuPDF
-from aioshutil import move, rmtree
+from aioshutil import rmtree
 from PIL import Image
 
 from bot import DOWNLOAD_DIR, LOGGER, cpu_no
@@ -10152,10 +10152,8 @@ async def get_md_leech_cmd(file_path):
         # No audio mapped
 
     # Remove subtitles (-sn), Compress video, Add -del to replace original
-    cmd.extend(
-        ["-sn", "-c:v", "libx265", "-crf", "28", "-preset", "fast", "-del"]
-    )
-    
+    cmd.extend(["-sn", "-c:v", "libx265", "-crf", "28", "-preset", "fast", "-del"])
+
     return cmd
 
 
@@ -10174,7 +10172,7 @@ async def get_enc_cmd(file_path):
 
     # Construct ffmpeg command arguments
     # We use "input.mp4" as placeholder which proceed_ffmpeg handles
-    cmd = [
+    return [
         "-i",
         "input.mp4",
         "-map",
@@ -10191,5 +10189,3 @@ async def get_enc_cmd(file_path):
         "copy",
         "-del",
     ]
-
-    return cmd
