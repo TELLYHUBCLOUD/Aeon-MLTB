@@ -45,3 +45,4 @@ class BotCommands:
     SelectCommand = f"sel{i}"
     RssCommand = f"rss{i}"
     SoxCommand = [f"spectrum{i}", f"sox{i}"]
+    CompressCommand = f"compress{i}"

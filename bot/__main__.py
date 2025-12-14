@@ -42,6 +42,7 @@ COMMANDS = {
     "BotSetCommand": "- [ADMIN] Open Bot settings",
     "LogCommand": "- [ADMIN] View bot log",
     "RestartCommand": "- [ADMIN] Restart the bot",
+    "CompressCommand": "- Compress video with custom settings",
 }
 
 

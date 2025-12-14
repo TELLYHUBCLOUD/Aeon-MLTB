@@ -3,6 +3,7 @@ from .broadcast import broadcast
 from .cancel_task import cancel, cancel_all_buttons, cancel_all_update, cancel_multi
 from .chat_permission import add_sudo, authorize, remove_sudo, unauthorize
 from .clone import clone_node
+from .compress import compress_handler, compression_callback_handler
 from .exec import aioexecute, clear, execute
 from .file_selector import confirm_selection, select
 from .force_start import remove_from_queue
@@ -55,6 +56,8 @@ __all__ = [
     "cancel_multi",
     "clear",
     "clone_node",
+    "compress_handler",
+    "compression_callback_handler",
     "confirm_restart",
     "confirm_selection",
     "count_node",

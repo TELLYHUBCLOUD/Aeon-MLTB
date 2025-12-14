@@ -215,6 +215,11 @@ def add_handlers():
             BotCommands.SoxCommand,
             CustomFilters.authorized,
         ),
+        "compress_handler": (
+            compress_handler,
+            BotCommands.CompressCommand,
+            CustomFilters.authorized,
+        ),
     }
 
     for handler_func, command_name, custom_filter in command_filters.values():
@@ -245,6 +250,7 @@ def add_handlers():
         "^status": status_pages,
         "^botrestart": confirm_restart,
         "^aeon": aeon_callback,
+        "^compress": compression_callback_handler,
     }
 
     for regex_filter, handler_func in regex_filters.items():
