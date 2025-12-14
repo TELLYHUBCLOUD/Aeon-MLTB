@@ -15,7 +15,7 @@ from aiofiles import open as aiopen
 from aiofiles.os import makedirs
 from aiofiles.os import path as aiopath
 
-from bot import DOWNLOAD_DIR, LOGGER
+from bot import DOWNLOAD_DIR, LOGGER, bot_loop
 from bot.core.aeon_client import TgClient
 from bot.helper.aeon_utils.access_check import token_check
 from bot.helper.ext_utils.compression_state import compression_state_manager
@@ -165,7 +165,7 @@ async def download_full_video(url: str, output_path: str, progress_msg) -> bool:
         return False
 
 
-async def compress_handler(client, message):
+async def _compress_event(client, message):
     """
     Main handler for /compress command.
 
@@ -349,6 +349,11 @@ async def compress_handler(client, message):
         LOGGER.error(f"Error in compress_handler: {e}")
         await edit_message(status_msg, f"❌ Error: {e!s}")
         await compression_state_manager.remove_session(user_id)
+
+
+async def compress_handler(client, message):
+    """Wrapper for compress command that creates async task"""
+    bot_loop.create_task(_compress_event(client, message))
 
 
 async def compression_callback_handler(client, query):
