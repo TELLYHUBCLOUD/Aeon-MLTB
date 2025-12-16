@@ -92,6 +92,14 @@ class TelegramUploader:
         self._last_uploaded = current
         self._processed_bytes += chunk_size
 
+    def _is_bot_pm_enabled(self):
+        """Check if BOT_PM is enabled with user priority over owner config"""
+        user_dict = self._listener.user_dict
+        bot_pm_enabled = user_dict.get("BOT_PM", None)
+        if bot_pm_enabled is None:
+            bot_pm_enabled = Config.BOT_PM
+        return bot_pm_enabled
+
     async def _user_settings(self):
         self._media_group = self._listener.user_dict.get("MEDIA_GROUP") or (
             Config.MEDIA_GROUP
@@ -553,20 +561,38 @@ class TelegramUploader:
                         await sleep(0.5)
             LOGGER.error(f"Failed to copy message after {retries} attempts")
 
-        # TODO if self.dm_mode:
-        if self._sent_msg.chat.id != self._user_id:
-            await _copy(self._user_id)
-
+        # Get source chat ID
+        source_chat_id = self._sent_msg.chat.id
+        
+        # Collect all destination targets
+        destinations = []
+        
+        # Add user's PM if not already there and BOT_PM is enabled
+        if source_chat_id != self._user_id and self._is_bot_pm_enabled():
+            destinations.append(self._user_id)
+        
+        # Add user dump if configured
         if self._user_dump:
-            with contextlib.suppress(Exception):
-                await _copy(int(self._user_dump))
+            try:
+                user_dump_id = int(self._user_dump)
+                if user_dump_id not in destinations:
+                    destinations.append(user_dump_id)
+            except Exception:
+                pass
+        
+        # Add leech dump chats if configured
         if (
             isinstance(Config.LEECH_DUMP_CHAT, list)
             and len(Config.LEECH_DUMP_CHAT) > 1
         ):
-            for i in Config.LEECH_DUMP_CHAT[1:]:
-                with contextlib.suppress(Exception):
-                    await _copy(i)
+            for chat_id in Config.LEECH_DUMP_CHAT[1:]:
+                if chat_id not in destinations:
+                    destinations.append(chat_id)
+        
+        # Copy message to all destinations
+        for target in destinations:
+            with contextlib.suppress(Exception):
+                await _copy(target)
 
     @property
     def speed(self):
