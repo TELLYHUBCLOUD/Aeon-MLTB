@@ -4,7 +4,6 @@ from base64 import b64encode
 from re import match as re_match
 
 from aiofiles.os import path as aiopath
-from pyrogram.filters import regex
 from truelink import TrueLinkResolver
 from truelink.exceptions import TrueLinkException
 from truelink.types import FolderResult, LinkResult
@@ -134,13 +133,13 @@ class Mirror(TaskListener):
         if self.auto_link:
             # Inject link if not present (Auto Leech)
             if not any(x.startswith("http") or "magnet" in x for x in input_list):
-                 input_list.append(self.auto_link)
+                input_list.append(self.auto_link)
 
         # Check if user provided -ff
         user_ff = any(item.strip() == "-ff" for item in input_list)
         if not user_ff and self.auto_ff:
-             # Append auto FFmpeg args
-             input_list.extend(self.auto_ff.split())
+            # Append auto FFmpeg args
+            input_list.extend(self.auto_ff.split())
 
         arg_parser(input_list[1:], args)
 
@@ -508,7 +507,7 @@ async def nzb_leech(client, message):
 async def auto_leech_handler(client, message):
     user_id = message.from_user.id
     user_dict = user_data.get(user_id, {})
-    
+
     # Check Settings
     if not user_dict.get("AUTO_LEECH"):
         return
@@ -517,63 +516,64 @@ async def auto_leech_handler(client, message):
     text = message.text
     if not text:
         return
-        
+
     # Simple Link Validation (http/https/magnet)
     # Refine this based on existing link utils if needed, but basic check is fast
-    if not (re_match(r"https?://\S+", text) or re_match(r"magnet:\?xt=urn:\S+", text)):
+    if not (
+        re_match(r"https?://\S+", text) or re_match(r"magnet:\?xt=urn:\S+", text)
+    ):
         return
 
     # Fetch Auto Settings
     auto_ff = user_dict.get("AUTO_COMPRESS_CMD")
-    
+
     # Trigger Leech
     # Determine if it's qbit or aria/ytdl is handled by new_event -> is_qbit detection
     # We just pass is_leech=True
-    
+
     # We need to construct a "Command" like structure or just let Mirror handle it.
     # Mirror expects self.message.text to be parsed.
     # We should prepend a fake command so arg_parser works (it skips index 0)
     # Or we can just ensure input_list[0] is mocked.
-    
+
     # Actually, Mirror uses self.message.text.
     # If using Auto Leech, the message is JUST the link.
-    # So input_list would be [link]. 
+    # So input_list would be [link].
     # arg_parser expects [1:]. So it would parse nothing.
     # We need to prepend "/leech" effectively.
-    
-    # Let's modify the message text in memory for the Mirror instance? 
+
+    # Let's modify the message text in memory for the Mirror instance?
     # Or better, logic in Mirror handles it?
     # Mirror splits message.text.
-    
+
     # Approach:
-    # 1. Modify message.text to "/leech <original_text>" 
+    # 1. Modify message.text to "/leech <original_text>"
     #    BUT we don't want to edit the actual telegram message.
     # 2. We can pass `options` to Mirror? No, `options` is for bulk.
-    
-    # Hack: Subclass or wrapper message? 
-    # Easier: Just prepend "/leech" to message.text in the object copy? 
+
+    # Hack: Subclass or wrapper message?
+    # Easier: Just prepend "/leech" to message.text in the object copy?
     # Pyrogram Message object is mutable? Yes.
     # But safer:
-    
+
     # Modify Mirror to use `self.text` instead of `self.message.text`?
     # Mirror.__init__ -> self.message = message.
     # Mirror.new_event -> text = self.message.text.split("\n")
-    
+
     # I can just overwrite message.text since this is a new Mirror instance and message is passed by reference but we can clone it?
     # No need to clone, just modify and pass. It's an async handler, won't affect others if we are careful.
     # Actually, modifying the message object might affect other handlers if they run in parallel?
     # Unlikely to be an issue for this specific message.
-    
+
     # Let's prepend "/leech " to the text.
     message.text = f"/leech {text}"
-    
-    LOGGER.info(f"[AUTO_LEECH] Triggered for user {user_id}: {text[:30]}...")
-    
-    await Mirror(
-        client, 
-        message, 
-        is_leech=True, 
-        auto_link=text, # passing original text as link just in case
-        auto_ff=auto_ff
-    ).new_event()
 
+    LOGGER.info(f"[AUTO_LEECH] Triggered for user {user_id}: {text[:30]}...")
+
+    await Mirror(
+        client,
+        message,
+        is_leech=True,
+        auto_link=text,  # passing original text as link just in case
+        auto_ff=auto_ff,
+    ).new_event()

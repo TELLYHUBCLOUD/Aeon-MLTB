@@ -61,7 +61,7 @@ class SetInterval:
 def clean_caption(caption, replace_text, remove_text):
     if not caption:
         return ""
-        
+
     # Apply Replacements
     if replace_text:
         for rule in replace_text.split(","):
@@ -74,11 +74,13 @@ def clean_caption(caption, replace_text, remove_text):
                 # "Word-level replace" -> User said "sony -> replace with sona".
                 # Regex is better for case insensitive.
                 import re
+
                 caption = re.sub(re.escape(old), new, caption, flags=re.IGNORECASE)
 
     # Apply Removals
     if remove_text:
         import re
+
         for word in remove_text.split(","):
             word = word.strip()
             if word:
@@ -86,9 +88,8 @@ def clean_caption(caption, replace_text, remove_text):
 
     # Normalize Spaces
     import re
-    caption = re.sub(r"\s+", " ", caption).strip()
-    return caption
 
+    return re.sub(r"\s+", " ", caption).strip()
 
 
 def _build_command_usage(help_dict, command_key):
