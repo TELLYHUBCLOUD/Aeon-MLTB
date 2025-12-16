@@ -61,7 +61,7 @@ async def rss_menu(event):
             buttons.data_button("Start Rss", f"rss start {user_id}")
     buttons.data_button("Close", f"rss close {user_id}")
     button = buttons.build_menu(2)
-    msg = f"╭📰 <b>RSS Menu</b>\n"
+    msg = "╭📰 <b>RSS Menu</b>\n"
     msg += f"┊👥 <b>Users:</b> {len(rss_dict)}\n"
     msg += f"╰⚡ <b>Running:</b> {scheduler.running}"
     return msg, button
@@ -157,9 +157,7 @@ async def rss_sub(_, message, pre_event):
             else:
                 size = 0
             msg += "╭✅ <b>Subscribed!</b>"
-            msg += (
-                f"\n┊<b>Title: </b><code>{title}</code>\n┊<b>Feed Url: </b>{feed_link}"
-            )
+            msg += f"\n┊<b>Title: </b><code>{title}</code>\n┊<b>Feed Url: </b>{feed_link}"
             msg += f"\n┊<b>Latest record for </b>{rss_d.feed.title}:"
             msg += f"\n┊<b>Name: </b><code>{last_title.replace('>', '').replace('<', '')}</code>"
             try:
@@ -287,7 +285,9 @@ async def rss_list(query, start, all_users=False):
     user_id = query.from_user.id
     buttons = ButtonMaker()
     if all_users:
-        list_feed = f"╭📋 <b>All subscriptions</b>\n┊<b>Page:</b> {int(start / 5)}\n╰\n"
+        list_feed = (
+            f"╭📋 <b>All subscriptions</b>\n┊<b>Page:</b> {int(start / 5)}\n╰\n"
+        )
         async with rss_dict_lock:
             keysCount = sum(len(v.keys()) for v in rss_dict.values())
             index = 0
@@ -307,7 +307,9 @@ async def rss_list(query, start, all_users=False):
                     if index == 5:
                         break
     else:
-        list_feed = f"╭📋 <b>Your subscriptions</b>\n┊<b>Page:</b> {int(start / 5)}\n╰\n"
+        list_feed = (
+            f"╭📋 <b>Your subscriptions</b>\n┊<b>Page:</b> {int(start / 5)}\n╰\n"
+        )
         async with rss_dict_lock:
             keysCount = len(rss_dict.get(user_id, {}).keys())
             for title, data in list(rss_dict[user_id].items())[start : 5 + start]:

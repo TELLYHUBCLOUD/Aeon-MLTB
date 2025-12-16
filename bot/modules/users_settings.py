@@ -145,8 +145,6 @@ async def get_user_settings(from_user, stype="main"):
         if bot_pm_enabled is None:
             bot_pm_enabled = Config.BOT_PM if hasattr(Config, "BOT_PM") else False
 
-
-
         # Add BOT_PM toggle button
         if bot_pm_enabled:
             buttons.data_button(
@@ -339,9 +337,6 @@ async def get_user_settings(from_user, stype="main"):
             f"userset {user_id} menu AUTO_CAPTION_REMOVE",
         )
         ac_rem = user_dict.get("AUTO_CAPTION_REMOVE") or "None"
-
-
-
 
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
