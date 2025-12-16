@@ -137,7 +137,9 @@ class Clone(TaskListener):
                 self.user_id,
             )
             if mime_type is None:
-                await send_message(self.message, f"╭❌ <b>Error</b>\n╰<code>{self.name}</code>")
+                await send_message(
+                    self.message, f"╭❌ <b>Error</b>\n╰<code>{self.name}</code>"
+                )
                 return
             msg, button = await stop_duplicate_check(self)
             if msg:

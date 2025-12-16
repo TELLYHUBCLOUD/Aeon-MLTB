@@ -58,14 +58,18 @@ async def start(client, message):
         user_data[userid].update(data)
         await database.update_user_tdata(userid, token, token_time)
         msg = "╭✅ <b>Success</b>\n╰Your token has been successfully generated!\n\n"
-        msg += f"<b>Validity:</b> {get_readable_time(int(Config.TOKEN_TIMEOUT), True)}"
+        msg += (
+            f"<b>Validity:</b> {get_readable_time(int(Config.TOKEN_TIMEOUT), True)}"
+        )
         return await send_message(message, msg)
     elif await CustomFilters.authorized(client, message):
         help_command = f"/{BotCommands.HelpCommand}"
         start_string = f"╭🤖 <b>Aeon MLTB</b>\n┊This bot can mirror all your links, files, and torrents to Google Drive, Rclone, or Telegram.\n╰<b>Type {help_command} to get a list of available commands</b>"
         await send_message(message, start_string)
     else:
-        await send_message(message, "╭⚠️ <b>Warning</b>\n╰You are not an authorized user!")
+        await send_message(
+            message, "╭⚠️ <b>Warning</b>\n╰You are not an authorized user!"
+        )
     await database.update_pm_users(message.from_user.id)
     return None
 
@@ -73,9 +77,13 @@ async def start(client, message):
 @new_task
 async def ping(_, message):
     start_time = round(time() * 1000)
-    reply = await send_message(message, "╭⚡ <b>Starting Ping...</b>\n╰<b>Please wait...</b>")
+    reply = await send_message(
+        message, "╭⚡ <b>Starting Ping...</b>\n╰<b>Please wait...</b>"
+    )
     end_time = round(time() * 1000)
-    await edit_message(reply, f"╭📶 <b>Ping</b>\n╰<code>{end_time - start_time} ms</code>")
+    await edit_message(
+        reply, f"╭📶 <b>Ping</b>\n╰<code>{end_time - start_time} ms</code>"
+    )
 
 
 @new_task

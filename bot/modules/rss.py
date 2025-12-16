@@ -246,7 +246,10 @@ async def rss_update(_, message, pre_event, state):
                 continue
         istate = rss_dict[user_id][title].get("paused", False)
         if (istate and state == "pause") or (not istate and state == "resume"):
-            await send_message(message, f"╭ℹ️ <b>Info</b>\n╰<b>Title:</b> <code>{title}</code> is already <b>{state}d</b>!")
+            await send_message(
+                message,
+                f"╭ℹ️ <b>Info</b>\n╰<b>Title:</b> <code>{title}</code> is already <b>{state}d</b>!",
+            )
             continue
         async with rss_dict_lock:
             updated.append(title)
@@ -414,7 +417,9 @@ async def rss_edit(_, message, pre_event):
             )
             continue
         if not rss_dict[user_id].get(title, False):
-            await send_message(message, "╭❌ <b>Error</b>\n╰Enter a valid title. Title not found!")
+            await send_message(
+                message, "╭❌ <b>Error</b>\n╰Enter a valid title. Title not found!"
+            )
             continue
         updated = True
         inf_lists = []

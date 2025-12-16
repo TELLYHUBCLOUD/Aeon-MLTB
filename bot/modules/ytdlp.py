@@ -56,7 +56,9 @@ async def select_format(_, query, obj):
     elif data[1] == "back":
         await obj.back_to_main()
     elif data[1] == "cancel":
-        await edit_message(message, "╭🛑 <b>Task has been cancelled.</b>\n╰User request.")
+        await edit_message(
+            message, "╭🛑 <b>Task has been cancelled.</b>\n╰User request."
+        )
         obj.qual = None
         obj.listener.is_cancelled = True
         obj.event.set()
@@ -95,7 +97,9 @@ class YtSelection:
         try:
             await wait_for(self.event.wait(), timeout=self._timeout)
         except Exception:
-            await edit_message(self._reply_to, "╭⌛ <b>Timed Out</b>\n╰Task has been cancelled!")
+            await edit_message(
+                self._reply_to, "╭⌛ <b>Timed Out</b>\n╰Task has been cancelled!"
+            )
             self.qual = None
             self.listener.is_cancelled = True
             self.event.set()

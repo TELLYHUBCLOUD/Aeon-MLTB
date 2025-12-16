@@ -13,7 +13,9 @@ from bot.helper.telegram_helper.message_utils import (
 
 @new_task
 async def speedtest(_, message):
-    speed = await send_message(message, "╭⚡ <b>Initializing Speedtest...</b>\n╰<b>Please wait...</b>")
+    speed = await send_message(
+        message, "╭⚡ <b>Initializing Speedtest...</b>\n╰<b>Please wait...</b>"
+    )
 
     def get_speedtest_results():
         test = Speedtest()
@@ -24,7 +26,10 @@ async def speedtest(_, message):
 
     result = await TgClient.bot.loop.run_in_executor(None, get_speedtest_results)
     if not result:
-        await edit_message(speed, "╭❌ <b>Speedtest failed to complete.</b>\n╰Check logs for more info.")
+        await edit_message(
+            speed,
+            "╭❌ <b>Speedtest failed to complete.</b>\n╰Check logs for more info.",
+        )
         return
     string_speed = f"""╭🚀 <b>Speedtest Info</b>
 ┊
