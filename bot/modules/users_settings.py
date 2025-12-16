@@ -354,9 +354,9 @@ async def get_user_settings(from_user, stype="main"):
 
         buttons.data_button("🤖 Automation", f"userset {user_id} automation")
 
-        if user_dict.get("AUTO_LEECH", False):
-            aleech = "✅ Enabled"
-        elif "AUTO_LEECH" not in user_dict and Config.AUTO_LEECH:
+        if user_dict.get("AUTO_LEECH", False) or (
+            "AUTO_LEECH" not in user_dict and Config.AUTO_LEECH
+        ):
             aleech = "✅ Enabled"
         else:
             aleech = "❌ Disabled"
