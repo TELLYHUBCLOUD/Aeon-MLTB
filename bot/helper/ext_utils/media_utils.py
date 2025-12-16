@@ -417,9 +417,15 @@ class FFMpeg:
         _, stderr = await self._listener.subproc.communicate()
         code = self._listener.subproc.returncode
         if self._listener.is_cancelled:
-            return False
-        if code == 0:
-            return outputs
+            return Falseif code == 0:
+        # AUTO DELETE ORIGINAL FILE AFTER SUCCESS
+        try:
+            if await aiopath.exists(f_path):
+                await remove(f_path)
+                LOGGER.info(f"Original file deleted after ffmpeg success: {f_path}")
+        except Exception as e:
+            LOGGER.warning(f"Failed to delete original file: {f_path} | Error: {e}")
+        return outputs
         if code == -9:
             self._listener.is_cancelled = True
             return False
