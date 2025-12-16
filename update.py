@@ -110,7 +110,7 @@ UPSTREAM_REPO = (
 )
 
 UPSTREAM_BRANCH = (
-    config_file.get("UPSTREAM_BRANCH", "betax2")
+    config_file.get("UPSTREAM_BRANCH", "betax")
     or os.getenv("UPSTREAM_BRANCH", "")
     or "main"
 )
