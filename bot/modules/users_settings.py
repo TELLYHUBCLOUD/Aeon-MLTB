@@ -350,6 +350,13 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("☁️ Gdrive API", f"userset {user_id} gdrive")
         buttons.data_button("🎥 YouTube", f"userset {user_id} youtube")
 
+        # Main Menu Shortcut for Auto Leech
+        buttons.data_button(
+            "🚀 Auto Leech",
+            f"userset {user_id} tog AUTO_LEECH {'f' if user_dict.get('AUTO_LEECH') else 't'}",
+        )
+        aleech = "✅ Enabled" if user_dict.get("AUTO_LEECH") else "❌ Disabled"
+
         upload_paths = user_dict.get("UPLOAD_PATHS", {})
         if (
             not upload_paths
@@ -448,6 +455,7 @@ async def get_user_settings(from_user, stype="main"):
         text = f"""<u>⚙️ Settings for {name}</u>
 
 📦 Default Package: <b>{du}</b>
+🚀 Auto Leech: <b>{aleech}</b>
 🔑 Use <b>{tr}</b> token/config
 📤 Upload Paths: <code>{upload_paths}</code>
 
