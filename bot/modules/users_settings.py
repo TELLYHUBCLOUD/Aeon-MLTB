@@ -139,8 +139,8 @@ async def get_user_settings(from_user, stype="main"):
         # Get BOT_PM status
         bot_pm_enabled = user_dict.get("BOT_PM", None)
         if bot_pm_enabled is None:
-            bot_pm_enabled = Config.BOT_PM if hasattr(Config, 'BOT_PM') else False
-        
+            bot_pm_enabled = Config.BOT_PM if hasattr(Config, "BOT_PM") else False
+
         # Add BOT_PM toggle button
         if bot_pm_enabled:
             buttons.data_button(
