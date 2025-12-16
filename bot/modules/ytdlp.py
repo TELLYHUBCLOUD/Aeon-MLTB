@@ -123,7 +123,7 @@ class YtSelection:
             buttons.data_button("Best Audios", "ytq ba/b")
             buttons.data_button("Cancel", "ytq cancel", "footer")
             self._main_buttons = buttons.build_menu(3)
-            msg = f"Choose Playlist Videos Quality:\nTimeout: {get_readable_time(self._timeout - (time() - self._time))}"
+            msg = f"╭🎥 <b>Choose Playlist Videos Quality</b>\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}"
         else:
             format_dict = result.get("formats")
             if format_dict is not None:
@@ -180,7 +180,7 @@ class YtSelection:
             buttons.data_button("Best Audio", "ytq ba/b")
             buttons.data_button("Cancel", "ytq cancel", "footer")
             self._main_buttons = buttons.build_menu(2)
-            msg = f"Choose Video Quality:\nTimeout: {get_readable_time(self._timeout - (time() - self._time))}"
+            msg = f"╭🎥 <b>Choose Video Quality</b>\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}"
         self._reply_to = await send_message(
             self.listener.message,
             msg,
@@ -193,9 +193,9 @@ class YtSelection:
 
     async def back_to_main(self):
         if self._is_playlist:
-            msg = f"Choose Playlist Videos Quality:\nTimeout: {get_readable_time(self._timeout - (time() - self._time))}"
+            msg = f"╭🎥 <b>Choose Playlist Videos Quality</b>\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}"
         else:
-            msg = f"Choose Video Quality:\nTimeout: {get_readable_time(self._timeout - (time() - self._time))}"
+            msg = f"╭🎥 <b>Choose Video Quality</b>\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}"
         await edit_message(self._reply_to, msg, self._main_buttons)
 
     async def qual_subbuttons(self, b_name):
@@ -207,7 +207,7 @@ class YtSelection:
         buttons.data_button("Back", "ytq back", "footer")
         buttons.data_button("Cancel", "ytq cancel", "footer")
         subbuttons = buttons.build_menu(2)
-        msg = f"Choose Bit rate for <b>{b_name}</b>:\nTimeout: {get_readable_time(self._timeout - (time() - self._time))}"
+        msg = f"╭🎼 <b>Choose Bit rate for {b_name}</b>\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}"
         await edit_message(self._reply_to, msg, subbuttons)
 
     async def mp3_subbuttons(self):
@@ -220,7 +220,7 @@ class YtSelection:
         buttons.data_button("Back", "ytq back")
         buttons.data_button("Cancel", "ytq cancel")
         subbuttons = buttons.build_menu(3)
-        msg = f"Choose mp3 Audio{i} Bitrate:\nTimeout: {get_readable_time(self._timeout - (time() - self._time))}"
+        msg = f"╭🎵 <b>Choose mp3 Audio{i} Bitrate</b>\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}"
         await edit_message(self._reply_to, msg, subbuttons)
 
     async def audio_format(self):
@@ -232,7 +232,7 @@ class YtSelection:
         buttons.data_button("Back", "ytq back", "footer")
         buttons.data_button("Cancel", "ytq cancel", "footer")
         subbuttons = buttons.build_menu(3)
-        msg = f"Choose Audio{i} Format:\nTimeout: {get_readable_time(self._timeout - (time() - self._time))}"
+        msg = f"╭🔊 <b>Choose Audio{i} Format</b>\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}"
         await edit_message(self._reply_to, msg, subbuttons)
 
     async def audio_quality(self, format):
@@ -244,7 +244,7 @@ class YtSelection:
         buttons.data_button("Back", "ytq aq back")
         buttons.data_button("Cancel", "ytq aq cancel")
         subbuttons = buttons.build_menu(5)
-        msg = f"Choose Audio{i} Qaulity:\n0 is best and 10 is worst\nTimeout: {get_readable_time(self._timeout - (time() - self._time))}"
+        msg = f"╭🎧 <b>Choose Audio{i} Quality</b>\n┊0 is best and 10 is worst\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}"
         await edit_message(self._reply_to, msg, subbuttons)
 
 

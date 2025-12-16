@@ -61,7 +61,9 @@ async def rss_menu(event):
             buttons.data_button("Start Rss", f"rss start {user_id}")
     buttons.data_button("Close", f"rss close {user_id}")
     button = buttons.build_menu(2)
-    msg = f"Rss Menu | Users: {len(rss_dict)} | Running: {scheduler.running}"
+    msg = f"╭📰 <b>RSS Menu</b>\n"
+    msg += f"┊👥 <b>Users:</b> {len(rss_dict)}\n"
+    msg += f"╰⚡ <b>Running:</b> {scheduler.running}"
     return msg, button
 
 
@@ -154,21 +156,21 @@ async def rss_sub(_, message, pre_event):
                 size = get_size_bytes(sizes[0])
             else:
                 size = 0
-            msg += "<b>Subscribed!</b>"
+            msg += "╭✅ <b>Subscribed!</b>"
             msg += (
-                f"\n<b>Title: </b><code>{title}</code>\n<b>Feed Url: </b>{feed_link}"
+                f"\n┊<b>Title: </b><code>{title}</code>\n┊<b>Feed Url: </b>{feed_link}"
             )
-            msg += f"\n<b>latest record for </b>{rss_d.feed.title}:"
-            msg += f"\nName: <code>{last_title.replace('>', '').replace('<', '')}</code>"
+            msg += f"\n┊<b>Latest record for </b>{rss_d.feed.title}:"
+            msg += f"\n┊<b>Name: </b><code>{last_title.replace('>', '').replace('<', '')}</code>"
             try:
                 last_link = rss_d.entries[0]["links"][1]["href"]
             except IndexError:
                 last_link = rss_d.entries[0]["link"]
-            msg += f"\n<b>Link: </b><code>{last_link}</code>"
+            msg += f"\n┊<b>Link: </b><code>{last_link}</code>"
             if size:
-                msg += f"\nSize: {get_readable_file_size(size)}"
-            msg += f"\n<b>Command: </b><code>{cmd}</code>"
-            msg += f"\n<b>Filters:-</b>\ninf: <code>{inf}</code>\nexf: <code>{exf}</code>\n<b>sensitive: </b>{stv}"
+                msg += f"\n┊<b>Size: </b>{get_readable_file_size(size)}"
+            msg += f"\n┊<b>Command: </b><code>{cmd}</code>"
+            msg += f"\n╰<b>Filters:</b>\ninf: <code>{inf}</code>\nexf: <code>{exf}</code>\n<b>sensitive: </b>{stv}"
             async with rss_dict_lock:
                 if rss_dict.get(user_id, False):
                     rss_dict[user_id][title] = {
@@ -285,7 +287,7 @@ async def rss_list(query, start, all_users=False):
     user_id = query.from_user.id
     buttons = ButtonMaker()
     if all_users:
-        list_feed = f"<b>All subscriptions | Page: {int(start / 5)} </b>"
+        list_feed = f"╭📋 <b>All subscriptions</b>\n┊<b>Page:</b> {int(start / 5)}\n╰\n"
         async with rss_dict_lock:
             keysCount = sum(len(v.keys()) for v in rss_dict.values())
             index = 0
@@ -293,28 +295,28 @@ async def rss_list(query, start, all_users=False):
                 for index, (title, data) in enumerate(
                     list(titles.items())[start : 5 + start],
                 ):
-                    list_feed += f"\n\n<b>Title:</b> <code>{title}</code>\n"
-                    list_feed += f"<b>Feed Url:</b> <code>{data['link']}</code>\n"
-                    list_feed += f"<b>Command:</b> <code>{data['command']}</code>\n"
-                    list_feed += f"<b>Inf:</b> <code>{data['inf']}</code>\n"
-                    list_feed += f"<b>Exf:</b> <code>{data['exf']}</code>\n"
-                    list_feed += f"<b>Sensitive:</b> <code>{data.get('sensitive', False)}</code>\n"
-                    list_feed += f"<b>Paused:</b> <code>{data['paused']}</code>\n"
-                    list_feed += f"<b>User:</b> {data['tag'].replace('@', '', 1)}"
+                    list_feed += f"\n\n╭<b>Title:</b> <code>{title}</code>\n"
+                    list_feed += f"┊<b>Feed Url:</b> <code>{data['link']}</code>\n"
+                    list_feed += f"┊<b>Command:</b> <code>{data['command']}</code>\n"
+                    list_feed += f"┊<b>Inf:</b> <code>{data['inf']}</code>\n"
+                    list_feed += f"┊<b>Exf:</b> <code>{data['exf']}</code>\n"
+                    list_feed += f"┊<b>Sensitive:</b> <code>{data.get('sensitive', False)}</code>\n"
+                    list_feed += f"┊<b>Paused:</b> <code>{data['paused']}</code>\n"
+                    list_feed += f"╰<b>User:</b> {data['tag'].replace('@', '', 1)}"
                     index += 1
                     if index == 5:
                         break
     else:
-        list_feed = f"<b>Your subscriptions | Page: {int(start / 5)} </b>"
+        list_feed = f"╭📋 <b>Your subscriptions</b>\n┊<b>Page:</b> {int(start / 5)}\n╰\n"
         async with rss_dict_lock:
             keysCount = len(rss_dict.get(user_id, {}).keys())
             for title, data in list(rss_dict[user_id].items())[start : 5 + start]:
-                list_feed += f"\n\n<b>Title:</b> <code>{title}</code>\n<b>Feed Url: </b><code>{data['link']}</code>\n"
-                list_feed += f"<b>Command:</b> <code>{data['command']}</code>\n"
-                list_feed += f"<b>Inf:</b> <code>{data['inf']}</code>\n"
-                list_feed += f"<b>Exf:</b> <code>{data['exf']}</code>\n"
-                list_feed += f"<b>Sensitive:</b> <code>{data.get('sensitive', False)}</code>\n"
-                list_feed += f"<b>Paused:</b> <code>{data['paused']}</code>\n"
+                list_feed += f"\n\n╭<b>Title:</b> <code>{title}</code>\n┊<b>Feed Url: </b><code>{data['link']}</code>\n"
+                list_feed += f"┊<b>Command:</b> <code>{data['command']}</code>\n"
+                list_feed += f"┊<b>Inf:</b> <code>{data['inf']}</code>\n"
+                list_feed += f"┊<b>Exf:</b> <code>{data['exf']}</code>\n"
+                list_feed += f"┊<b>Sensitive:</b> <code>{data.get('sensitive', False)}</code>\n"
+                list_feed += f"╰<b>Paused:</b> <code>{data['paused']}</code>\n"
     buttons.data_button("Back", f"rss back {user_id}")
     buttons.data_button("Close", f"rss close {user_id}")
     if keysCount > 5:
@@ -350,7 +352,7 @@ async def rss_get(_, message, pre_event):
             try:
                 msg = await send_message(
                     message,
-                    f"Getting the last <b>{count}</b> item(s) from {title}",
+                    f"╭📥 <b>Getting last {count} item(s)</b>\n╰<b>From:</b> {title}",
                 )
                 async with AsyncClient(
                     headers=headers,
@@ -367,8 +369,8 @@ async def rss_get(_, message, pre_event):
                         link = rss_d.entries[item_num]["links"][1]["href"]
                     except IndexError:
                         link = rss_d.entries[item_num]["link"]
-                    item_info += f"<b>Name: </b><code>{rss_d.entries[item_num]['title'].replace('>', '').replace('<', '')}</code>\n"
-                    item_info += f"<b>Link: </b><code>{link}</code>\n\n"
+                    item_info += f"╭<b>Name: </b><code>{rss_d.entries[item_num]['title'].replace('>', '').replace('<', '')}</code>\n"
+                    item_info += f"╰<b>Link: </b><code>{link}</code>\n\n"
                 item_info_ecd = item_info.encode()
                 if len(item_info_ecd) > 4000:
                     with BytesIO(item_info_ecd) as out_file:
