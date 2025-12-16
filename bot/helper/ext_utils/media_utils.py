@@ -422,9 +422,13 @@ class FFMpeg:
             try:
                 if await aiopath.exists(f_path):
                     await remove(f_path)
-                    LOGGER.info(f"Original file deleted after ffmpeg success: {f_path}")
+                    LOGGER.info(
+                        f"Original file deleted after ffmpeg success: {f_path}"
+                    )
             except Exception as e:
-                LOGGER.warning(f"Failed to delete original file: {f_path} | Error: {e}")
+                LOGGER.warning(
+                    f"Failed to delete original file: {f_path} | Error: {e}"
+                )
             return outputs
         if code == -9:
             self._listener.is_cancelled = True
@@ -535,9 +539,13 @@ class FFMpeg:
             try:
                 if await aiopath.exists(video_file):
                     await remove(video_file)
-                    LOGGER.info(f"Original file deleted after conversion success: {video_file}")
+                    LOGGER.info(
+                        f"Original file deleted after conversion success: {video_file}"
+                    )
             except Exception as e:
-                LOGGER.warning(f"Failed to delete original file: {video_file} | Error: {e}")
+                LOGGER.warning(
+                    f"Failed to delete original file: {video_file} | Error: {e}"
+                )
             return output
         if code == -9:
             self._listener.is_cancelled = True
@@ -589,9 +597,13 @@ class FFMpeg:
             try:
                 if await aiopath.exists(audio_file):
                     await remove(audio_file)
-                    LOGGER.info(f"Original file deleted after conversion success: {audio_file}")
+                    LOGGER.info(
+                        f"Original file deleted after conversion success: {audio_file}"
+                    )
             except Exception as e:
-                LOGGER.warning(f"Failed to delete original file: {audio_file} | Error: {e}")
+                LOGGER.warning(
+                    f"Failed to delete original file: {audio_file} | Error: {e}"
+                )
             return output
         if code == -9:
             self._listener.is_cancelled = True
