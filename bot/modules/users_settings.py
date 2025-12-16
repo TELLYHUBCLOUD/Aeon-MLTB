@@ -750,15 +750,23 @@ async def edit_user_settings(client, query):
         update_user_ldata(user_id, "YT_DEFAULT_FOLDER_MODE", new_mode)
         await database.update_user_data(user_id)
         await update_user_settings(query, "youtube")
+# Find this section around Line 695 in edit_user_settings function
+# Replace the elif data[2] == "tog": section with this:
+
     elif data[2] == "tog":
         await query.answer()
         update_user_ldata(user_id, data[3], data[4] == "t")
+        
+        # Determine which settings page to return to
         if data[3] == "STOP_DUPLICATE":
             back_to = "gdrive"
         elif data[3] == "USER_TOKENS":
             back_to = "main"
+        elif data[3] in ["BOT_PM", "AS_DOCUMENT", "MEDIA_GROUP", "AUTO_LEECH"]:  # ← ADD THIS LINE
+            back_to = "leech"  # ← BOT_PM aur leech-related toggles
         else:
             back_to = "leech"
+        
         await update_user_settings(query, stype=back_to)
         await database.update_user_data(user_id)
     elif data[2] == "file":
