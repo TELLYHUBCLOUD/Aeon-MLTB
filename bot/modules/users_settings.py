@@ -135,6 +135,27 @@ async def get_user_settings(from_user, stype="main"):
         else:
             thumb_layout = "None"
 
+        # ============ BOT_PM BUTTON ADDITION START ============
+        # Get BOT_PM status
+        bot_pm_enabled = user_dict.get("BOT_PM", None)
+        if bot_pm_enabled is None:
+            bot_pm_enabled = Config.BOT_PM if hasattr(Config, 'BOT_PM') else False
+        
+        # Add BOT_PM toggle button
+        if bot_pm_enabled:
+            buttons.data_button(
+                "📩 Disable Bot PM",
+                f"userset {user_id} tog BOT_PM f",
+            )
+            bot_pm_status = "✅ Enabled"
+        else:
+            buttons.data_button(
+                "📩 Enable Bot PM",
+                f"userset {user_id} tog BOT_PM t",
+            )
+            bot_pm_status = "❌ Disabled"
+        # ============ BOT_PM BUTTON ADDITION END ============
+
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
 
@@ -147,6 +168,7 @@ async def get_user_settings(from_user, stype="main"):
 👤 User Session: {usess}
 📦 User Dump: <code>{udump}</code>
 🎨 Thumbnail Layout: <b>{thumb_layout}</b>
+📩 Bot PM: <b>{bot_pm_status}</b>
 """
     elif stype == "rclone":
         buttons.data_button(
