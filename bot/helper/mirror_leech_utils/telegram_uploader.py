@@ -563,14 +563,14 @@ class TelegramUploader:
 
         # Get source chat ID
         source_chat_id = self._sent_msg.chat.id
-        
+
         # Collect all destination targets
         destinations = []
-        
+
         # Add user's PM if not already there and BOT_PM is enabled
         if source_chat_id != self._user_id and self._is_bot_pm_enabled():
             destinations.append(self._user_id)
-        
+
         # Add user dump if configured
         if self._user_dump:
             try:
@@ -579,7 +579,7 @@ class TelegramUploader:
                     destinations.append(user_dump_id)
             except Exception:
                 pass
-        
+
         # Add leech dump chats if configured
         if (
             isinstance(Config.LEECH_DUMP_CHAT, list)
@@ -588,7 +588,7 @@ class TelegramUploader:
             for chat_id in Config.LEECH_DUMP_CHAT[1:]:
                 if chat_id not in destinations:
                     destinations.append(chat_id)
-        
+
         # Copy message to all destinations
         for target in destinations:
             with contextlib.suppress(Exception):
