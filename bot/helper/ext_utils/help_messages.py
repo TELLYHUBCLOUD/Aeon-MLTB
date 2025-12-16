@@ -394,6 +394,9 @@ Timeout: 60 sec""",
     "YT_ADD_TO_PLAYLIST_ID": "Enter the YouTube Playlist ID you want your videos to be added to. If set, newly uploaded videos will be added to this playlist. Leave empty or set to 'None' to not automatically add to a specific playlist (unless creating a new one for a folder upload without this setting). Timeout: 60 sec",
     "GOFILE_TOKEN": "Send your GoFile API token. You can get it from https://gofile.io/myProfile. This token will be used to upload files to your GoFile account. Timeout: 60 sec",
     "GOFILE_FOLDER_ID": "Send your GoFile folder ID where you want to upload files. If not set, files will be uploaded to your account root. You can get folder ID from the GoFile URL. Example: for https://gofile.io/d/abcd123, the folder ID is abcd123. Timeout: 60 sec",
+    "AUTO_COMPRESS_CMD": "Send your default FFmpeg command to be appended to leech commands automatically. Example: -ff -metadata title='My Title'. Timeout: 60 sec",
+    "AUTO_CAPTION_REPLACE": "Send your caption replacement rules. Format: old1|new1,old2|new2. Case-insensitive. Timeout: 60 sec",
+    "AUTO_CAPTION_REMOVE": "Send keywords to remove from captions. Format: word1,word2,word3. Case-insensitive. Timeout: 60 sec",
 }
 
 help_string = f"""

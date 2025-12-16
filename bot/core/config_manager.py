@@ -30,6 +30,7 @@ class Config:
     JD_PASS: str = ""
     IS_TEAM_DRIVE: bool = False
     LEECH_DUMP_CHAT: ClassVar[list[str]] = []
+    BOT_PM: bool = True  # Enable/disable sending media to user's bot PM
     LEECH_FILENAME_PREFIX: str = ""
     LEECH_SPLIT_SIZE: int = 2097152000
     MEDIA_GROUP: bool = False

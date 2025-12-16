@@ -41,6 +41,10 @@ leech_options = [
     "THUMBNAIL_LAYOUT",
     "USER_DUMP",
     "USER_SESSION",
+    "AUTO_LEECH",
+    "AUTO_COMPRESS_CMD",
+    "AUTO_CAPTION_REPLACE",
+    "AUTO_CAPTION_REMOVE",
 ]
 rclone_options = ["RCLONE_CONFIG", "RCLONE_PATH", "RCLONE_FLAGS"]
 gdrive_options = ["TOKEN_PICKLE", "GDRIVE_ID", "INDEX_URL"]
@@ -135,6 +139,52 @@ async def get_user_settings(from_user, stype="main"):
         else:
             thumb_layout = "None"
 
+        # ============ BOT_PM BUTTON ADDITION START ============
+        # Get BOT_PM status
+        bot_pm_enabled = user_dict.get("BOT_PM", None)
+        if bot_pm_enabled is None:
+            bot_pm_enabled = Config.BOT_PM if hasattr(Config, "BOT_PM") else False
+
+        # AUTO LEECH + AUTO COMPRESS + AUTO CAPTION CLEAN
+        buttons.data_button(
+            "🚀 Auto Leech",
+            f"userset {user_id} tog AUTO_LEECH {'f' if user_dict.get('AUTO_LEECH') else 't'}",
+        )
+        aleech = "✅ Enabled" if user_dict.get("AUTO_LEECH") else "❌ Disabled"
+
+        buttons.data_button(
+            "🎬 Auto Compress Cmd",
+            f"userset {user_id} menu AUTO_COMPRESS_CMD",
+        )
+        ac_cmd = user_dict.get("AUTO_COMPRESS_CMD") or "None"
+
+        buttons.data_button(
+            "📝 Auto Caption Replace",
+            f"userset {user_id} menu AUTO_CAPTION_REPLACE",
+        )
+        ac_rep = user_dict.get("AUTO_CAPTION_REPLACE") or "None"
+
+        buttons.data_button(
+            "🧹 Auto Caption Remove",
+            f"userset {user_id} menu AUTO_CAPTION_REMOVE",
+        )
+        ac_rem = user_dict.get("AUTO_CAPTION_REMOVE") or "None"
+
+        # Add BOT_PM toggle button
+        if bot_pm_enabled:
+            buttons.data_button(
+                "📩 Disable Bot PM",
+                f"userset {user_id} tog BOT_PM f",
+            )
+            bot_pm_status = "✅ Enabled"
+        else:
+            buttons.data_button(
+                "📩 Enable Bot PM",
+                f"userset {user_id} tog BOT_PM t",
+            )
+            bot_pm_status = "❌ Disabled"
+        # ============ BOT_PM BUTTON ADDITION END ============
+
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
 
@@ -147,6 +197,11 @@ async def get_user_settings(from_user, stype="main"):
 👤 User Session: {usess}
 📦 User Dump: <code>{udump}</code>
 🎨 Thumbnail Layout: <b>{thumb_layout}</b>
+📩 Bot PM: <b>{bot_pm_status}</b>
+🚀 Auto Leech: <b>{aleech}</b>
+🎬 Auto Compress Cmd: <code>{escape(ac_cmd)}</code>
+📝 Auto Caption Replace: <code>{escape(ac_rep)}</code>
+🧹 Auto Caption Remove: <code>{escape(ac_rem)}</code>
 """
     elif stype == "rclone":
         buttons.data_button(
@@ -295,6 +350,13 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("☁️ Gdrive API", f"userset {user_id} gdrive")
         buttons.data_button("🎥 YouTube", f"userset {user_id} youtube")
 
+        # Main Menu Shortcut for Auto Leech
+        buttons.data_button(
+            "🚀 Auto Leech",
+            f"userset {user_id} tog AUTO_LEECH {'f' if user_dict.get('AUTO_LEECH') else 't'}",
+        )
+        aleech = "✅ Enabled" if user_dict.get("AUTO_LEECH") else "❌ Disabled"
+
         upload_paths = user_dict.get("UPLOAD_PATHS", {})
         if (
             not upload_paths
@@ -393,6 +455,7 @@ async def get_user_settings(from_user, stype="main"):
         text = f"""<u>⚙️ Settings for {name}</u>
 
 📦 Default Package: <b>{du}</b>
+🚀 Auto Leech: <b>{aleech}</b>
 🔑 Use <b>{tr}</b> token/config
 📤 Upload Paths: <code>{upload_paths}</code>
 
@@ -687,15 +750,28 @@ async def edit_user_settings(client, query):
         update_user_ldata(user_id, "YT_DEFAULT_FOLDER_MODE", new_mode)
         await database.update_user_data(user_id)
         await update_user_settings(query, "youtube")
+    # Find this section around Line 695 in edit_user_settings function
+    # Replace the elif data[2] == "tog": section with this:
+
     elif data[2] == "tog":
         await query.answer()
         update_user_ldata(user_id, data[3], data[4] == "t")
+
+        # Determine which settings page to return to
         if data[3] == "STOP_DUPLICATE":
             back_to = "gdrive"
         elif data[3] == "USER_TOKENS":
             back_to = "main"
+        elif data[3] in [
+            "BOT_PM",
+            "AS_DOCUMENT",
+            "MEDIA_GROUP",
+            "AUTO_LEECH",
+        ]:  # ← ADD THIS LINE
+            back_to = "leech"  # ← BOT_PM aur leech-related toggles
         else:
             back_to = "leech"
+
         await update_user_settings(query, stype=back_to)
         await database.update_user_data(user_id)
     elif data[2] == "file":

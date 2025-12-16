@@ -271,3 +271,10 @@ def add_handlers():
             filters=regex(r"^/stop(_\w+)?(?!all)") & CustomFilters.authorized,
         ),
     )
+
+    TgClient.bot.add_handler(
+        MessageHandler(
+            auto_leech_handler,
+            filters=regex(r"https?://|magnet:") & CustomFilters.authorized,
+        ),
+    )
