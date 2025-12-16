@@ -58,6 +58,39 @@ class SetInterval:
         self.task.cancel()
 
 
+def clean_caption(caption, replace_text, remove_text):
+    if not caption:
+        return ""
+        
+    # Apply Replacements
+    if replace_text:
+        for rule in replace_text.split(","):
+            if "|" in rule:
+                old, new = rule.split("|", 1)
+                caption = caption.replace(old, new)
+                # Case insensitive backup? User requirement says case-insensitive.
+                # .replace is case-sensitive.
+                # Use re.sub for case insensitive?
+                # "Word-level replace" -> User said "sony -> replace with sona".
+                # Regex is better for case insensitive.
+                import re
+                caption = re.sub(re.escape(old), new, caption, flags=re.IGNORECASE)
+
+    # Apply Removals
+    if remove_text:
+        import re
+        for word in remove_text.split(","):
+            word = word.strip()
+            if word:
+                caption = re.sub(re.escape(word), "", caption, flags=re.IGNORECASE)
+
+    # Normalize Spaces
+    import re
+    caption = re.sub(r"\s+", " ", caption).strip()
+    return caption
+
+
+
 def _build_command_usage(help_dict, command_key):
     """
     Builds and stores command usage help messages and buttons

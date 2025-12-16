@@ -39,7 +39,7 @@ from tenacity import (
 from bot.core.aeon_client import TgClient
 from bot.core.config_manager import Config
 from bot.helper.aeon_utils.caption_gen import generate_caption
-from bot.helper.ext_utils.bot_utils import sync_to_async
+from bot.helper.ext_utils.bot_utils import sync_to_async, clean_caption
 from bot.helper.ext_utils.files_utils import (
     get_base_name,
     is_archive,
@@ -197,6 +197,12 @@ class TelegramUploader:
             new_path = ospath.join(dirpath, f"{name}{ext}")
             await rename(self._up_path, new_path)
             self._up_path = new_path
+        # AUTO CAPTION CLEAN
+        replace_text = self._listener.user_dict.get("AUTO_CAPTION_REPLACE", "")
+        remove_text = self._listener.user_dict.get("AUTO_CAPTION_REMOVE", "")
+        if replace_text or remove_text:
+            cap_mono = clean_caption(cap_mono, replace_text, remove_text)
+            
         return cap_mono
 
     def _get_input_media(self, subkey, key):

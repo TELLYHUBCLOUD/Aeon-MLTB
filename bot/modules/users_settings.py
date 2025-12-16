@@ -41,6 +41,10 @@ leech_options = [
     "THUMBNAIL_LAYOUT",
     "USER_DUMP",
     "USER_SESSION",
+    "AUTO_LEECH",
+    "AUTO_COMPRESS_CMD",
+    "AUTO_CAPTION_REPLACE",
+    "AUTO_CAPTION_REMOVE",
 ]
 rclone_options = ["RCLONE_CONFIG", "RCLONE_PATH", "RCLONE_FLAGS"]
 gdrive_options = ["TOKEN_PICKLE", "GDRIVE_ID", "INDEX_URL"]
@@ -141,6 +145,31 @@ async def get_user_settings(from_user, stype="main"):
         if bot_pm_enabled is None:
             bot_pm_enabled = Config.BOT_PM if hasattr(Config, "BOT_PM") else False
 
+        # AUTO LEECH + AUTO COMPRESS + AUTO CAPTION CLEAN
+        buttons.data_button(
+            "🚀 Auto Leech",
+            f"userset {user_id} tog AUTO_LEECH {'f' if user_dict.get('AUTO_LEECH') else 't'}",
+        )
+        aleech = "✅ Enabled" if user_dict.get("AUTO_LEECH") else "❌ Disabled"
+
+        buttons.data_button(
+            "🎬 Auto Compress Cmd",
+            f"userset {user_id} menu AUTO_COMPRESS_CMD",
+        )
+        ac_cmd = user_dict.get("AUTO_COMPRESS_CMD") or "None"
+
+        buttons.data_button(
+            "📝 Auto Caption Replace",
+            f"userset {user_id} menu AUTO_CAPTION_REPLACE",
+        )
+        ac_rep = user_dict.get("AUTO_CAPTION_REPLACE") or "None"
+
+        buttons.data_button(
+            "🧹 Auto Caption Remove",
+            f"userset {user_id} menu AUTO_CAPTION_REMOVE",
+        )
+        ac_rem = user_dict.get("AUTO_CAPTION_REMOVE") or "None"
+
         # Add BOT_PM toggle button
         if bot_pm_enabled:
             buttons.data_button(
@@ -169,6 +198,10 @@ async def get_user_settings(from_user, stype="main"):
 📦 User Dump: <code>{udump}</code>
 🎨 Thumbnail Layout: <b>{thumb_layout}</b>
 📩 Bot PM: <b>{bot_pm_status}</b>
+🚀 Auto Leech: <b>{aleech}</b>
+🎬 Auto Compress Cmd: <code>{escape(ac_cmd)}</code>
+📝 Auto Caption Replace: <code>{escape(ac_rep)}</code>
+🧹 Auto Caption Remove: <code>{escape(ac_rem)}</code>
 """
     elif stype == "rclone":
         buttons.data_button(

@@ -12,6 +12,7 @@ from .gd_search import gdrive_search, select_type
 from .help import arg_usage, bot_help
 from .mediainfo import mediainfo
 from .mirror_leech import (
+    auto_leech_handler,
     jd_leech,
     jd_mirror,
     leech,
@@ -45,6 +46,7 @@ __all__ = [
     "aeon_callback",
     "aioexecute",
     "arg_usage",
+    "auto_leech_handler",
     "authorize",
     "bot_help",
     "bot_stats",
