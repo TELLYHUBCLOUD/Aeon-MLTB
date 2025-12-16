@@ -8,7 +8,6 @@ temporary files, and session timeouts.
 from asyncio import Lock
 from dataclasses import dataclass, field
 from time import time
-from typing import Optional
 
 from aiofiles.os import path as aiopath
 from aiofiles.os import remove as aioremove
@@ -22,10 +21,10 @@ class CompressionState:
 
     user_id: int
     message_id: int
-    video_url: Optional[str] = None
-    video_file_path: Optional[str] = None
-    partial_file_path: Optional[str] = None
-    output_file_path: Optional[str] = None
+    video_url: str | None = None
+    video_file_path: str | None = None
+    partial_file_path: str | None = None
+    output_file_path: str | None = None
 
     # Metadata
     duration: int = 0
@@ -46,7 +45,9 @@ class CompressionState:
     # State management
     created_at: float = field(default_factory=time)
     last_activity: float = field(default_factory=time)
-    workflow_step: str = "initial"  # initial, selecting, confirmed, processing, completed
+    workflow_step: str = (
+        "initial"  # initial, selecting, confirmed, processing, completed
+    )
     is_cancelled: bool = False
 
     def update_activity(self):
@@ -81,7 +82,9 @@ class CompressionStateManager:
         self._sessions: dict[int, CompressionState] = {}
         self._lock = Lock()
 
-    async def create_session(self, user_id: int, message_id: int) -> CompressionState:
+    async def create_session(
+        self, user_id: int, message_id: int
+    ) -> CompressionState:
         """Create a new compression session"""
         async with self._lock:
             # Clean up old session if exists
@@ -93,7 +96,7 @@ class CompressionStateManager:
             LOGGER.info(f"Created compression session for user {user_id}")
             return session
 
-    async def get_session(self, user_id: int) -> Optional[CompressionState]:
+    async def get_session(self, user_id: int) -> CompressionState | None:
         """Get existing session"""
         async with self._lock:
             session = self._sessions.get(user_id)

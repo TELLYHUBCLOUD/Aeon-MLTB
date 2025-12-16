@@ -8,7 +8,6 @@ user-selectable audio tracks, subtitle tracks, and quality levels.
 from asyncio import create_subprocess_exec
 from asyncio.subprocess import PIPE
 from os import path as ospath
-from re import search as re_search
 from time import time
 
 import aiohttp
@@ -44,7 +43,9 @@ from bot.helper.telegram_helper.message_utils import (
 PARTIAL_DOWNLOAD_SIZE = 20 * 1024 * 1024
 
 
-async def download_partial_video(url: str, output_path: str, size_limit: int) -> bool:
+async def download_partial_video(
+    url: str, output_path: str, size_limit: int
+) -> bool:
     """
     Download partial video for metadata extraction.
 
@@ -234,7 +235,9 @@ async def compress_handler(client, message):
                 session.video_file_path,
             )
             if not success:
-                await edit_message(status_msg, "❌ Failed to download Telegram video")
+                await edit_message(
+                    status_msg, "❌ Failed to download Telegram video"
+                )
                 await compression_state_manager.remove_session(user_id)
                 return
             session.file_size = file_size
@@ -249,7 +252,9 @@ async def compress_handler(client, message):
                 PARTIAL_DOWNLOAD_SIZE,
             )
             if not success:
-                await edit_message(status_msg, "❌ Failed to download video for analysis")
+                await edit_message(
+                    status_msg, "❌ Failed to download video for analysis"
+                )
                 await compression_state_manager.remove_session(user_id)
                 return
             metadata_file = session.partial_file_path
@@ -278,7 +283,9 @@ async def compress_handler(client, message):
 
         # Initialize selections (select all by default)
         session.selected_audio_tracks = [t["index"] for t in session.audio_tracks]
-        session.selected_subtitle_tracks = [t["index"] for t in session.subtitle_tracks]
+        session.selected_subtitle_tracks = [
+            t["index"] for t in session.subtitle_tracks
+        ]
 
         # Build metadata display
         metadata_text = (
@@ -299,9 +306,7 @@ async def compress_handler(client, message):
             metadata_text += (
                 f"<b>Subtitle Tracks ({len(session.subtitle_tracks)}):</b>\n"
             )
-            metadata_text += (
-                f"<code>{format_track_info(session.subtitle_tracks, 'subtitle')}</code>\n\n"
-            )
+            metadata_text += f"<code>{format_track_info(session.subtitle_tracks, 'subtitle')}</code>\n\n"
         else:
             metadata_text += "<b>Subtitle Tracks:</b> None\n\n"
 
@@ -312,7 +317,9 @@ async def compress_handler(client, message):
 
         # Audio selection buttons
         if session.audio_tracks:
-            buttons.data_button("🔊 Select Audio Tracks", f"compress_{user_id}_audio")
+            buttons.data_button(
+                "🔊 Select Audio Tracks", f"compress_{user_id}_audio"
+            )
         buttons.data_button("🔇 Remove All Audio", f"compress_{user_id}_noaudio")
 
         # Subtitle selection buttons
@@ -369,7 +376,9 @@ async def compression_callback_handler(client, query):
         # Handle different actions
         if action == "noaudio":
             session.selected_audio_tracks = []
-            await query.answer("✓ All audio tracks will be removed", show_alert=False)
+            await query.answer(
+                "✓ All audio tracks will be removed", show_alert=False
+            )
 
         elif action == "nosub":
             session.selected_subtitle_tracks = []
@@ -529,7 +538,9 @@ async def show_main_menu(query, session):
 
     # Audio selection summary
     if session.selected_audio_tracks:
-        text += f"<b>Audio:</b> {len(session.selected_audio_tracks)} track(s) selected\n"
+        text += (
+            f"<b>Audio:</b> {len(session.selected_audio_tracks)} track(s) selected\n"
+        )
     else:
         text += "<b>Audio:</b> All removed (muted video)\n"
 
@@ -544,7 +555,9 @@ async def show_main_menu(query, session):
     text += f"<b>Quality:</b> {session.compression_level.title()} - {preset['description']}\n\n"
 
     # Estimated size
-    estimated = estimate_compressed_size(session.file_size, session.compression_level)
+    estimated = estimate_compressed_size(
+        session.file_size, session.compression_level
+    )
     text += f"<b>Original Size:</b> {format_size(session.file_size)}\n"
     text += f"<b>Estimated Size:</b> {format_size(estimated)}\n\n"
     text += "👇 <b>Adjust settings or confirm:</b>"
@@ -553,18 +566,26 @@ async def show_main_menu(query, session):
     buttons = ButtonMaker()
 
     if session.audio_tracks:
-        buttons.data_button("🔊 Select Audio Tracks", f"compress_{session.user_id}_audio")
+        buttons.data_button(
+            "🔊 Select Audio Tracks", f"compress_{session.user_id}_audio"
+        )
     buttons.data_button("🔇 Remove All Audio", f"compress_{session.user_id}_noaudio")
 
     if session.subtitle_tracks:
-        buttons.data_button("📝 Select Subtitles", f"compress_{session.user_id}_subtitle")
-    buttons.data_button("❌ Remove All Subtitles", f"compress_{session.user_id}_nosub")
+        buttons.data_button(
+            "📝 Select Subtitles", f"compress_{session.user_id}_subtitle"
+        )
+    buttons.data_button(
+        "❌ Remove All Subtitles", f"compress_{session.user_id}_nosub"
+    )
 
     buttons.data_button("🔴 Low Quality", f"compress_{session.user_id}_low")
     buttons.data_button("🟡 Medium Quality", f"compress_{session.user_id}_medium")
     buttons.data_button("🟢 High Quality", f"compress_{session.user_id}_high")
 
-    buttons.data_button("✅ Start Compression", f"compress_{session.user_id}_confirm")
+    buttons.data_button(
+        "✅ Start Compression", f"compress_{session.user_id}_confirm"
+    )
     buttons.data_button("🚫 Cancel", f"compress_{session.user_id}_cancel")
 
     await query.message.edit(text, reply_markup=buttons.build_menu(2))
@@ -584,7 +605,10 @@ async def start_compression(message, session):
                 await compression_state_manager.remove_session(session.user_id)
                 return
 
-            work_dir = ospath.dirname(session.partial_file_path or f"{DOWNLOAD_DIR}compress_{session.user_id}")
+            work_dir = ospath.dirname(
+                session.partial_file_path
+                or f"{DOWNLOAD_DIR}compress_{session.user_id}"
+            )
             session.video_file_path = ospath.join(work_dir, "input_video.mp4")
 
             await edit_message(message, "📥 <b>Downloading full video...</b>")
@@ -628,7 +652,7 @@ async def start_compression(message, session):
                 self.is_cancelled = False
 
         temp_listener = TempListener()
-        ffmpeg = FFMpeg(temp_listener)
+        FFMpeg(temp_listener)
 
         # Execute FFmpeg command
         process = await create_subprocess_exec(
@@ -638,7 +662,7 @@ async def start_compression(message, session):
         )
 
         temp_listener.subproc = process
-        stdout, stderr = await process.communicate()
+        _stdout, stderr = await process.communicate()
 
         if process.returncode != 0:
             error_msg = stderr.decode() if stderr else "Unknown error"
@@ -695,5 +719,7 @@ async def start_compression(message, session):
 
     except Exception as e:
         LOGGER.error(f"Error in start_compression: {e}")
-        await edit_message(message, f"❌ <b>Error during compression:</b>\n\n<code>{e!s}</code>")
+        await edit_message(
+            message, f"❌ <b>Error during compression:</b>\n\n<code>{e!s}</code>"
+        )
         await compression_state_manager.remove_session(session.user_id)
