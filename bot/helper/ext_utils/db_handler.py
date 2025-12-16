@@ -152,29 +152,31 @@ class DbManager:
             {"_id": user_id},
             [
                 {
-                    "$set": {
-                        "$mergeObjects": [
-                            {
-                                "$arrayToObject": {
-                                    "$filter": {
-                                        "input": {"$objectToArray": "$$ROOT"},
-                                        "as": "field",
-                                        "cond": {
-                                            "$in": [
-                                                "$$field.k",
-                                                [
-                                                    "THUMBNAIL",
-                                                    "RCLONE_CONFIG",
-                                                    "TOKEN_PICKLE",
-                                                    "_id",
+                    "$replaceRoot": {
+                        "newRoot": {
+                            "$mergeObjects": [
+                                {
+                                    "$arrayToObject": {
+                                        "$filter": {
+                                            "input": {"$objectToArray": "$$ROOT"},
+                                            "as": "field",
+                                            "cond": {
+                                                "$in": [
+                                                    "$$field.k",
+                                                    [
+                                                        "THUMBNAIL",
+                                                        "RCLONE_CONFIG",
+                                                        "TOKEN_PICKLE",
+                                                        "_id",
+                                                    ],
                                                 ],
-                                            ],
+                                            },
                                         },
                                     },
                                 },
-                            },
-                            data,
-                        ],
+                                data,
+                            ],
+                        },
                     },
                 },
             ],
