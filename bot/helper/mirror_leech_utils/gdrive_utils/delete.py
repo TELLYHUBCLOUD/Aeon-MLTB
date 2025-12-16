@@ -23,7 +23,7 @@ class GoogleDriveDelete(GoogleDriveHelper):
                 fileId=file_id,
                 supportsAllDrives=True,
             ).execute()
-            msg = "Successfully deleted"
+            msg = "╭✅ <b>Success</b>\n╰Successfully deleted"
             LOGGER.info(f"Delete Result: {msg}")
         except HttpError as err:
             if "File not found" in str(err) or "insufficientFilePermissions" in str(
@@ -34,7 +34,7 @@ class GoogleDriveDelete(GoogleDriveHelper):
                     self.use_sa = False
                     LOGGER.error("File not found. Trying with token.pickle...")
                     return self.deletefile(link, user_id)
-                err = "File not found or insufficientFilePermissions!"
+                err = "╭❌ <b>Error</b>\n╰File not found or insufficientFilePermissions!"
             LOGGER.error(f"Delete Result: {err}")
             msg = str(err)
         return msg

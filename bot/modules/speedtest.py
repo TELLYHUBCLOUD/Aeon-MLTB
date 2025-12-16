@@ -13,7 +13,7 @@ from bot.helper.telegram_helper.message_utils import (
 
 @new_task
 async def speedtest(_, message):
-    speed = await send_message(message, "⚡ Initializing Speedtest...")
+    speed = await send_message(message, "╭⚡ <b>Initializing Speedtest...</b>\n╰<b>Please wait...</b>")
 
     def get_speedtest_results():
         test = Speedtest()
@@ -24,15 +24,14 @@ async def speedtest(_, message):
 
     result = await TgClient.bot.loop.run_in_executor(None, get_speedtest_results)
     if not result:
-        await edit_message(speed, "❌ Speedtest failed to complete.")
+        await edit_message(speed, "╭❌ <b>Speedtest failed to complete.</b>\n╰Check logs for more info.")
         return
-    string_speed = f"""
-<blockquote>🚀 <b>SPEEDTEST INFO</b></blockquote>
-
-<blockquote>📡 <b>Ping:</b> <code>{result.ping} ms</code>
-📤 <b>Upload:</b> <code>{get_readable_file_size(result.upload / 8)}/s</code>
-📥 <b>Download:</b> <code>{get_readable_file_size(result.download / 8)}/s</code>
-🌐 <b>IP Address:</b> <code>{result.client["ip"]}</code></blockquote>
+    string_speed = f"""╭🚀 <b>Speedtest Info</b>
+┊
+┊📡 <b>Ping:</b> <code>{result.ping} ms</code>
+┊📤 <b>Upload:</b> <code>{get_readable_file_size(result.upload / 8)}/s</code>
+┊📥 <b>Download:</b> <code>{get_readable_file_size(result.download / 8)}/s</code>
+╰🌐 <b>IP Address:</b> <code>{result.client["ip"]}</code>
 """
     try:
         await send_message(message, string_speed, photo=result.share())

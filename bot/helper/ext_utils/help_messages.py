@@ -352,51 +352,54 @@ PASSWORD_ERROR_MESSAGE = """
 
 
 user_settings_text = {
-    "METADATA_KEY": "Send your text for change mkv medias metadata (title only). Timeout: 60 sec",
-    "WATERMARK_KEY": "Send your text which will added as watermark in all mkv videos left upper corner. Timeout: 60 sec",
-    "USER_SESSION": "Send your pyrogram user session string for download from private telegram chat. Timeout: 60 sec",
-    "USER_DUMP": "Send your channel or group id where you want to store your leeched files. Bot must have permission to send message in your chat. Timeout: 60 sec",
-    "LEECH_FILENAME_CAPTION": "Send leech filename caption. Timeout: 60 sec",
-    "LEECH_SPLIT_SIZE": f"Send Leech split size in bytes or use gb or mb. Example: 40000000 or 2.5gb or 1000mb. IS_PREMIUM_USER: {TgClient.IS_PREMIUM_USER}. Timeout: 60 sec",
-    "LEECH_FILENAME_PREFIX": r"Send Leech Filename Prefix. You can add HTML tags. Example: <code>@mychannel</code>. Timeout: 60 sec",
-    "THUMBNAIL_LAYOUT": "Send thumbnail layout (widthxheight, 2x2, 3x3, 2x4, 4x4, ...). Example: 3x3. Timeout: 60 sec",
-    "RCLONE_PATH": "Send Rclone Path. If you want to use your rclone config edit using owner/user config from usetting or add mrcc: before rclone path. Example mrcc:remote:folder. Timeout: 60 sec",
-    "RCLONE_FLAGS": "key:value|key|key|key:value . Check here all <a href='https://rclone.org/flags/'>RcloneFlags</a>\nEx: --buffer-size:8M|--drive-starred-only",
-    "GDRIVE_ID": "Send Gdrive ID. If you want to use your token.pickle edit using owner/user token from usetting or add mtp: before the id. Example: mtp:F435RGGRDXXXXXX . Timeout: 60 sec",
-    "INDEX_URL": "Send Index URL. Timeout: 60 sec",
-    "UPLOAD_PATHS": "Send Dict of keys that have path values. Example: {'path 1': 'remote:rclonefolder', 'path 2': 'gdrive1 id', 'path 3': 'tg chat id', 'path 4': 'mrcc:remote:', 'path 5': b:@username} . Timeout: 60 sec",
-    "EXCLUDED_EXTENSIONS": "Send exluded extenions separated by space without dot at beginning. Timeout: 60 sec",
-    "NAME_SUBSTITUTE": r"""Word Subtitions. You can add pattern instead of normal text. Timeout: 60 sec
-NOTE: You must add \ before any character, those are the characters: \^$.|?*+()[]{}-
-Example: script/code/s | mirror/leech | tea/ /s | clone | cpu/ | \[mltb\]/mltb | \\text\\/text/s
-1. script will get replaced by code with sensitive case
-2. mirror will get replaced by leech
-4. tea will get replaced by space with sensitive case
-5. clone will get removed
-6. cpu will get replaced by space
-7. [mltb] will get replaced by mltb
-8. \text\ will get replaced by text with sensitive case
+    "METADATA_KEY": "╭ℹ️ <b>Info</b>\n╰Send your text for change mkv medias metadata (title only). Timeout: 60 sec",
+    "WATERMARK_KEY": "╭ℹ️ <b>Info</b>\n╰Send your text which will added as watermark in all mkv videos left upper corner. Timeout: 60 sec",
+    "USER_SESSION": "╭ℹ️ <b>Info</b>\n╰Send your pyrogram user session string for download from private telegram chat. Timeout: 60 sec",
+    "USER_DUMP": "╭ℹ️ <b>Info</b>\n╰Send your channel or group id where you want to store your leeched files. Bot must have permission to send message in your chat. Timeout: 60 sec",
+    "LEECH_FILENAME_CAPTION": "╭ℹ️ <b>Info</b>\n╰Send leech filename caption. Timeout: 60 sec",
+    "LEECH_SPLIT_SIZE": f"╭ℹ️ <b>Info</b>\n╰Send Leech split size in bytes or use gb or mb. Example: 40000000 or 2.5gb or 1000mb. IS_PREMIUM_USER: {TgClient.IS_PREMIUM_USER}. Timeout: 60 sec",
+    "LEECH_FILENAME_PREFIX": r"╭ℹ️ <b>Info</b>\n╰Send Leech Filename Prefix. You can add HTML tags. Example: <code>@mychannel</code>. Timeout: 60 sec",
+    "THUMBNAIL_LAYOUT": "╭ℹ️ <b>Info</b>\n╰Send thumbnail layout (widthxheight, 2x2, 3x3, 2x4, 4x4, ...). Example: 3x3. Timeout: 60 sec",
+    "RCLONE_PATH": "╭ℹ️ <b>Info</b>\n╰Send Rclone Path. If you want to use your rclone config edit using owner/user config from usetting or add mrcc: before rclone path. Example mrcc:remote:folder. Timeout: 60 sec",
+    "RCLONE_FLAGS": "╭ℹ️ <b>Info</b>\n╰key:value|key|key|key:value . Check here all <a href='https://rclone.org/flags/'>RcloneFlags</a>\nEx: --buffer-size:8M|--drive-starred-only",
+    "GDRIVE_ID": "╭ℹ️ <b>Info</b>\n╰Send Gdrive ID. If you want to use your token.pickle edit using owner/user token from usetting or add mtp: before the id. Example: mtp:F435RGGRDXXXXXX . Timeout: 60 sec",
+    "INDEX_URL": "╭ℹ️ <b>Info</b>\n╰Send Index URL. Timeout: 60 sec",
+    "UPLOAD_PATHS": "╭ℹ️ <b>Info</b>\n╰Send Dict of keys that have path values. Example: {'path 1': 'remote:rclonefolder', 'path 2': 'gdrive1 id', 'path 3': 'tg chat id', 'path 4': 'mrcc:remote:', 'path 5': b:@username} . Timeout: 60 sec",
+    "EXCLUDED_EXTENSIONS": "╭ℹ️ <b>Info</b>\n╰Send exluded extenions separated by space without dot at beginning. Timeout: 60 sec",
+    "NAME_SUBSTITUTE": r"""╭ℹ️ <b>Info</b>
+┊Word Subtitions. You can add pattern instead of normal text. Timeout: 60 sec
+┊<b>NOTE:</b> You must add \ before any character, those are the characters: \^$.|?*+()[]{}-
+┊<b>Example:</b> script/code/s | mirror/leech | tea/ /s | clone | cpu/ | \[mltb\]/mltb | \\text\\/text/s
+┊1. script will get replaced by code with sensitive case
+┊2. mirror will get replaced by leech
+┊4. tea will get replaced by space with sensitive case
+┊5. clone will get removed
+┊6. cpu will get replaced by space
+┊7. [mltb] will get replaced by mltb
+╰8. \text\ will get replaced by text with sensitive case
 """,
-    "YT_DLP_OPTIONS": """Send dict of YT-DLP Options. Timeout: 60 sec
-Format: {key: value, key: value, key: value}.
-Example: {"format": "bv*+mergeall[vcodec=none]", "nocheckcertificate": True, "playliststart": 10, "fragment_retries": float("inf"), "matchtitle": "S13", "writesubtitles": True, "live_from_start": True, "postprocessor_args": {"ffmpeg": ["-threads", "4"]}, "wait_for_video": (5, 100), "download_ranges": [{"start_time": 0, "end_time": 10}]}
-Check all yt-dlp api options from this <a href='https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/YoutubeDL.py#L184'>FILE</a> or use this <a href='https://t.me/mltb_official_channel/177'>script</a> to convert cli arguments to api options.""",
-    "FFMPEG_CMDS": """Read this guide. http://telegra.ph/Ffmpeg-guide-01-10""",
-    "YT_DEFAULT_PRIVACY": "Set your default YouTube upload privacy (public, private, unlisted). Timeout: 60 sec",
-    "YT_DEFAULT_CATEGORY": "Set your default YouTube video category ID (e.g., 22 for People & Blogs). Timeout: 60 sec",
-    "YT_DEFAULT_TAGS": "Set your default YouTube tags, separated by commas. Timeout: 60 sec",
-    "YT_DEFAULT_DESCRIPTION": "Set your default YouTube video description. Timeout: 60 sec",
-    "YT_DEFAULT_FOLDER_MODE": """Choose how folders (containing multiple videos) are uploaded to YouTube by default:
-- <b>Playlist</b>: Uploads the entire folder as a single new YouTube playlist.
-- <b>Individual Videos</b>: Uploads each video from the folder as an individual YouTube video, without creating a playlist.
-- <b>Playlist & Individuals</b>: Uploads the folder as a new playlist AND also makes each video available individually.
-Timeout: 60 sec""",
-    "YT_ADD_TO_PLAYLIST_ID": "Enter the YouTube Playlist ID you want your videos to be added to. If set, newly uploaded videos will be added to this playlist. Leave empty or set to 'None' to not automatically add to a specific playlist (unless creating a new one for a folder upload without this setting). Timeout: 60 sec",
-    "GOFILE_TOKEN": "Send your GoFile API token. You can get it from https://gofile.io/myProfile. This token will be used to upload files to your GoFile account. Timeout: 60 sec",
-    "GOFILE_FOLDER_ID": "Send your GoFile folder ID where you want to upload files. If not set, files will be uploaded to your account root. You can get folder ID from the GoFile URL. Example: for https://gofile.io/d/abcd123, the folder ID is abcd123. Timeout: 60 sec",
-    "AUTO_COMPRESS_CMD": "Send your default FFmpeg command to be appended to leech commands automatically. Example: -ff -metadata title='My Title'. Timeout: 60 sec",
-    "AUTO_CAPTION_REPLACE": "Send your caption replacement rules. Format: old1|new1,old2|new2. Case-insensitive. Timeout: 60 sec",
-    "AUTO_CAPTION_REMOVE": "Send keywords to remove from captions. Format: word1,word2,word3. Case-insensitive. Timeout: 60 sec",
+    "YT_DLP_OPTIONS": """╭ℹ️ <b>Info</b>
+┊Send dict of YT-DLP Options. Timeout: 60 sec
+┊<b>Format:</b> {key: value, key: value, key: value}.
+┊<b>Example:</b> {"format": "bv*+mergeall[vcodec=none]", "nocheckcertificate": True, "playliststart": 10, "fragment_retries": float("inf"), "matchtitle": "S13", "writesubtitles": True, "live_from_start": True, "postprocessor_args": {"ffmpeg": ["-threads", "4"]}, "wait_for_video": (5, 100), "download_ranges": [{"start_time": 0, "end_time": 10}]}
+╰Check all yt-dlp api options from this <a href='https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/YoutubeDL.py#L184'>FILE</a> or use this <a href='https://t.me/mltb_official_channel/177'>script</a> to convert cli arguments to api options.""",
+    "FFMPEG_CMDS": """╭ℹ️ <b>Info</b>\n╰Read this guide. http://telegra.ph/Ffmpeg-guide-01-10""",
+    "YT_DEFAULT_PRIVACY": "╭ℹ️ <b>Info</b>\n╰Set your default YouTube upload privacy (public, private, unlisted). Timeout: 60 sec",
+    "YT_DEFAULT_CATEGORY": "╭ℹ️ <b>Info</b>\n╰Set your default YouTube video category ID (e.g., 22 for People & Blogs). Timeout: 60 sec",
+    "YT_DEFAULT_TAGS": "╭ℹ️ <b>Info</b>\n╰Set your default YouTube tags, separated by commas. Timeout: 60 sec",
+    "YT_DEFAULT_DESCRIPTION": "╭ℹ️ <b>Info</b>\n╰Set your default YouTube video description. Timeout: 60 sec",
+    "YT_DEFAULT_FOLDER_MODE": """╭ℹ️ <b>Info</b>
+┊Choose how folders (containing multiple videos) are uploaded to YouTube by default:
+┊- <b>Playlist</b>: Uploads the entire folder as a single new YouTube playlist.
+┊- <b>Individual Videos</b>: Uploads each video from the folder as an individual YouTube video, without creating a playlist.
+┊- <b>Playlist & Individuals</b>: Uploads the folder as a new playlist AND also makes each video available individually.
+╰Timeout: 60 sec""",
+    "YT_ADD_TO_PLAYLIST_ID": "╭ℹ️ <b>Info</b>\n╰Enter the YouTube Playlist ID you want your videos to be added to. If set, newly uploaded videos will be added to this playlist. Leave empty or set to 'None' to not automatically add to a specific playlist (unless creating a new one for a folder upload without this setting). Timeout: 60 sec",
+    "GOFILE_TOKEN": "╭ℹ️ <b>Info</b>\n╰Send your GoFile API token. You can get it from https://gofile.io/myProfile. This token will be used to upload files to your GoFile account. Timeout: 60 sec",
+    "GOFILE_FOLDER_ID": "╭ℹ️ <b>Info</b>\n╰Send your GoFile folder ID where you want to upload files. If not set, files will be uploaded to your account root. You can get folder ID from the GoFile URL. Example: for https://gofile.io/d/abcd123, the folder ID is abcd123. Timeout: 60 sec",
+    "AUTO_COMPRESS_CMD": "╭ℹ️ <b>Info</b>\n╰Send your default FFmpeg command to be appended to leech commands automatically. Example: -ff -metadata title='My Title'. Timeout: 60 sec",
+    "AUTO_CAPTION_REPLACE": "╭ℹ️ <b>Info</b>\n╰Send your caption replacement rules. Format: old1|new1,old2|new2. Case-insensitive. Timeout: 60 sec",
+    "AUTO_CAPTION_REMOVE": "╭ℹ️ <b>Info</b>\n╰Send keywords to remove from captions. Format: word1,word2,word3. Case-insensitive. Timeout: 60 sec",
 }
 
 help_string = f"""

@@ -69,7 +69,7 @@ async def get_buttons(key=None, edit_type=None):
         buttons.data_button("Sabnzbd", "botset nzb")
         buttons.data_button("JD Sync", "botset syncjd")
         buttons.data_button("Close", "botset close")
-        msg = "Bot Settings:"
+        msg = "╭⚙️ <b>Bot Settings</b>\n╰Choose a setting to configure:"
     elif edit_type is not None:
         if edit_type == "botvar":
             msg = ""
@@ -87,13 +87,13 @@ async def get_buttons(key=None, edit_type=None):
                 "TG_PROXY",
             ]:
                 msg += "Restart required for this edit to take effect! You will not see the changes in bot vars, the edit will be in database only!\n\n"
-            msg += f"Send a valid value for {key}. Current value is '{Config.get(key)}'. Timeout: 60 sec"
+            msg += f"╭✏️ <b>Edit Bot Variable</b>\n┊<b>Variable:</b> {key}\n┊<b>Current Value:</b> {Config.get(key)}\n╰<b>Timeout:</b> 60 sec"
         elif edit_type == "nzbvar":
             buttons.data_button("Back", "botset nzb")
             buttons.data_button("Default", f"botset resetnzb {key}")
             buttons.data_button("Empty String", f"botset emptynzb {key}")
             buttons.data_button("Close", "botset close")
-            msg = f"Send a valid value for {key}. Current value is '{nzb_options[key]}'.\nIf the value is list then separate them by space or ,\nExample: .exe,info or .exe .info\nTimeout: 60 sec"
+            msg = f"╭✏️ <b>Edit WS Variable</b>\n┊<b>Variable:</b> {key}\n┊<b>Current Value:</b> {nzb_options[key]}\n┊<b>Note:</b> If list, separate by space or ','\n┊<b>Example:</b> .exe,info or .exe .info\n╰<b>Timeout:</b> 60 sec"
         elif edit_type.startswith("nzbsevar"):
             index = 0 if key == "newser" else int(edit_type.replace("nzbsevar", ""))
             if key == "newser":
@@ -102,7 +102,7 @@ async def get_buttons(key=None, edit_type=None):
             else:
                 buttons.data_button("Empty", f"botset emptyserkey {index} {key}")
                 buttons.data_button("Back", f"botset nzbser{index}")
-                msg = f"Send a valid value for {key} in server {Config.USENET_SERVERS[index]['name']}. Current value is {Config.USENET_SERVERS[index][key]}. Timeout: 60 sec"
+                msg = f"╭✏️ <b>Edit Server Variable</b>\n┊<b>Server:</b> {Config.USENET_SERVERS[index]['name']}\n┊<b>Variable:</b> {key}\n┊<b>Current Value:</b> {Config.USENET_SERVERS[index][key]}\n╰<b>Timeout:</b> 60 sec"
             buttons.data_button("Close", "botset close")
     elif key == "var":
         conf_dict = Config.get_all()
@@ -122,14 +122,15 @@ async def get_buttons(key=None, edit_type=None):
                 f"botset start var {x}",
                 position="footer",
             )
-        msg = f"Config Variables | Page: {int(start / 10)} | State: {state}"
+        msg = f"╭🛠 <b>Config Variables</b>\n┊<b>Page:</b> {int(start / 10)}\n╰<b>State:</b> {state}"
     elif key == "private":
         buttons.data_button("Back", "botset back")
         buttons.data_button("Close", "botset close")
-        msg = """Send private file: config.py, token.pickle, rclone.conf, accounts.zip, list_drives.txt, cookies.txt, .netrc or any other private file!
-To delete private file send only the file name as text message.
-Note: Changing .netrc will not take effect for aria2c until restart.
-Timeout: 60 sec"""
+        msg = """╭🔒 <b>Private Files</b>
+┊Send private file: config.py, token.pickle, rclone.conf, accounts.zip, list_drives.txt, cookies.txt, .netrc or any other private file!
+┊To delete private file send only the file name as text message.
+┊<b>Note:</b> Changing .netrc will not take effect for aria2c until restart.
+╰<b>Timeout:</b> 60 sec"""
     elif key == "nzb":
         for k in list(nzb_options.keys())[start : 10 + start]:
             buttons.data_button(k, f"botset nzbvar {k}")
@@ -147,7 +148,7 @@ Timeout: 60 sec"""
                 f"botset start nzb {x}",
                 position="footer",
             )
-        msg = f"Sabnzbd Options | Page: {int(start / 10)} | State: {state}"
+        msg = f"╭🌩 <b>Sabnzbd Options</b>\n┊<b>Page:</b> {int(start / 10)}\n╰<b>State:</b> {state}"
     elif key == "nzbserver":
         if len(Config.USENET_SERVERS) > 0:
             for index, k in enumerate(Config.USENET_SERVERS[start : 10 + start]):
@@ -162,7 +163,7 @@ Timeout: 60 sec"""
                     f"botset start nzbser {x}",
                     position="footer",
                 )
-        msg = f"Usenet Servers | Page: {int(start / 10)} | State: {state}"
+        msg = f"╭🌍 <b>Usenet Servers</b>\n┊<b>Page:</b> {int(start / 10)}\n╰<b>State:</b> {state}"
     elif key.startswith("nzbser"):
         index = int(key.replace("nzbser", ""))
         for k in list(Config.USENET_SERVERS[index].keys())[start : 10 + start]:
@@ -181,7 +182,7 @@ Timeout: 60 sec"""
                     f"botset start {key} {x}",
                     position="footer",
                 )
-        msg = f"Server Keys | Page: {int(start / 10)} | State: {state}"
+        msg = f"╭🔑 <b>Server Keys</b>\n┊<b>Page:</b> {int(start / 10)}\n╰<b>State:</b> {state}"
 
     button = buttons.build_menu(1) if key is None else buttons.build_menu(2)
     return msg, button

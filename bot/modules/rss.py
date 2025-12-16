@@ -248,7 +248,7 @@ async def rss_update(_, message, pre_event, state):
                 continue
         istate = rss_dict[user_id][title].get("paused", False)
         if (istate and state == "pause") or (not istate and state == "resume"):
-            await send_message(message, f"{title} already {state}d!")
+            await send_message(message, f"╭ℹ️ <b>Info</b>\n╰<b>Title:</b> <code>{title}</code> is already <b>{state}d</b>!")
             continue
         async with rss_dict_lock:
             updated.append(title)
@@ -276,7 +276,7 @@ async def rss_update(_, message, pre_event, state):
         LOGGER.info(f"Rss link with Title(s): {updated} has been {state}d!")
         await send_message(
             message,
-            f"Rss links with Title(s): <code>{updated}</code> has been {state}d!",
+            f"╭✅ <b>Success</b>\n╰<b>RSS links with Title(s):</b> <code>{updated}</code> has been <b>{state}d!</b>",
         )
         if rss_dict.get(user_id):
             await database.rss_update(user_id)
@@ -412,7 +412,7 @@ async def rss_edit(_, message, pre_event):
             )
             continue
         if not rss_dict[user_id].get(title, False):
-            await send_message(message, "Enter a valid title. Title not found!")
+            await send_message(message, "╭❌ <b>Error</b>\n╰Enter a valid title. Title not found!")
             continue
         updated = True
         inf_lists = []
@@ -536,7 +536,7 @@ async def rss_listener(client, query):
             button = buttons.build_menu(2)
             await edit_message(
                 message,
-                "Send one title with value separated by space get last X items.\nTitle Value\nTimeout: 60 sec.",
+                "╭ℹ️ <b>Info</b>\n╰Send one title with value separated by space get last X items.\n<b>Format:</b> Title Value\n<b>Timeout:</b> 60 sec.",
                 button,
             )
             pfunc = partial(rss_get, pre_event=query)
@@ -559,7 +559,7 @@ async def rss_listener(client, query):
             button = buttons.build_menu(2)
             await edit_message(
                 message,
-                f"Send one or more rss titles separated by space to {data[1]}.\nTimeout: 60 sec.",
+                f"╭ℹ️ <b>Info</b>\n╰Send one or more rss titles separated by space to <b>{data[1]}</b>.\n<b>Timeout:</b> 60 sec.",
                 button,
             )
             pfunc = partial(rss_update, pre_event=query, state=data[1])
@@ -574,13 +574,14 @@ async def rss_listener(client, query):
             buttons.data_button("Back", f"rss back {user_id}")
             buttons.data_button("Close", f"rss close {user_id}")
             button = buttons.build_menu(2)
-            msg = """Send one or more rss titles with new filters or command separated by new line.
-Examples:
-Title1 -c mirror -up remote:path/subdir -exf none -inf 1080 or 720 -stv true
-Title2 -c none -inf none -stv false
-Title3 -c mirror -rcf xxx -up xxx -z pswd -stv false
-Note: Only what you provide will be edited, the rest will be the same like example 2: exf will stay same as it is.
-Timeout: 60 sec. Argument -c for command and arguments
+            msg = """╭✏️ <b>Edit RSS</b>
+┊Send one or more rss titles with new filters or command separated by new line.
+┊<b>Examples:</b>
+┊Title1 -c mirror -up remote:path/subdir -exf none -inf 1080 or 720 -stv true
+┊Title2 -c none -inf none -stv false
+┊Title3 -c mirror -rcf xxx -up xxx -z pswd -stv false
+┊<b>Note:</b> Only what you provide will be edited, the rest will be the same like example 2: exf will stay same as it is.
+╰<b>Timeout:</b> 60 sec. Argument -c for command and arguments
             """
             await edit_message(message, msg, button)
             pfunc = partial(rss_edit, pre_event=query)
@@ -647,7 +648,7 @@ Timeout: 60 sec. Argument -c for command and arguments
             buttons.data_button("Back", f"rss back {user_id}")
             buttons.data_button("Close", f"rss close {user_id}")
             button = buttons.build_menu(2)
-            msg = "Send one or more user_id separated by space to delete their resources.\nTimeout: 60 sec."
+            msg = "╭🗑 <b>Delete User Resources</b>\n╰Send one or more user_id separated by space to delete their resources.\n<b>Timeout:</b> 60 sec."
             await edit_message(message, msg, button)
             pfunc = partial(rss_delete, pre_event=query)
             await event_handler(client, query, pfunc)
