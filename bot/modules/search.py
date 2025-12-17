@@ -142,12 +142,15 @@ async def torrent_search(_, message):
     key = message.text.split()
     if len(key) == 1:
         await send_message(
-            message, "╭ℹ️ <b>Info</b>\n╰Send a search key along with command"
+            message,
+            "<blockquote expendable>╭ℹ️ <b>Info</b>\n╰Send a search key along with command</blockquote>",
         )
     else:
         button = await plugin_buttons(user_id)
         await send_message(
-            message, "╭🌐 <b>Choose site to search</b>\n╰<b>Plugins:</b>", button
+            message,
+            "<blockquote expendable>╭🌐 <b>Choose site to search</b>\n╰<b>Plugins:</b></blockquote>",
+            button,
         )
 
 
@@ -164,18 +167,21 @@ async def torrent_search_update(_, query):
         await query.answer()
         button = await plugin_buttons(user_id)
         await edit_message(
-            message, "╭🌐 <b>Choose site:</b>\n╰Select a plugin to search.", button
+            message,
+            "<blockquote expendable>╭🌐 <b>Choose site:</b>\n╰Select a plugin to search.</blockquote>",
+            button,
         )
     elif data[2] != "cancel":
         await query.answer()
         site = data[2]
         await edit_message(
             message,
-            f"╭🔎 <b>Searching for</b> <i>{key}</i>\n╰<b>Torrent Site:</b> <i>{site.capitalize()}</i>",
+            f"<blockquote expendable>╭🔎 <b>Searching for</b> <i>{key}</i>\n╰<b>Torrent Site:</b> <i>{site.capitalize()}</i></blockquote>",
         )
         await search(key, site, message)
     else:
         await query.answer()
         await edit_message(
-            message, "╭🛑 <b>Search has been canceled!</b>\n╰User request."
+            message,
+                "<blockquote expendable>╭🛑 <b>Search has been canceled!</b>\n╰User request.</blockquote>",
         )

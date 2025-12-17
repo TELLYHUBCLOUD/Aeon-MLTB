@@ -11,6 +11,9 @@ logging.basicConfig(level=logging.INFO)
 class Config:
     AS_DOCUMENT: bool = False
     AUTHORIZED_CHATS: str = ""
+    AUTO_CAPTION_REMOVE: str = ""
+    AUTO_CAPTION_REPLACE: str = ""
+    AUTO_COMPRESS_CMD: str = ""
     AUTO_LEECH: bool = False
     BASE_URL: str = ""
     BASE_URL_PORT: int = 80
