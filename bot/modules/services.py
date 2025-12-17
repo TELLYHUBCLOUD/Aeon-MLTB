@@ -33,23 +33,23 @@ async def start(client, message):
         if stored_token is None:
             return await send_message(
                 message,
-                "<blockquote expendable>╭❌ <b>Error</b>\n╰<b>This token is not for you!</b> Please generate your own.</blockquote>",
+                "<blockquote expandable>╭❌ <b>Error</b>\n╰<b>This token is not for you!</b> Please generate your own.</blockquote>",
             )
         if input_token != stored_token:
             return await send_message(
                 message,
-                "<blockquote expendable>╭❌ <b>Error</b>\n╰Invalid token. Please generate a new one.</blockquote>",
+                "<blockquote expandable>╭❌ <b>Error</b>\n╰Invalid token. Please generate a new one.</blockquote>",
             )
         if userid not in user_data:
             return await send_message(
                 message,
-                "<blockquote expendable>╭❌ <b>Error</b>\n╰This token is not yours! Kindly generate your own.</blockquote>",
+                "<blockquote expandable>╭❌ <b>Error</b>\n╰This token is not yours! Kindly generate your own.</blockquote>",
             )
         data = user_data[userid]
         if "TOKEN" not in data or data["TOKEN"] != input_token:
             return await send_message(
                 message,
-                "<blockquote expendable>╭❌ <b>Error</b>\n╰<b>This token has already been used!</b> Please get a new one.</blockquote>",
+                "<blockquote expandable>╭❌ <b>Error</b>\n╰<b>This token has already been used!</b> Please get a new one.</blockquote>",
             )
         token = str(uuid4())
         token_time = time()
@@ -57,7 +57,7 @@ async def start(client, message):
         data["TIME"] = token_time
         user_data[userid].update(data)
         await database.update_user_tdata(userid, token, token_time)
-        msg = "<blockquote expendable>╭✅ <b>Success</b>\n╰Your token has been successfully generated!\n\n"
+        msg = "<blockquote expandable>╭✅ <b>Success</b>\n╰Your token has been successfully generated!\n\n"
         msg += (
             f"<b>Validity:</b> {get_readable_time(int(Config.TOKEN_TIMEOUT), True)}"
         )
@@ -68,7 +68,7 @@ async def start(client, message):
         await send_message(message, start_string)
     else:
         await send_message(
-            message, "<blockquote expendable>╭⚠️ <b>Warning</b>\n╰You are not an authorized user!</blockquote>"
+            message, "<blockquote expandable>╭⚠️ <b>Warning</b>\n╰You are not an authorized user!</blockquote>"
         )
     await database.update_pm_users(message.from_user.id)
     return None
@@ -78,11 +78,11 @@ async def start(client, message):
 async def ping(_, message):
     start_time = round(time() * 1000)
     reply = await send_message(
-        message, "<blockquote expendable>╭⚡ <b>Starting Ping...</b>\n╰<b>Please wait...</b></blockquote>"
+        message, "<blockquote expandable>╭⚡ <b>Starting Ping...</b>\n╰<b>Please wait...</b></blockquote>"
     )
     end_time = round(time() * 1000)
     await edit_message(
-        reply, f"<blockquote expendable>╭📶 <b>Ping</b>\n╰<code>{end_time - start_time} ms</code></blockquote>"
+        reply, f"<blockquote expandable>╭📶 <b>Ping</b>\n╰<code>{end_time - start_time} ms</code></blockquote>"
     )
 
 
@@ -92,7 +92,7 @@ async def log(_, message):
     buttons.data_button("View log", f"aeon {message.from_user.id} view")
     reply_message = await send_file(
         message,
-        "<blockquote expendable>log.txt</blockquote>",
+        "<blockquote expandable>log.txt</blockquote>",
         buttons=buttons.build_menu(1),
     )
     await delete_message(message)
@@ -145,3 +145,4 @@ async def aeon_callback(_, query):
         await query.answer()
         await delete_message(message)
         return None
+

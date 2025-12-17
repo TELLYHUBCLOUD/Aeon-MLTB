@@ -42,7 +42,7 @@ async def bot_stats(_, message):
     total, used, free, disk = disk_usage("/")
     swap = swap_memory()
     memory = virtual_memory()
-    stats = f"""<blockquote expendable>
+    stats = f"""<blockquote expandable>
 ╭📊 <b>Bot Statistics</b>
 ┊
 ┊📅 <b>Commit Date:</b> {commands["commit"]}
@@ -107,3 +107,4 @@ async def get_packages_version():
     else:
         last_commit = "No UPSTREAM_REPO"
     commands["commit"] = last_commit
+

@@ -57,7 +57,7 @@ async def select_format(_, query, obj):
         await obj.back_to_main()
     elif data[1] == "cancel":
         await edit_message(
-            message, "<blockquote expendable>╭🛑 <b>Task has been cancelled.</b>\n╰User request.</blockquote>"
+            message, "<blockquote expandable>╭🛑 <b>Task has been cancelled.</b>\n╰User request.</blockquote>"
         )
         obj.qual = None
         obj.listener.is_cancelled = True
@@ -98,7 +98,7 @@ class YtSelection:
             await wait_for(self.event.wait(), timeout=self._timeout)
         except Exception:
             await edit_message(
-                self._reply_to, "<blockquote expendable>╭⌛ <b>Timed Out</b>\n╰Task has been cancelled!</blockquote>"
+                self._reply_to, "<blockquote expandable>╭⌛ <b>Timed Out</b>\n╰Task has been cancelled!</blockquote>"
             )
             self.qual = None
             self.listener.is_cancelled = True
@@ -127,7 +127,7 @@ class YtSelection:
             buttons.data_button("Best Audios", "ytq ba/b")
             buttons.data_button("Cancel", "ytq cancel", "footer")
             self._main_buttons = buttons.build_menu(3)
-            msg = f"<blockquote expendable>╭🎥 <b>Choose Playlist Videos Quality</b>\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}</blockquote>"
+            msg = f"<blockquote expandable>╭🎥 <b>Choose Playlist Videos Quality</b>\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}</blockquote>"
         else:
             format_dict = result.get("formats")
             if format_dict is not None:
@@ -184,7 +184,7 @@ class YtSelection:
             buttons.data_button("Best Audio", "ytq ba/b")
             buttons.data_button("Cancel", "ytq cancel", "footer")
             self._main_buttons = buttons.build_menu(2)
-            msg = f"<blockquote expendable>🎥 <b>Choose Video Quality</b>\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}</blockquote>"
+            msg = f"<blockquote expandable>🎥 <b>Choose Video Quality</b>\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}</blockquote>"
         self._reply_to = await send_message(
             self.listener.message,
             msg,
@@ -197,9 +197,9 @@ class YtSelection:
 
     async def back_to_main(self):
         if self._is_playlist:
-            msg = f"<blockquote expendable>🎥 <b>Choose Playlist Videos Quality</b>\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}</blockquote>"
+            msg = f"<blockquote expandable>🎥 <b>Choose Playlist Videos Quality</b>\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}</blockquote>"
         else:
-            msg = f"<blockquote expendable>🎥 <b>Choose Video Quality</b>\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}</blockquote>"
+            msg = f"<blockquote expandable>🎥 <b>Choose Video Quality</b>\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}</blockquote>"
         await edit_message(self._reply_to, msg, self._main_buttons)
 
     async def qual_subbuttons(self, b_name):
@@ -211,7 +211,7 @@ class YtSelection:
         buttons.data_button("Back", "ytq back", "footer")
         buttons.data_button("Cancel", "ytq cancel", "footer")
         subbuttons = buttons.build_menu(2)
-        msg = f"<blockquote expendable>🎼 <b>Choose Bit rate for {b_name}</b>\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}</blockquote>"
+        msg = f"<blockquote expandable>🎼 <b>Choose Bit rate for {b_name}</b>\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}</blockquote>"
         await edit_message(self._reply_to, msg, subbuttons)
 
     async def mp3_subbuttons(self):
@@ -224,7 +224,7 @@ class YtSelection:
         buttons.data_button("Back", "ytq back")
         buttons.data_button("Cancel", "ytq cancel")
         subbuttons = buttons.build_menu(3)
-        msg = f"<blockquote expendable>🎵 <b>Choose mp3 Audio{i} Bitrate</b>\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}</blockquote>"
+        msg = f"<blockquote expandable>🎵 <b>Choose mp3 Audio{i} Bitrate</b>\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}</blockquote>"
         await edit_message(self._reply_to, msg, subbuttons)
 
     async def audio_format(self):
@@ -236,7 +236,7 @@ class YtSelection:
         buttons.data_button("Back", "ytq back", "footer")
         buttons.data_button("Cancel", "ytq cancel", "footer")
         subbuttons = buttons.build_menu(3)
-        msg = f"<blockquote expendable>🔊 <b>Choose Audio{i} Format</b>\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}</blockquote>"
+        msg = f"<blockquote expandable>🔊 <b>Choose Audio{i} Format</b>\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}</blockquote>"
         await edit_message(self._reply_to, msg, subbuttons)
 
     async def audio_quality(self, format):
@@ -248,7 +248,7 @@ class YtSelection:
         buttons.data_button("Back", "ytq aq back")
         buttons.data_button("Cancel", "ytq aq cancel")
         subbuttons = buttons.build_menu(5)
-        msg = f"<blockquote expendable>🎧 <b>Choose Audio{i} Quality</b>\n┊0 is best and 10 is worst\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}</blockquote>"
+        msg = f"<blockquote expandable>🎧 <b>Choose Audio{i} Quality</b>\n┊0 is best and 10 is worst\n╰<b>Timeout:</b> {get_readable_time(self._timeout - (time() - self._time))}</blockquote>"
         await edit_message(self._reply_to, msg, subbuttons)
 
 
@@ -536,3 +536,4 @@ async def ytdl(client, message):
 
 async def ytdl_leech(client, message):
     bot_loop.create_task(YtDlp(client, message, is_leech=True).new_event())
+

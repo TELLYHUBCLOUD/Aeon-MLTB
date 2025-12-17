@@ -61,7 +61,7 @@ async def rss_menu(event):
             buttons.data_button("Start Rss", f"rss start {user_id}")
     buttons.data_button("Close", f"rss close {user_id}")
     button = buttons.build_menu(2)
-    msg = "<blockquote expendable>╭📰 <b>RSS Menu</b>\n"
+    msg = "<blockquote expandable>╭📰 <b>RSS Menu</b>\n"
     msg += f"┊👥 <b>Users:</b> {len(rss_dict)}\n"
     msg += f"╰⚡ <b>Running:</b> {scheduler.running}</blockquote>"
     return msg, button
@@ -93,21 +93,21 @@ async def rss_sub(_, message, pre_event):
         if len(args) < 2:
             await send_message(
                 message,
-                f"<blockquote expendable>{item}. Wrong Input format. Read help message before adding new subcription!</blockquote>",
+                f"<blockquote expandable>{item}. Wrong Input format. Read help message before adding new subcription!</blockquote>",
             )
             continue
         title = args[0].strip()
         if (user_feeds := rss_dict.get(user_id, False)) and title in user_feeds:
             await send_message(
                 message,
-                f"<blockquote expendable>This title {title} already subscribed! Choose another title!</blockquote>",
+                f"<blockquote expandable>This title {title} already subscribed! Choose another title!</blockquote>",
             )
             continue
         feed_link = args[1].strip()
         if feed_link.startswith(("-inf", "-exf", "-c")):
             await send_message(
                 message,
-                f"<blockquote expendable>Wrong input in line {index}! Add Title! Read the example!</blockquote>",
+                f"<blockquote expandable>Wrong input in line {index}! Add Title! Read the example!</blockquote>",
             )
             continue
         inf_lists = []
@@ -156,7 +156,7 @@ async def rss_sub(_, message, pre_event):
                 size = get_size_bytes(sizes[0])
             else:
                 size = 0
-            msg += "<blockquote expendable>╭✅ <b>Subscribed!</b>"
+            msg += "<blockquote expandable>╭✅ <b>Subscribed!</b>"
             msg += f"\n┊<b>Title: </b><code>{title}</code>\n┊<b>Feed Url: </b>{feed_link}"
             msg += f"\n┊<b>Latest record for </b>{rss_d.feed.title}:"
             msg += f"\n┊<b>Name: </b><code>{last_title.replace('>', '').replace('<', '')}</code>"
@@ -248,7 +248,7 @@ async def rss_update(_, message, pre_event, state):
         if (istate and state == "pause") or (not istate and state == "resume"):
             await send_message(
                 message,
-                f"<blockquote expendable>╭ℹ️ <b>Info</b>\n╰<b>Title:</b> <code>{title}</code> is already <b>{state}d</b>!</blockquote>",
+                f"<blockquote expandable>╭ℹ️ <b>Info</b>\n╰<b>Title:</b> <code>{title}</code> is already <b>{state}d</b>!</blockquote>",
             )
             continue
         async with rss_dict_lock:
@@ -277,7 +277,7 @@ async def rss_update(_, message, pre_event, state):
         LOGGER.info(f"Rss link with Title(s): {updated} has been {state}d!")
         await send_message(
             message,
-            f"<blockquote expendable>╭✅ <b>Success</b>\n╰<b>RSS links with Title(s):</b> <code>{updated}</code> has been <b>{state}d!</b></blockquote>",
+            f"<blockquote expandable>╭✅ <b>Success</b>\n╰<b>RSS links with Title(s):</b> <code>{updated}</code> has been <b>{state}d!</b></blockquote>",
         )
         if rss_dict.get(user_id):
             await database.rss_update(user_id)
@@ -289,7 +289,7 @@ async def rss_list(query, start, all_users=False):
     buttons = ButtonMaker()
     if all_users:
         list_feed = (
-            f"<blockquote expendable>╭📋 <b>All subscriptions</b>\n┊<b>Page:</b> {int(start / 5)}\n╰\n"
+            f"<blockquote expandable>╭📋 <b>All subscriptions</b>\n┊<b>Page:</b> {int(start / 5)}\n╰\n"
         )
         async with rss_dict_lock:
             keysCount = sum(len(v.keys()) for v in rss_dict.values())
@@ -311,7 +311,7 @@ async def rss_list(query, start, all_users=False):
                         break
     else:
         list_feed = (
-            f"<blockquote expendable>╭📋 <b>Your subscriptions</b>\n┊<b>Page:</b> {int(start / 5)}\n╰\n"
+            f"<blockquote expandable>╭📋 <b>Your subscriptions</b>\n┊<b>Page:</b> {int(start / 5)}\n╰\n"
         )
         async with rss_dict_lock:
             keysCount = len(rss_dict.get(user_id, {}).keys())
@@ -360,7 +360,7 @@ async def rss_get(_, message, pre_event):
             try:
                 msg = await send_message(
                     message,
-                    f"<blockquote expendable>╭📥 <b>Getting last {count} item(s)</b>\n╰<b>From:</b> {title}</blockquote>",
+                    f"<blockquote expandable>╭📥 <b>Getting last {count} item(s)</b>\n╰<b>From:</b> {title}</blockquote>",
                 )
                 async with AsyncClient(
                     headers=headers,
@@ -377,7 +377,7 @@ async def rss_get(_, message, pre_event):
                         link = rss_d.entries[item_num]["links"][1]["href"]
                     except IndexError:
                         link = rss_d.entries[item_num]["link"]
-                    item_info += f"<blockquote expendable>╭<b>Name: </b><code>{rss_d.entries[item_num]['title'].replace('>', '').replace('<', '')}</code>\n"
+                    item_info += f"<blockquote expandable>╭<b>Name: </b><code>{rss_d.entries[item_num]['title'].replace('>', '').replace('<', '')}</code>\n"
                     item_info += f"╰<b>Link: </b><code>{link}</code>\n\n</blockquote>"
                 item_info_ecd = item_info.encode()
                 if len(item_info_ecd) > 4000:
@@ -416,13 +416,13 @@ async def rss_edit(_, message, pre_event):
         if len(args) < 2:
             await send_message(
                 message,
-                f"<blockquote expendable>╭❌ <b>Error</b>\n╰{item}. Wrong Input format. Read help message before editing!</blockquote>",
+                f"<blockquote expandable>╭❌ <b>Error</b>\n╰{item}. Wrong Input format. Read help message before editing!</blockquote>",
             )
             continue
         if not rss_dict[user_id].get(title, False):
             await send_message(
                 message,
-                "<blockquote expendable>╭❌ <b>Error</b>\n╰Enter a valid title. Title not found!</blockquote>",
+                "<blockquote expandable>╭❌ <b>Error</b>\n╰Enter a valid title. Title not found!</blockquote>",
             )
             continue
         updated = True
@@ -547,7 +547,7 @@ async def rss_listener(client, query):
             button = buttons.build_menu(2)
             await edit_message(
                 message,
-                "<blockquote expendable>╭ℹ️ <b>Info</b>\n╰Send one title with value separated by space get last X items.\n<b>Format:</b> Title Value\n<b>Timeout:</b> 60 sec.</blockquote>",
+                "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send one title with value separated by space get last X items.\n<b>Format:</b> Title Value\n<b>Timeout:</b> 60 sec.</blockquote>",
                 button,
             )
             pfunc = partial(rss_get, pre_event=query)
@@ -585,7 +585,7 @@ async def rss_listener(client, query):
             buttons.data_button("⬅️ Back", f"rss back {user_id}")
             buttons.data_button("❌ Close", f"rss close {user_id}")
             button = buttons.build_menu(2)
-            msg = """<blockquote expendable>╭✏️ <b>Edit RSS</b>
+            msg = """<blockquote expandable>╭✏️ <b>Edit RSS</b>
 ┊Send one or more rss titles with new filters or command separated by new line.
 ┊<b>Examples:</b>
 ┊Title1 -c mirror -up remote:path/subdir -exf none -inf 1080 or 720 -stv true
@@ -659,7 +659,7 @@ async def rss_listener(client, query):
             buttons.data_button("⬅️ Back", f"rss back {user_id}")
             buttons.data_button("❌ Close", f"rss close {user_id}")
             button = buttons.build_menu(2)
-            msg = "<blockquote expendable>╭🗑 <b>Delete User Resources</b>\n╰Send one or more user_id separated by space to delete their resources.\n<b>Timeout:</b> 60 sec.</blockquote>"
+            msg = "<blockquote expandable>╭🗑 <b>Delete User Resources</b>\n╰Send one or more user_id separated by space to delete their resources.\n<b>Timeout:</b> 60 sec.</blockquote>"
             await edit_message(message, msg, button)
             pfunc = partial(rss_delete, pre_event=query)
             await event_handler(client, query, pfunc)
@@ -859,3 +859,4 @@ def add_job():
 
 add_job()
 scheduler.start()
+

@@ -164,7 +164,7 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("❌ Close", f"userset {user_id} close")
 
         text = f"""<u>⚙️ Leech Settings for {name}</u>
-<blockquote expendable>
+<blockquote expandable>
 ╭📦 Leech Type: <b>{ltype}</b>
 ┊📸 Media Group: <b>{media_group}</b>
 ┊📝 Leech Prefix: <code>{escape(lprefix)}</code>
@@ -203,7 +203,7 @@ async def get_user_settings(from_user, stype="main"):
             rcflags = Config.RCLONE_FLAGS
         else:
             rcflags = "None"
-        text = f"""<blockquote expendable>
+        text = f"""<blockquote expandable>
 ╭⚙️ <b>Rclone Settings for {name}</b>
 ┊📁 <b>Rclone Config:</b> {rccmsg}
 ┊📂 <b>Rclone Path:</b> <code>{rccpath}</code>
@@ -245,7 +245,7 @@ async def get_user_settings(from_user, stype="main"):
         index = (
             user_dict["INDEX_URL"] if user_dict.get("INDEX_URL", False) else "None"
         )
-        text = f"""<blockquote expendable>
+        text = f"""<blockquote expandable>
 ╭⚙️ <b>Gdrive API Settings for {name}</b>
 ┊🔑 <b>Gdrive Token:</b> {tokenmsg}
 ┊💾 <b>Gdrive ID:</b> <code>{gdrive_id}</code>
@@ -258,7 +258,7 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("🎥 YouTube", f"userset {user_id} set_upload yt")
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
-        text = f"""<blockquote expendable>
+        text = f"""<blockquote expandable>
 ╭📤 <b>Upload Destination Settings for {name}</b>
 ╰Choose where to upload your files.
 </blockquote>"""
@@ -303,7 +303,7 @@ async def get_user_settings(from_user, stype="main"):
 
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
-        text = f"""<blockquote expendable>
+        text = f"""<blockquote expandable>
 ╭🎥 <b>YouTube Settings for {name}</b>
 ┊🔒 <b>Default Privacy:</b> <code>{yt_privacy}</code>
 ┊📂 <b>Default Category:</b> <code>{yt_category}</code>
@@ -321,7 +321,7 @@ async def get_user_settings(from_user, stype="main"):
         )
         buttons.data_button("🔙 Back", f"userset {user_id} youtube")
         buttons.data_button("❌ Close", f"userset {user_id} close")
-        text = f"""<blockquote expendable>
+        text = f"""<blockquote expandable>
 ╭📁 <b>Set Default YouTube Folder Upload Mode for {name}</b>
 ╰Choose how to handle folder uploads.
 </blockquote>"""
@@ -353,7 +353,7 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
 
-        text = f"""<blockquote expendable>
+        text = f"""<blockquote expandable>
 ╭🤖 <b>Automation Settings for {name}</b>
 ┊🚀 <b>Auto Leech:</b> {aleech}
 ┊🎬 <b>Auto Compress Cmd:</b> <code>{escape(ac_cmd)}</code>
@@ -470,7 +470,7 @@ async def get_user_settings(from_user, stype="main"):
 
         buttons.data_button("❌ Close", f"userset {user_id} close")
 
-        text = f"""<blockquote expendable>
+        text = f"""<blockquote expandable>
 ╭⚙️ <b>Settings for {name}</b>
 ┊📦 <b>Default Package:</b> {du}
 ┊🚀 <b>Auto Leech:</b> {aleech}
@@ -952,3 +952,4 @@ async def get_users_settings(_, message):
             await send_message(message, msg)
     else:
         await send_message(message, "❌ No users data!")
+

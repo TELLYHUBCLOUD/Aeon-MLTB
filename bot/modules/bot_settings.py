@@ -69,7 +69,7 @@ async def get_buttons(key=None, edit_type=None):
         buttons.data_button("Sabnzbd", "botset nzb")
         buttons.data_button("JD Sync", "botset syncjd")
         buttons.data_button("Close", "botset close")
-        msg = "╭⚙️ <b>Bot Settings</b>\n╰Choose a setting to configure:"
+        msg = "<blockquote expandable>╭⚙️ <b>Bot Settings\n╰Choose a setting to configure:</blockquote>"
     elif edit_type is not None:
         if edit_type == "botvar":
             msg = ""
@@ -87,13 +87,13 @@ async def get_buttons(key=None, edit_type=None):
                 "TG_PROXY",
             ]:
                 msg += "Restart required for this edit to take effect! You will not see the changes in bot vars, the edit will be in database only!\n\n"
-            msg += f"╭✏️ <b>Edit Bot Variable</b>\n┊<b>Variable:</b> {key}\n┊<b>Current Value:</b> {Config.get(key)}\n╰<b>Timeout:</b> 60 sec"
+            msg += f"<blockquote expandable>╭✏️ <b>Edit Bot Variable</b>\n┊<b>Variable:</b> {key}\n┊<b>Current Value:</b> {Config.get(key)}\n╰<b>Timeout:</b> 60 sec</blockquote>"
         elif edit_type == "nzbvar":
             buttons.data_button("Back", "botset nzb")
             buttons.data_button("Default", f"botset resetnzb {key}")
             buttons.data_button("Empty String", f"botset emptynzb {key}")
             buttons.data_button("Close", "botset close")
-            msg = f"╭✏️ <b>Edit WS Variable</b>\n┊<b>Variable:</b> {key}\n┊<b>Current Value:</b> {nzb_options[key]}\n┊<b>Note:</b> If list, separate by space or ','\n┊<b>Example:</b> .exe,info or .exe .info\n╰<b>Timeout:</b> 60 sec"
+            msg = f"<blockquote expandable>╭✏️ <b>Edit WS Variable</b>\n┊<b>Variable:</b> {key}\n┊<b>Current Value:</b> {nzb_options[key]}\n┊<b>Note:</b> If list, separate by space or ','\n┊<b>Example:</b> .exe,info or .exe .info\n╰<b>Timeout:</b> 60 sec</blockquote>"
         elif edit_type.startswith("nzbsevar"):
             index = 0 if key == "newser" else int(edit_type.replace("nzbsevar", ""))
             if key == "newser":

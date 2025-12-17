@@ -57,7 +57,7 @@ async def task_status(_, message):
     if count == 0:
         currentTime = get_readable_time(time() - bot_start_time)
         free = get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)
-        msg = "<blockquote expendable>╭🎯 <b>No Active Tasks!</b>\n"
+        msg = "<blockquote expandable>╭🎯 <b>No Active Tasks!</b>\n"
         msg += (
             f"┊🖥 <b>CPU:</b> {cpu_percent()}% | 💾 <b>FREE:</b> {free}\n"
             f"╰🎚 <b>RAM:</b> {virtual_memory().percent}% | ⏱ <b>UPTIME:</b> {currentTime}"
@@ -187,7 +187,7 @@ async def status_pages(_, query):
                     case _:
                         tasks["Download"] += 1
 
-        msg = f"""<blockquote expendable>
+        msg = f"""<blockquote expandable>
 ╭📊 <b>Task Overview</b>
 ┊📥 <b>DL:</b> {tasks["Download"]} | 📤 <b>UP:</b> {tasks["Upload"]} | 🌱 <b>SD:</b> {tasks["Seed"]} | 🗜 <b>AR:</b> {tasks["Archive"]}
 ┊📦 <b>EX:</b> {tasks["Extract"]} | ✂️ <b>SP:</b> {tasks["Split"]} | ⏳ <b>QD:</b> {tasks["QueueDl"]} | ⏳ <b>QU:</b> {tasks["QueueUp"]}
@@ -196,7 +196,7 @@ async def status_pages(_, query):
 ╰🖼 <b>ET:</b> {tasks["EmbedThumb"]} | 🎥 <b>YT:</b> {tasks["YtUp"]}
 </blockquote>"""
 
-        msg += f"""<blockquote expendable>
+        msg += f"""<blockquote expandable>
 ╭⚡️ <b>Speed Statistics</b>
 ┊⬇️ <b>Download:</b> {get_readable_file_size(dl_speed)}/s
 ┊⬆️ <b>Upload:</b> {get_readable_file_size(up_speed)}/s
@@ -205,3 +205,4 @@ async def status_pages(_, query):
         button = ButtonMaker()
         button.data_button("🔙 Back", f"status {data[1]} ref")
         await edit_message(message, msg, button.build_menu())
+

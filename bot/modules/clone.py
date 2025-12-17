@@ -138,7 +138,7 @@ class Clone(TaskListener):
             )
             if mime_type is None:
                 await send_message(
-                    self.message, f"╭❌ <b>Error</b>\n╰<code>{self.name}</code>"
+                    self.message, f"<blockquote expandable>╭❌ <b>Error</b>\n╰<code>{self.name}</code></blockquote>"
                 )
                 return
             msg, button = await stop_duplicate_check(self)
@@ -151,7 +151,7 @@ class Clone(TaskListener):
             if files <= 10:
                 msg = await send_message(
                     self.message,
-                    f"╭♻️ <b>Cloning</b>\n╰<b>Link:</b> <code>{self.link}</code>",
+                    f"<blockquote expandable>╭♻️ <b>Cloning</b>\n╰<b>Link:</b> <code>{self.link}</code></blockquote>",
                 )
             else:
                 msg = ""

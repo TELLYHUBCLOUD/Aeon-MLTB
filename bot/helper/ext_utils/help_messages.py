@@ -420,3 +420,4 @@ help_string = f"""<blockquote expandable>╭ℹ️ <b>Help Guide</b>
 ┊/{BotCommands.SearchCommand} [query]: Search for torrents with API.
 ┊/{BotCommands.StatusCommand[0]}: Shows a status of all the downloads.
 ╰/{BotCommands.StatsCommand}: Show stats of the machine where the bot is hosted in.</blockquote>"""
+
