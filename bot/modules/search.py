@@ -63,7 +63,7 @@ async def search(key, site, message):
     if total_results == 0:
         await edit_message(
             message,
-            f"╭❌ <b>No result found for</b> <i>{key}</i>\n╰<b>Torrent Site:</b> <i>{site.capitalize()}</i>",
+            f"<blockquote expandable>╭❌ <b>No result found for</b> <i>{key}</i>\n╰<b>Torrent Site:</b> <i>{site.capitalize()}</i></blockquote>",
         )
         return
     msg = f"╭🔎 <b>Found</b> {min(total_results, TELEGRAPH_LIMIT)}"
@@ -101,7 +101,7 @@ async def get_result(search_results, key, message):
 
     await edit_message(
         message,
-        f"╭☕ <b>Creating</b> {len(telegraph_content)} <b>Telegraph pages...</b>\n╰<b>Please wait...</b>",
+        f"<blockquote expandable>╭☕ <b>Creating</b> {len(telegraph_content)} <b>Telegraph pages...</b>\n╰<b>Please wait...</b></blockquote>",
     )
     path = [
         (
@@ -115,7 +115,7 @@ async def get_result(search_results, key, message):
     if len(path) > 1:
         await edit_message(
             message,
-            f"╭✏️ <b>Editing</b> {len(telegraph_content)} <b>Telegraph pages...</b>\n╰<b>Please wait...</b>",
+            f"<blockquote expandable>╭✏️ <b>Editing</b> {len(telegraph_content)} <b>Telegraph pages...</b>\n╰<b>Please wait...</b></blockquote>",
         )
         await telegraph.edit_telegraph(path, telegraph_content)
     return f"https://telegra.ph/{path[0]}"

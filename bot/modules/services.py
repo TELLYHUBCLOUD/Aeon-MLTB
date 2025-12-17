@@ -64,7 +64,7 @@ async def start(client, message):
         return await send_message(message, msg)
     elif await CustomFilters.authorized(client, message):
         help_command = f"/{BotCommands.HelpCommand}"
-        start_string = f"╭🤖 <b>Aeon MLTB</b>\n┊This bot can mirror all your links, files, and torrents to Google Drive, Rclone, or Telegram.\n╰<b>Type {help_command} to get a list of available commands</b>"
+        start_string = f"<blockquote expandable>╭🤖 <b>Aeon MLTB</b>\n┊This bot can mirror all your links, files, and torrents to Google Drive, Rclone, or Telegram.\n╰<b>Type {help_command} to get a list of available commands</b></blockquote>"
         await send_message(message, start_string)
     else:
         await send_message(

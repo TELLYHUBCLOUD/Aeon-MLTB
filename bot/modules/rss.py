@@ -570,7 +570,7 @@ async def rss_listener(client, query):
             button = buttons.build_menu(2)
             await edit_message(
                 message,
-                f"╭ℹ️ <b>Info</b>\n╰Send one or more rss titles separated by space to <b>{data[1]}</b>.\n<b>Timeout:</b> 60 sec.",
+                f"<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send one or more rss titles separated by space to <b>{data[1]}</b>.\n<b>Timeout:</b> 60 sec.</blockquote>",
                 button,
             )
             pfunc = partial(rss_update, pre_event=query, state=data[1])
