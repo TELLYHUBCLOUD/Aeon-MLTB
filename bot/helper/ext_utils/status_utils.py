@@ -302,6 +302,8 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
     msg += f"╭🖥️ <b>CPU:</b> {cpu_percent()}%\n"
     msg += f"┊🐏 <b>RAM:</b> {virtual_memory().percent}%\n"
     msg += f"┊⏰ <b>UPTIME:</b> {get_readable_time(time() - bot_start_time)}\n"
-    msg += f"╰💿 <b>FREE:</b> {get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)}\n"
+    msg += (
+        f"╰💿 <b>FREE:</b> {get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)}\n"
+    )
 
     return msg, button

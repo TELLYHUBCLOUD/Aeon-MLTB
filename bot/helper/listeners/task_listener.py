@@ -708,7 +708,10 @@ class TaskListener(TaskConfig):
             if self.mid in task_dict:
                 del task_dict[self.mid]
             count = len(task_dict)
-        x = await send_message(self.message, f"╭❌ <b>Upload Error</b>\n┊{self.tag}\n╰{escape(str(error))}")
+        x = await send_message(
+            self.message,
+            f"╭❌ <b>Upload Error</b>\n┊{self.tag}\n╰{escape(str(error))}",
+        )
         create_task(auto_delete_message(x, time=300))
         if count == 0:
             await self.clean()
