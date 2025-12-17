@@ -90,13 +90,13 @@ async def gen_mediainfo(message, link=None, media=None, msg=None):
 
     except Exception as e:
         LOGGER.error(e)
-        await edit_message(temp_send, f"╭❌ <b>MediaInfo Error</b>\n╰{e!s}")
+        await edit_message(temp_send, f"<blockquote>╭❌ <b>MediaInfo Error</b>\n⁰{e!s}</blockquote>")
     finally:
         await aioremove(des_path)
 
     link_id = (await telegraph.create_page(title="MediaInfo", content=tc))["path"]
     await temp_send.edit(
-        f"╭✅ <b>MediaInfo Generated</b>\n╰<a href='https://graph.org/{link_id}'>Click Here to View</a>",
+        f"<blockquote>╭✅ <b>MediaInfo Generated</b>\n⁰<a href='https://graph.org/{link_id}'>Click Here to View</a></blockquote>",
         disable_web_page_preview=False,
     )
 

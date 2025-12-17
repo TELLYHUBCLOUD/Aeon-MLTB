@@ -142,11 +142,11 @@ async def cancel_all_buttons(_, message):
     async with task_dict_lock:
         count = len(task_dict)
     if count == 0:
-        await send_message(message, "No active tasks!")
+        await send_message(message, "<blockquote>╭ℹ️ <b>Info</b>\n╰No active tasks!</blockquote>")
         return
     is_sudo = await CustomFilters.sudo("", message)
     button = create_cancel_buttons(is_sudo, message.from_user.id)
-    can_msg = await send_message(message, "Choose tasks to cancel!", button)
+    can_msg = await send_message(message, "<blockquote>╭🗂️ <b>Cancel Tasks</b>\n╰Choose tasks to cancel!</blockquote>", button)
     await auto_delete_message(message, can_msg)
 
 
@@ -189,4 +189,4 @@ async def cancel_all_update(_, query):
         await edit_message(message, "Choose tasks to cancel.", button)
         res = await cancel_all(data[1], user_id)
         if not res:
-            await send_message(reply_to, f"No matching tasks for {data[1]}!")
+            await send_message(reply_to, f"<blockquote>╭ℹ️ <b>Info</b>\n╰No matching tasks for {data[1]}!</blockquote>")

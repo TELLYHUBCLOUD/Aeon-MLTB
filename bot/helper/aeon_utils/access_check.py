@@ -74,7 +74,7 @@ async def error_check(message):
             try:
                 temp_msg = await message._client.send_message(
                     chat_id=user_id,
-                    text="╭🕵️ <b>Checking Access...</b>\n╰<b>Please wait...</b>",
+                    text="<blockquote>╭🕵️ <b>Checking Access...</b>\n╰<b>Please wait...</b></blockquote>",
                 )
                 await temp_msg.delete()
             except Exception:
@@ -98,10 +98,11 @@ async def error_check(message):
         username = message.from_user.username
         tag = f"@{username}" if username else message.from_user.mention
         final_msg = (
-            f"╭⚠️ <b>Access Denied</b>\n┊<b>User:</b> {tag}\n╰<b>Reason(s):</b>\n"
+            f"<blockquote>╭⚠️ <b>Access Denied</b>\n┊<b>User:</b> {tag}\n╰<b>Reason(s):</b>\n"
         )
         for i, m in enumerate(msg, 1):
             final_msg += f"\n<b>{i}.</b> {m}"
+        final_msg += "</blockquote>"
 
         if button:
             button = button.build_menu(2)

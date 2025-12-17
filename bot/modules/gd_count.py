@@ -20,7 +20,7 @@ async def count_node(_, message):
 
     if is_gdrive_link(link):
         msg = await send_message(
-            message, f"╭⏳ <b>Counting...</b>\n╰<b>Link:</b> <code>{link}</code>"
+            message, f"<blockquote>╭⏳ <b>Counting...</b>\n╰<b>Link:</b> <code>{link}</code></blockquote>"
         )
         name, mime_type, size, files, folders = await sync_to_async(
             GoogleDriveCount().count,
@@ -31,11 +31,11 @@ async def count_node(_, message):
             await send_message(message, name)
             return
         await delete_message(msg)
-        msg = f"╭📦 <b>Count Result</b>\n┊<b>Name:</b> <code>{name}</code>\n┊<b>Size:</b> {get_readable_file_size(size)}\n┊<b>Type:</b> {mime_type}"
+        msg = f"<blockquote>╭📦 <b>Count Result</b>\n┊<b>Name:</b> <code>{name}</code>\n┊<b>Size:</b> {get_readable_file_size(size)}\n┊<b>Type:</b> {mime_type}"
         if mime_type == "Folder":
             msg += f"\n┊<b>SubFolders:</b> {folders}\n┊<b>Files:</b> {files}"
-        msg += f"\n╰<b>cc:</b> {tag}"
+        msg += f"\n╰<b>cc:</b> {tag}</blockquote>"
     else:
-        msg = "╭ℹ️ <b>Info</b>\n╰Send Gdrive link along with command or by replying to the link by command"
+        msg = "<blockquote>╭ℹ️ <b>Info</b>\n╰Send Gdrive link along with command or by replying to the link by command</blockquote>"
 
     await send_message(message, msg)

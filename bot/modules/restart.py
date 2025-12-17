@@ -27,7 +27,7 @@ async def restart_bot(_, message):
     button = buttons.build_menu(2)
     await send_message(
         message,
-        "╭⚠️ <b>Warning</b>\n╰Are you sure you want to restart the bot ?!",
+        "<blockquote>╭⚠️ <b>Warning</b>\n╰Are you sure you want to restart the bot ?!</blockquote>",
         button,
     )
 
@@ -83,7 +83,7 @@ async def restart_notification():
             await TgClient.bot.edit_message_text(
                 chat_id=chat_id,
                 message_id=msg_id,
-                text="╭✅ <b>Restarted Successfully!</b>\n╰Bot is now active.",
+                text="<blockquote>╭✅ <b>Restarted Successfully!</b>\n⁰Bot is now active.</blockquote>",
             )
         await remove(".restartmsg")
 

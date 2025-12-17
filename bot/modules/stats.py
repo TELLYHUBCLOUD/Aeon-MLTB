@@ -42,7 +42,7 @@ async def bot_stats(_, message):
     total, used, free, disk = disk_usage("/")
     swap = swap_memory()
     memory = virtual_memory()
-    stats = f"""╭📊 <b>Bot Statistics</b>
+    stats = f"""<blockquote>╭📊 <b>Bot Statistics</b>
 ┊
 ┊📅 <b>Commit Date:</b> {commands["commit"]}
 ┊⏰ <b>Bot Uptime:</b> {get_readable_time(time() - bot_start_time)}
@@ -72,7 +72,7 @@ async def bot_stats(_, message):
 ┊☁️ <b>rclone:</b> {commands["rclone"]}
 ┊📹 <b>yt-dlp:</b> {commands["yt-dlp"]}
 ┊🎬 <b>ffmpeg:</b> {commands["ffmpeg"]}
-╰🗜️ <b>7z:</b> {commands["7z"]}
+╰🗜️ <b>7z:</b> {commands["7z"]}</blockquote>
 """
     reply_message = await send_message(message, stats)
     await delete_message(message)

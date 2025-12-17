@@ -587,7 +587,7 @@ class TaskListener(TaskConfig):
                     await sleep(1)
 
             if isinstance(upload_result, str):
-                error_message = f"╭❌ <b>YT Upload Error</b>\n┊<b>Name: </b><code>{escape(self.name)}</code>\n┊<b>Size: </b>{get_readable_file_size(self.size)}\n┊<b>Error: </b>{escape(upload_result)}\n╰<b>cc: </b>{self.tag}"
+                error_message = f"<blockquote>╭❌ <b>YT Upload Error</b>\n┊<b>Name: </b><code>{escape(self.name)}</code>\n┊<b>Size: </b>{get_readable_file_size(self.size)}\n┊<b>Error: </b>{escape(upload_result)}\n╰<b>cc: </b>{self.tag}</blockquote>"
                 await send_message(self.user_id, error_message)
                 if Config.LOG_CHAT_ID:
                     await send_message(int(Config.LOG_CHAT_ID), error_message)
@@ -710,7 +710,7 @@ class TaskListener(TaskConfig):
             count = len(task_dict)
         x = await send_message(
             self.message,
-            f"╭❌ <b>Upload Error</b>\n┊{self.tag}\n╰{escape(str(error))}",
+            f"<blockquote>╭❌ <b>Upload Error</b>\n┊{self.tag}\n╰{escape(str(error))}</blockquote>",
         )
         create_task(auto_delete_message(x, time=300))
         if count == 0:
