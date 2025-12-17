@@ -194,6 +194,7 @@ async def status_pages(_, query):
 ┊📋 <b>CL:</b> {tasks["Clone"]} | ✅ <b>CK:</b> {tasks["CheckUp"]} | ⏸ <b>PA:</b> {tasks["Pause"]} | 🎬 <b>SV:</b> {tasks["SamVid"]}
 ┊🎞 <b>CM:</b> {tasks["ConvertMedia"]} | 🎵 <b>FF:</b> {tasks["FFmpeg"]} | 📝 <b>MD:</b> {tasks["Metadata"]} | 💧 <b>WM:</b> {tasks["Watermark"]}
 ╰🖼 <b>ET:</b> {tasks["EmbedThumb"]} | 🎥 <b>YT:</b> {tasks["YtUp"]}
+
 </blockquote>"""
 
         msg += f"""<blockquote expendable>
