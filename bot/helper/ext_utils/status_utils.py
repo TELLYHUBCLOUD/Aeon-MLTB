@@ -3,7 +3,7 @@ from asyncio import gather, iscoroutinefunction
 from html import escape
 from time import time
 
-from psutil import cpu_percent, disk_usage, virtual_memory
+from psutil import disk_usage, virtual_memory
 
 from bot import DOWNLOAD_DIR, bot_start_time, status_dict, task_dict, task_dict_lock
 from bot.helper.telegram_helper.button_build import ButtonMaker
@@ -302,8 +302,6 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
     msg += "<blockquote>╭🖥️ <b>CPU:</b> {cpu_percent()}%\n"
     msg += f"┊🐏 <b>RAM:</b> {virtual_memory().percent}%\n"
     msg += f"┊⏰ <b>UPTIME:</b> {get_readable_time(time() - bot_start_time)}\n"
-    msg += (
-        f"╰💿 <b>FREE:</b> {get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)}</blockquote>\n"
-    )
+    msg += f"╰💿 <b>FREE:</b> {get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)}</blockquote>\n"
 
     return msg, button

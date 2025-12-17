@@ -90,7 +90,9 @@ async def gen_mediainfo(message, link=None, media=None, msg=None):
 
     except Exception as e:
         LOGGER.error(e)
-        await edit_message(temp_send, f"<blockquote>╭❌ <b>MediaInfo Error</b>\n⁰{e!s}</blockquote>")
+        await edit_message(
+            temp_send, f"<blockquote>╭❌ <b>MediaInfo Error</b>\n⁰{e!s}</blockquote>"
+        )
     finally:
         await aioremove(des_path)
 

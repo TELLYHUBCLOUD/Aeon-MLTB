@@ -20,7 +20,8 @@ async def count_node(_, message):
 
     if is_gdrive_link(link):
         msg = await send_message(
-            message, f"<blockquote>╭⏳ <b>Counting...</b>\n╰<b>Link:</b> <code>{link}</code></blockquote>"
+            message,
+            f"<blockquote>╭⏳ <b>Counting...</b>\n╰<b>Link:</b> <code>{link}</code></blockquote>",
         )
         name, mime_type, size, files, folders = await sync_to_async(
             GoogleDriveCount().count,

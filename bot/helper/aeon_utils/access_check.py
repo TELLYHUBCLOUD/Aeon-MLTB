@@ -97,9 +97,7 @@ async def error_check(message):
     if msg:
         username = message.from_user.username
         tag = f"@{username}" if username else message.from_user.mention
-        final_msg = (
-            f"<blockquote>╭⚠️ <b>Access Denied</b>\n┊<b>User:</b> {tag}\n╰<b>Reason(s):</b>\n"
-        )
+        final_msg = f"<blockquote>╭⚠️ <b>Access Denied</b>\n┊<b>User:</b> {tag}\n╰<b>Reason(s):</b>\n"
         for i, m in enumerate(msg, 1):
             final_msg += f"\n<b>{i}.</b> {m}"
         final_msg += "</blockquote>"
