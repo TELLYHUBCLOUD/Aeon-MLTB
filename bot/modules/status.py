@@ -194,7 +194,6 @@ async def status_pages(_, query):
 ┊📋 <b>CL:</b> {tasks["Clone"]} | ✅ <b>CK:</b> {tasks["CheckUp"]} | ⏸ <b>PA:</b> {tasks["Pause"]} | 🎬 <b>SV:</b> {tasks["SamVid"]}
 ┊🎞 <b>CM:</b> {tasks["ConvertMedia"]} | 🎵 <b>FF:</b> {tasks["FFmpeg"]} | 📝 <b>MD:</b> {tasks["Metadata"]} | 💧 <b>WM:</b> {tasks["Watermark"]}
 ╰🖼 <b>ET:</b> {tasks["EmbedThumb"]} | 🎥 <b>YT:</b> {tasks["YtUp"]}
-
 </blockquote>"""
 
         msg += f"""<blockquote expendable>
@@ -202,7 +201,7 @@ async def status_pages(_, query):
 ┊⬇️ <b>Download:</b> {get_readable_file_size(dl_speed)}/s
 ┊⬆️ <b>Upload:</b> {get_readable_file_size(up_speed)}/s
 ╰🌱 <b>Seeding:</b> {get_readable_file_size(seed_speed)}/s
-</blockquote>"""    
+</blockquote>"""
         button = ButtonMaker()
         button.data_button("🔙 Back", f"status {data[1]} ref")
         await edit_message(message, msg, button.build_menu())
