@@ -5,7 +5,7 @@ nsfw_keywords = [
     "fgjgfjgfhjgffgh",
 ]
 
-mirror = """╭ℹ️ <b>Mirror Help</b>
+mirror = """<blockquote expandable>╭ℹ️ <b>Mirror Help</b>
 ┊<b>Send link along with command line or </b>
 ┊
 ┊<code>/cmd link</code>
@@ -15,9 +15,9 @@ mirror = """╭ℹ️ <b>Mirror Help</b>
 ┊<code>/cmd -n new name -e -up upload destination</code>
 ┊
 ┊<b>NOTE:</b>
-╰1. Commands that start with <b>qb</b> are ONLY for torrents."""
+╰1. Commands that start with <b>qb</b> are ONLY for torrents.</blockquote>"""
 
-yt = """╭ℹ️ <b>YouTube Help</b>
+yt = """<blockquote expandable>╭ℹ️ <b>YouTube Help</b>
 ┊<b>Send link along with command line</b>:
 ┊
 ┊<code>/cmd link</code>
@@ -27,20 +27,20 @@ yt = """╭ℹ️ <b>YouTube Help</b>
 ┊Check here all supported <a href='https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md'>SITES</a>
 ╰Check all yt-dlp api options from this <a href='https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/YoutubeDL.py#L212'>FILE</a> or use this <a href='https://t.me/mltb_official_channel/177'>script</a> to convert cli arguments to api options."""
 
-clone = """╭ℹ️ <b>Clone Help</b>
+clone = """<blockquote expandable>╭ℹ️ <b>Clone Help</b>
 ┊Send Gdrive|Gdot|Filepress|Filebee|Appdrive|Gdflix link or rclone path along with command or by replying to the link/rc_path by command.
 ╰Use -sync to use sync method in rclone. Example: <code>/cmd rcl/rclone_path -up rcl/rclone_path/rc -sync</code>"""
 
-new_name = """╭ℹ️ <b>New Name</b>: -n
+new_name = """<blockquote expandable>╭ℹ️ <b>New Name</b>: -n
 ┊
 ┊<code>/cmd link -n new name</code>
-╰Note: Doesn't work with torrents"""
+╰Note: Doesn't work with torrents</blockquote>"""
 
-multi_link = """╭ℹ️ <b>Multi links only by replying to first link/file</b>: -i
+multi_link = """<blockquote expandable>╭ℹ️ <b>Multi links only by replying to first link/file</b>: -i
 ┊
-╰<code>/cmd -i 10(number of links/files)</code>"""
+╰<code>/cmd -i 10(number of links/files)</code></blockquote>"""
 
-same_dir = """╭ℹ️ <b>Move file(s)/folder(s) to new folder</b>: -m
+same_dir = """<blockquote expandable>╭ℹ️ <b>Move file(s)/folder(s) to new folder</b>: -m
 ┊
 ┊You can use this arg also to move multiple links/torrents contents to the same directory, so all links will be uploaded together as one task
 ┊
@@ -59,19 +59,18 @@ same_dir = """╭ℹ️ <b>Move file(s)/folder(s) to new folder</b>: -m
 ┊so link1 and link2 content will be uploaded from same folder which is folder1
 ┊link3 and link4 content will be uploaded from same folder also which is folder2
 ┊link5 will uploaded alone inside new folder named folder3
-╰link6 will get uploaded normally alone
-"""
+╰link6 will get uploaded normally alone</blockquote>"""
 
-thumb = """╭ℹ️ <b>Thumbnail for current task</b>: -t
+thumb = """<blockquote expandable>╭ℹ️ <b>Thumbnail for current task</b>: -t
 ┊
-╰<code>/cmd link -t tg-message-link</code> (doc or photo) or none (file without thumb)"""
+╰<code>/cmd link -t tg-message-link</code> (doc or photo) or none (file without thumb)</blockquote>"""
 
-split_size = """╭ℹ️ <b>Split size for current task</b>: -sp
+split_size = """<blockquote expandable>╭ℹ️ <b>Split size for current task</b>: -sp
 ┊
 ┊<code>/cmd link -sp (500mb or 2gb or 4000000000)</code>
-╰Note: Only mb and gb are supported or write in bytes without unit!"""
+╰Note: Only mb and gb are supported or write in bytes without unit!</blockquote>"""
 
-upload = """╭ℹ️ <b>Upload Destination</b>: -up
+upload = """<blockquote expandable>╭ℹ️ <b>Upload Destination</b>: -up
 ┊
 ┊<code>/cmd link -up rcl/gdl</code> (rcl: to select rclone config, remote & path | gdl: To select token.pickle, gdrive id) using buttons
 ┊You can directly add the upload path: <code>-up remote:dir/subdir</code> or <code>-up Gdrive_id</code> or <code>-up id/username</code> (telegram) or <code>-up id/username|topic_id</code> (telegram)
@@ -90,9 +89,9 @@ upload = """╭ℹ️ <b>Upload Destination</b>: -up
 ┊<code>-up id/@username|topic_id</code>(leech in specific chat and topic) add | without space and write topic id after chat id or username.
 ┊
 ┊In case you want to specify whether using token.pickle or service accounts you can add tp:gdrive_id (using token.pickle) or sa:gdrive_id (using service accounts) or mtp:gdrive_id (using token.pickle uploaded from usetting).
-╰DEFAULT_UPLOAD doesn't affect on leech cmds."""
+╰DEFAULT_UPLOAD doesn't affect on leech cmds.</blockquote>"""
 
-user_download = """╭ℹ️ <b>User Download</b>: link
+user_download = """<blockquote expandable>╭ℹ️ <b>User Download</b>: link
 ┊
 ┊<code>/cmd tp:link</code> to download using owner token.pickle incase service account enabled.
 ┊<code>/cmd sa:link</code> to download using service account incase service account disabled.
@@ -100,15 +99,15 @@ user_download = """╭ℹ️ <b>User Download</b>: link
 ┊<code>/cmd sa:gdrive_id</code> to download using service account and file_id incase service account disabled.
 ┊<code>/cmd mtp:gdrive_id</code> or <code>mtp:link</code> to download using user token.pickle uploaded from usetting
 ┊<code>/cmd mrcc:remote:path</code> to download using user rclone config uploaded from usetting
-╰you can simply edit upload using owner/user token/config from usetting without adding mtp: or mrcc: before the path/id"""
+╰you can simply edit upload using owner/user token/config from usetting without adding mtp: or mrcc: before the path/id</blockquote>"""
 
-rcf = """╭ℹ️ <b>Rclone Flags</b>: -rcf
+rcf = """<blockquote expandable>╭ℹ️ <b>Rclone Flags</b>: -rcf
 ┊
 ┊<code>/cmd link|path|rcl -up path|rcl -rcf --buffer-size:8M|--drive-starred-only|key|key:value</code>
 ┊This will override all other flags except --exclude
-╰Check here all <a href='https://rclone.org/flags/'>RcloneFlags</a>."""
+╰Check here all <a href='https://rclone.org/flags/'>RcloneFlags</a>.</blockquote>"""
 
-bulk = """╭ℹ️ <b>Bulk Download</b>: -b
+bulk = """<blockquote expandable>╭ℹ️ <b>Bulk Download</b>: -b
 ┊
 ┊Bulk can be used only by replying to text message or text file contains links separated by new line.
 ┊Example:
@@ -121,34 +120,34 @@ bulk = """╭ℹ️ <b>Bulk Download</b>: -b
 ┊<code>/cmd -b -up remote: -z -m folder name</code> (all links contents in one zipped folder uploaded to one destination)
 ┊so you can't set different upload destinations along with link incase you have added -m along with cmd
 ┊You can set start and end of the links from the bulk like seed, with -b start:end or only end by -b :end or only start by -b start.
-╰The default start is from zero(first link) to inf."""
+╰The default start is from zero(first link) to inf.</blockquote>"""
 
-rlone_dl = """╭ℹ️ <b>Rclone Download</b>:
+rlone_dl = """<blockquote expandable>╭ℹ️ <b>Rclone Download</b>:
 ┊
 ┊Treat rclone paths exactly like links
 ┊<code>/cmd main:dump/ubuntu.iso</code> or rcl(To select config, remote and path)
 ┊Users can add their own rclone from user settings
 ┊If you want to add path manually from your config add mrcc: before the path without space
 ┊<code>/cmd mrcc:main:dump/ubuntu.iso</code>
-╰You can simply edit using owner/user config from usetting without adding mrcc: before the path"""
+╰You can simply edit using owner/user config from usetting without adding mrcc: before the path</blockquote>"""
 
-extract_zip = """╭ℹ️ <b>Extract/Zip</b>: -e -z
+extract_zip = """<blockquote expandable>╭ℹ️ <b>Extract/Zip</b>: -e -z
 ┊
 ┊<code>/cmd link -e password</code> (extract password protected)
 ┊<code>/cmd link -z password</code> (zip password protected)
 ┊<code>/cmd link -z password -e</code> (extract and zip password protected)
-╰Note: When both extract and zip added with cmd it will extract first and then zip, so always extract first"""
+╰Note: When both extract and zip added with cmd it will extract first and then zip, so always extract first</blockquote>"""
 
-join = """╭ℹ️ <b>Join Splitted Files</b>: -j
+join = """<blockquote expandable>╭ℹ️ <b>Join Splitted Files</b>: -j
 ┊
 ┊This option will only work before extract and zip, so mostly it will be used with -m argument (samedir)
 ┊By Reply:
 ┊<code>/cmd -i 3 -j -m folder name</code>
 ┊<code>/cmd -b -j -m folder name</code>
 ┊if u have link(folder) have splitted files:
-╰<code>/cmd link -j</code>"""
+╰<code>/cmd link -j</code></blockquote>"""  
 
-tg_links = """╭ℹ️ <b>TG Links</b>:
+tg_links = """<blockquote expandable>╭ℹ️ <b>TG Links</b>:
 ┊
 ┊Treat links like any direct link
 ┊Some links need user access so you must add USER_SESSION_STRING for it.
@@ -158,68 +157,68 @@ tg_links = """╭ℹ️ <b>TG Links</b>:
 ┊Super: <code>https://t.me/c/channel_id/message_id</code>
 ┊Range: <code>https://t.me/channel_name/first_message_id-last_message_id</code>
 ┊Range Example: <code>tg://openmessage?user_id=xxxxxx&message_id=555-560</code> or <code>https://t.me/channel_name/100-150</code>
-╰Note: Range link will work only by replying cmd to it"""
+╰Note: Range link will work only by replying cmd to it</blockquote>"""
 
-sample_video = """╭ℹ️ <b>Sample Video</b>: -sv
+sample_video = """<blockquote expandable>╭ℹ️ <b>Sample Video</b>: -sv
 ┊
 ┊Create sample video for one video or folder of videos.
 ┊<code>/cmd -sv</code> (it will take the default values which 60sec sample duration and part duration is 4sec).
-╰You can control those values. Example: <code>/cmd -sv 70:5</code>(sample-duration:part-duration) or <code>/cmd -sv :5</code> or <code>/cmd -sv 70</code>."""
+╰You can control those values. Example: <code>/cmd -sv 70:5</code>(sample-duration:part-duration) or <code>/cmd -sv :5</code> or <code>/cmd -sv 70</code>.</blockquote>"""
 
-screenshot = """╭ℹ️ <b>ScreenShots</b>: -ss
+screenshot = """<blockquote expandable>╭ℹ️ <b>ScreenShots</b>: -ss
 ┊
 ┊Create screenshots for one video or folder of videos.
 ┊<code>/cmd -ss</code> (it will take the default values which is 10 photos).
-╰You can control this value. Example: <code>/cmd -ss 6</code>."""
+╰You can control this value. Example: <code>/cmd -ss 6</code>.</blockquote>"""
 
-seed = """╭ℹ️ <b>Bittorrent seed</b>: -d
+seed = """<blockquote expandable>╭ℹ️ <b>Bittorrent seed</b>: -d
 ┊
 ┊<code>/cmd link -d ratio:seed_time</code> or by replying to file/link
 ┊To specify ratio and seed time add <code>-d ratio:time</code>.
-╰Example: <code>-d 0.7:10</code> (ratio and time) or <code>-d 0.7</code> (only ratio) or <code>-d :10</code> (only time) where time in minutes"""
+╰Example: <code>-d 0.7:10</code> (ratio and time) or <code>-d 0.7</code> (only ratio) or <code>-d :10</code> (only time) where time in minutes</blockquote>"""
 
-zip_arg = """╭ℹ️ <b>Zip</b>: -z password
+zip_arg = """<blockquote expandable>╭ℹ️ <b>Zip</b>: -z password
 ┊
 ┊<code>/cmd link -z</code> (zip)
-╰<code>/cmd link -z password</code> (zip password protected)"""
+╰<code>/cmd link -z password</code> (zip password protected)</blockquote>"""
 
-qual = """╭ℹ️ <b>Quality Buttons</b>: -s
+qual = """<blockquote expandable>╭ℹ️ <b>Quality Buttons</b>: -s
 ┊
 ┊In case default quality added from yt-dlp options using format option and you need to select quality for specific link or links with multi links feature.
-╰<code>/cmd link -s</code>"""
+╰<code>/cmd link -s</code></blockquote>"""
 
-yt_opt = """╭ℹ️ <b>Options</b>: -opt
+yt_opt = """<blockquote expandable>╭ℹ️ <b>Options</b>: -opt
 ┊
 ┊<code>/cmd link -opt {"format": "bv*+mergeall[vcodec=none]", "nocheckcertificate": True, "playliststart": 10, "fragment_retries": float("inf"), "matchtitle": "S13", "writesubtitles": True, "live_from_start": True, "postprocessor_args": {"ffmpeg": ["-threads", "4"]}, "wait_for_video": (5, 100), "download_ranges": [{"start_time": 0, "end_time": 10}]}</code>
-╰Check all yt-dlp api options from this <a href='https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/YoutubeDL.py#L184'>FILE</a> or use this <a href='https://t.me/mltb_official_channel/177'>script</a> to convert cli arguments to api options."""
+╰Check all yt-dlp api options from this <a href='https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/YoutubeDL.py#L184'>FILE</a> or use this <a href='https://t.me/mltb_official_channel/177'>script</a> to convert cli arguments to api options.</blockquote>"""
 
-convert_media = """╭ℹ️ <b>Convert Media</b>: -ca -cv
+convert_media = """<blockquote expandable>╭ℹ️ <b>Convert Media</b>: -ca -cv
 ┊<code>/cmd link -ca mp3 -cv mp4</code> (convert all audios to mp3 and all videos to mp4)
 ┊<code>/cmd link -ca mp3</code> (convert all audios to mp3)
 ┊<code>/cmd link -cv mp4</code> (convert all videos to mp4)
 ┊<code>/cmd link -ca mp3 + flac ogg</code> (convert only flac and ogg audios to mp3)
-╰<code>/cmd link -cv mkv - webm flv</code> (convert all videos to mp4 except webm and flv)"""
+╰<code>/cmd link -cv mkv - webm flv</code> (convert all videos to mp4 except webm and flv)</blockquote>"""
 
-force_start = """╭ℹ️ <b>Force Start</b>: -f -fd -fu
+force_start = """<blockquote expandable>╭ℹ️ <b>Force Start</b>: -f -fd -fu
 ┊<code>/cmd link -f</code> (force download and upload)
 ┊<code>/cmd link -fd</code> (force download only)
-╰<code>/cmd link -fu</code> (force upload directly after download finish)"""
+╰<code>/cmd link -fu</code> (force upload directly after download finish)</blockquote>"""
 
-gdrive = """╭ℹ️ <b>Gdrive</b>: link
+gdrive = """<blockquote expandable>╭ℹ️ <b>Gdrive</b>: link
 ┊If DEFAULT_UPLOAD is `rc` then you can pass up: `gd` to upload using gdrive tools to GDRIVE_ID.
 ┊<code>/cmd gdriveLink</code> or <code>gdl</code> or <code>gdriveId</code> -up <code>gdl</code> or <code>gdriveId</code> or <code>gd</code>
 ┊<code>/cmd tp:gdriveLink</code> or <code>tp:gdriveId</code> -up <code>tp:gdriveId</code> or <code>gdl</code> or <code>gd</code> (to use token.pickle if service account enabled)
 ┊<code>/cmd sa:gdriveLink</code> or <code>sa:gdriveId</code> -p <code>sa:gdriveId</code> or <code>gdl</code> or <code>gd</code> (to use service account if service account disabled)
 ┊<code>/cmd mtp:gdriveLink</code> or <code>mtp:gdriveId</code> -up <code>mtp:gdriveId</code> or <code>gdl</code> or <code>gd</code>(if you have added upload gdriveId from usetting) (to use user token.pickle that uploaded by usetting)
-╰You can simply edit using owner/user token from usetting without adding mtp: before the id"""
+╰You can simply edit using owner/user token from usetting without adding mtp: before the id</blockquote>"""
 
-rclone_cl = """╭ℹ️ <b>Rclone</b>: path
+rclone_cl = """<blockquote expandable>╭ℹ️ <b>Rclone</b>: path
 ┊If DEFAULT_UPLOAD is `gd` then you can pass up: `rc` to upload to RCLONE_PATH.
 ┊<code>/cmd rcl/rclone_path -up rcl/rclone_path/rc -rcf flagkey:flagvalue|flagkey|flagkey:flagvalue</code>
 ┊<code>/cmd rcl</code> or <code>rclone_path</code> -up <code>rclone_path</code> or <code>rc</code> or <code>rcl</code>
-╰<code>/cmd mrcc:rclone_path</code> -up <code>rcl</code> or <code>rc</code>(if you have add rclone path from usetting) (to use user config)"""
+╰<code>/cmd mrcc:rclone_path</code> -up <code>rcl</code> or <code>rc</code>(if you have add rclone path from usetting) (to use user config)</blockquote>"""
 
-name_sub = r"""╭ℹ️ <b>Name Substitution</b>: -ns
+name_sub = r"""<blockquote expandable>╭ℹ️ <b>Name Substitution</b>: -ns
 ┊<code>/cmd link -ns script/code/s | mirror/leech | tea/ /s | clone | cpu/ | \[hello\]/hello | \\text\\/text/s</code>
 ┊This will affect on all files. Format: wordToReplace/wordToReplaceWith/sensitiveCase
 ┊Word Subtitions. You can add pattern instead of normal text. Timeout: 60 sec
@@ -230,22 +229,21 @@ name_sub = r"""╭ℹ️ <b>Name Substitution</b>: -ns
 ┊5. clone will get removed
 ┊6. cpu will get replaced by space
 ┊7. [hello] will get replaced by hello
-╰8. \text\ will get replaced by text with sensitive case
-"""
+╰8. \text\ will get replaced by text with sensitive case</blockquote>"""
 
-transmission = """╭ℹ️ <b>Tg transmission</b>: -hl -ut -bt
+transmission = """<blockquote expandable>╭ℹ️ <b>Tg transmission</b>: -hl -ut -bt
 ┊<code>/cmd link -hl</code> (leech by user and bot session with respect to size) (Hybrid Leech)
 ┊<code>/cmd link -bt</code> (leech by bot session)
-╰<code>/cmd link -ut</code> (leech by user)"""
+╰<code>/cmd link -ut</code> (leech by user)</blockquote>"""
 
-thumbnail_layout = """╭ℹ️ <b>Thumbnail Layout</b>: -tl
-╰<code>/cmd link -tl 3x3</code> (widthxheight) 3 photos in row and 3 photos in column"""
+thumbnail_layout = """<blockquote expandable>╭ℹ️ <b>Thumbnail Layout</b>: -tl
+╰<code>/cmd link -tl 3x3</code> (widthxheight) 3 photos in row and 3 photos in column</blockquote>"""
 
-leech_as = """╭ℹ️ <b>Leech as</b>: -doc -med
+leech_as = """<blockquote expandable>╭ℹ️ <b>Leech as</b>: -doc -med
 ┊<code>/cmd link -doc</code> (Leech as document)
-╰<code>/cmd link -med</code> (Leech as media)"""
+╰<code>/cmd link -med</code> (Leech as media)</blockquote>"""
 
-ffmpeg_cmds = """╭ℹ️ <b>FFmpeg Commands</b>: -ff
+ffmpeg_cmds = """<blockquote expandable>╭ℹ️ <b>FFmpeg Commands</b>: -ff
 ┊list of lists of ffmpeg commands. You can set multiple ffmpeg commands for all files before upload. Don't write ffmpeg at beginning, start directly with the arguments.
 ┊Notes:
 ┊1. Add <code>-del</code> to the list(s) which you want from the bot to delete the original files after command run complete!
@@ -256,8 +254,7 @@ ffmpeg_cmds = """╭ℹ️ <b>FFmpeg Commands</b>: -ff
 ┊2. Second cmd: the input is mltb.video so this cmd will work on all videos and the output is only mltb so the extenstion is same as input files.
 ┊3. Third cmd: the input in mltb.m4a so this cmd will work only on m4a audios and the output is mltb.mp3 so the output extension is mp3.
 ┊4. Fourth cmd: the input is mltb.audio so this cmd will work on all audios and the output is mltb.mp3 so the output extension is mp3.
-╰5. Fifth cmd: You can add telegram link for small size input like photo to set watermark"""
-
+╰5. Fifth cmd: You can add telegram link for small size input like photo to set watermark</blockquote>"""
 
 YT_HELP_DICT = {
     "main": yt,
@@ -321,7 +318,7 @@ CLONE_HELP_DICT = {
     "Rclone": rclone_cl,
 }
 
-RSS_HELP_MESSAGE = """╭ℹ️ <b>RSS Help</b>
+RSS_HELP_MESSAGE = """<blockquote expandable>╭ℹ️ <b>RSS Help</b>
 ┊Use this format to add feed url:
 ┊Title1 link (required)
 ┊Title2 link -c cmd -inf xx -exf xx
@@ -342,33 +339,31 @@ RSS_HELP_MESSAGE = """╭ℹ️ <b>RSS Help</b>
 ┊2. Add `or` between similar keys, you can add it between qualities or between extensions, so don't add filter like this f: 1080|mp4 or 720|web because this will parse 1080 and (mp4 or 720) and web ... not (1080 and mp4) or (720 and web).
 ┊3. You can add `or` and `|` as much as you want.
 ┊4. Take a look at the title if it has a static special character after or before the qualities or extensions or whatever and use them in the filter to avoid wrong match.
-╰Timeout: 60 sec.
-"""
+╰Timeout: 60 sec.</blockquote>"""
 
-PASSWORD_ERROR_MESSAGE = """╭❌ <b>Password Error</b>
+PASSWORD_ERROR_MESSAGE = """<blockquote expandable>╭❌ <b>Password Error</b>
 ┊<b>This link requires a password!</b>
 ┊- Insert <b>::</b> after the link and write the password after the sign.
-╰<b>Example:</b> link::my password
-"""
+╰<b>Example:</b> link::my password</blockquote>""" 
 
 
 user_settings_text = {
-    "METADATA_KEY": "╭ℹ️ <b>Info</b>\n╰Send your text for change mkv medias metadata (title only). Timeout: 60 sec",
-    "WATERMARK_KEY": "╭ℹ️ <b>Info</b>\n╰Send your text which will added as watermark in all mkv videos left upper corner. Timeout: 60 sec",
+    "METADATA_KEY": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send your text for change mkv medias metadata (title only). Timeout: 60 sec</blockquote>",
+    "WATERMARK_KEY": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send your text which will added as watermark in all mkv videos left upper corner. Timeout: 60 sec</blockquote>",
     "USER_SESSION": "╭ℹ️ <b>Info</b>\n╰Send your pyrogram user session string for download from private telegram chat. Timeout: 60 sec",
-    "USER_DUMP": "╭ℹ️ <b>Info</b>\n╰Send your channel or group id where you want to store your leeched files. Bot must have permission to send message in your chat. Timeout: 60 sec",
-    "LEECH_FILENAME_CAPTION": "╭ℹ️ <b>Info</b>\n╰Send leech filename caption. Timeout: 60 sec",
-    "LEECH_SPLIT_SIZE": f"╭ℹ️ <b>Info</b>\n╰Send Leech split size in bytes or use gb or mb. Example: 40000000 or 2.5gb or 1000mb. IS_PREMIUM_USER: {TgClient.IS_PREMIUM_USER}. Timeout: 60 sec",
-    "LEECH_FILENAME_PREFIX": r"╭ℹ️ <b>Info</b>\n╰Send Leech Filename Prefix. You can add HTML tags. Example: <code>@mychannel</code>. Timeout: 60 sec",
-    "THUMBNAIL_LAYOUT": "╭ℹ️ <b>Info</b>\n╰Send thumbnail layout (widthxheight, 2x2, 3x3, 2x4, 4x4, ...). Example: 3x3. Timeout: 60 sec",
-    "RCLONE_PATH": "╭ℹ️ <b>Info</b>\n╰Send Rclone Path. If you want to use your rclone config edit using owner/user config from usetting or add mrcc: before rclone path. Example mrcc:remote:folder. Timeout: 60 sec",
-    "RCLONE_FLAGS": "╭ℹ️ <b>Info</b>\n╰key:value|key|key|key:value . Check here all <a href='https://rclone.org/flags/'>RcloneFlags</a>\nEx: --buffer-size:8M|--drive-starred-only",
-    "GDRIVE_ID": "╭ℹ️ <b>Info</b>\n╰Send Gdrive ID. If you want to use your token.pickle edit using owner/user token from usetting or add mtp: before the id. Example: mtp:F435RGGRDXXXXXX . Timeout: 60 sec",
-    "INDEX_URL": "╭ℹ️ <b>Info</b>\n╰Send Index URL. Timeout: 60 sec",
-    "UPLOAD_PATHS": "╭ℹ️ <b>Info</b>\n╰Send Dict of keys that have path values. Example: {'path 1': 'remote:rclonefolder', 'path 2': 'gdrive1 id', 'path 3': 'tg chat id', 'path 4': 'mrcc:remote:', 'path 5': b:@username} . Timeout: 60 sec",
-    "EXCLUDED_EXTENSIONS": "╭ℹ️ <b>Info</b>\n╰Send exluded extenions separated by space without dot at beginning. Timeout: 60 sec",
-    "NAME_SUBSTITUTE": r"""╭ℹ️ <b>Info</b>
-┊Word Subtitions. You can add pattern instead of normal text. Timeout: 60 sec
+    "USER_DUMP": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send your channel or group id where you want to store your leeched files. Bot must have permission to send message in your chat. Timeout: 60 sec</blockquote>",
+    "LEECH_FILENAME_CAPTION": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send leech filename caption. Timeout: 60 sec</blockquote>",
+    "LEECH_SPLIT_SIZE": f"<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send Leech split size in bytes or use gb or mb. Example: 40000000 or 2.5gb or 1000mb. IS_PREMIUM_USER: {TgClient.IS_PREMIUM_USER}. Timeout: 60 sec</blockquote>",
+    "LEECH_FILENAME_PREFIX": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send Leech Filename Prefix. You can add HTML tags. Example: <code>@mychannel</code>. Timeout: 60 sec</blockquote>",
+    "THUMBNAIL_LAYOUT": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send thumbnail layout (widthxheight, 2x2, 3x3, 2x4, 4x4, ...). Example: 3x3. Timeout: 60 sec</blockquote>",
+    "RCLONE_PATH": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send Rclone Path. If you want to use your rclone config edit using owner/user config from usetting or add mrcc: before rclone path. Example mrcc:remote:folder. Timeout: 60 sec</blockquote>",
+    "RCLONE_FLAGS": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰key:value|key|key|key:value . Check here all <a href='https://rclone.org/flags/'>RcloneFlags</a>\nEx: --buffer-size:8M|--drive-starred-only</blockquote>",
+    "GDRIVE_ID": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send Gdrive ID. If you want to use your token.pickle edit using owner/user token from usetting or add mtp: before the id. Example: mtp:F435RGGRDXXXXXX . Timeout: 60 sec</blockquote>",
+    "INDEX_URL": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send Index URL. Timeout: 60 sec</blockquote>",
+    "UPLOAD_PATHS": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send Dict of keys that have path values. Example: {'path 1': 'remote:rclonefolder', 'path 2': 'gdrive1 id', 'path 3': 'tg chat id', 'path 4': 'mrcc:remote:', 'path 5': b:@username} . Timeout: 60 sec</blockquote>",
+    "EXCLUDED_EXTENSIONS": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send exluded extenions separated by space without dot at beginning. Timeout: 60 sec</blockquote>",
+    "NAME_SUBSTITUTE": """<blockquote expandable>╭ℹ️ <b>Info</b>
+┊Word Substitutions. You can add pattern instead of normal text. Timeout: 60 sec
 ┊<b>NOTE:</b> You must add \ before any character, those are the characters: \^$.|?*+()[]{}-
 ┊<b>Example:</b> script/code/s | mirror/leech | tea/ /s | clone | cpu/ | \[mltb\]/mltb | \\text\\/text/s
 ┊1. script will get replaced by code with sensitive case
@@ -377,33 +372,33 @@ user_settings_text = {
 ┊5. clone will get removed
 ┊6. cpu will get replaced by space
 ┊7. [mltb] will get replaced by mltb
-╰8. \text\ will get replaced by text with sensitive case
-""",
-    "YT_DLP_OPTIONS": """╭ℹ️ <b>Info</b>
+╰8. \text\ will get replaced by text with sensitive case</blockquote>""",
+    "YT_DLP_OPTIONS": """<blockquote expandable>╭ℹ️ <b>Info</b>
 ┊Send dict of YT-DLP Options. Timeout: 60 sec
 ┊<b>Format:</b> {key: value, key: value, key: value}.
 ┊<b>Example:</b> {"format": "bv*+mergeall[vcodec=none]", "nocheckcertificate": True, "playliststart": 10, "fragment_retries": float("inf"), "matchtitle": "S13", "writesubtitles": True, "live_from_start": True, "postprocessor_args": {"ffmpeg": ["-threads", "4"]}, "wait_for_video": (5, 100), "download_ranges": [{"start_time": 0, "end_time": 10}]}
-╰Check all yt-dlp api options from this <a href='https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/YoutubeDL.py#L184'>FILE</a> or use this <a href='https://t.me/mltb_official_channel/177'>script</a> to convert cli arguments to api options.""",
-    "FFMPEG_CMDS": """╭ℹ️ <b>Info</b>\n╰Read this guide. http://telegra.ph/Ffmpeg-guide-01-10""",
-    "YT_DEFAULT_PRIVACY": "╭ℹ️ <b>Info</b>\n╰Set your default YouTube upload privacy (public, private, unlisted). Timeout: 60 sec",
-    "YT_DEFAULT_CATEGORY": "╭ℹ️ <b>Info</b>\n╰Set your default YouTube video category ID (e.g., 22 for People & Blogs). Timeout: 60 sec",
-    "YT_DEFAULT_TAGS": "╭ℹ️ <b>Info</b>\n╰Set your default YouTube tags, separated by commas. Timeout: 60 sec",
-    "YT_DEFAULT_DESCRIPTION": "╭ℹ️ <b>Info</b>\n╰Set your default YouTube video description. Timeout: 60 sec",
-    "YT_DEFAULT_FOLDER_MODE": """╭ℹ️ <b>Info</b>
+╰Check all yt-dlp api options from this <a href='https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/YoutubeDL.py#L184'>FILE</a> or use this <a href='https://t.me/mltb_official_channel/177'>script</a> to convert cli arguments to api options.</blockquote>""",
+    
+    "FFMPEG_CMDS": """<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Read this guide. http://telegra.ph/Ffmpeg-guide-01-10</blockquote>""",
+    "YT_DEFAULT_CATEGORY": """<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Set your default YouTube video category ID (e.g., 22 for People & Blogs). Timeout: 60 sec</blockquote>""",
+    "YT_DEFAULT_TAGS": """<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Set your default YouTube tags, separated by commas. Timeout: 60 sec</blockquote>""",
+    "YT_DEFAULT_PRIVACY": """<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Set your default YouTube upload privacy (public, private, unlisted). Timeout: 60 sec</blockquote>""",
+    "YT_DEFAULT_DESCRIPTION": """<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Set your default YouTube video description. Timeout: 60 sec</blockquote>""",
+    "YT_DEFAULT_FOLDER_MODE": """<blockquote expandable>╭ℹ️ <b>Info</b>
 ┊Choose how folders (containing multiple videos) are uploaded to YouTube by default:
 ┊- <b>Playlist</b>: Uploads the entire folder as a single new YouTube playlist.
 ┊- <b>Individual Videos</b>: Uploads each video from the folder as an individual YouTube video, without creating a playlist.
 ┊- <b>Playlist & Individuals</b>: Uploads the folder as a new playlist AND also makes each video available individually.
-╰Timeout: 60 sec""",
-    "YT_ADD_TO_PLAYLIST_ID": "╭ℹ️ <b>Info</b>\n╰Enter the YouTube Playlist ID you want your videos to be added to. If set, newly uploaded videos will be added to this playlist. Leave empty or set to 'None' to not automatically add to a specific playlist (unless creating a new one for a folder upload without this setting). Timeout: 60 sec",
-    "GOFILE_TOKEN": "╭ℹ️ <b>Info</b>\n╰Send your GoFile API token. You can get it from https://gofile.io/myProfile. This token will be used to upload files to your GoFile account. Timeout: 60 sec",
-    "GOFILE_FOLDER_ID": "╭ℹ️ <b>Info</b>\n╰Send your GoFile folder ID where you want to upload files. If not set, files will be uploaded to your account root. You can get folder ID from the GoFile URL. Example: for https://gofile.io/d/abcd123, the folder ID is abcd123. Timeout: 60 sec",
-    "AUTO_COMPRESS_CMD": "╭ℹ️ <b>Info</b>\n╰Send your default FFmpeg command to be appended to leech commands automatically. Example: -ff -metadata title='My Title'. Timeout: 60 sec",
-    "AUTO_CAPTION_REPLACE": "╭ℹ️ <b>Info</b>\n╰Send your caption replacement rules. Format: old1|new1,old2|new2. Case-insensitive. Timeout: 60 sec",
-    "AUTO_CAPTION_REMOVE": "╭ℹ️ <b>Info</b>\n╰Send keywords to remove from captions. Format: word1,word2,word3. Case-insensitive. Timeout: 60 sec",
+╰Timeout: 60 sec</blockquote>""",
+    "YT_ADD_TO_PLAYLIST_ID": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Enter the YouTube Playlist ID you want your videos to be added to. If set, newly uploaded videos will be added to this playlist. Leave empty or set to 'None' to not automatically add to a specific playlist (unless creating a new one for a folder upload without this setting). Timeout: 60 sec</blockquote>",
+    "GOFILE_TOKEN": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send your GoFile API token. You can get it from https://gofile.io/myProfile. This token will be used to upload files to your GoFile account. Timeout: 60 sec</blockquote>",
+    "GOFILE_FOLDER_ID": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send your GoFile folder ID where you want to upload files. If not set, files will be uploaded to your account root. You can get folder ID from the GoFile URL. Example: for https://gofile.io/d/abcd123, the folder ID is abcd123. Timeout: 60 sec</blockquote>",
+    "AUTO_COMPRESS_CMD": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send your default FFmpeg command to be appended to leech commands automatically. Example: -ff -metadata title='My Title'. Timeout: 60 sec</blockquote>",
+    "AUTO_CAPTION_REPLACE": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send your caption replacement rules. Format: old1:new1|old2:new2. Case-insensitive. Timeout: 60 sec</blockquote>",
+    "AUTO_CAPTION_REMOVE": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send keywords to remove from captions. Format: word1|word2|word3 or re:regex_pattern. Case-insensitive. Timeout: 60 sec</blockquote>",
 }
 
-help_string = f"""╭ℹ️ <b>Help Guide</b>
+help_string = f"""<blockquote expandable>╭ℹ️ <b>Help Guide</b>
 ┊NOTE: Try each command without any argument to see more detalis.
 ┊/{BotCommands.MirrorCommand[0]} or /{BotCommands.MirrorCommand[1]}: Start mirroring to cloud.
 ┊/{BotCommands.JdMirrorCommand[0]} or /{BotCommands.JdMirrorCommand[1]}: Start Mirroring to cloud using JDownloader.
@@ -424,4 +419,4 @@ help_string = f"""╭ℹ️ <b>Help Guide</b>
 ┊/{BotCommands.ListCommand} [query]: Search in Google Drive(s).
 ┊/{BotCommands.SearchCommand} [query]: Search for torrents with API.
 ┊/{BotCommands.StatusCommand[0]}: Shows a status of all the downloads.
-╰/{BotCommands.StatsCommand}: Show stats of the machine where the bot is hosted in."""
+╰/{BotCommands.StatsCommand}: Show stats of the machine where the bot is hosted in.</blockquote>"""
