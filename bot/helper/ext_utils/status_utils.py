@@ -299,7 +299,7 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
     # Bot stats section with side symbols
     msg += "•---------------------------•\n"
     msg += "<blockquote>⧉ <b>𝐁𝐨𝐭 𝐒𝐭𝐚𝐭𝐬</b></blockquote>\n"
-    msg += "<blockquote>╭🖥️ <b>CPU:</b> {cpu_percent()}%\n"
+    msg += f"<blockquote>╭🖥️ <b>CPU:</b> {cpu_percent()}%\n"
     msg += f"┊🐏 <b>RAM:</b> {virtual_memory().percent}%\n"
     msg += f"┊⏰ <b>UPTIME:</b> {get_readable_time(time() - bot_start_time)}\n"
     msg += f"╰💿 <b>FREE:</b> {get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)}</blockquote>\n"
