@@ -11,7 +11,7 @@ from functools import partial, wraps
 
 from httpx import AsyncClient
 
-from bot import bot_loop, user_data
+from bot import LOGGER, bot_loop, user_data
 from bot.core.config_manager import Config
 from bot.helper.telegram_helper.button_build import ButtonMaker
 
@@ -81,10 +81,15 @@ def clean_caption(caption, replace_text, remove_text):
     if remove_text:
         import re
 
-        for word in remove_text.split(","):
-            word = word.strip()
-            if word:
-                caption = re.sub(re.escape(word), "", caption, flags=re.IGNORECASE)
+        if remove_text.startswith("re:"):
+            pattern = remove_text.replace("re:", "", 1)
+            with suppress(Exception):
+                caption = re.sub(pattern, "", caption, flags=re.IGNORECASE)
+        else:
+            for word in remove_text.split(","):
+                word = word.strip()
+                if word:
+                    caption = re.sub(re.escape(word), "", caption, flags=re.IGNORECASE)
 
     # Normalize Spaces
     import re

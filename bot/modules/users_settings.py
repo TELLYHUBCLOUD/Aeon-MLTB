@@ -164,7 +164,7 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("❌ Close", f"userset {user_id} close")
 
         text = f"""<u>⚙️ Leech Settings for {name}</u>
-
+<blockquote expendable>
 ╭📦 Leech Type: <b>{ltype}</b>
 ┊📸 Media Group: <b>{media_group}</b>
 ┊📝 Leech Prefix: <code>{escape(lprefix)}</code>
@@ -173,7 +173,7 @@ async def get_user_settings(from_user, stype="main"):
 ┊📦 User Dump: <code>{udump}</code>
 ┊🎨 Thumbnail Layout: <b>{thumb_layout}</b>
 ╰📩 Bot PM: <b>{bot_pm_status}</b>
-
+</blockquote>
 """
     elif stype == "rclone":
         buttons.data_button(
@@ -203,10 +203,12 @@ async def get_user_settings(from_user, stype="main"):
             rcflags = Config.RCLONE_FLAGS
         else:
             rcflags = "None"
-        text = f"""╭⚙️ <b>Rclone Settings for {name}</b>
+        text = f"""<blockquote expendable>
+╭⚙️ <b>Rclone Settings for {name}</b>
 ┊📁 <b>Rclone Config:</b> {rccmsg}
 ┊📂 <b>Rclone Path:</b> <code>{rccpath}</code>
-╰🚩 <b>Rclone Flags:</b> <code>{rcflags}</code>"""
+╰🚩 <b>Rclone Flags:</b> <code>{rcflags}</code>
+</blockquote>"""
     elif stype == "gdrive":
         buttons.data_button(
             "🔑 token.pickle", f"userset {user_id} menu TOKEN_PICKLE"
@@ -243,18 +245,23 @@ async def get_user_settings(from_user, stype="main"):
         index = (
             user_dict["INDEX_URL"] if user_dict.get("INDEX_URL", False) else "None"
         )
-        text = f"""╭⚙️ <b>Gdrive API Settings for {name}</b>
+        text = f"""<blockquote expendable>
+╭⚙️ <b>Gdrive API Settings for {name}</b>
 ┊🔑 <b>Gdrive Token:</b> {tokenmsg}
 ┊💾 <b>Gdrive ID:</b> <code>{gdrive_id}</code>
 ┊🔗 <b>Index URL:</b> <code>{index}</code>
-╰🔄 <b>Stop Duplicate:</b> {sd_msg}"""
+╰🔄 <b>Stop Duplicate:</b> {sd_msg}
+</blockquote>"""
     elif stype == "upload_dest":
         buttons.data_button("☁️ Gdrive", f"userset {user_id} set_upload gd")
         buttons.data_button("📁 Rclone", f"userset {user_id} set_upload rc")
         buttons.data_button("🎥 YouTube", f"userset {user_id} set_upload yt")
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
-        text = f"╭📤 <b>Upload Destination Settings for {name}</b>\n╰Choose where to upload your files."
+        text = f"""<blockquote expendable>
+╭📤 <b>Upload Destination Settings for {name}</b>
+╰Choose where to upload your files.
+</blockquote>"""
     elif stype == "youtube":
         buttons.data_button(
             "🔒 Default Privacy",
@@ -296,13 +303,15 @@ async def get_user_settings(from_user, stype="main"):
 
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
-        text = f"""╭🎥 <b>YouTube Settings for {name}</b>
+        text = f"""<blockquote expendable>
+╭🎥 <b>YouTube Settings for {name}</b>
 ┊🔒 <b>Default Privacy:</b> <code>{yt_privacy}</code>
 ┊📂 <b>Default Category:</b> <code>{yt_category}</code>
 ┊🏷️ <b>Default Tags:</b> <code>{yt_tags}</code>
 ┊📝 <b>Default Description:</b> <code>{yt_description}</code>
 ┊📁 <b>Default Folder Upload Mode:</b> <b>{yt_folder_mode.capitalize()}</b>
-╰📋 <b>Add to Playlist ID:</b> <code>{yt_add_to_playlist_id}</code>"""
+╰📋 <b>Add to Playlist ID:</b> <code>{yt_add_to_playlist_id}</code>
+</blockquote>"""
     elif stype == "youtube_folder_mode_menu":
         buttons.data_button(
             "📋 Playlist", f"userset {user_id} set_yt_folder_mode playlist"
@@ -312,7 +321,10 @@ async def get_user_settings(from_user, stype="main"):
         )
         buttons.data_button("🔙 Back", f"userset {user_id} youtube")
         buttons.data_button("❌ Close", f"userset {user_id} close")
-        text = f"╭📁 <b>Set Default YouTube Folder Upload Mode for {name}</b>\n╰Choose how to handle folder uploads."
+        text = f"""<blockquote expendable>
+╭📁 <b>Set Default YouTube Folder Upload Mode for {name}</b>
+╰Choose how to handle folder uploads.
+</blockquote>"""
     elif stype == "automation":
         buttons.data_button(
             "🚀 Auto Leech",
@@ -341,11 +353,13 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
 
-        text = f"""╭🤖 <b>Automation Settings for {name}</b>
+        text = f"""<blockquote expendable>
+╭🤖 <b>Automation Settings for {name}</b>
 ┊🚀 <b>Auto Leech:</b> {aleech}
 ┊🎬 <b>Auto Compress Cmd:</b> <code>{escape(ac_cmd)}</code>
 ┊📝 <b>Auto Caption Replace:</b> <code>{escape(ac_rep)}</code>
-╰🧹 <b>Auto Caption Remove:</b> <code>{escape(ac_rem)}</code>"""
+╰🧹 <b>Auto Caption Remove:</b> <code>{escape(ac_rem)}</code>
+</blockquote>"""
     else:
         buttons.data_button("📥 Leech", f"userset {user_id} leech")
         buttons.data_button("📁 Rclone", f"userset {user_id} rclone")
@@ -456,7 +470,8 @@ async def get_user_settings(from_user, stype="main"):
 
         buttons.data_button("❌ Close", f"userset {user_id} close")
 
-        text = f"""╭⚙️ <b>Settings for {name}</b>
+        text = f"""<blockquote expendable>
+╭⚙️ <b>Settings for {name}</b>
 ┊📦 <b>Default Package:</b> {du}
 ┊🚀 <b>Auto Leech:</b> {aleech}
 ┊🔑 <b>Use {tr} token/config</b>
@@ -466,7 +481,8 @@ async def get_user_settings(from_user, stype="main"):
 ┊⬇️ <b>YT-DLP Options:</b> <code>{ytopt}</code>
 ┊🎬 <b>FFMPEG Commands:</b> {ffc}
 ┊📋 <b>Metadata:</b> <code>{mdt}</code>
-╰💧 <b>Watermark Text:</b> <code>{wmt}</code>"""
+╰💧 <b>Watermark Text:</b> <code>{wmt}</code>
+</blockquote>"""
 
     return text, buttons.build_menu(2), thumbnail
 

@@ -14,7 +14,7 @@ from bot.helper.telegram_helper.message_utils import (
 @new_task
 async def speedtest(_, message):
     speed = await send_message(
-        message, "╭⚡ <b>Initializing Speedtest...</b>\n╰<b>Please wait...</b>"
+        message, "<blockquote>╭⚡ <b>Initializing Speedtest...</b>\n╰<b>Please wait...</b></blockquote>"
     )
 
     def get_speedtest_results():
@@ -28,16 +28,15 @@ async def speedtest(_, message):
     if not result:
         await edit_message(
             speed,
-            "╭❌ <b>Speedtest failed to complete.</b>\n╰Check logs for more info.",
+            "<blockquote>╭❌ <b>Speedtest failed to complete.</b>\n╰Check logs for more info.</blockquote>",
         )
         return
-    string_speed = f"""╭🚀 <b>Speedtest Info</b>
+    string_speed = f"""<blockquote>╭🚀 <b>Speedtest Info</b>
 ┊
 ┊📡 <b>Ping:</b> <code>{result.ping} ms</code>
 ┊📤 <b>Upload:</b> <code>{get_readable_file_size(result.upload / 8)}/s</code>
 ┊📥 <b>Download:</b> <code>{get_readable_file_size(result.download / 8)}/s</code>
-╰🌐 <b>IP Address:</b> <code>{result.client["ip"]}</code>
-"""
+╰🌐 <b>IP Address:</b> <code>{result.client["ip"]}</code></blockquote>"""
     try:
         await send_message(message, string_speed, photo=result.share())
         await delete_message(speed)
