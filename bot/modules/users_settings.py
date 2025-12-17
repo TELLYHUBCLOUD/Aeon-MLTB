@@ -352,7 +352,7 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("☁️ Gdrive API", f"userset {user_id} gdrive")
         buttons.data_button("🎥 YouTube", f"userset {user_id} youtube")
 
-        buttons.data_button("🤖 Automation", f"userset {user_id} automation")
+        buttons.data_button("🤖 Auto Features", f"userset {user_id} automation")
 
         if user_dict.get("AUTO_LEECH", False) or (
             "AUTO_LEECH" not in user_dict and Config.AUTO_LEECH

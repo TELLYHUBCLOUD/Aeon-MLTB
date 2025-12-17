@@ -224,9 +224,9 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
 
         # Start the boxed section
         if task.listener.subname:
-            msg += f"╭●<i>{task.listener.subname}</i>\n"
+            msg += f"╭<i>{task.listener.subname}</i>\n"
         else:
-            msg += "╭●"
+            msg += "╭"
 
         # Progress bar (if applicable)
         if (
@@ -244,34 +244,34 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
                 subsize = ""
                 count = ""
 
-            msg += f"╞●📊 <b>Processed:</b> {task.processed_bytes()}{subsize}\n"
+            msg += f"┊📊 <b>Processed:</b> {task.processed_bytes()}{subsize}\n"
             if count:
-                msg += f"╞●🔢 <b>Count:</b> {count}\n"
-            msg += f"╞●💾 <b>Size:</b> {task.size()}\n"
-            msg += f"╞●⚡ <b>Speed:</b> {task.speed()}\n"
-            msg += f"╞●⏱️ <b>ETA:</b> {task.eta()}\n"
+                msg += f"┊🔢 <b>Count:</b> {count}\n"
+            msg += f"┊💾 <b>Size:</b> {task.size()}\n"
+            msg += f"┊⚡ <b>Speed:</b> {task.speed()}\n"
+            msg += f"┊⏱️ <b>ETA:</b> {task.eta()}\n"
 
             if (
                 tstatus == MirrorStatus.STATUS_DOWNLOAD and task.listener.is_torrent
             ) or task.listener.is_qbit:
                 with contextlib.suppress(Exception):
-                    msg += f"╞●🌱 <b>Seeders:</b> {task.seeders_num()} | 🔗 <b>Leechers:</b> {task.leechers_num()}\n"
+                    msg += f"┊🌱 <b>Seeders:</b> {task.seeders_num()} | 🔗 <b>Leechers:</b> {task.leechers_num()}\n"
 
         elif tstatus == MirrorStatus.STATUS_SEED:
-            msg += f"╞●💾 <b>Size:</b> {task.size()}\n"
-            msg += f"╞●⚡ <b>Speed:</b> {task.seed_speed()}\n"
-            msg += f"╞●📤 <b>Uploaded:</b> {task.uploaded_bytes()}\n"
-            msg += f"╞●📈 <b>Ratio:</b> {task.ratio()}\n"
-            msg += f"╞●⏳ <b>Time:</b> {task.seeding_time()}\n"
+            msg += f"┊💾 <b>Size:</b> {task.size()}\n"
+            msg += f"┊⚡ <b>Speed:</b> {task.seed_speed()}\n"
+            msg += f"┊📤 <b>Uploaded:</b> {task.uploaded_bytes()}\n"
+            msg += f"┊📈 <b>Ratio:</b> {task.ratio()}\n"
+            msg += f"┊⏳ <b>Time:</b> {task.seeding_time()}\n"
         else:
-            msg += f"╞●💾 <b>Size:</b> {task.size()}\n"
+            msg += f"┊💾 <b>Size:</b> {task.size()}\n"
 
-        msg += f"╞●🔧 <b>Tool:</b> {task.tool}\n"
-        msg += f"╞●👤 <b>By:</b> {source(task.listener)}\n"
+        msg += f"┊🔧 <b>Tool:</b> {task.tool}\n"
+        msg += f"┊👤 <b>By:</b> {source(task.listener)}\n"
 
         task_gid = task.gid()
         short_gid = task_gid[-8:] if task_gid.startswith("SABnzbd") else task_gid[:8]
-        msg += f"╰●🛑 /stop_{short_gid}\n\n"
+        msg += f"╰🛑 /stop_{short_gid}\n\n"
 
     if len(msg) == 0:
         if status == "All":
@@ -299,9 +299,9 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
     # Bot stats section with side symbols
     msg += "•---------------------------•\n"
     msg += "<blockquote>⧉ <b>𝐁𝐨𝐭 𝐒𝐭𝐚𝐭𝐬</b></blockquote>\n"
-    msg += f"╭●🖥️ <b>CPU:</b> {cpu_percent()}%\n"
-    msg += f"╞●🐏 <b>RAM:</b> {virtual_memory().percent}%\n"
-    msg += f"╞●⏰ <b>UPTIME:</b> {get_readable_time(time() - bot_start_time)}\n"
-    msg += f"╰●💿 <b>FREE:</b> {get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)}\n"
+    msg += f"╭🖥️ <b>CPU:</b> {cpu_percent()}%\n"
+    msg += f"┊🐏 <b>RAM:</b> {virtual_memory().percent}%\n"
+    msg += f"┊⏰ <b>UPTIME:</b> {get_readable_time(time() - bot_start_time)}\n"
+    msg += f"╰💿 <b>FREE:</b> {get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)}\n"
 
     return msg, button

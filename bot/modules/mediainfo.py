@@ -49,7 +49,7 @@ def parseinfo(out, file_size):
 
 
 async def gen_mediainfo(message, link=None, media=None, msg=None):
-    temp_send = await send_message(message, "Generating MediaInfo...")
+    temp_send = await send_message(message, "╭⏳ <b>Generating MediaInfo...</b>")
     try:
         path = "Mediainfo/"
         if not await aiopath.isdir(path):
@@ -90,13 +90,13 @@ async def gen_mediainfo(message, link=None, media=None, msg=None):
 
     except Exception as e:
         LOGGER.error(e)
-        await edit_message(temp_send, f"MediaInfo stopped due to {e!s}")
+        await edit_message(temp_send, f"╭❌ <b>MediaInfo Error</b>\n╰{e!s}")
     finally:
         await aioremove(des_path)
 
     link_id = (await telegraph.create_page(title="MediaInfo", content=tc))["path"]
     await temp_send.edit(
-        f"<blockquote>MediaInfo generated successfully<a href='https://graph.org/{link_id}'>.</a></blockquote>",
+        f"╭✅ <b>MediaInfo Generated</b>\n╰<a href='https://graph.org/{link_id}'>Click Here to View</a>",
         disable_web_page_preview=False,
     )
 

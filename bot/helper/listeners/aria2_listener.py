@@ -33,7 +33,7 @@ async def _on_download_started(api, data):
         if task := await get_task_by_gid(gid):
             task.listener.is_torrent = True
             if task.listener.select:
-                metamsg = "Downloading Metadata, wait then you can select files. Use torrent file to avoid this wait."
+                metamsg = "╭ℹ️ <b>Metadata</b>\n╰Downloading Metadata, wait then you can select files. Use torrent file to avoid this wait."
                 meta = await send_message(task.listener.message, metamsg)
                 while True:
                     await sleep(0.5)
@@ -77,7 +77,7 @@ async def _on_download_complete(api, data):
                 if not task.queued:
                     await api.forcePause(new_gid)
                 SBUTTONS = bt_selection_buttons(new_gid)
-                msg = "Your download paused. Choose files then press Done Selecting button to start downloading."
+                msg = "╭⏸️ <b>Selection</b>\n╰Your download paused. Choose files then press Done Selecting button to start downloading."
                 await send_message(task.listener.message, msg, SBUTTONS)
     elif "bittorrent" in download:
         if task := await get_task_by_gid(gid):

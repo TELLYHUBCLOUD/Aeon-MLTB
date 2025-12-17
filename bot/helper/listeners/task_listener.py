@@ -428,7 +428,7 @@ class TaskListener(TaskConfig):
             and Config.DATABASE_URL
         ):
             await database.rm_complete_task(self.message.link)
-        msg = f"<b>Name: </b><code>{escape(self.name)}</code>\n\n<b>Size: </b>{get_readable_file_size(self.size)}"
+        msg = f"╭<b>Name: </b><code>{escape(self.name)}</code>\n┊<b>Size: </b>{get_readable_file_size(self.size)}"
         done_msg = f"{self.tag}\nYour task is complete\nPlease check your inbox."
         LOGGER.info(f"Task Done: {self.name}")
 
@@ -442,10 +442,10 @@ class TaskListener(TaskConfig):
             )
 
         if self.is_leech:
-            msg += f"\n<b>Total Files: </b>{folders}"
+            msg += f"\n┊<b>Total Files: </b>{folders}"
             if mime_type != 0:
-                msg += f"\n<b>Corrupted Files: </b>{mime_type}"
-            msg += f"\n<b>cc: </b>{self.tag}\n\n"
+                msg += f"\n┊<b>Corrupted Files: </b>{mime_type}"
+            msg += f"\n╰<b>cc: </b>{self.tag}\n\n"
             if not files:
                 await send_message(self.message, msg)
             else:
@@ -493,18 +493,18 @@ class TaskListener(TaskConfig):
             )
 
             if playlist_url:
-                base_msg_content = f"<b>Name: </b><code>{escape(self.name)}</code>\n\n<b>Size: </b>{get_readable_file_size(self.size)}"
+                base_msg_content = f"╭<b>Name: </b><code>{escape(self.name)}</code>\n┊<b>Size: </b>{get_readable_file_size(self.size)}"
                 base_msg_content += (
-                    f"\n<b>Playlist Link: </b><a href='{playlist_url}'>Link</a>"
+                    f"\n┊<b>Playlist Link: </b><a href='{playlist_url}'>Link</a>"
                 )
 
                 messages_to_send = []
 
                 current_message_part = base_msg_content
-                current_message_part += f"\n\n<b>Total Videos: </b>{folders}"
+                current_message_part += f"\n┊<b>Total Videos: </b>{folders}"
                 if folders == 1:
-                    current_message_part += "\n<b>Source: </b>Folder"
-                current_message_part += f"\n<b>cc: </b>{self.tag}"
+                    current_message_part += "\n┊<b>Source: </b>Folder"
+                current_message_part += f"\n╰<b>cc: </b>{self.tag}"
 
                 if individual_video_urls:
                     links_header = "\n\n<b>Individual Video Links:</b>"
@@ -533,18 +533,18 @@ class TaskListener(TaskConfig):
                     await sleep(1)
 
             else:
-                base_msg_content = f"<b>Name: </b><code>{escape(self.name)}</code>\n\n<b>Size: </b>{get_readable_file_size(self.size)}"
+                base_msg_content = f"╭<b>Name: </b><code>{escape(self.name)}</code>\n┊<b>Size: </b>{get_readable_file_size(self.size)}"
 
                 messages_to_send = []
                 current_message_part = base_msg_content
 
                 if video_url:
-                    current_message_part += f"\n<b>Link: </b><a href='{video_url['url']}'>{escape(video_url['name'])}</a>"
+                    current_message_part += f"\n┊<b>Link: </b><a href='{video_url['url']}'>{escape(video_url['name'])}</a>"
 
-                current_message_part += f"\n\n<b>Total Videos: </b>{folders}"
+                current_message_part += f"\n┊<b>Total Videos: </b>{folders}"
                 if folders == 1:
-                    current_message_part += "\n<b>Source: </b>Folder"
-                current_message_part += f"\n<b>cc: </b>{self.tag}"
+                    current_message_part += "\n┊<b>Source: </b>Folder"
+                current_message_part += f"\n╰<b>cc: </b>{self.tag}"
 
                 if individual_video_urls:
                     links_header = "\n\n<b>Individual Video Links:</b>"
@@ -587,7 +587,7 @@ class TaskListener(TaskConfig):
                     await sleep(1)
 
             if isinstance(upload_result, str):
-                error_message = f"<b>Name: </b><code>{escape(self.name)}</code>\n\n<b>Size: </b>{get_readable_file_size(self.size)}\n\n<b>YT Upload Error: </b>{escape(upload_result)}\n\n<b>cc: </b>{self.tag}"
+                error_message = f"╭❌ <b>YT Upload Error</b>\n┊<b>Name: </b><code>{escape(self.name)}</code>\n┊<b>Size: </b>{get_readable_file_size(self.size)}\n┊<b>Error: </b>{escape(upload_result)}\n╰<b>cc: </b>{self.tag}"
                 await send_message(self.user_id, error_message)
                 if Config.LOG_CHAT_ID:
                     await send_message(int(Config.LOG_CHAT_ID), error_message)
@@ -597,10 +597,10 @@ class TaskListener(TaskConfig):
                 f"{self.tag}\nYour YouTube upload is complete!",
             )
         else:
-            msg += f"\n\n<b>Type: </b>{mime_type}"
+            msg += f"\n┊<b>Type: </b>{mime_type}"
             if mime_type == "Folder":
-                msg += f"\n<b>SubFolders: </b>{folders}"
-                msg += f"\n<b>Files: </b>{files}"
+                msg += f"\n┊<b>SubFolders: </b>{folders}"
+                msg += f"\n┊<b>Files: </b>{files}"
             if link or (
                 rclone_path and Config.RCLONE_SERVE_URL and not self.private_link
             ):
@@ -608,7 +608,7 @@ class TaskListener(TaskConfig):
                 if link:
                     buttons.url_button("Cloud Link", link)
                 else:
-                    msg += f"\n\nPath: <code>{rclone_path}</code>"
+                    msg += f"\n┊<b>Path: </b><code>{rclone_path}</code>"
                 if rclone_path and Config.RCLONE_SERVE_URL and not self.private_link:
                     remote, rpath = rclone_path.split(":", 1)
                     url_path = rutils.quote(f"{rpath}")
@@ -632,9 +632,9 @@ class TaskListener(TaskConfig):
                             buttons.url_button("🌐 View Link", share_urls)
                 button = buttons.build_menu(2)
             else:
-                msg += f"\n\nPath: <code>{rclone_path}</code>"
+                msg += f"\n┊<b>Path: </b><code>{rclone_path}</code>"
                 button = None
-            msg += f"\n\n<b>cc: </b>{self.tag}"
+            msg += f"\n╰<b>cc: </b>{self.tag}"
             await send_message(self.user_id, msg, button)
             if Config.LOG_CHAT_ID:
                 await send_message(int(Config.LOG_CHAT_ID), msg, button)
@@ -708,7 +708,7 @@ class TaskListener(TaskConfig):
             if self.mid in task_dict:
                 del task_dict[self.mid]
             count = len(task_dict)
-        x = await send_message(self.message, f"{self.tag} {escape(str(error))}")
+        x = await send_message(self.message, f"╭❌ <b>Upload Error</b>\n┊{self.tag}\n╰{escape(str(error))}")
         create_task(auto_delete_message(x, time=300))
         if count == 0:
             await self.clean()

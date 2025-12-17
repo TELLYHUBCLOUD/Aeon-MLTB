@@ -388,7 +388,7 @@ class Mirror(TaskListener):
         try:
             await self.before_start()
         except Exception as e:
-            x = await send_message(self.message, e)
+            x = await send_message(self.message, f"╭❌ <b>Error</b>\n╰{e}")
             await self.remove_from_same_dir()
             await delete_links(self.message)
             return await auto_delete_message(x, time=300)
@@ -427,14 +427,14 @@ class Mirror(TaskListener):
                                     f"{k}: {v}" for k, v in result.headers.items()
                                 ]
                 except TrueLinkException as e:
-                    x = await send_message(self.message, e)
+                    x = await send_message(self.message, f"╭❌ <b>Error</b>\n╰{e}")
                     await self.remove_from_same_dir()
                     await delete_links(self.message)
                     return await auto_delete_message(x, time=300)
                 except Exception as e:
                     LOGGER.error(f"Unexpected exception in resolver: {e}")
                     x = await send_message(
-                        self.message, "An unexpected error occurred."
+                        self.message, "╭❌ <b>Error</b>\n╰An unexpected error occurred."
                     )
                     await self.remove_from_same_dir()
                     await delete_links(self.message)
