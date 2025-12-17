@@ -196,7 +196,7 @@ async def status_pages(_, query):
 ╰🖼 <b>ET:</b> {tasks["EmbedThumb"]} | 🎥 <b>YT:</b> {tasks["YtUp"]}
 </blockquote>"""
 
-msg += f"""<blockquote expendable>
+        msg += f"""<blockquote expendable>
 ╭⚡️ <b>Speed Statistics</b>
 ┊⬇️ <b>Download:</b> {get_readable_file_size(dl_speed)}/s
 ┊⬆️ <b>Upload:</b> {get_readable_file_size(up_speed)}/s
