@@ -80,15 +80,6 @@ class TeraboxListener(Mirror):
     async def process_terabox(self):
         msg = await send_message(self.message, "Processing Terabox Link...")
         
-        # Standardize Domain
-        self.link = self.link.replace("1024terabox.com", "terabox.com")
-        self.link = self.link.replace("teraboxapp.com", "terabox.com")
-        self.link = self.link.replace("terabox.app", "terabox.com")
-        self.link = self.link.replace("nephobox.com", "terabox.com")
-        self.link = self.link.replace("4funbox.com", "terabox.com")
-        self.link = self.link.replace("mirrobox.com", "terabox.com")
-        self.link = self.link.replace("momerybox.com", "terabox.com")
-        
         api_url = f"{Config.TERABOX_API}{quote(self.link)}"
         
         async with ClientSession(connector=TCPConnector(verify_ssl=False)) as session:
@@ -119,18 +110,18 @@ class TeraboxListener(Mirror):
                     if link:
                         valid_links.append(link)
 
-        # 1. api5.dl1
-        check_add("api5", "dl1")
-        # 2. api5.dl2
+        # 1. api5.dl2
         check_add("api5", "dl2")
-        # 3. api6.dl1
-        check_add("api6", "dl1")
-        # 4. api6.dl2
+        # 2. api5.dl1
+        check_add("api5", "dl1")
+        # 3. api6.dl2
         check_add("api6", "dl2")
-        # 5. api3.dl1
-        check_add("api3", "dl1")
-        # 6. api3.dl2
+        # 4. api6.dl1
+        check_add("api6", "dl1")
+        # 5. api3.dl2
         check_add("api3", "dl2")
+        # 6. api3.dl1
+        check_add("api3", "dl1")
 
         if not valid_links:
             await msg.edit("No valid download links found from API.")
@@ -142,22 +133,20 @@ class TeraboxListener(Mirror):
         # We will use the first one as source, and somehow pass others?
         # For now let's just use the first best one found. The list is priority sorted.
         
+        if not valid_links:
+            await msg.edit("No valid download links found from API.")
+            return
+
         best_link = valid_links[0]
-        
-        # Initialize Mirror with the extracted direct link
         self.link = best_link
+        
+        # Extract Filename from Metadata
+        if metadata := data.get("metadata"):
+            if file_name := metadata.get("file_name"):
+                self.name = file_name
+                LOGGER.info(f"Terabox Filename: {self.name}")
+
         await msg.delete()
-        
-        # Call the parent class methods to start download
-        # We need to set self.name if the API provides it?
-        # The API response might have filename info, but user didn't specify structure.
-        # Let's rely on aria2 resolving name or user provided -n.
-        
-        # Re-using the initialized instance to start download logic
-        # We need to bypass the 'check if link is magnet/url' part of Mirror since we have direct link now
-        # But Mirror.new_event does parsing again. 
-        # Better approach: We are inside new_event. We can just call add_aria2_download directly or 
-        # proceed with standard checks if it looks like a URL.
         
         # However, we inherited from Mirror. Mirror.new_event() parses arguments again unless we carefully set state.
         # Actually, we shouldn't use Mirror.new_event inside. We should setup the object and call standard download helpers.
