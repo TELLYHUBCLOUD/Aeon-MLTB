@@ -1,7 +1,7 @@
 from urllib.parse import quote, urlparse
 
 from aiohttp import ClientSession, TCPConnector
-from bot import LOGGER, bot_loop
+from bot import DOWNLOAD_DIR, LOGGER, bot_loop
 from bot.core.aeon_client import TgClient
 from bot.core.config_manager import Config
 from bot.helper.aeon_utils.access_check import error_check
@@ -132,6 +132,6 @@ class TeraboxListener(Mirror):
         from bot.helper.mirror_leech_utils.download_utils.aria2_download import add_aria2_download    
         await self.on_download_start()
         headers = ["User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"]
-        await add_aria2_download(self, f"{self.mid}/", headers, None, None)
+        await add_aria2_download(self, f"{DOWNLOAD_DIR}{self.mid}/", headers, None, None)
 async def terabox(client, message):
     bot_loop.create_task(TeraboxListener(client, message).new_event())
