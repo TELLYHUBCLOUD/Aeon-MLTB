@@ -10,7 +10,7 @@ from bot.helper.aeon_utils.access_check import error_check
 from bot.helper.ext_utils.bot_utils import (
     COMMAND_USAGE,
     arg_parser,
-    get_readable_size,
+    get_readable_file_size,
     new_task,
 )
 from bot.helper.ext_utils.links_utils import is_url
@@ -180,7 +180,7 @@ class TeraboxListener(Mirror):
                 self.file_size = metadata.get("size", 0)
                 self.file_type = metadata.get("type", "Unknown")
                 
-                size_str = get_readable_size(self.file_size) if self.file_size > 0 else "Unknown"
+                size_str = get_readable_file_size(self.file_size) if self.file_size > 0 else "Unknown"
                 LOGGER.info(
                     f"Terabox Metadata - Name: {self.name}, "
                     f"Size: {size_str}, Type: {self.file_type}"
@@ -314,7 +314,7 @@ class TeraboxListener(Mirror):
             
             # Update progress message
             if has_metadata and self.file_size > 0:
-                size_str = get_readable_size(self.file_size)
+                size_str = get_readable_file_size(self.file_size)
                 await msg.edit(
                     f"✅ File Found!\n\n"
                     f"📄 Name: {self.name}\n"
