@@ -99,7 +99,7 @@ async def edit_message(
                 reply_markup=buttons,
                 # parse_mode=parse_mode,
             )
-        await message.edit(
+        return await message.edit(
             text=text,
             disable_web_page_preview=True,
             reply_markup=buttons,
