@@ -790,6 +790,7 @@ async def edit_user_settings(client, query):
             back_to = "main"
         elif data[3] in [
             "AUTO_LEECH",
+            "AUTO_LEECH_CMD",
             "AUTO_COMPRESS_CMD",
             "AUTO_CAPTION_REPLACE",
             "AUTO_CAPTION_REMOVE",
