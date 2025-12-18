@@ -206,28 +206,27 @@ class Merge(TaskListener):
 
             if hasattr(link, "download"):
                  # Telegram reply object
-                await TelegramDownloadHelper(self).add_download(
+                create_task(TelegramDownloadHelper(self).add_download(
                         link,
                         path,
                         self.client,
-                    )
+                    ))
             elif is_telegram_link(str(link)):
                  message = await self.get_tg_link_message(link)
                  if message:
-                     await TelegramDownloadHelper(self).add_download(
-                        message,
-                        path,
-                        self.client,
-                    )
+                     if message.document or message.video or message.audio:
+                         create_task(TelegramDownloadHelper(self).add_download(
+                            message,
+                            path,
+                            self.client,
+                        ))
+                     else:
+                         self.total_batch_files -= 1
                  else:
                      LOGGER.error(f"Failed to get message for: {link}")
                      self.total_batch_files -= 1 # adjust total
             elif is_url(str(link)):
-                 await add_aria2_download(self, path, [], None, None) # This is async? 
-                 # Wait, add_aria2_download calls on_download_start?
-                 # If aria2, we can't easily await finish here unless we track gid?
-                 # For now, simplistic await? Aria2 might return early...
-                 # Ideally Merge shouldn't mix Aria2 and TG links heavily in one batch unless tested.
+                 await add_aria2_download(self, path, [], None, None) 
             else:
                  self.total_batch_files -= 1
 

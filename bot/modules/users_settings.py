@@ -41,7 +41,10 @@ leech_options = [
     "THUMBNAIL_LAYOUT",
     "USER_DUMP",
     "USER_SESSION",
+]
+automation_options = [
     "AUTO_LEECH",
+    "AUTO_LEECH_CMD",
     "AUTO_COMPRESS_CMD",
     "AUTO_CAPTION_REPLACE",
     "AUTO_CAPTION_REMOVE",
@@ -333,6 +336,12 @@ async def get_user_settings(from_user, stype="main"):
         aleech = "✅ Enabled" if user_dict.get("AUTO_LEECH") else "❌ Disabled"
 
         buttons.data_button(
+            "🎬 Auto Leech Cmd",
+            f"userset {user_id} menu AUTO_LEECH_CMD",
+        )
+        aleech_cmd = user_dict.get("AUTO_LEECH_CMD") or "None"
+
+        buttons.data_button(
             "🎬 Auto Compress Cmd",
             f"userset {user_id} menu AUTO_COMPRESS_CMD",
         )
@@ -619,6 +628,8 @@ async def get_menu(option, message, user_id):
             buttons.data_button("➖ Remove one", f"userset {user_id} rmone {option}")
     if option in leech_options:
         back_to = "leech"
+    elif option in automation_options:
+        back_to = "automation"
     elif option in rclone_options:
         back_to = "rclone"
     elif option in gdrive_options:
