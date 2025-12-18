@@ -465,10 +465,10 @@ class Encode(TaskListener):
         if self.quality != "Original": # and has_video (we assume yes or generic)
              cmd.extend(["-c:v", "libx264"])
              scale = ""
-             if self.quality == "1080p": scale = "scale=-1:1080"
-             elif self.quality == "720p": scale = "scale=-1:720"
-             elif self.quality == "480p": scale = "scale=-1:480"
-             elif self.quality == "360p": scale = "scale=-1:360"
+             if self.quality == "1080p": scale = "scale=-2:1080"
+             elif self.quality == "720p": scale = "scale=-2:720"
+             elif self.quality == "480p": scale = "scale=-2:480"
+             elif self.quality == "360p": scale = "scale=-2:360"
              if scale:
                 cmd.extend(["-vf", scale])
         else:
@@ -477,7 +477,7 @@ class Encode(TaskListener):
         if self.has_metadata_selection:
              cmd.extend(["-c:a", "copy", "-c:s", "copy"])
 
-        output_file = f"{ospath.splitext(file_path)[0]}_encoded.mp4"
+        output_file = f"{ospath.splitext(file_path)[0]}_encoded{ospath.splitext(file_path)[1]}"
         cmd.append(output_file)
         
         LOGGER.info(f"Running Encode CMD: {cmd}")
