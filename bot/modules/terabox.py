@@ -1,3 +1,5 @@
+from urllib.parse import quote
+
 from aiohttp import ClientSession
 from bot import LOGGER, bot_loop
 from bot.core.aeon_client import TgClient
@@ -77,12 +79,17 @@ class TeraboxListener(Mirror):
 
     async def process_terabox(self):
         msg = await send_message(self.message, "Processing Terabox Link...")
-        api_url = f"{Config.TERABOX_API}{self.link}"
+        api_url = f"{Config.TERABOX_API}{quote(self.link)}"
         
         async with ClientSession() as session:
             async with session.get(api_url) as resp:
                 if resp.status != 200:
-                    await msg.edit(f"API Error: {resp.status}")
+                    try:
+                        resp_text = await resp.text()
+                    except:
+                        resp_text = "N/A"
+                    LOGGER.error(f"Terabox API Error: {resp.status} | Body: {resp_text}")
+                    await msg.edit(f"API Error: {resp.status}\nBody: {resp_text[:100]}")
                     return
                 try:
                     data = await resp.json()
