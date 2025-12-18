@@ -26,6 +26,10 @@ class TeraboxListener(Mirror):
         self,
         client,
         message,
+        is_qbit=False,
+        is_leech=False,
+        is_jd=False,
+        is_nzb=False,
         same_dir=None,
         bulk=None,
         multi_tag=None,
@@ -155,10 +159,10 @@ class TeraboxListener(Mirror):
             await TeraboxListener(
                 self.client,
                 nextmsg,
-                self.same_dir,
-                self.bulk,
-                self.multi_tag,
-                self.options,
+                same_dir=self.same_dir,
+                bulk=self.bulk,
+                multi_tag=self.multi_tag,
+                options=self.options,
             ).new_event()
             return await delete_links(self.message)
 

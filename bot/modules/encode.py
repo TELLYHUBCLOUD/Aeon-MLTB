@@ -334,6 +334,13 @@ class Encode(TaskListener):
             return
             
         file_path = f"{self.dir}/{files[0]}" 
+        if await aiopath.isdir(file_path):
+            dir_files = await listdir(file_path)
+            if dir_files:
+                file_path = f"{file_path}/{dir_files[0]}"
+            else:
+                 await self.on_upload_error("Empty folder downloaded.")
+                 return
 
         # NOTE: We skip Metadata/Menu because we did it pre-download.
         # However, if remote fetch FAILED but we proceeded with Generic Menu,
