@@ -173,10 +173,17 @@ class TeraboxListener(Mirror):
                 self.link = reply_to.caption.split("\n", 1)[0].strip()
 
         if not is_url(self.link):
-            await send_message(
-                self.message,
-                "Provide a valid Terabox link to download.",
-            )
+            if len(input_list) == 1 and not reply_to:
+                await send_message(
+                    self.message,
+                    COMMAND_USAGE["terabox"][0],
+                    COMMAND_USAGE["terabox"][1],
+                )
+            else:
+                await send_message(
+                    self.message,
+                    "Provide a valid Terabox link to download.",
+                )
             return
 
         if not Config.TERABOX_API:
