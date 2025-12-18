@@ -122,6 +122,11 @@ def create_help_buttons():
     _build_command_usage(MIRROR_HELP_DICT, "mirror")
     _build_command_usage(YT_HELP_DICT, "yt")
     _build_command_usage(CLONE_HELP_DICT, "clone")
+    
+    # Add manual entries for new commands that share logic or have simple help
+    COMMAND_USAGE["encode"] = ["Send link or reply to file/link with /encode -q 1080p|720p|480p", None]
+    COMMAND_USAGE["merge"] = ["Send link or reply to file/link with /merge", None]
+    COMMAND_USAGE["terabox"] = [MIRROR_HELP_DICT["main"], None] # Reuse Mirror help or create custom
 
 
 def bt_selection_buttons(id_):

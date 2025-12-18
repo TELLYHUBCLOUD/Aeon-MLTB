@@ -162,7 +162,10 @@ class TeraboxListener(Mirror):
         # If user wants Leech (default for /terabox as per user context usually implies leech bot), 
         # we set is_leech=True in __init__.
         
-        await add_aria2_download(self, f"{self.mid}/", [], None, None)
+        # Add User-Agent to Aria2 options
+        headers = ["User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"]
+        
+        await add_aria2_download(self, f"{self.mid}/", headers, None, None)
 
 
 async def terabox(client, message):
