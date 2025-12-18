@@ -779,9 +779,6 @@ async def edit_user_settings(client, query):
         update_user_ldata(user_id, "YT_DEFAULT_FOLDER_MODE", new_mode)
         await database.update_user_data(user_id)
         await update_user_settings(query, "youtube")
-    # Find this section around Line 695 in edit_user_settings function
-    # Replace the elif data[2] == "tog": section with this:
-
     elif data[2] == "tog":
         await query.answer()
         update_user_ldata(user_id, data[3], data[4] == "t")
