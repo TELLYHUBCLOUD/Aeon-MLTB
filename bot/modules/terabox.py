@@ -130,6 +130,7 @@ class TeraboxListener(Mirror):
 
         await msg.delete()
         from bot.helper.mirror_leech_utils.download_utils.aria2_download import add_aria2_download    
+        await self.before_start()
         await self.on_download_start()
         headers = ["User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"]
         await add_aria2_download(self, f"{DOWNLOAD_DIR}{self.mid}/", headers, None, None)
