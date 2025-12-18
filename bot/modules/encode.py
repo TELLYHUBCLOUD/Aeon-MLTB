@@ -282,7 +282,7 @@ class Encode(TaskListener):
             line = line.strip()
             if not line: continue
             # Check TG Range
-            if is_telegram_link(line):
+            if isinstance(line, str) and is_telegram_link(line):
                 match = re_search(r"(https?://t\.me/(?:c/)?(?:[\w\d]+)/)(\d+)-(\d+)", line)
                 if match:
                     base = match.group(1)
@@ -292,7 +292,7 @@ class Encode(TaskListener):
                         for i in range(start, end + 1):
                             all_links.append(f"{base}{i}")
                     continue
-            if is_url(line) or is_telegram_link(line):
+            if is_url(line) or (isinstance(line, str) and is_telegram_link(line)):
                 all_links.append(line)
         
         if len(all_links) > 1:
@@ -311,7 +311,7 @@ class Encode(TaskListener):
             elif reply_to.text:
                 self.link = reply_to.text.split("\n", 1)[0].strip()
 
-        if is_telegram_link(self.link):
+        if isinstance(self.link, str) and is_telegram_link(self.link):
             try:
                 reply_to, session = await get_tg_link_message(self.link, self.message.from_user.id)
                 if isinstance(reply_to, list):

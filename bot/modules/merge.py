@@ -3,7 +3,7 @@ from os import path as ospath, walk
 import re
 
 from aiofiles.os import path as aiopath
-from aiofiles.os import remove
+from aiofiles.os import makedirs, remove
 
 from secrets import token_hex
 from aioshutil import move
@@ -197,18 +197,21 @@ class Merge(TaskListener):
         
         path = f"{self.dir}/"
         
-        for link in self.inputs:
+        for index, link in enumerate(self.inputs):
             # Check cancel
             if self.is_cancelled:
                 return
 
             self.link = link
+            # Use unique subdir for each file to avoid collisions
+            current_path = f"{path}{index}/"
+            await makedirs(current_path, exist_ok=True)
 
             if hasattr(link, "download"):
                  # Telegram reply object
                 create_task(TelegramDownloadHelper(self).add_download(
                         link,
-                        path,
+                        current_path,
                         self.client,
                     ))
             elif is_telegram_link(str(link)):
@@ -217,7 +220,7 @@ class Merge(TaskListener):
                      if message.document or message.video or message.audio:
                          create_task(TelegramDownloadHelper(self).add_download(
                             message,
-                            path,
+                            current_path,
                             self.client,
                         ))
                      else:
@@ -226,7 +229,7 @@ class Merge(TaskListener):
                      LOGGER.error(f"Failed to get message for: {link}")
                      self.total_batch_files -= 1 # adjust total
             elif is_url(str(link)):
-                 await add_aria2_download(self, path, [], None, None) 
+                 await add_aria2_download(self, current_path, [], None, None) 
             else:
                  self.total_batch_files -= 1
 
