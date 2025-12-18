@@ -1,4 +1,4 @@
-from asyncio import create_task, Event, wait_for
+from asyncio import create_task, Event, wait_for, sleep
 from os import path as ospath
 from time import time
 from functools import partial
@@ -9,12 +9,20 @@ from aiofiles.os import remove, listdir
 from pyrogram.handlers import CallbackQueryHandler
 from pyrogram.filters import regex, user
 
-from bot import LOGGER, bot_loop, task_dict, task_dict_lock
+from secrets import token_hex
+from aioshutil import move
+
+from bot import LOGGER, bot_loop, task_dict, task_dict_lock, multi_tags, intervals
 from bot.helper.aeon_utils.access_check import error_check
 from bot.helper.ext_utils.bot_utils import (
     COMMAND_USAGE,
     arg_parser,
 )
+from bot.helper.ext_utils.bot_utils import (
+    COMMAND_USAGE,
+    arg_parser,
+)
+from bot.helper.ext_utils.bulk_links import extract_bulk_links
 from bot.helper.ext_utils.links_utils import is_url
 from bot.helper.ext_utils.media_utils import FFMpeg, get_remote_media_info
 from bot.helper.ext_utils.status_utils import get_readable_file_size, get_readable_time
@@ -205,6 +213,13 @@ class Encode(TaskListener):
         super().__init__()
         self.is_leech = True
 
+        self.is_leech = True
+        self.bulk = []
+        self.multi = 0
+        self.options = ""
+        self.same_dir = {}
+        self.multi_tag = ""
+
     async def new_event(self):
         text = self.message.text.split("\n")
         input_list = text[0].split(" ")
@@ -223,6 +238,7 @@ class Encode(TaskListener):
             "-q": "",
             "-an": False,
             "-sn": False,
+            "-b": False,
         }
 
         arg_parser(input_list[1:], args)
@@ -234,6 +250,26 @@ class Encode(TaskListener):
         self.quality = args["-q"]
         self.remove_audio = args["-an"]
         self.remove_subs = args["-sn"]
+        self.multi = args["-i"]
+        is_bulk = args["-b"]
+        bulk_start = 0
+        bulk_end = 0
+
+        if not isinstance(is_bulk, bool):
+            dargs = is_bulk.split(":")
+            bulk_start = dargs[0] or 0
+            if len(dargs) == 2:
+                bulk_end = dargs[1] or 0
+            is_bulk = True
+
+        if is_bulk:
+            await self.init_bulk(input_list, bulk_start, bulk_end, Encode)
+            return
+
+        if len(self.bulk) != 0:
+            del self.bulk[0]
+
+        await self.run_multi(input_list, Encode)
 
         if not self.link and (reply_to := self.message.reply_to_message):
             if reply_to.document or reply_to.video or reply_to.audio:
@@ -455,8 +491,17 @@ class Encode(TaskListener):
                 if not files_left:
                      LOGGER.error("All files removed/missing after encode!")
                 else:
-                     self.name = files_left[0]
-                     LOGGER.info(f"Encoded File: {self.name} | Size: {await get_path_size(self.dir)}")
+                     encoded_file = files_left[0]
+                     if self.name and self.name != encoded_file:
+                         ext = ospath.splitext(encoded_file)[1]
+                         if not self.name.endswith(ext):
+                             self.name += ext
+                         new_path = f"{self.dir}/{self.name}"
+                         await move(f"{self.dir}/{encoded_file}", new_path)
+                         LOGGER.info(f"Renamed encoded file to: {self.name} | Size: {await get_path_size(self.dir)}")
+                     else:
+                         self.name = encoded_file
+                         LOGGER.info(f"Encoded File: {self.name} | Size: {await get_path_size(self.dir)}")
 
              except Exception as e:
                 LOGGER.error(f"Error removing original: {e}")
@@ -465,6 +510,96 @@ class Encode(TaskListener):
         else:
              await self.on_upload_error("Encoding Failed. Check logs.")
 
+
+    async def run_multi(self, input_list, obj):
+        await sleep(7)
+        if not self.multi_tag and self.multi > 1:
+            self.multi_tag = token_hex(2)
+            multi_tags.add(self.multi_tag)
+        elif self.multi <= 1:
+            if self.multi_tag in multi_tags:
+                multi_tags.discard(self.multi_tag)
+            return
+        if self.multi_tag and self.multi_tag not in multi_tags:
+            await send_message(
+                self.message,
+                f"{self.tag} Multi-task has been cancelled!",
+            )
+            await send_status_message(self.message)
+            async with task_dict_lock:
+                for fd_name in self.same_dir:
+                    self.same_dir[fd_name]["total"] -= self.multi
+            return
+        if len(self.bulk) != 0:
+            msg = input_list[:1]
+            msg.append(f"{self.bulk[0]} -i {self.multi - 1} {self.options}")
+            msgts = " ".join(msg)
+            if self.multi > 2:
+                msgts += f"\nCancel Multi: <code>/stop {self.multi_tag}</code>"
+            nextmsg = await send_message(self.message, msgts)
+        else:
+            msg = [s.strip() for s in input_list]
+            index = msg.index("-i")
+            msg[index + 1] = f"{self.multi - 1}"
+            nextmsg = await self.client.get_messages(
+                chat_id=self.message.chat.id,
+                message_ids=self.message.reply_to_message_id + 1,
+            )
+            msgts = " ".join(msg)
+            if self.multi > 2:
+                msgts += f"\nCancel Multi: <code>/stop {self.multi_tag}</code>"
+            nextmsg = await send_message(nextmsg, msgts)
+        nextmsg = await self.client.get_messages(
+            chat_id=self.message.chat.id,
+            message_ids=nextmsg.id,
+        )
+        if self.message.from_user:
+            nextmsg.from_user = self.user
+        else:
+            nextmsg.sender_chat = self.user
+        if intervals["stopAll"]:
+            return
+        await obj(
+            self.client,
+            nextmsg,
+        ).new_event()
+
+    async def init_bulk(self, input_list, bulk_start, bulk_end, obj):
+        try:
+            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
+            if len(self.bulk) == 0:
+                raise ValueError("Bulk Empty!")
+            b_msg = input_list[:1]
+            self.options = input_list[1:]
+            index = self.options.index("-b")
+            del self.options[index]
+            if bulk_start or bulk_end:
+                del self.options[index + 1]
+            self.options = " ".join(self.options)
+            b_msg.append(f"{self.bulk[0]} -i {len(self.bulk)} {self.options}")
+            msg = " ".join(b_msg)
+            if len(self.bulk) > 2:
+                self.multi_tag = token_hex(2)
+                multi_tags.add(self.multi_tag)
+                msg += f"\nCancel Multi: <code>/stop {self.multi_tag}</code>"
+            nextmsg = await send_message(self.message, msg)
+            nextmsg = await self.client.get_messages(
+                chat_id=self.message.chat.id,
+                message_ids=nextmsg.id,
+            )
+            if self.message.from_user:
+                nextmsg.from_user = self.user
+            else:
+                nextmsg.sender_chat = self.user
+            await obj(
+                self.client,
+                nextmsg,
+            ).new_event()
+        except Exception as e:
+            await send_message(
+                self.message,
+                f"Reply to a text file or a Telegram message with links separated by new lines. Error: {e}",
+            )
 
 async def encode(client, message):
     bot_loop.create_task(Encode(client, message).new_event())

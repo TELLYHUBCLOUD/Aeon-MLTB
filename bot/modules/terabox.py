@@ -164,7 +164,13 @@ class TeraboxListener(Mirror):
                 multi_tag=self.multi_tag,
                 options=self.options,
             ).new_event()
+
             return await delete_links(self.message)
+        elif reply_to:
+             if reply_to.text:
+                self.link = reply_to.text.split("\n", 1)[0].strip()
+             elif reply_to.caption:
+                self.link = reply_to.caption.split("\n", 1)[0].strip()
 
         if not is_url(self.link):
             await send_message(
