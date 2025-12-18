@@ -88,58 +88,53 @@ class Merge(TaskListener):
             is_bulk = True
 
         if is_bulk:
-            await self.init_bulk(input_list, bulk_start, bulk_end, Merge)
-            return
+            try:
+                self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
+                if len(self.bulk) == 0:
+                    raise ValueError("Bulk Empty!")
+                # For merge, bulk means inputs for THIS task
+                for link in self.bulk:
+                     if is_telegram_link(link):
+                         match = re.search(r"(https?://t\.me/(?:c/)?(?:[\w\d]+)/)(\d+)-(\d+)", link)
+                         if match:
+                             base = match.group(1)
+                             start = int(match.group(2))
+                             end = int(match.group(3))
+                             if start <= end:
+                                 for i in range(start, end + 1):
+                                     self.inputs.append(f"{base}{i}")
+                             continue
+                     self.inputs.append(link)
+            except Exception as e:
+                await send_message(
+                    self.message,
+                    f"Reply to a text file or a Telegram message with links separated by new lines. Error: {e}",
+                )
+                return
 
-        if len(self.bulk) != 0:
-            del self.bulk[0]
-
-        await self.run_multi(input_list, Merge)
-
-        # Merge usually works with Reply loop or Folder?
-        # For simplicity, if replied to a message, treat it as input?
-        # Or bulk input?
-        # User said "/merge ... esmi video/media file ko merge kari"
-        # Strategy: Download provided link(s). If folder, merge all files inside. 
-        # If single link, maybe useless unless standard inputs?
-        # Let's assume it works like Mirror: Download -> Merge content of folder -> Upload single file.
-
-        if not self.link and (reply_to := self.message.reply_to_message):
-             # Logic to handle reply
-             if reply_to.document or reply_to.video or reply_to.audio:
-                self.link = reply_to
-             elif reply_to.text:
-                self.link = reply_to.text.split("\n", 1)[0].strip()
-
-        if not self.link:
-            # Check for multiple links in text
-            if len(text) > 0:
-                 self.link = text[0] # Take first as primary? or parse all
-        
         # Parse Inputs from text (Multiple links / Ranges)
-        if not is_bulk: # If NOT bulk, check for multiple inputs for THIS task
-             for line in text:
-                 line = line.strip()
-                 if not line: continue
-                 # Check for TG Range: link/11-20
-                 if is_telegram_link(line):
-                     match = re.search(r"(https?://t\.me/(?:c/)?(?:[\w\d]+)/)(\d+)-(\d+)", line)
-                     if match:
-                         base = match.group(1)
-                         start = int(match.group(2))
-                         end = int(match.group(3))
-                         if start <= end:
-                             for i in range(start, end + 1):
-                                 self.inputs.append(f"{base}{i}")
-                         continue
-                 # Normal Link
-                 if is_url(line) or hasattr(line, "download"): # Handle reply object later
-                     self.inputs.append(line)
-             
-             # If reply object and no text links
-             if not self.inputs and (reply_to := self.message.reply_to_message):
-                 if reply_to.document or reply_to.video or reply_to.audio:
-                    self.inputs.append(reply_to)
+        for line in text:
+             line = line.strip()
+             if not line: continue
+             # Check for TG Range: link/11-20
+             if is_telegram_link(line):
+                 match = re.search(r"(https?://t\.me/(?:c/)?(?:[\w\d]+)/)(\d+)-(\d+)", line)
+                 if match:
+                     base = match.group(1)
+                     start = int(match.group(2))
+                     end = int(match.group(3))
+                     if start <= end:
+                         for i in range(start, end + 1):
+                             self.inputs.append(f"{base}{i}")
+                     continue
+             # Normal Link
+             if is_url(line) or hasattr(line, "download"): # Handle reply object later
+                 self.inputs.append(line)
+         
+        # If reply object and no text links
+        if not self.inputs and (reply_to := self.message.reply_to_message):
+             if reply_to.document or reply_to.video or reply_to.audio:
+                self.inputs.append(reply_to)
 
         if not self.inputs and self.link:
              if is_telegram_link(self.link):
@@ -156,12 +151,26 @@ class Merge(TaskListener):
              else:
                  self.inputs.append(self.link)
         
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_inputs = []
+        for inp in self.inputs:
+            inp_str = str(inp)
+            if inp_str not in seen:
+                seen.add(inp_str)
+                unique_inputs.append(inp)
+        self.inputs = unique_inputs
+
         if not self.inputs:
              await send_message(
                 self.message,
                 COMMAND_USAGE["merge"][0],
                 COMMAND_USAGE["merge"][1],
             )
+             return
+
+        if len(self.inputs) > 10:
+             await send_message(self.message, "Merge Limit: You can only merge up to 10 files/links at once.")
              return
 
         self.total_batch_files = len(self.inputs)

@@ -25,6 +25,7 @@ from bot.core.config_manager import Config
 from bot.helper.ext_utils.bot_utils import SetInterval
 from bot.helper.ext_utils.exceptions import TgLinkException
 from bot.helper.ext_utils.status_utils import get_readable_message
+from bot.helper.telegram_helper.bot_commands import BotCommands
 
 session_cache = TTLCache(maxsize=1000, ttl=36000)
 
@@ -364,16 +365,36 @@ async def send_status_message(msg, user_id=0):
                     obj.cancel()
                     del intervals["status"][sid]
                 return
+
             old_message = status_dict[sid]["message"]
-            message = await send_message(msg, text, buttons, block=False)
+
+            if msg.text and any(
+                msg.text.startswith(f"/{cmd}") for cmd in BotCommands.StatusCommand
+            ):
+                await delete_message(old_message)
+                message = await send_message(msg, text, buttons, block=False)
+            else:
+                message = await edit_message(old_message, text, buttons, block=False)
+            
             if isinstance(message, str):
+                if message.startswith("Telegram says: [40"):
+                    del status_dict[sid]
+                    if obj := intervals["status"].get(sid):
+                        obj.cancel()
+                        del intervals["status"][sid]
+                    return
                 LOGGER.error(
                     f"Status with id: {sid} haven't been sent. Error: {message}",
                 )
                 return
-            await delete_message(old_message)
-            message.text = text
-            status_dict[sid].update({"message": message, "time": time()})
+            
+            if msg.text and any(
+                msg.text.startswith(f"/{cmd}") for cmd in BotCommands.StatusCommand
+            ):
+                 status_dict[sid].update({"message": message, "time": time()})
+            else:
+                 message.text = text
+                 status_dict[sid].update({"message": message, "time": time()})
         else:
             text, buttons = await get_readable_message(sid, is_user)
             if text is None:
