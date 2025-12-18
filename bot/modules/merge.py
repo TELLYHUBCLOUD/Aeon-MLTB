@@ -254,6 +254,8 @@ class Merge(TaskListener):
         # Prepare FFMpeg Status
         ffmpeg = FFMpeg(self)
         async with task_dict_lock:
+            if self.mid in task_dict:
+                self.gid = task_dict[self.mid].gid()
             task_dict[self.mid] = FFmpegStatus(self, ffmpeg, self.gid, "merging")
         
         await send_status_message(self.message)
