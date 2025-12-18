@@ -71,6 +71,9 @@ class TeraboxListener(Mirror):
 
         LOGGER.info(f"Terabox Link: {self.link}")
         
+        await self.get_tag(text)
+
+        
         try:
             await self.process_terabox()
         except Exception as e:
