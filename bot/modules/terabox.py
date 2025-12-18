@@ -1,7 +1,7 @@
 from urllib.parse import quote, urlparse
 
 from aiohttp import ClientSession, TCPConnector
-from bot import DOWNLOAD_DIR, LOGGER, bot_loop
+from bot import DOWNLOAD_DIR, LOGGER, bot_loop, task_dict_lock
 from bot.core.aeon_client import TgClient
 from bot.core.config_manager import Config
 from bot.helper.aeon_utils.access_check import error_check
@@ -10,19 +10,36 @@ from bot.helper.ext_utils.bot_utils import (
     arg_parser,
     new_task,
 )
-from bot.helper.ext_utils.links_utils import is_url
+from bot.helper.ext_utils.links_utils import is_url, is_telegram_link
 from bot.helper.telegram_helper.message_utils import (
     auto_delete_message,
     delete_links,
     send_message,
     send_status_message,
+    get_tg_link_message,
 )
 from bot.modules.mirror_leech import Mirror
 
 
 class TeraboxListener(Mirror):
-    def __init__(self, client, message):
-        super().__init__(client, message, is_leech=True)
+    def __init__(
+        self,
+        client,
+        message,
+        same_dir=None,
+        bulk=None,
+        multi_tag=None,
+        options="",
+    ):
+        super().__init__(
+            client,
+            message,
+            is_leech=True,
+            same_dir=same_dir,
+            bulk=bulk,
+            multi_tag=multi_tag,
+            options=options,
+        )
 
     async def new_event(self):
         text = self.message.text.split("\n")
@@ -45,15 +62,105 @@ class TeraboxListener(Mirror):
             "-cv": "",
             "-ns": "",
             "-md": "",
+            "-b": False,
         }
 
         arg_parser(input_list[1:], args)
         
         self.link = args["link"]
+        self.multi = args["-i"]
+        is_bulk = args["-b"]
+        bulk_start = 0
+        bulk_end = 0
+        reply_to = None
+
+        if not isinstance(is_bulk, bool):
+            dargs = is_bulk.split(":")
+            bulk_start = dargs[0] or 0
+            if len(dargs) == 2:
+                bulk_end = dargs[1] or 0
+            is_bulk = True
+
+        if not is_bulk:
+            try:
+                self.multi = int(self.multi)
+            except:
+                self.multi = 0
+
+            if self.multi > 0:
+                self.folder_name = f"/{args['-m']}".rstrip("/") if len(args["-m"]) > 0 else ""
+                
+                if self.folder_name:
+                    async with task_dict_lock:
+                        if self.folder_name in self.same_dir:
+                            self.same_dir[self.folder_name]["tasks"].add(self.mid)
+                            for fd_name in self.same_dir:
+                                if fd_name != self.folder_name:
+                                    self.same_dir[fd_name]["total"] -= 1
+                        elif self.same_dir:
+                            self.same_dir[self.folder_name] = {
+                                "total": self.multi,
+                                "tasks": {self.mid},
+                            }
+                            for fd_name in self.same_dir:
+                                if fd_name != self.folder_name:
+                                    self.same_dir[fd_name]["total"] -= 1
+                        else:
+                            self.same_dir = {
+                                self.folder_name: {
+                                    "total": self.multi,
+                                    "tasks": {self.mid},
+                                },
+                            }
+                elif self.same_dir:
+                    async with task_dict_lock:
+                        for fd_name in self.same_dir:
+                            self.same_dir[fd_name]["total"] -= 1
+        else:
+            await self.init_bulk(input_list, bulk_start, bulk_end, TeraboxListener)
+            return
+
+        if len(self.bulk) != 0:
+            del self.bulk[0]
+
+        await self.run_multi(input_list, TeraboxListener)
 
         if not self.link and (reply_to := self.message.reply_to_message):
              if reply_text := reply_to.text:
                 self.link = reply_text.split("\n", 1)[0].strip()
+        
+        if is_telegram_link(self.link):
+            try:
+                reply_to, session = await get_tg_link_message(self.link, self.message.from_user.id)
+            except Exception as e:
+                x = await send_message(self.message, f"ERROR: {e}")
+                await self.remove_from_same_dir()
+                await delete_links(self.message)
+                return await auto_delete_message(x, time=300)
+
+        if isinstance(reply_to, list):
+            self.bulk = reply_to
+            b_msg = input_list[:1]
+            self.options = " ".join(input_list[1:])
+            b_msg.append(f"{self.bulk[0]} -i {len(self.bulk)} {self.options}")
+            nextmsg = await send_message(self.message, " ".join(b_msg))
+            nextmsg = await self.client.get_messages(
+                chat_id=self.message.chat.id,
+                message_ids=nextmsg.id,
+            )
+            if self.message.from_user:
+                nextmsg.from_user = self.user
+            else:
+                nextmsg.sender_chat = self.user
+            await TeraboxListener(
+                self.client,
+                nextmsg,
+                self.same_dir,
+                self.bulk,
+                self.multi_tag,
+                self.options,
+            ).new_event()
+            return await delete_links(self.message)
 
         if not is_url(self.link):
             await send_message(
@@ -72,7 +179,6 @@ class TeraboxListener(Mirror):
         LOGGER.info(f"Terabox Link: {self.link}")
         
         await self.get_tag(text)
-
         
         try:
             await self.process_terabox()
@@ -137,5 +243,6 @@ class TeraboxListener(Mirror):
         await self.on_download_start()
         headers = ["User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"]
         await add_aria2_download(self, f"{DOWNLOAD_DIR}{self.mid}/", headers, None, None)
+
 async def terabox(client, message):
     bot_loop.create_task(TeraboxListener(client, message).new_event())
