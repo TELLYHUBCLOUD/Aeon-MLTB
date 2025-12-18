@@ -1,4 +1,5 @@
 import contextlib
+import json
 from asyncio import create_subprocess_exec, gather, sleep, wait_for
 from asyncio.subprocess import PIPE
 from os import path as ospath
@@ -59,7 +60,29 @@ async def get_media_info(path):
         artist = tags.get("artist") or tags.get("ARTIST") or tags.get("Artist")
         title = tags.get("title") or tags.get("TITLE") or tags.get("Title")
         return duration, artist, title
+        return duration, artist, title
     return 0, None, None
+
+
+async def get_remote_media_info(link):
+    try:
+        result = await cmd_exec(
+            [
+                "ffprobe",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-print_format",
+                "json",
+                "-show_streams",
+                link,
+            ],
+        )
+        if result[0]:
+            return json.loads(result[0]).get("streams", [])
+    except Exception as e:
+        LOGGER.error(f"Get Remote Media Info Failed: {e} - Link: {link}")
+    return []
 
 
 async def get_document_type(path):

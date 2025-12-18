@@ -16,7 +16,7 @@ from bot.helper.ext_utils.bot_utils import (
     arg_parser,
 )
 from bot.helper.ext_utils.links_utils import is_url
-from bot.helper.ext_utils.media_utils import FFMpeg
+from bot.helper.ext_utils.media_utils import FFMpeg, get_remote_media_info
 from bot.helper.ext_utils.status_utils import get_readable_file_size, get_readable_time
 from bot.helper.listeners.task_listener import TaskListener
 from bot.helper.mirror_leech_utils.download_utils.aria2_download import (
@@ -199,6 +199,9 @@ class Encode(TaskListener):
         self.quality = ""
         self.remove_audio = False
         self.remove_subs = False
+        self.audio_map = {}
+        self.sub_map = {}
+        self.has_metadata_selection = False
         super().__init__()
         self.is_leech = True
 
@@ -249,6 +252,50 @@ class Encode(TaskListener):
         LOGGER.info(f"Encode Request: Link: {self.link}")
 
         await self.get_tag(text) 
+        
+        # === PRE-DOWNLOAD METADATA STEP ===
+        streams = []
+        is_remote_successful = False
+        
+        if is_url(self.link):
+            wait_msg = await send_message(self.message, "⏳ Fetching Metadata...")
+            streams = await get_remote_media_info(self.link)
+            await delete_message(wait_msg)
+            if streams:
+                is_remote_successful = True
+        
+        # Interactive Menu (Pre-Download)
+        selector = EncodeSelection(self, streams)
+        if self.quality: selector.quality = self.quality
+        
+        # Pre-apply flags if passed via CLI
+        if self.remove_audio and streams:
+            for idx in selector.audio_map: selector.audio_map[idx] = False
+        elif self.remove_audio:
+            selector.remove_audio = True
+            
+        if self.remove_subs and streams:
+            for idx in selector.sub_map: selector.sub_map[idx] = False
+        elif self.remove_subs:
+            selector.remove_subs = True
+
+        qual, map1, map2 = await selector.get_selection()
+
+        if qual is None: # Cancelled
+            await send_message(self.message, "Task Cancelled.")
+            return
+
+        # Store Selection
+        if streams:
+            self.quality = qual
+            self.audio_map = map1
+            self.sub_map = map2
+            self.has_metadata_selection = True
+        else:
+            self.quality = qual
+            self.remove_audio = map1
+            self.remove_subs = map2
+            self.has_metadata_selection = False
 
         try:
              await self.before_start()
@@ -288,56 +335,13 @@ class Encode(TaskListener):
             
         file_path = f"{self.dir}/{files[0]}" 
 
-        # Extract Metadata (Streams)
-        try:
-            result = await cmd_exec(
-                [
-                    "ffprobe", 
-                    "-hide_banner", 
-                    "-loglevel", "error", 
-                    "-print_format", "json", 
-                    "-show_streams", 
-                    file_path
-                ]
-            )
-            if result[0]:
-                streams = json.loads(result[0]).get("streams", [])
-            else:
-                streams = []
-        except Exception as e:
-            LOGGER.error(f"Metadata Extraction Failed: {e}")
-            streams = []
-
-        # Interactive Menu (Post-Download)
-        selector = EncodeSelection(self, streams)
-        # Apply args if present? User wants menu, so maybe pre-select but still show?
-        if self.quality: selector.quality = self.quality
-        if self.remove_audio and not streams: selector.remove_audio = True
-        if self.remove_subs and not streams: selector.remove_subs = True
-        
-        # If streams are present, and user passed -an (Remove All Audio), we could pre-toggle all audio to False
-        if self.remove_audio and streams:
-            for idx in selector.audio_map: selector.audio_map[idx] = False
-
-        if self.remove_subs and streams:
-            for idx in selector.sub_map: selector.sub_map[idx] = False
-
-        qual, map1, map2 = await selector.get_selection()
-
-        if qual is None: # Cancelled
-            await self.on_upload_error("User Cancelled Task")
-            return
-            
-        if streams:
-            self.quality = qual
-            audio_map = map1
-            sub_map = map2
-        else:
-            self.quality = qual
-            self.remove_audio = map1
-            self.remove_subs = map2
-            audio_map = {}
-            sub_map = {}
+        # NOTE: We skip Metadata/Menu because we did it pre-download.
+        # However, if remote fetch FAILED but we proceeded with Generic Menu,
+        # we MIGHT want to re-check streams here if we want to be super robust?
+        # But User requested "Download task nahi lagi jab tak selection done".
+        # This implies the Menu MUST happen before.
+        # If we only had Generic Menu, we just use Generic flags (remove_audio/subs).
+        # We process with what we have.
 
         # Prepare FFMpeg Status
         ffmpeg = FFMpeg(self)
@@ -357,26 +361,53 @@ class Encode(TaskListener):
             "-i", file_path,
         ]
 
-        if streams:
-            # Map Streams based on Selection
+        # Extract streams LOCALLY only if we need them for MAPPING (and didn't get them remotely)
+        # OR if we have remote mapping, we need to map indices.
+        # INDICES should match if file is same.
+        
+        # We need local streams to iterate and check against our map?
+        # If we have self.audio_map (from remote), we assume indices match. 
+        # But for robustness, let's just get local streams to be sure we are mapping existing streams.
+        # If we have no map (Generic), we fallback.
+
+        local_streams = []
+        if self.has_metadata_selection:
+             try:
+                result = await cmd_exec(
+                    [
+                        "ffprobe", 
+                        "-hide_banner", 
+                        "-loglevel", "error", 
+                        "-print_format", "json", 
+                        "-show_streams", 
+                        file_path
+                    ]
+                )
+                if result[0]:
+                    local_streams = json.loads(result[0]).get("streams", [])
+             except:
+                pass
+
+        if self.has_metadata_selection and local_streams:
+            # Map Streams based on Pre-Selection (indices should match)
             has_video = False
-            for stream in streams:
+            for stream in local_streams:
                 idx = stream['index']
                 ctype = stream['codec_type']
                 if ctype == 'video':
                     cmd.extend(["-map", f"0:{idx}"])
                     has_video = True
                 elif ctype == 'audio':
-                    if audio_map.get(idx, True):
+                    if self.audio_map.get(idx, True): # Default Keep if missing in map? Or Strict?
                         cmd.extend(["-map", f"0:{idx}"])
                 elif ctype == 'subtitle':
-                    if sub_map.get(idx, True):
+                    if self.sub_map.get(idx, True):
                         cmd.extend(["-map", f"0:{idx}"])
                 else:
-                     cmd.extend(["-map", f"0:{idx}"]) # Map attachments/data
+                     cmd.extend(["-map", f"0:{idx}"]) # Map attachments
         else:
-            # Fallback (No metadata)
-            has_video = True 
+            # Fallback (Generic flags)
+            has_video = True # Assume video
             if self.remove_audio:
                 cmd.append("-an")
             else:
@@ -388,7 +419,7 @@ class Encode(TaskListener):
                 cmd.extend(["-c:s", "copy"])
 
         # Transcoding Options
-        if self.quality != "Original" and has_video:
+        if self.quality != "Original": # and has_video (we assume yes or generic)
              cmd.extend(["-c:v", "libx264"])
              scale = ""
              if self.quality == "1080p": scale = "scale=-1:1080"
@@ -400,7 +431,7 @@ class Encode(TaskListener):
         else:
              cmd.extend(["-c:v", "copy"])
         
-        if streams:
+        if self.has_metadata_selection:
              cmd.extend(["-c:a", "copy", "-c:s", "copy"])
 
         output_file = f"{ospath.splitext(file_path)[0]}_encoded.mp4"
