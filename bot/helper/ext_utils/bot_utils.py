@@ -19,6 +19,10 @@ from .help_messages import (
     CLONE_HELP_DICT,
     MIRROR_HELP_DICT,
     YT_HELP_DICT,
+    ENCODE_HELP_DICT,
+    MERGE_HELP_DICT,
+    TERABOX_HELP_DICT,
+    AUTOMATION_HELP_DICT,
 )
 from .telegraph_helper import telegraph
 from bot.helper.ext_utils.status_utils import get_readable_file_size
@@ -122,11 +126,10 @@ def create_help_buttons():
     _build_command_usage(MIRROR_HELP_DICT, "mirror")
     _build_command_usage(YT_HELP_DICT, "yt")
     _build_command_usage(CLONE_HELP_DICT, "clone")
-    
-    # Add manual entries for new commands that share logic or have simple help
-    COMMAND_USAGE["encode"] = ["Send link or reply to file/link with /encode -q 1080p|720p|480p", None]
-    COMMAND_USAGE["merge"] = ["Send link or reply to file/link with /merge", None]
-    COMMAND_USAGE["terabox"] = [MIRROR_HELP_DICT["main"], None] # Reuse Mirror help or create custom
+    _build_command_usage(ENCODE_HELP_DICT, "encode")
+    _build_command_usage(MERGE_HELP_DICT, "merge")
+    _build_command_usage(TERABOX_HELP_DICT, "terabox")
+    _build_command_usage(AUTOMATION_HELP_DICT, "automation")
 
 
 def bt_selection_buttons(id_):

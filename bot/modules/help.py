@@ -3,6 +3,10 @@ from bot.helper.ext_utils.help_messages import (
     CLONE_HELP_DICT,
     MIRROR_HELP_DICT,
     YT_HELP_DICT,
+    ENCODE_HELP_DICT,
+    MERGE_HELP_DICT,
+    TERABOX_HELP_DICT,
+    AUTOMATION_HELP_DICT,
     help_string,
 )
 from bot.helper.telegram_helper.button_build import ButtonMaker
@@ -38,6 +42,30 @@ async def arg_usage(_, query):
                 COMMAND_USAGE["clone"][0],
                 COMMAND_USAGE["clone"][1],
             )
+        elif data[2] == "enc":
+            await edit_message(
+                message,
+                COMMAND_USAGE["encode"][0],
+                COMMAND_USAGE["encode"][1],
+            )
+        elif data[2] == "mrg":
+            await edit_message(
+                message,
+                COMMAND_USAGE["merge"][0],
+                COMMAND_USAGE["merge"][1],
+            )
+        elif data[2] == "tb":
+            await edit_message(
+                message,
+                COMMAND_USAGE["terabox"][0],
+                COMMAND_USAGE["terabox"][1],
+            )
+        elif data[2] == "auto":
+            await edit_message(
+                message,
+                COMMAND_USAGE["automation"][0],
+                COMMAND_USAGE["automation"][1],
+            )
     elif data[1] == "mirror":
         buttons = ButtonMaker()
         buttons.data_button("Back", "help back m")
@@ -53,6 +81,26 @@ async def arg_usage(_, query):
         buttons.data_button("Back", "help back c")
         button = buttons.build_menu()
         await edit_message(message, CLONE_HELP_DICT[data[2]], button)
+    elif data[1] == "encode":
+        buttons = ButtonMaker()
+        buttons.data_button("Back", "help back enc")
+        button = buttons.build_menu()
+        await edit_message(message, ENCODE_HELP_DICT[data[2]], button)
+    elif data[1] == "merge":
+        buttons = ButtonMaker()
+        buttons.data_button("Back", "help back mrg")
+        button = buttons.build_menu()
+        await edit_message(message, MERGE_HELP_DICT[data[2]], button)
+    elif data[1] == "terabox":
+        buttons = ButtonMaker()
+        buttons.data_button("Back", "help back tb")
+        button = buttons.build_menu()
+        await edit_message(message, TERABOX_HELP_DICT[data[2]], button)
+    elif data[1] == "automation":
+        buttons = ButtonMaker()
+        buttons.data_button("Back", "help back auto")
+        button = buttons.build_menu()
+        await edit_message(message, AUTOMATION_HELP_DICT[data[2]], button)
 
 
 @new_task

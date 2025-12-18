@@ -38,10 +38,15 @@ COMMANDS = {
     "StatsCommand": "- Show Bot and System stats",
     "CancelAllCommand": "- Cancel all your tasks",
     "HelpCommand": "- Get detailed help",
+    "SetCommand": "- Set settings via arguments",
+    "EncodeCommand": "- Encode a file",
+    "MergeCommand": "- Merge files",
+    "TeraboxCommand": "- Mirror from Terabox",
     "SpeedTest": "- Run a speedtest",
     "BotSetCommand": "- [ADMIN] Open Bot settings",
     "LogCommand": "- [ADMIN] View bot log",
     "RestartCommand": "- [ADMIN] Restart the bot",
+
 }
 
 

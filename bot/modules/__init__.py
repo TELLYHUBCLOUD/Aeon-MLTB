@@ -40,7 +40,10 @@ from .status import status_pages, task_status
 from .users_settings import (
     edit_user_settings,
     get_users_settings,
+    edit_user_settings,
+    get_users_settings,
     send_user_settings,
+    set_command,
 )
 from .terabox import terabox
 from .ytdlp import ytdl, ytdl_leech
@@ -95,6 +98,7 @@ __all__ = [
     "select_type",
     "send_bot_settings",
     "send_user_settings",
+    "set_command",
     "spectrum_handler",
     "speedtest",
     "start",

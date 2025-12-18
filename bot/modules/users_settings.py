@@ -365,6 +365,7 @@ async def get_user_settings(from_user, stype="main"):
         text = f"""<blockquote expandable>
 ╭🤖 <b>Automation Settings for {name}</b>
 ┊🚀 <b>Auto Leech:</b> {aleech}
+┊🎬 <b>Auto Leech Cmd:</b> <code>{escape(aleech_cmd)}</code>
 ┊🎬 <b>Auto Compress Cmd:</b> <code>{escape(ac_cmd)}</code>
 ┊📝 <b>Auto Caption Replace:</b> <code>{escape(ac_rep)}</code>
 ╰🧹 <b>Auto Caption Remove:</b> <code>{escape(ac_rem)}</code>
@@ -961,4 +962,24 @@ async def get_users_settings(_, message):
             await send_message(message, msg)
     else:
         await send_message(message, "❌ No users data!")
+
+
+@new_task
+async def set_command(client, message):
+    reply = message.reply_to_message
+    if not reply:
+        await send_message(message, "reply to settings or photo")
+        return
+    text = message.text.split()
+    if len(text) == 2 and text[1] in ["-thum", "-thumbnail"]:
+        if not reply.photo:
+            await send_message(message, "reply to photo to set as thumbnail")
+            return
+        user_id = message.from_user.id
+        des_dir = await create_thumb(reply, user_id)
+        update_user_ldata(user_id, "THUMBNAIL", des_dir)
+        await database.update_user_doc(user_id, "THUMBNAIL", des_dir)
+        await send_message(message, "Thumbnail saved successfully!")
+    else:
+        await send_message(message, "Invalid argument. Use /set -thum by replying to photo")
 

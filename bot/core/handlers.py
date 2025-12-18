@@ -170,6 +170,11 @@ def add_handlers():
             BotCommands.UserSetCommand,
             CustomFilters.authorized,
         ),
+        "set_settings": (
+            set_command,
+            BotCommands.SetCommand,
+            CustomFilters.authorized,
+        ),
         "ytdl": (
             ytdl,
             BotCommands.YtdlCommand,

@@ -399,6 +399,93 @@ user_settings_text = {
     "AUTO_CAPTION_REMOVE": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send keywords to remove from captions. Format: word1|word2|word3 or re:regex_pattern. Case-insensitive. Timeout: 60 sec</blockquote>",
 }
 
+encode_help_main = """<blockquote expandable>╭ℹ️ <b>Encode Help</b>
+┊<b>Send link along with command line or </b>
+┊
+┊<code>/encode link</code>
+┊
+┊<b>By replying to link/file</b>:
+┊
+┊<code>/encode -q 1080p|720p|480p -an -sn</code>
+┊
+┊<b>NOTE:</b>
+┊1. Default quality is 1080p if not specified.
+╰2. You can use -an to remove audio and -sn to remove subtitles.</blockquote>"""
+
+merge_help_main = """<blockquote expandable>╭ℹ️ <b>Merge Help</b>
+┊<b>Send multiple links/files to merge them into one video.</b>
+┊
+┊<b>Usage:</b>
+┊<code>/merge link1 link2 link3</code> (Max 10 inputs)
+┊
+┊<b>By replying to a message with links</b>:
+┊Reply to a message containing links (one per line) with <code>/merge -b</code>
+┊
+┊<b>NOTE:</b>
+╰1. All inputs will be concatenated in order.</blockquote>"""
+
+terabox_help_main = """<blockquote expandable>╭ℹ️ <b>Terabox Help</b>
+┊<b>Send Terabox link along with command line or by replying.</b>
+┊
+┊<code>/terabox link</code>
+┊
+┊<b>Options (Same as Leech):</b>
+┊<code>-n new name</code> : Rename the file
+┊<code>-up destination</code> : Custom upload destination
+┊<code>-t thumbnail_link</code> : Custom thumbnail
+╰<code>-p password</code> : Zip password (if zipping)</blockquote>"""
+
+
+ENCODE_HELP_DICT = {
+    "main": encode_help_main,
+    "quality": qual,
+    "ffmpeg": ffmpeg_cmds,
+    "upload": upload,
+    "new_name": new_name,
+    "thumbnail": thumb,
+    "split_size": split_size,
+}
+
+MERGE_HELP_DICT = {
+    "main": merge_help_main,
+    "inputs": multi_link, # Reusing multi_link help
+    "upload": upload,
+    "new_name": new_name,
+    "thumbnail": thumb,
+    "split_size": split_size,
+}
+
+TERABOX_HELP_DICT = {
+    "main": terabox_help_main,
+    "upload": upload,
+    "new_name": new_name,
+    "thumbnail": thumb,
+    "split_size": split_size,
+    "zip": zip_arg,
+}
+
+automation_help_main = """<blockquote expandable>╭ℹ️ <b>Automation Help</b>
+┊<b>Automate your leeching tasks with these settings.</b>
+┊
+┊<b>To access these settings:</b>
+┊<code>/userset</code> -> <b>🤖 Auto Features</b>
+┊
+┊<b>Features:</b>
+┊1. <b>Auto Leech</b>: Automatically mirror/leech links sent to the bot (forwarded or direct).
+┊2. <b>Auto Leech Cmd</b>: The default command to use (e.g., <code>/leech</code>, <code>/mirror</code>, <code>/yl</code>).
+┊3. <b>Auto Compress Cmd</b>: Extra arguments to append (e.g., <code>-z password</code>, <code>-ff</code>).
+┊4. <b>Auto Caption</b>: Replace or remove parts of filenames/captions.
+╰Check specific help buttons for more details.</blockquote>"""
+
+AUTOMATION_HELP_DICT = {
+    "main": automation_help_main,
+    "Auto-Leech": "<b>Auto Leech</b>\n\nEnable this to let the bot automatically process links sent to it in private chat.\nNote: Requires <code>Auto Leech Cmd</code> to be set.",
+    "Auto-Leech-Cmd": user_settings_text["AUTO_LEECH_CMD"],
+    "Auto-Compress-Cmd": user_settings_text["AUTO_COMPRESS_CMD"],
+    "Caption-Replace": user_settings_text["AUTO_CAPTION_REPLACE"],
+    "Caption-Remove": user_settings_text["AUTO_CAPTION_REMOVE"],
+}
+
 help_string = f"""<blockquote expandable>╭ℹ️ <b>Help Guide</b>
 ┊NOTE: Try each command without any argument to see more detalis.
 ┊/{BotCommands.MirrorCommand[0]} or /{BotCommands.MirrorCommand[1]}: Start mirroring to cloud.
@@ -422,5 +509,7 @@ help_string = f"""<blockquote expandable>╭ℹ️ <b>Help Guide</b>
 ┊/{BotCommands.ListCommand} [query]: Search in Google Drive(s).
 ┊/{BotCommands.SearchCommand} [query]: Search for torrents with API.
 ┊/{BotCommands.StatusCommand[0]}: Shows a status of all the downloads.
-╰/{BotCommands.StatsCommand}: Show stats of the machine where the bot is hosted in.</blockquote>"""
+┊/{BotCommands.StatusCommand[0]}: Shows a status of all the downloads.
+┊/{BotCommands.StatsCommand}: Show stats of the machine where the bot is hosted in.
+╰/automation: Show help guide for Automation features.</blockquote>"""
 

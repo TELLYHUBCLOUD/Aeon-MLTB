@@ -14,7 +14,8 @@ async def get_download(gid, old_info=None):
         res = await TorrentManager.aria2.tellStatus(gid)
         return res or old_info
     except Exception as e:
-        LOGGER.error(f"{e}: Aria2c, Error while getting torrent info")
+        if "not found" not in str(e):
+            LOGGER.error(f"{e}: Aria2c, Error while getting torrent info")
         return old_info
 
 
