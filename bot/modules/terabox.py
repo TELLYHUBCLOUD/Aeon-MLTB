@@ -1,6 +1,6 @@
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
-from aiohttp import ClientSession
+from aiohttp import ClientSession, TCPConnector
 from bot import LOGGER, bot_loop
 from bot.core.aeon_client import TgClient
 from bot.core.config_manager import Config
@@ -79,9 +79,19 @@ class TeraboxListener(Mirror):
 
     async def process_terabox(self):
         msg = await send_message(self.message, "Processing Terabox Link...")
+        
+        # Standardize Domain
+        self.link = self.link.replace("1024terabox.com", "terabox.com")
+        self.link = self.link.replace("teraboxapp.com", "terabox.com")
+        self.link = self.link.replace("terabox.app", "terabox.com")
+        self.link = self.link.replace("nephobox.com", "terabox.com")
+        self.link = self.link.replace("4funbox.com", "terabox.com")
+        self.link = self.link.replace("mirrobox.com", "terabox.com")
+        self.link = self.link.replace("momerybox.com", "terabox.com")
+        
         api_url = f"{Config.TERABOX_API}{quote(self.link)}"
         
-        async with ClientSession() as session:
+        async with ClientSession(connector=TCPConnector(verify_ssl=False)) as session:
             async with session.get(api_url) as resp:
                 if resp.status != 200:
                     try:
