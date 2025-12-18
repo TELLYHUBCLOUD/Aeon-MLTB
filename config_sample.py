@@ -15,6 +15,7 @@ AUTHORIZED_CHATS = ""  # Space separated chat_id/user_id to authorize
 SUDO_USERS = ""  # Space separated user_id for sudo access
 DEFAULT_UPLOAD = ""  # Default uploader if -ul is not specified. Options: "yt" (YouTube), "gd" (Google Drive), "rc" (Rclone), or "" (empty for no specific default).
 FILELION_API = ""
+TERABOX_API = "https://terabox-api.tellycloudapi.workers.dev/?url=https://true-link-vercel-api.vercel.app/api/terabox/api?url="  # Terabox Worker API URL
 STREAMWISH_API = ""
 EXCLUDED_EXTENSIONS = (
     ""  # Space separated file extensions to exclude (e.g., .log .exe)
@@ -86,6 +87,7 @@ UPSTREAM_REPO = (
 UPSTREAM_BRANCH = "main"  # Default branch for updates
 
 # Leech
+AUTO_LEECH_CMD = "leech" # Command to run on auto-leech (e.g., "leech", "mirror", "clone")
 LEECH_SPLIT_SIZE = 2097152000  # Split size for leeched files in bytes. Default: 2GB. Max: 4GB for Premium, 2GB for others. 0 for bot default.
 AS_DOCUMENT = False  # Upload leeched files as documents instead of media
 MEDIA_GROUP = False  # Send leeched files as a media group
@@ -104,9 +106,14 @@ BASE_URL_PORT = 80  # Port for the BASE_URL (Default: 80)
 WEB_PINCODE = False  # Require a PIN code for web file selection
 
 # Queueing system
+# Queueing system
 QUEUE_ALL = 0  # Max concurrent tasks (upload + download)
 QUEUE_DOWNLOAD = 0  # Max concurrent download tasks
 QUEUE_UPLOAD = 0  # Max concurrent upload tasks
+USER_TASK_LIMIT = 0 # Max concurrent tasks per user
+LEECH_LIMIT = 0 # Leech limit in GB
+MIRROR_LIMIT = 0 # Mirror limit in GB
+CLONE_LIMIT = 0 # Clone limit in GB
 
 # RSS
 RSS_DELAY = 600  # RSS feed check interval in seconds (Default: 600)

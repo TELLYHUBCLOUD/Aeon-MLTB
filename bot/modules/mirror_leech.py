@@ -10,6 +10,7 @@ from truelink.types import FolderResult, LinkResult
 
 from bot import DOWNLOAD_DIR, LOGGER, bot_loop, task_dict_lock, user_data
 from bot.core.aeon_client import TgClient
+from bot.core.config_manager import Config
 from bot.helper.aeon_utils.access_check import error_check
 from bot.helper.ext_utils.bot_utils import (
     COMMAND_USAGE,
@@ -49,6 +50,8 @@ from bot.helper.telegram_helper.message_utils import (
     send_message,
 )
 
+
+from bot.modules.clone import Clone
 
 class Mirror(TaskListener):
     def __init__(
@@ -518,12 +521,30 @@ async def auto_leech_handler(client, message):
     ):
         return
     auto_ff = user_dict.get("AUTO_COMPRESS_CMD")
-    message.text = f"/leech {text}"
-    LOGGER.info(f"[AUTO_LEECH] Triggered for user {user_id}: {text[:30]}...")
-    await Mirror(
-        client,
-        message,
-        is_leech=True,
-        auto_link=text,
-        auto_ff=auto_ff,
-    ).new_event()
+    auto_ff = user_dict.get("AUTO_COMPRESS_CMD")
+    cmd = Config.AUTO_LEECH_CMD.lower()
+    message.text = f"/{cmd} {text}"
+    LOGGER.info(f"[AUTO_LEECH] Triggered for user {user_id} with cmd {cmd}: {text[:30]}...")
+
+    if cmd == "clone":
+        await Clone(
+            client,
+            message,
+        ).new_event()
+    elif cmd == "mirror":
+        await Mirror(
+            client,
+            message,
+            is_leech=False,
+            auto_link=text,
+            auto_ff=auto_ff,
+        ).new_event()
+    else:
+        # Default to leech
+        await Mirror(
+            client,
+            message,
+            is_leech=True,
+            auto_link=text,
+            auto_ff=auto_ff,
+        ).new_event()

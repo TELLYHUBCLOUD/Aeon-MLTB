@@ -17,7 +17,7 @@ from bot import (
 )
 from bot.core.config_manager import Config
 from bot.core.torrent_manager import TorrentManager
-from bot.helper.ext_utils.bot_utils import new_task
+from bot.helper.ext_utils.bot_utils import check_size_limit, new_task
 from bot.helper.ext_utils.files_utils import clean_unwanted
 from bot.helper.ext_utils.status_utils import get_readable_time, get_task_by_gid
 from bot.helper.ext_utils.task_manager import stop_duplicate_check
@@ -141,6 +141,12 @@ async def _qb_listener():
                     elif state == "downloading":
                         qb_torrents[tag]["stalled_time"] = time()
                         if not qb_torrents[tag]["stop_dup_check"]:
+                            if task := await get_task_by_gid(tor_info.hash[:12]):
+                                if limit_exceeded := check_size_limit(
+                                    task.listener, tor_info.total_size
+                                ):
+                                    await _on_download_error(limit_exceeded, tor_info)
+                                    continue
                             qb_torrents[tag]["stop_dup_check"] = True
                             await _stop_duplicate(tor_info)
                     elif state == "stalledDL":

@@ -15,6 +15,7 @@ class Config:
     AUTO_CAPTION_REPLACE: str = ""
     AUTO_COMPRESS_CMD: str = ""
     AUTO_LEECH: bool = False
+    AUTO_LEECH_CMD: str = "leech"
     BASE_URL: str = ""
     BASE_URL_PORT: int = 80
     BOT_TOKEN: str = ""
@@ -46,6 +47,10 @@ class Config:
     QUEUE_ALL: int = 0
     QUEUE_DOWNLOAD: int = 0
     QUEUE_UPLOAD: int = 0
+    USER_TASK_LIMIT: int = 0
+    LEECH_LIMIT: int = 0
+    MIRROR_LIMIT: int = 0
+    CLONE_LIMIT: int = 0
     RCLONE_FLAGS: str = ""
     RCLONE_PATH: str = ""
     RCLONE_SERVE_URL: str = ""
@@ -60,6 +65,7 @@ class Config:
     SUDO_USERS: str = ""
     TELEGRAM_API: int = 0
     TELEGRAM_HASH: str = ""
+    TERABOX_API: str = ""
     TG_PROXY: ClassVar[dict[str, str]] = {}
     THUMBNAIL_LAYOUT: str = ""
     TORRENT_TIMEOUT: int = 0

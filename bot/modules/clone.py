@@ -12,6 +12,8 @@ from bot.helper.ext_utils.bot_utils import (
     cmd_exec,
     sync_to_async,
 )
+from bot.core.config_manager import Config
+from bot.helper.ext_utils.status_utils import get_readable_file_size
 from bot.helper.ext_utils.links_utils import (
     is_gdrive_id,
     is_gdrive_link,
@@ -141,6 +143,12 @@ class Clone(TaskListener):
                     self.message, f"<blockquote expandable>╭❌ <b>Error</b>\n╰<code>{self.name}</code></blockquote>"
                 )
                 return
+            if Config.CLONE_LIMIT and self.size > Config.CLONE_LIMIT * 1024**3:
+                await send_message(
+                    self.message,
+                    f"<blockquote expandable>╭❌ <b>Error</b>\n╰Clone Limit Exceeded. Task size {get_readable_file_size(self.size)} exceeds limit of {Config.CLONE_LIMIT} GB.</blockquote>",
+                )
+                return
             msg, button = await stop_duplicate_check(self)
             if msg:
                 await send_message(self.message, msg, button)
@@ -223,6 +231,27 @@ class Clone(TaskListener):
                     if not self.name:
                         self.name = src_path.rsplit("/", 1)[-1]
                     mime_type = rstat["MimeType"]
+
+            if Config.CLONE_LIMIT:
+                cmd = [
+                    "xone",
+                    "size",
+                    "--fast-list",
+                    "--json",
+                    "--config",
+                    config_path,
+                    f"{remote}:{src_path}",
+                ]
+                res = await cmd_exec(cmd)
+                if res[2] == 0:
+                    rsize = loads(res[0])
+                    size = rsize["bytes"]
+                    if size > Config.CLONE_LIMIT * 1024**3:
+                        await send_message(
+                            self.message,
+                            f"<blockquote expandable>╭❌ <b>Error</b>\n╰Clone Limit Exceeded. Task size {get_readable_file_size(size)} exceeds limit of {Config.CLONE_LIMIT} GB.</blockquote>",
+                        )
+                        return
 
             await self.on_download_start()
 

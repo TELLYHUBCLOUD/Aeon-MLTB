@@ -408,6 +408,8 @@ help_string = f"""<blockquote expandable>╭ℹ️ <b>Help Guide</b>
 ┊/{BotCommands.JdLeechCommand[0]} or /{BotCommands.JdLeechCommand[1]}: Start leeching using JDownloader.
 ┊/{BotCommands.NzbLeechCommand[0]} or /{BotCommands.NzbLeechCommand[1]}: Start leeching using Sabnzbd.
 ┊/{BotCommands.YtdlLeechCommand[0]} or /{BotCommands.YtdlLeechCommand[1]}: Leech yt-dlp supported link.
+┊/{BotCommands.EncodeCommand} [link]: Re-encode media (-q 1080p|720p|480p -an -sn).
+┊/{BotCommands.MergeCommand} [link]: Merge video files.
 ┊/{BotCommands.CloneCommand} [drive_url]: Copy file/folder to Google Drive.
 ┊/{BotCommands.CountCommand} [drive_url]: Count file/folder of Google Drive.
 ┊/{BotCommands.DeleteCommand} [drive_url]: Delete file/folder from Google Drive (Only Owner & Sudo).

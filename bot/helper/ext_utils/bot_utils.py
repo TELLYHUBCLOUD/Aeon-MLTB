@@ -21,10 +21,23 @@ from .help_messages import (
     YT_HELP_DICT,
 )
 from .telegraph_helper import telegraph
+from bot.helper.ext_utils.status_utils import get_readable_file_size
 
 COMMAND_USAGE = {}
 
 THREAD_POOL = ThreadPoolExecutor(max_workers=500)
+
+
+def check_size_limit(listener, size_bytes):
+    if (
+        user_data.get(listener.message.from_user.id, {}).get("SUDO")
+        or listener.message.from_user.id == Config.OWNER_ID
+    ):
+        return None
+    limit = Config.LEECH_LIMIT if listener.is_leech else Config.MIRROR_LIMIT
+    if limit and size_bytes > limit * 1024**3:
+        return f"Task size {get_readable_file_size(size_bytes)} exceeds limit of {limit} GB."
+    return None
 
 
 class SetInterval:

@@ -15,6 +15,9 @@ class BotCommands:
     NzbLeechCommand = [f"nzbleech{i}", f"nl{i}"]
     YtdlLeechCommand = [f"ytdlleech{i}", f"yl{i}"]
     CloneCommand = f"clone{i}"
+    EncodeCommand = f"encode{i}"
+    MergeCommand = f"merge{i}"
+    TeraboxCommand = [f"terabox{i}", f"tb{i}"]
     MediaInfoCommand = f"mediainfo{i}"
     CountCommand = f"count{i}"
     DeleteCommand = f"del{i}"

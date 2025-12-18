@@ -3,6 +3,7 @@ from .broadcast import broadcast
 from .cancel_task import cancel, cancel_all_buttons, cancel_all_update, cancel_multi
 from .chat_permission import add_sudo, authorize, remove_sudo, unauthorize
 from .clone import clone_node
+from .encode import encode
 from .exec import aioexecute, clear, execute
 from .file_selector import confirm_selection, select
 from .force_start import remove_from_queue
@@ -10,7 +11,9 @@ from .gd_count import count_node
 from .gd_delete import delete_file
 from .gd_search import gdrive_search, select_type
 from .help import arg_usage, bot_help
+from .help import arg_usage, bot_help
 from .mediainfo import mediainfo
+from .merge import merge
 from .mirror_leech import (
     auto_leech_handler,
     jd_leech,
@@ -39,6 +42,7 @@ from .users_settings import (
     get_users_settings,
     send_user_settings,
 )
+from .terabox import terabox
 from .ytdlp import ytdl, ytdl_leech
 
 __all__ = [
@@ -63,6 +67,7 @@ __all__ = [
     "delete_file",
     "edit_bot_settings",
     "edit_user_settings",
+    "encode",
     "execute",
     "gdrive_search",
     "get_packages_version",
@@ -75,6 +80,7 @@ __all__ = [
     "leech",
     "log",
     "mediainfo",
+    "merge",
     "mirror",
     "nzb_leech",
     "nzb_mirror",
@@ -94,6 +100,7 @@ __all__ = [
     "start",
     "status_pages",
     "task_status",
+    "terabox",
     "torrent_search",
     "torrent_search_update",
     "unauthorize",

@@ -215,6 +215,21 @@ def add_handlers():
             BotCommands.SoxCommand,
             CustomFilters.authorized,
         ),
+        "encode": (
+            encode,
+            BotCommands.EncodeCommand,
+            CustomFilters.authorized,
+        ),
+        "merge": (
+            merge,
+            BotCommands.MergeCommand,
+            CustomFilters.authorized,
+        ),
+        "terabox": (
+            terabox,
+            BotCommands.TeraboxCommand,
+            CustomFilters.authorized,
+        ),
     }
 
     for handler_func, command_name, custom_filter in command_filters.values():

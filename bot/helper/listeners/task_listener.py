@@ -178,7 +178,10 @@ class TaskListener(TaskConfig):
         if not await aiopath.exists(f"{self.dir}/{self.name}"):
             try:
                 files = await listdir(self.dir)
-                self.name = files[-1]
+                if len(files) > 1:
+                    self.name = ""
+                else:
+                    self.name = files[0]
                 if self.name == "yt-dlp-thumb":
                     self.name = files[0]
             except Exception as e:

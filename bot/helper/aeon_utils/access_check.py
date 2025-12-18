@@ -6,6 +6,8 @@ from pyrogram.errors import PeerIdInvalid, RPCError, UserNotParticipant
 
 from bot import (
     LOGGER,
+    task_dict,
+    task_dict_lock,
     user_data,
 )
 from bot.core.aeon_client import TgClient
@@ -87,6 +89,18 @@ async def error_check(message):
         Config.RSS_CHAT,
         user_data.get(user_id, {}).get("SUDO"),
     }:
+        if Config.USER_TASK_LIMIT:
+            async with task_dict_lock:
+                tasks = [
+                    t
+                    for t in task_dict.values()
+                    if t.listener.message.from_user.id == user_id
+                ]
+            if len(tasks) >= Config.USER_TASK_LIMIT:
+                msg.append(
+                    f"User Task Limit Exceeded. You can only have {Config.USER_TASK_LIMIT} active tasks.",
+                )
+
         token_msg, button = await token_check(user_id, button)
         if token_msg:
             msg.append(token_msg)

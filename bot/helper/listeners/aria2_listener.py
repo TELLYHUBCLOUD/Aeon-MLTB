@@ -9,7 +9,7 @@ from aiohttp.client_exceptions import ClientError
 from bot import LOGGER, intervals, task_dict, task_dict_lock
 from bot.core.config_manager import Config
 from bot.core.torrent_manager import TorrentManager, aria2_name, is_metadata
-from bot.helper.ext_utils.bot_utils import bt_selection_buttons
+from bot.helper.ext_utils.bot_utils import bt_selection_buttons, check_size_limit
 from bot.helper.ext_utils.files_utils import clean_unwanted
 from bot.helper.ext_utils.status_utils import get_task_by_gid
 from bot.helper.ext_utils.task_manager import stop_duplicate_check
@@ -51,6 +51,12 @@ async def _on_download_started(api, data):
     await sleep(2)
     if task := await get_task_by_gid(gid):
         download = await api.tellStatus(gid)
+        if limit_exceeded := check_size_limit(
+            task.listener, int(download["totalLength"])
+        ):
+            await TorrentManager.aria2_remove(download)
+            await task.listener.on_download_error(limit_exceeded)
+            return
         task.listener.name = aria2_name(download)
         msg, button = await stop_duplicate_check(task.listener)
         if msg:
