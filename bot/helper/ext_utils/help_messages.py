@@ -362,7 +362,7 @@ user_settings_text = {
     "INDEX_URL": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send Index URL. Timeout: 60 sec</blockquote>",
     "UPLOAD_PATHS": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send Dict of keys that have path values. Example: {'path 1': 'remote:rclonefolder', 'path 2': 'gdrive1 id', 'path 3': 'tg chat id', 'path 4': 'mrcc:remote:', 'path 5': b:@username} . Timeout: 60 sec</blockquote>",
     "EXCLUDED_EXTENSIONS": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send exluded extenions separated by space without dot at beginning. Timeout: 60 sec</blockquote>",
-    "NAME_SUBSTITUTE": """<blockquote expandable>╭ℹ️ <b>Info</b>
+    "NAME_SUBSTITUTE": r"""<blockquote expandable>╭ℹ️ <b>Info</b>
 ┊Word Substitutions. You can add pattern instead of normal text. Timeout: 60 sec
 ┊<b>NOTE:</b> You must add \ before any character, those are the characters: \^$.|?*+()[]{}-
 ┊<b>Example:</b> script/code/s | mirror/leech | tea/ /s | clone | cpu/ | \[mltb\]/mltb | \\text\\/text/s
@@ -372,7 +372,7 @@ user_settings_text = {
 ┊5. clone will get removed
 ┊6. cpu will get replaced by space
 ┊7. [mltb] will get replaced by mltb
-╰8. \text\ will get replaced by text with sensitive case</blockquote>""",
+┊8. \text\ will get replaced by text with sensitive case</blockquote>""",
     "YT_DLP_OPTIONS": """<blockquote expandable>╭ℹ️ <b>Info</b>
 ┊Send dict of YT-DLP Options. Timeout: 60 sec
 ┊<b>Format:</b> {key: value, key: value, key: value}.

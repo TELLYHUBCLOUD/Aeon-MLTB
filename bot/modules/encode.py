@@ -19,7 +19,7 @@ from bot.helper.mirror_leech_utils.download_utils.aria2_download import (
 from bot.helper.mirror_leech_utils.download_utils.direct_downloader import (
     add_direct_download,
 )
-from bot.helper.mirror_leech_utils.status_utils.ffmpeg_status import FFMpegStatus
+from bot.helper.mirror_leech_utils.status_utils.ffmpeg_status import FFmpegStatus
 from bot.helper.telegram_helper.message_utils import (
     auto_delete_message,
     delete_links,
@@ -149,7 +149,7 @@ class Encode(TaskListener):
         ffmpeg = FFMpeg(self)
         
         async with task_dict_lock:
-            task_dict[self.mid] = FFMpegStatus(self, ffmpeg, self.gid, "encoding")
+            task_dict[self.mid] = FFmpegStatus(self, ffmpeg, self.gid, "encoding")
         
         await send_status_message(self.message)
         
