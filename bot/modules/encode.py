@@ -50,15 +50,15 @@ async def select_encode_options(_, query, obj):
         obj.quality = data[2]
         await obj.main_menu()
     elif data[1] == "toggle_audio":
+        index = int(data[2])
         if obj.streams:
-            index = int(data[2])
-            obj.audio_map[index] = not obj.audio_map[index]
+             obj.audio_map[index] = not obj.audio_map[index]
         else:
              obj.remove_audio = not obj.remove_audio
         await obj.main_menu()
     elif data[1] == "toggle_sub":
+        index = int(data[2])
         if obj.streams:
-            index = int(data[2])
             obj.sub_map[index] = not obj.sub_map[index]
         else:
              obj.remove_subs = not obj.remove_subs
@@ -79,8 +79,8 @@ class EncodeSelection:
         self.quality = "Original" # Original, 1080p, 720p, 480p, 360p
         self.audio_map = {} # index: bool (True = Keep)
         self.sub_map = {}   # index: bool (True = Keep)
-        self.remove_audio = False # Global toggle if streams=None
-        self.remove_subs = False  # Global toggle if streams=None
+        self.remove_audio = False
+        self.remove_subs = False
         self.is_cancelled = False
         self.event = Event()
         self._reply_to = None
@@ -122,7 +122,6 @@ class EncodeSelection:
         if self.streams:
              return self.quality, self.audio_map, self.sub_map
         else:
-             # Return generic flags
              return self.quality, self.remove_audio, self.remove_subs
 
     async def main_menu(self):
@@ -187,7 +186,7 @@ class EncodeSelection:
              prefix = "✅ " if self.quality == opt else ""
              buttons.data_button(f"{prefix}{opt}", f"enc qual {opt}")
         
-        buttons.data_button("Back", "enc done") # Re-using done as back to main menu loop essentially
+        buttons.data_button("Back", "enc done") 
         
         markup = buttons.build_menu(2)
         await edit_message(self._reply_to, "Select Quality", markup)
@@ -247,30 +246,9 @@ class Encode(TaskListener):
             )
              return
 
-        LOGGER.info(f"Encode Request: Link: {self.link} Quality: {self.quality}")
+        LOGGER.info(f"Encode Request: Link: {self.link}")
 
-        await self.get_tag(text) # Fix for "cc: seftuser" (ensures self.tag is set)
-
-        # Pre-Download Menu
-        selector = EncodeSelection(self, None) 
-        # Note: If CLI args were provided, we could skip this? 
-        # But User requested "Interactive Menu". 
-        # We can pre-set EncodeSelection with args?
-        # For now, let's show the menu as requested.
-        
-        if self.remove_audio: selector.remove_audio = True
-        if self.remove_subs: selector.remove_subs = True
-        if self.quality: selector.quality = self.quality
-        
-        qual, r_aud, r_sub = await selector.get_selection()
-        
-        if qual is None: # Cancelled
-            await send_message(self.message, "Task Cancelled.")
-            return
-
-        self.quality = qual
-        self.remove_audio = r_aud
-        self.remove_subs = r_sub
+        await self.get_tag(text) 
 
         try:
              await self.before_start()
@@ -297,7 +275,6 @@ class Encode(TaskListener):
                 ),
             )
         elif is_url(self.link):
-             # For simplicity, assuming direct link or aria2 supported link
              create_task(add_aria2_download(self, path, [], None, None))
         else:
              await send_message(self.message, "Invalid input for encode.")
@@ -310,6 +287,57 @@ class Encode(TaskListener):
             return
             
         file_path = f"{self.dir}/{files[0]}" 
+
+        # Extract Metadata (Streams)
+        try:
+            result = await cmd_exec(
+                [
+                    "ffprobe", 
+                    "-hide_banner", 
+                    "-loglevel", "error", 
+                    "-print_format", "json", 
+                    "-show_streams", 
+                    file_path
+                ]
+            )
+            if result[0]:
+                streams = json.loads(result[0]).get("streams", [])
+            else:
+                streams = []
+        except Exception as e:
+            LOGGER.error(f"Metadata Extraction Failed: {e}")
+            streams = []
+
+        # Interactive Menu (Post-Download)
+        selector = EncodeSelection(self, streams)
+        # Apply args if present? User wants menu, so maybe pre-select but still show?
+        if self.quality: selector.quality = self.quality
+        if self.remove_audio and not streams: selector.remove_audio = True
+        if self.remove_subs and not streams: selector.remove_subs = True
+        
+        # If streams are present, and user passed -an (Remove All Audio), we could pre-toggle all audio to False
+        if self.remove_audio and streams:
+            for idx in selector.audio_map: selector.audio_map[idx] = False
+
+        if self.remove_subs and streams:
+            for idx in selector.sub_map: selector.sub_map[idx] = False
+
+        qual, map1, map2 = await selector.get_selection()
+
+        if qual is None: # Cancelled
+            await self.on_upload_error("User Cancelled Task")
+            return
+            
+        if streams:
+            self.quality = qual
+            audio_map = map1
+            sub_map = map2
+        else:
+            self.quality = qual
+            self.remove_audio = map1
+            self.remove_subs = map2
+            audio_map = {}
+            sub_map = {}
 
         # Prepare FFMpeg Status
         ffmpeg = FFMpeg(self)
@@ -329,20 +357,38 @@ class Encode(TaskListener):
             "-i", file_path,
         ]
 
-        if self.remove_audio:
-            cmd.append("-an")
+        if streams:
+            # Map Streams based on Selection
+            has_video = False
+            for stream in streams:
+                idx = stream['index']
+                ctype = stream['codec_type']
+                if ctype == 'video':
+                    cmd.extend(["-map", f"0:{idx}"])
+                    has_video = True
+                elif ctype == 'audio':
+                    if audio_map.get(idx, True):
+                        cmd.extend(["-map", f"0:{idx}"])
+                elif ctype == 'subtitle':
+                    if sub_map.get(idx, True):
+                        cmd.extend(["-map", f"0:{idx}"])
+                else:
+                     cmd.extend(["-map", f"0:{idx}"]) # Map attachments/data
         else:
-            cmd.extend(["-c:a", "copy"])
-            
-        if self.remove_subs:
-            cmd.append("-sn")
-        else:
-            cmd.extend(["-c:s", "copy"])
+            # Fallback (No metadata)
+            has_video = True 
+            if self.remove_audio:
+                cmd.append("-an")
+            else:
+                cmd.extend(["-c:a", "copy"])
+                
+            if self.remove_subs:
+                cmd.append("-sn")
+            else:
+                cmd.extend(["-c:s", "copy"])
 
         # Transcoding Options
-        # Logic: If Quality != Original, use Libx264 + Scale. 
-        # Else copy input video stream.
-        if self.quality != "Original":
+        if self.quality != "Original" and has_video:
              cmd.extend(["-c:v", "libx264"])
              scale = ""
              if self.quality == "1080p": scale = "scale=-1:1080"
@@ -354,6 +400,9 @@ class Encode(TaskListener):
         else:
              cmd.extend(["-c:v", "copy"])
         
+        if streams:
+             cmd.extend(["-c:a", "copy", "-c:s", "copy"])
+
         output_file = f"{ospath.splitext(file_path)[0]}_encoded.mp4"
         cmd.append(output_file)
         
@@ -366,7 +415,6 @@ class Encode(TaskListener):
                 await remove(file_path) # Delete Original
                 files_left = await listdir(self.dir)
                 if not files_left:
-                     # This shouldn't happen if output_file was created
                      LOGGER.error("All files removed/missing after encode!")
                 else:
                      self.name = files_left[0]
