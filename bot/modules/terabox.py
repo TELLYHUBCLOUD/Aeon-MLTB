@@ -108,17 +108,12 @@ class TeraboxListener(Mirror):
                         valid_links.append(link)
 
         # 1. api5.dl2
-        check_add("api5", "dl2")
-        # 2. api5.dl1
         check_add("api5", "dl1")
-        # 3. api6.dl2
-        check_add("api6", "dl2")
-        # 4. api6.dl1
+        check_add("api5", "dl2")
         check_add("api6", "dl1")
-        # 5. api3.dl2
-        check_add("api3", "dl2")
-        # 6. api3.dl1
+        check_add("api6", "dl2")
         check_add("api3", "dl1")
+        check_add("api3", "dl2")
 
         if not valid_links:
             await msg.edit("No valid download links found from API.")
