@@ -1,5 +1,5 @@
 from asyncio import create_task, sleep
-from os import path as ospath
+from os import path as ospath, walk
 import re
 
 from aiofiles.os import path as aiopath
@@ -13,6 +13,7 @@ from bot.helper.aeon_utils.access_check import error_check
 from bot.helper.ext_utils.bot_utils import (
     COMMAND_USAGE,
     arg_parser,
+    sync_to_async,
 )
 
 from bot.helper.ext_utils.bulk_links import extract_bulk_links
@@ -201,6 +202,8 @@ class Merge(TaskListener):
             if self.is_cancelled:
                 return
 
+            self.link = link
+
             if hasattr(link, "download"):
                  # Telegram reply object
                 await TelegramDownloadHelper(self).add_download(
@@ -237,18 +240,21 @@ class Merge(TaskListener):
         if self.current_batch_files < self.total_batch_files:
             return
 
-        from bot.helper.ext_utils.files_utils import listdir
-        files = await listdir(self.dir)
-        if not files or len(files) < 2:
-            await self.on_upload_error(f"Need at least 2 files to merge. Found: {len(files)}")
+        input_files = []
+        for root, _, filess in await sync_to_async(walk, self.dir):
+             for file in filess:
+                 input_files.append(ospath.join(root, file))
+        
+        if not input_files or len(input_files) < 2:
+            await self.on_upload_error(f"Need at least 2 files to merge. Found: {len(input_files)}")
             return
             
-        files.sort() # Sort by name
+        input_files.sort()
         
         # Create input.txt
         input_txt_path = f"{self.dir}/input.txt"
         with open(input_txt_path, 'w') as f:
-            for file in files:
+            for file in input_files:
                 f.write(f"file '{file}'\n")
         
         # Prepare FFMpeg Status
@@ -287,8 +293,8 @@ class Merge(TaskListener):
         
         if res:
              # Cleanup inputs
-             for file in files:
-                 await remove(f"{self.dir}/{file}")
+             for file in input_files:
+                 await remove(file)
              await remove(input_txt_path)
              
 
