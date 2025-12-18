@@ -139,6 +139,21 @@ class Merge(TaskListener):
              if not self.inputs and (reply_to := self.message.reply_to_message):
                  if reply_to.document or reply_to.video or reply_to.audio:
                     self.inputs.append(reply_to)
+
+        if not self.inputs and self.link:
+             if is_telegram_link(self.link):
+                 match = re.search(r"(https?://t\.me/(?:c/)?(?:[\w\d]+)/)(\d+)-(\d+)", self.link)
+                 if match:
+                     base = match.group(1)
+                     start = int(match.group(2))
+                     end = int(match.group(3))
+                     if start <= end:
+                         for i in range(start, end + 1):
+                             self.inputs.append(f"{base}{i}")
+                 else:
+                     self.inputs.append(self.link)
+             else:
+                 self.inputs.append(self.link)
         
         if not self.inputs:
              await send_message(

@@ -6,6 +6,7 @@ import json
 
 from aiofiles.os import path as aiopath
 from aiofiles.os import remove, listdir
+from bot.helper.ext_utils.files_utils import get_path_size
 from pyrogram.handlers import CallbackQueryHandler
 from pyrogram.filters import regex, user
 

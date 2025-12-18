@@ -105,10 +105,13 @@ async def edit_message(
             # parse_mode=parse_mode,
         )
     except FloodWait as f:
-        LOGGER.warning(str(f))
+        if f.value > 20:
+            LOGGER.warning(str(f))
+        else:
+            LOGGER.info(str(f))
         if not block:
             return message
-        await sleep(f.value * 1.2)
+        await sleep(f.value * 1.5)
         return await edit_message(message, text, buttons, photo)
     except (MessageNotModified, MessageEmpty):
         pass
