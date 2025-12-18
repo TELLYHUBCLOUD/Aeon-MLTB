@@ -115,7 +115,7 @@ async def edit_message(
         await sleep(f.value * 1.5)
         return await edit_message(message, text, buttons, photo)
     except (MessageNotModified, MessageEmpty):
-        pass
+        return message
     except Exception as e:
         LOGGER.error(str(e))
         return str(e)
