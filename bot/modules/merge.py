@@ -285,7 +285,7 @@ class Merge(TaskListener):
                 # Try to detect series pattern from input files
                 input_filenames = [ospath.basename(f) for f in input_files]
                 # Regex for S01E01 or Episode 01
-                pattern_se = re.compile(r"(.*?)S(\d+)E(\d+)", re.IGNORECASE)
+                pattern_se = re.compile(r"(.*?)S(\d+)\s*E(\d+)", re.IGNORECASE)
                 pattern_ep = re.compile(r"(.*?)Episode\s*(\d+)", re.IGNORECASE)
                 
                 series_name = ""
