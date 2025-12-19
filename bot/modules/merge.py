@@ -287,8 +287,8 @@ class Merge(TaskListener):
             "-progress",
             "pipe:1",
             "-f", "concat",
-            "-safe", "0",
             "-i", input_txt_path,
+            "-map", "0",
             "-c", "copy",
             output_file
         ]
