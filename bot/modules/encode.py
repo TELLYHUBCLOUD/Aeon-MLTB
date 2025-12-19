@@ -648,10 +648,10 @@ class Encode(TaskListener):
             nextmsg.sender_chat = self.user
         if intervals["stopAll"]:
             return
-        await obj(
+        create_task(obj(
             self.client,
             nextmsg,
-        ).new_event()
+        ).new_event())
 
     async def init_bulk(self, input_list, bulk_start, bulk_end, obj):
         try:
@@ -660,30 +660,44 @@ class Encode(TaskListener):
                 raise ValueError("Bulk Empty!")
             b_msg = input_list[:1]
             self.options = input_list[1:]
-            index = self.options.index("-b")
-            del self.options[index]
-            if bulk_start or bulk_end:
-                del self.options[index + 1]
+            if "-b" in self.options:
+                index = self.options.index("-b")
+                del self.options[index]
+                if bulk_start or bulk_end:
+                    del self.options[index + 1]
             self.options = " ".join(self.options)
-            b_msg.append(f"{self.bulk[0]} -i {len(self.bulk)} {self.options}")
-            msg = " ".join(b_msg)
+
             if len(self.bulk) > 2:
                 self.multi_tag = token_hex(2)
                 multi_tags.add(self.multi_tag)
-                msg += f"\nCancel Multi: <code>/stop {self.multi_tag}</code>"
-            nextmsg = await send_message(self.message, msg)
-            nextmsg = await self.client.get_messages(
-                chat_id=self.message.chat.id,
-                message_ids=nextmsg.id,
-            )
-            if self.message.from_user:
-                nextmsg.from_user = self.user
-            else:
-                nextmsg.sender_chat = self.user
-            await obj(
-                self.client,
-                nextmsg,
-            ).new_event()
+
+            for index, link in enumerate(self.bulk):
+                if self.multi_tag and self.multi_tag not in multi_tags:
+                    break
+                    
+                cmd_parts = list(b_msg) # Copy base command
+                cmd_parts.append(f"{link} {self.options}")
+                if len(self.bulk) > 2:
+                     cmd_parts.append(f"\nCancel Multi: <code>/stop {self.multi_tag}</code>")
+                
+                msg = " ".join(cmd_parts)
+                nextmsg = await send_message(self.message, msg)
+                nextmsg = await self.client.get_messages(
+                    chat_id=self.message.chat.id,
+                    message_ids=nextmsg.id,
+                )
+                if self.message.from_user:
+                    nextmsg.from_user = self.user
+                else:
+                    nextmsg.sender_chat = self.user
+                
+                create_task(obj(
+                    self.client,
+                    nextmsg,
+                ).new_event())
+                
+                # Delay to prevent FloodWait and staggered start
+                await sleep(2)
         except Exception as e:
             await send_message(
                 self.message,
