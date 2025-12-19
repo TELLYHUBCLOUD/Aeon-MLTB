@@ -442,7 +442,7 @@ async def get_user_settings(from_user, stype="main"):
         return owner_value, "Owner"
 
     if stype == "leech":
-        buttons.data_button("Thumbnail", f"userset {user_id} menu THUMBNAIL")
+        buttons.data_button("🖼️ THUMBNAIL", f"userset {user_id} menu THUMBNAIL")
 
         # Auto Thumbnail toggle
         auto_thumb = user_dict.get("AUTO_THUMBNAIL")
@@ -451,17 +451,17 @@ async def get_user_settings(from_user, stype="main"):
 
         if auto_thumb:
             buttons.data_button(
-                "Auto Thumbnail: ✅ ON",
+                "🖼️ AUTO THUMBNAIL: ✅ ON",
                 f"userset {user_id} tog AUTO_THUMBNAIL f",
             )
         else:
             buttons.data_button(
-                "Auto Thumbnail: ❌ OFF",
+                "🖼️ AUTO THUMBNAIL: ❌ OFF",
                 f"userset {user_id} tog AUTO_THUMBNAIL t",
             )
 
         buttons.data_button(
-            "Leech Prefix",
+            "🏷️ LEECH PREFIX",
             f"userset {user_id} menu LEECH_FILENAME_PREFIX",
         )
         if user_dict.get("LEECH_FILENAME_PREFIX", False):
@@ -473,7 +473,7 @@ async def get_user_settings(from_user, stype="main"):
         else:
             lprefix = "None"
         buttons.data_button(
-            "Leech Suffix",
+            "🏷️ LEECH SUFFIX",
             f"userset {user_id} menu LEECH_SUFFIX",
         )
         if user_dict.get("LEECH_SUFFIX", False):
@@ -484,7 +484,7 @@ async def get_user_settings(from_user, stype="main"):
             lsuffix = "None"
 
         buttons.data_button(
-            "Leech Font",
+            "🔠 LEECH FONT",
             f"userset {user_id} menu LEECH_FONT",
         )
         if user_dict.get("LEECH_FONT", False):
@@ -495,7 +495,7 @@ async def get_user_settings(from_user, stype="main"):
             lfont = "None"
 
         buttons.data_button(
-            "Leech Filename",
+            "📝 LEECH FILENAME",
             f"userset {user_id} menu LEECH_FILENAME",
         )
         if user_dict.get("LEECH_FILENAME", False):
@@ -506,7 +506,7 @@ async def get_user_settings(from_user, stype="main"):
             lfilename = "None"
 
         buttons.data_button(
-            "Leech Caption",
+            "💬 LEECH CAPTION",
             f"userset {user_id} menu LEECH_FILENAME_CAPTION",
         )
         if user_dict.get("LEECH_FILENAME_CAPTION", False):
@@ -519,7 +519,7 @@ async def get_user_settings(from_user, stype="main"):
         else:
             lcap = "None"
         buttons.data_button(
-            "User Dump",
+            "📁 USER DUMP",
             f"userset {user_id} menu USER_DUMP",
         )
         if user_dict.get("USER_DUMP", False):
@@ -527,12 +527,12 @@ async def get_user_settings(from_user, stype="main"):
         else:
             udump = "None"
         buttons.data_button(
-            "User Session",
+            "🔑 USER SESSION",
             f"userset {user_id} menu USER_SESSION",
         )
         usess = "added" if user_dict.get("USER_SESSION", False) else "None"
         buttons.data_button(
-            "Leech Split Size",
+            "📏 LEECH SPLIT SIZE",
             f"userset {user_id} menu LEECH_SPLIT_SIZE",
         )
         # Handle LEECH_SPLIT_SIZE, ensuring it's an integer
@@ -549,7 +549,7 @@ async def get_user_settings(from_user, stype="main"):
         else:
             lsplit = "None"
         buttons.data_button(
-            "Equal Splits",
+            "⚖️ EQUAL SPLITS",
             f"userset {user_id} tog EQUAL_SPLITS {'f' if user_dict.get('EQUAL_SPLITS', False) or ('EQUAL_SPLITS' not in user_dict and Config.EQUAL_SPLITS) else 't'}",
         )
         if user_dict.get("AS_DOCUMENT", False) or (
@@ -557,26 +557,26 @@ async def get_user_settings(from_user, stype="main"):
         ):
             ltype = "DOCUMENT"
             buttons.data_button(
-                "Send As Media",
+                "🎬 SEND AS MEDIA",
                 f"userset {user_id} tog AS_DOCUMENT f",
             )
         else:
             ltype = "MEDIA"
             buttons.data_button(
-                "Send As Document",
+                "📄 SEND AS DOCUMENT",
                 f"userset {user_id} tog AS_DOCUMENT t",
             )
         if user_dict.get("MEDIA_GROUP", False) or (
             "MEDIA_GROUP" not in user_dict and Config.MEDIA_GROUP
         ):
             buttons.data_button(
-                "Disable Media Group",
+                "🚫 DISABLE MEDIA GROUP",
                 f"userset {user_id} tog MEDIA_GROUP f",
             )
             media_group = "Enabled"
         else:
             buttons.data_button(
-                "Enable Media Group",
+                "✅ ENABLE MEDIA GROUP",
                 f"userset {user_id} tog MEDIA_GROUP t",
             )
             media_group = "Disabled"
@@ -586,18 +586,18 @@ async def get_user_settings(from_user, stype="main"):
             "MEDIA_STORE" not in user_dict and Config.MEDIA_STORE
         ):
             buttons.data_button(
-                "Disable Media Store",
+                "🚫 DISABLE MEDIA STORE",
                 f"userset {user_id} tog MEDIA_STORE f",
             )
             media_store = "Enabled"
         else:
             buttons.data_button(
-                "Enable Media Store",
+                "✅ ENABLE MEDIA STORE",
                 f"userset {user_id} tog MEDIA_STORE t",
             )
             media_store = "Disabled"
         buttons.data_button(
-            "Thumbnail Layout",
+            "🧩 THUMBNAIL LAYOUT",
             f"userset {user_id} menu THUMBNAIL_LAYOUT",
         )
         if user_dict.get("THUMBNAIL_LAYOUT", False):
@@ -607,8 +607,8 @@ async def get_user_settings(from_user, stype="main"):
         else:
             thumb_layout = "None"
 
-        buttons.data_button("Back", f"userset {user_id} back")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} back")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         # Determine Equal Splits status
         equal_splits_status = (
@@ -665,14 +665,14 @@ async def get_user_settings(from_user, stype="main"):
 -> Equal Splits: <b>{equal_splits_status}</b>
 """
     elif stype == "rclone":
-        buttons.data_button("Rclone Config", f"userset {user_id} menu RCLONE_CONFIG")
+        buttons.data_button("🛠️ RCLONE CONFIG", f"userset {user_id} menu RCLONE_CONFIG")
         buttons.data_button(
-            "Default Rclone Path",
+            "📂 DEFAULT RCLONE PATH",
             f"userset {user_id} menu RCLONE_PATH",
         )
-        buttons.data_button("Rclone Flags", f"userset {user_id} menu RCLONE_FLAGS")
-        buttons.data_button("Back", f"userset {user_id} back")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("🏳️ RCLONE FLAGS", f"userset {user_id} menu RCLONE_FLAGS")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} back")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
         rccmsg = "Exists" if await aiopath.exists(rclone_conf) else "Not Exists"
         if "RCLONE_PATH" in user_dict:
             rccpath = user_dict["RCLONE_PATH"]
@@ -703,25 +703,25 @@ async def get_user_settings(from_user, stype="main"):
 
 """
     elif stype == "gdrive":
-        buttons.data_button("token.pickle", f"userset {user_id} menu TOKEN_PICKLE")
-        buttons.data_button("Default Gdrive ID", f"userset {user_id} menu GDRIVE_ID")
-        buttons.data_button("Index URL", f"userset {user_id} menu INDEX_URL")
+        buttons.data_button("🔑 TOKEN.PICKLE", f"userset {user_id} menu TOKEN_PICKLE")
+        buttons.data_button("🆔 DEFAULT GDRIVE ID", f"userset {user_id} menu GDRIVE_ID")
+        buttons.data_button("🔗 INDEX URL", f"userset {user_id} menu INDEX_URL")
         if user_dict.get("STOP_DUPLICATE", False) or (
             "STOP_DUPLICATE" not in user_dict and Config.STOP_DUPLICATE
         ):
             buttons.data_button(
-                "Disable Stop Duplicate",
+                "🚫 DISABLE STOP DUPLICATE",
                 f"userset {user_id} tog STOP_DUPLICATE f",
             )
             sd_msg = "Enabled"
         else:
             buttons.data_button(
-                "Enable Stop Duplicate",
+                "✅ ENABLE STOP DUPLICATE",
                 f"userset {user_id} tog STOP_DUPLICATE t",
             )
             sd_msg = "Disabled"
-        buttons.data_button("Back", f"userset {user_id} back")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} back")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
         tokenmsg = "Exists" if await aiopath.exists(token_pickle) else "Not Exists"
         if user_dict.get("GDRIVE_ID", False):
             gdrive_id = user_dict["GDRIVE_ID"]
@@ -740,15 +740,15 @@ async def get_user_settings(from_user, stype="main"):
     elif stype == "youtube":
         # Create organized menu with categories
         buttons.data_button(
-            "🔑 YouTube Token", f"userset {user_id} menu YOUTUBE_TOKEN_PICKLE"
+            "🔑 YOUTUBE TOKEN", f"userset {user_id} menu YOUTUBE_TOKEN_PICKLE"
         )
-        buttons.data_button("📹 Basic Settings", f"userset {user_id} youtube_basic")
+        buttons.data_button("⚙️ BASIC SETTINGS", f"userset {user_id} youtube_basic")
         buttons.data_button(
-            "⚙️ Advanced Settings", f"userset {user_id} youtube_advanced"
+            "🛠️ ADVANCED SETTINGS", f"userset {user_id} youtube_advanced"
         )
 
-        buttons.data_button("Back", f"userset {user_id} back")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} back")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         # Check if YouTube token exists
         youtube_token_path = f"tokens/{user_id}_youtube.pickle"
@@ -787,29 +787,29 @@ async def get_user_settings(from_user, stype="main"):
     elif stype == "youtube_basic":
         # Basic YouTube settings
         buttons.data_button(
-            "Default Privacy",
+            "🛡️ DEFAULT PRIVACY",
             f"userset {user_id} menu YOUTUBE_UPLOAD_DEFAULT_PRIVACY",
         )
         buttons.data_button(
-            "Default Category",
+            "📁 DEFAULT CATEGORY",
             f"userset {user_id} menu YOUTUBE_UPLOAD_DEFAULT_CATEGORY",
         )
         buttons.data_button(
-            "Default Tags", f"userset {user_id} menu YOUTUBE_UPLOAD_DEFAULT_TAGS"
+            "🏷️ DEFAULT TAGS", f"userset {user_id} menu YOUTUBE_UPLOAD_DEFAULT_TAGS"
         )
         buttons.data_button(
-            "Default Description",
+            "📝 DEFAULT DESCRIPTION",
             f"userset {user_id} menu YOUTUBE_UPLOAD_DEFAULT_DESCRIPTION",
         )
         buttons.data_button(
-            "Default Title", f"userset {user_id} menu YOUTUBE_UPLOAD_DEFAULT_TITLE"
+            "📌 DEFAULT TITLE", f"userset {user_id} menu YOUTUBE_UPLOAD_DEFAULT_TITLE"
         )
         buttons.data_button(
-            "Default Language",
+            "🗣️ DEFAULT LANGUAGE",
             f"userset {user_id} menu YOUTUBE_UPLOAD_DEFAULT_LANGUAGE",
         )
-        buttons.data_button("Back", f"userset {user_id} youtube")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} youtube")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         # Get basic settings
         youtube_privacy = user_dict.get(
@@ -850,38 +850,38 @@ async def get_user_settings(from_user, stype="main"):
     elif stype == "youtube_advanced":
         # Advanced YouTube settings
         buttons.data_button(
-            "Default License",
+            "📜 DEFAULT LICENSE",
             f"userset {user_id} menu YOUTUBE_UPLOAD_DEFAULT_LICENSE",
         )
         buttons.data_button(
-            "Embeddable", f"userset {user_id} tog YOUTUBE_UPLOAD_EMBEDDABLE"
+            "🔗 EMBEDDABLE", f"userset {user_id} tog YOUTUBE_UPLOAD_EMBEDDABLE"
         )
         buttons.data_button(
-            "Public Stats Viewable",
+            "📊 PUBLIC STATS VIEWABLE",
             f"userset {user_id} tog YOUTUBE_UPLOAD_PUBLIC_STATS_VIEWABLE",
         )
         buttons.data_button(
-            "Made for Kids", f"userset {user_id} tog YOUTUBE_UPLOAD_MADE_FOR_KIDS"
+            "🧒 MADE FOR KIDS", f"userset {user_id} tog YOUTUBE_UPLOAD_MADE_FOR_KIDS"
         )
         buttons.data_button(
-            "Notify Subscribers",
+            "🔔 NOTIFY SUBSCRIBERS",
             f"userset {user_id} tog YOUTUBE_UPLOAD_NOTIFY_SUBSCRIBERS",
         )
         buttons.data_button(
-            "Location Description",
+            "📍 LOCATION DESCRIPTION",
             f"userset {user_id} menu YOUTUBE_UPLOAD_LOCATION_DESCRIPTION",
         )
         buttons.data_button(
-            "Recording Date", f"userset {user_id} menu YOUTUBE_UPLOAD_RECORDING_DATE"
+            "🗓️ RECORDING DATE", f"userset {user_id} menu YOUTUBE_UPLOAD_RECORDING_DATE"
         )
         buttons.data_button(
-            "Auto Levels", f"userset {user_id} tog YOUTUBE_UPLOAD_AUTO_LEVELS"
+            "📈 AUTO LEVELS", f"userset {user_id} tog YOUTUBE_UPLOAD_AUTO_LEVELS"
         )
         buttons.data_button(
-            "Stabilize", f"userset {user_id} tog YOUTUBE_UPLOAD_STABILIZE"
+            "⚖️ STABILIZE", f"userset {user_id} tog YOUTUBE_UPLOAD_STABILIZE"
         )
-        buttons.data_button("Back", f"userset {user_id} youtube")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} youtube")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         # Get advanced settings
         youtube_license = user_dict.get(
@@ -936,19 +936,19 @@ async def get_user_settings(from_user, stype="main"):
 
     elif stype == "ai":
         # AI Model Selection (direct selection)
-        buttons.data_button("🤖 AI Model", f"userset {user_id} ai_model_selection")
+        buttons.data_button("🤖 AI MODEL", f"userset {user_id} ai_model_selection")
 
         # Conversation Mode Selection (direct selection)
         buttons.data_button(
-            "🎭 Conversation Mode", f"userset {user_id} ai_conversation_mode"
+            "🎭 CONVERSATION MODE", f"userset {user_id} ai_conversation_mode"
         )
 
         # Language Setting (direct selection)
-        buttons.data_button("🌐 Language", f"userset {user_id} ai_language")
+        buttons.data_button("🌐 LANGUAGE", f"userset {user_id} ai_language")
 
         # Max History Length (editable)
         buttons.data_button(
-            "📝 Max History Length", f"userset {user_id} menu AI_MAX_HISTORY_LENGTH"
+            "📝 MAX HISTORY LENGTH", f"userset {user_id} menu AI_MAX_HISTORY_LENGTH"
         )
 
         # Core Feature Toggles
@@ -956,7 +956,7 @@ async def get_user_settings(from_user, stype="main"):
             "AI_STREAMING_ENABLED", Config.AI_STREAMING_ENABLED
         )
         buttons.data_button(
-            f"Streaming: {'✅ ON' if streaming_enabled else '❌ OFF'}",
+            f"📺 STREAMING: {'✅ ON' if streaming_enabled else '❌ OFF'}",
             f"userset {user_id} tog AI_STREAMING_ENABLED {'f' if streaming_enabled else 't'}",
         )
 
@@ -964,7 +964,7 @@ async def get_user_settings(from_user, stype="main"):
             "AI_MULTIMODAL_ENABLED", Config.AI_MULTIMODAL_ENABLED
         )
         buttons.data_button(
-            f"Multimodal: {'✅ ON' if multimodal_enabled else '❌ OFF'}",
+            f"🔮 MULTIMODAL: {'✅ ON' if multimodal_enabled else '❌ OFF'}",
             f"userset {user_id} tog AI_MULTIMODAL_ENABLED {'f' if multimodal_enabled else 't'}",
         )
 
@@ -972,7 +972,7 @@ async def get_user_settings(from_user, stype="main"):
             "AI_CONVERSATION_HISTORY", Config.AI_CONVERSATION_HISTORY
         )
         buttons.data_button(
-            f"Conversation History: {'✅ ON' if history_enabled else '❌ OFF'}",
+            f"💬 CONVERSATION HISTORY: {'✅ ON' if history_enabled else '❌ OFF'}",
             f"userset {user_id} tog AI_CONVERSATION_HISTORY {'f' if history_enabled else 't'}",
         )
 
@@ -980,7 +980,7 @@ async def get_user_settings(from_user, stype="main"):
             "AI_QUESTION_PREDICTION", Config.AI_QUESTION_PREDICTION
         )
         buttons.data_button(
-            f"Follow-up Questions: {'✅ ON' if prediction_enabled else '❌ OFF'}",
+            f"🔮 FOLLOW-UP QUESTIONS: {'✅ ON' if prediction_enabled else '❌ OFF'}",
             f"userset {user_id} tog AI_QUESTION_PREDICTION {'f' if prediction_enabled else 't'}",
         )
 
@@ -989,7 +989,7 @@ async def get_user_settings(from_user, stype="main"):
             "AI_WEB_SEARCH_ENABLED", Config.AI_WEB_SEARCH_ENABLED
         )
         buttons.data_button(
-            f"Web Search: {'✅ ON' if web_search_enabled else '❌ OFF'}",
+            f"🔍 WEB SEARCH: {'✅ ON' if web_search_enabled else '❌ OFF'}",
             f"userset {user_id} tog AI_WEB_SEARCH_ENABLED {'f' if web_search_enabled else 't'}",
         )
 
@@ -997,7 +997,7 @@ async def get_user_settings(from_user, stype="main"):
             "AI_URL_SUMMARIZATION_ENABLED", Config.AI_URL_SUMMARIZATION_ENABLED
         )
         buttons.data_button(
-            f"URL Summarization: {'✅ ON' if url_summary_enabled else '❌ OFF'}",
+            f"📝 URL SUMMARIZATION: {'✅ ON' if url_summary_enabled else '❌ OFF'}",
             f"userset {user_id} tog AI_URL_SUMMARIZATION_ENABLED {'f' if url_summary_enabled else 't'}",
         )
 
@@ -1033,21 +1033,21 @@ async def get_user_settings(from_user, stype="main"):
 
         # Budget Settings (editable)
         buttons.data_button(
-            "💰 Daily Token Limit", f"userset {user_id} menu AI_DAILY_TOKEN_LIMIT"
+            "💰 DAILY TOKEN LIMIT", f"userset {user_id} menu AI_DAILY_TOKEN_LIMIT"
         )
         buttons.data_button(
-            "💳 Monthly Token Limit",
+            "💳 MONTHLY TOKEN LIMIT",
             f"userset {user_id} menu AI_MONTHLY_TOKEN_LIMIT",
         )
 
         # API Keys and Advanced Settings
-        buttons.data_button("🔑 API Keys", f"userset {user_id} ai_keys")
-        buttons.data_button("📊 Usage Statistics", f"userset {user_id} ai_usage")
-        buttons.data_button("⚙️ Advanced Settings", f"userset {user_id} ai_advanced")
+        buttons.data_button("🔑 API KEYS", f"userset {user_id} ai_keys")
+        buttons.data_button("📊 USAGE STATISTICS", f"userset {user_id} ai_usage")
+        buttons.data_button("⚙️ ADVANCED SETTINGS", f"userset {user_id} ai_advanced")
 
-        buttons.data_button("🔄 Reset AI Settings", f"userset {user_id} reset ai")
-        buttons.data_button("Back", f"userset {user_id} back")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("🔄 RESET AI SETTINGS", f"userset {user_id} reset ai")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} back")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         # Get current AI settings for display
         default_model = user_dict.get(
@@ -1211,11 +1211,11 @@ async def get_user_settings(from_user, stype="main"):
         else:
             # AI manager not available
             buttons.data_button(
-                "❌ AI Module Not Available", f"userset {user_id} ai"
+                "❌ AI MODULE NOT AVAILABLE", f"userset {user_id} ai"
             )
 
-        buttons.data_button("Back", f"userset {user_id} ai")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} ai")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         current_model = user_dict.get(
             "DEFAULT_AI_MODEL", getattr(Config, "DEFAULT_AI_MODEL", "gpt-4o")
@@ -1264,11 +1264,11 @@ Select a group above to see available models and their capabilities.
 
     elif stype == "ai_providers":
         # Provider Settings
-        buttons.data_button("🔑 API Keys", f"userset {user_id} ai_keys")
-        buttons.data_button("🌐 Custom URLs", f"userset {user_id} ai_urls")
-        buttons.data_button("📊 Provider Status", f"userset {user_id} ai_status")
-        buttons.data_button("Back", f"userset {user_id} ai")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("🔑 API KEYS", f"userset {user_id} ai_keys")
+        buttons.data_button("🌐 CUSTOM URLS", f"userset {user_id} ai_urls")
+        buttons.data_button("📊 PROVIDER STATUS", f"userset {user_id} ai_status")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} ai")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         text = f"""<u><b>⚙️ AI Provider Settings for {name}</b></u>
 
@@ -1313,8 +1313,8 @@ Keep your API keys secure and never share them.</i>"""
                     f"{label} {status}", f"userset {user_id} var {setting}"
                 )
 
-        buttons.data_button("Back", f"userset {user_id} ai")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} ai")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         if plugins_enabled:
             # Get individual plugin statuses
@@ -1424,8 +1424,8 @@ Keep your API keys secure and never share them.</i>"""
                     f"{label} {status}", f"userset {user_id} var {setting}"
                 )
 
-        buttons.data_button("Back", f"userset {user_id} ai")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} ai")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         # Get current conversation settings for status display
         history_enabled = user_dict.get(
@@ -1510,8 +1510,8 @@ Keep your API keys secure and never share them.</i>"""
                     f"userset {user_id} tog {setting} {'f' if current_value else 't'}",
                 )
 
-        buttons.data_button("Back", f"userset {user_id} ai")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} ai")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         # Get current advanced settings for status display
         streaming = user_dict.get(
@@ -1605,8 +1605,8 @@ Keep your API keys secure and never share them.</i>"""
                 f"{label} {status}", f"userset {user_id} var {setting}"
             )
 
-        buttons.data_button("Back", f"userset {user_id} ai_providers")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} ai_providers")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         text = f"""<u><b>🌐 Custom API URLs for {name}</b></u>
 
@@ -1624,9 +1624,9 @@ Useful for proxy servers or custom deployments.</i>"""
 
     elif stype == "ai_status":
         # Provider Status Display
-        buttons.data_button("🔄 Refresh Status", f"userset {user_id} ai_status")
-        buttons.data_button("Back", f"userset {user_id} ai_providers")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("🔄 REFRESH STATUS", f"userset {user_id} ai_status")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} ai_providers")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         # Check provider status
         providers = ["gpt", "claude", "gemini", "groq"]
@@ -1688,8 +1688,8 @@ Configure missing providers in API Keys or Custom URLs.</i>"""
 
             # No need to set provider separately - it's determined by model selection
 
-        buttons.data_button("Back", f"userset {user_id} ai_models")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} ai_models")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
     elif stype == "ai_keys":
         # Comprehensive API Keys and URLs Settings
@@ -1729,10 +1729,10 @@ Configure missing providers in API Keys or Custom URLs.</i>"""
             )
 
         # Provider Status Check
-        buttons.data_button("📊 Provider Status", f"userset {user_id} ai_status")
+        buttons.data_button("📊 PROVIDER STATUS", f"userset {user_id} ai_status")
 
-        buttons.data_button("Back", f"userset {user_id} ai")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} ai")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         # Get API key and URL status
         openai_key = "✅ Set" if user_dict.get("OPENAI_API_KEY") else "❌ Not Set"
@@ -1786,10 +1786,10 @@ Configure missing providers in API Keys or Custom URLs.</i>"""
     elif stype == "ai_analytics":
         # Detailed AI Analytics
         buttons.data_button(
-            "🔄 Refresh Analytics", f"userset {user_id} ai_analytics"
+            "🔄 REFRESH ANALYTICS", f"userset {user_id} ai_analytics"
         )
-        buttons.data_button("Back", f"userset {user_id} ai_usage")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} ai_usage")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         if ai_manager:
             try:
@@ -1856,16 +1856,16 @@ Detailed analytics are not available because the AI module is not loaded.
 
     elif stype == "ai_budget":
         # Budget Status and Management
-        buttons.data_button("🔄 Refresh Budget", f"userset {user_id} ai_budget")
+        buttons.data_button("🔄 REFRESH BUDGET", f"userset {user_id} ai_budget")
         buttons.data_button(
-            "💰 Set Daily Token Limit", f"userset {user_id} var AI_DAILY_TOKEN_LIMIT"
+            "💰 SET DAILY TOKEN LIMIT", f"userset {user_id} var AI_DAILY_TOKEN_LIMIT"
         )
         buttons.data_button(
-            "💳 Set Monthly Token Limit",
+            "💳 SET MONTHLY TOKEN LIMIT",
             f"userset {user_id} var AI_MONTHLY_TOKEN_LIMIT",
         )
-        buttons.data_button("Back", f"userset {user_id} ai_usage")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} ai_usage")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         if ai_manager:
             try:
@@ -1946,8 +1946,8 @@ Budget tracking is not available because the AI module is not loaded.
 
     elif stype == "ai_model_selection":
         # AI Model Selection - Combined view of all models
-        buttons.data_button("Back", f"userset {user_id} ai")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} ai")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         current_model = user_dict.get(
             "DEFAULT_AI_MODEL", getattr(Config, "DEFAULT_AI_MODEL", "gpt-4o")
@@ -2001,8 +2001,8 @@ Select your preferred AI model from the options below. Each model has different 
 
     elif stype == "ai_conversation_mode":
         # Conversation Mode Selection
-        buttons.data_button("Back", f"userset {user_id} ai")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} ai")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         if ai_manager:
             modes = ai_manager.get_conversation_modes()
@@ -2011,12 +2011,12 @@ Select your preferred AI model from the options below. Each model has different 
             for mode_id, mode_info in modes.items():
                 status = "✅" if mode_id == current_mode else ""
                 buttons.data_button(
-                    f"{mode_info['icon']} {mode_info['name']} {status}",
+                    f"{mode_info['icon']} {mode_info['name'].upper()} {status}",
                     f"userset {user_id} setvar AI_CONVERSATION_MODE {mode_id}",
                 )
         else:
             buttons.data_button(
-                "❌ AI Module Not Available", f"userset {user_id} ai"
+                "❌ AI MODULE NOT AVAILABLE", f"userset {user_id} ai"
             )
 
         text = f"""<u><b>🎭 Conversation Mode Selection for {name}</b></u>
@@ -2036,8 +2036,8 @@ Choose your preferred AI conversation mode. Each mode has specialized prompts an
 
     elif stype == "ai_language":
         # Language Selection
-        buttons.data_button("Back", f"userset {user_id} ai")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} ai")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         languages = {
             "en": "🇺🇸 English",
@@ -2080,12 +2080,10 @@ Choose your preferred language for AI responses. The AI will:
     elif stype == "ai_usage":
         # AI Usage Statistics
         buttons.data_button("🔄 Refresh Stats", f"userset {user_id} ai_usage")
-        buttons.data_button(
-            "📊 Detailed Analytics", f"userset {user_id} ai_analytics"
-        )
-        buttons.data_button("💰 Budget Status", f"userset {user_id} ai_budget")
-        buttons.data_button("Back", f"userset {user_id} ai")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("📊 DETAILED ANALYTICS", f"userset {user_id} ai_analytics")
+        buttons.data_button("💰 BUDGET STATUS", f"userset {user_id} ai_budget")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} ai")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         # Get usage statistics
         if ai_manager:
@@ -2158,8 +2156,8 @@ AI statistics are not available because the AI module is not loaded.
     elif stype == "mega":
         # Check if MEGA operations are enabled
         if not Config.MEGA_ENABLED or not Config.MEGA_UPLOAD_ENABLED:
-            buttons.data_button("Back", f"userset {user_id} back")
-            buttons.data_button("Close", f"userset {user_id} close")
+            buttons.data_button("⬅️ BACK", f"userset {user_id} back")
+            buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
             disabled_reason = []
             if not Config.MEGA_ENABLED:
@@ -2200,8 +2198,8 @@ Please contact the administrator to enable MEGA functionality.
             password_value = "✅ Set" if Config.MEGA_PASSWORD else "❌ Not set"
 
         # User credential settings - use menu action for consistent reset/remove buttons
-        buttons.data_button("📧 Email", f"userset {user_id} menu MEGA_EMAIL")
-        buttons.data_button("🔑 Password", f"userset {user_id} menu MEGA_PASSWORD")
+        buttons.data_button("📧 EMAIL", f"userset {user_id} menu MEGA_EMAIL")
+        buttons.data_button("🔑 PASSWORD", f"userset {user_id} menu MEGA_PASSWORD")
 
         # Upload Settings
         # Upload Folder button removed - using folder selector instead
@@ -2219,13 +2217,13 @@ Please contact the administrator to enable MEGA functionality.
         )
         # Private Links and Unlisted Links buttons removed - not supported by MEGA SDK v4.8.0
         buttons.data_button(
-            f"🖼️ Thumbnails: {'✅ ON' if thumbnails else '❌ OFF'}",
+            f"🖼️ THUMBNAILS: {'✅ ON' if thumbnails else '❌ OFF'}",
             f"userset {user_id} tog MEGA_UPLOAD_THUMBNAIL {'f' if thumbnails else 't'}",
         )
         # Delete After button removed - always delete after upload
 
-        buttons.data_button("Back", f"userset {user_id} back")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} back")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         # Upload settings
         # upload_folder removed - using folder selector instead
@@ -2273,8 +2271,8 @@ Please use /mediatools command to configure convert settings.
     elif stype == "gallerydl_main":
         # Gallery-dl Settings - only show if Gallery-dl is enabled
         if not Config.GALLERY_DL_ENABLED:
-            buttons.data_button("Back", f"userset {user_id} back")
-            buttons.data_button("Close", f"userset {user_id} close")
+            buttons.data_button("⬅️ BACK", f"userset {user_id} back")
+            buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
             text = f"""<u><b>🖼️ Gallery-dl Settings for {name}</b></u>
 
 <b>⚠️ Gallery-dl is currently disabled by the bot owner.</b>
@@ -2288,13 +2286,13 @@ Contact the bot owner to enable Gallery-dl functionality."""
         else:
             # Gallery-dl is enabled, show settings menu
             buttons.data_button(
-                "⚙️ General Settings", f"userset {user_id} gallerydl_general"
+                "⚙️ GENERAL SETTINGS", f"userset {user_id} gallerydl_general"
             )
             buttons.data_button(
-                "🔐 Authentication", f"userset {user_id} gallerydl_auth"
+                "🔐 AUTHENTICATION", f"userset {user_id} gallerydl_auth"
             )
-            buttons.data_button("Back", f"userset {user_id} back")
-            buttons.data_button("Close", f"userset {user_id} close")
+            buttons.data_button("⬅️ BACK", f"userset {user_id} back")
+            buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
             # Get user's gallery-dl settings status
             user_general_settings = any(
@@ -2351,10 +2349,10 @@ Gallery-dl supports 200+ platforms including Instagram, Twitter, Reddit, Pixiv, 
             display_name = (
                 setting.replace("GALLERY_DL_", "").replace("_", " ").title()
             )
-            buttons.data_button(display_name, f"userset {user_id} menu {setting}")
+            buttons.data_button(display_name.upper(), f"userset {user_id} menu {setting}")
 
-        buttons.data_button("Back", f"userset {user_id} gallerydl_main")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} gallerydl_main")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         # Get current values
         quality_selection = user_dict.get(
@@ -2415,10 +2413,10 @@ Gallery-dl supports 200+ platforms including Instagram, Twitter, Reddit, Pixiv, 
             display_name = (
                 setting.replace("GALLERY_DL_", "").replace("_", " ").title()
             )
-            buttons.data_button(display_name, f"userset {user_id} menu {setting}")
+            buttons.data_button(display_name.upper(), f"userset {user_id} menu {setting}")
 
-        buttons.data_button("Back", f"userset {user_id} gallerydl_main")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} gallerydl_main")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         text = f"""<u><b>🖼️ Gallery-dl Authentication Settings for {name}</b></u>
 
@@ -2451,11 +2449,11 @@ Configure credentials for accessing private content and higher quality downloads
 
         cookies_list = await get_user_cookies_list(user_id)
 
-        buttons.data_button("➕ Add New Cookie", f"userset {user_id} cookies_add")
+        buttons.data_button("➕ ADD NEW COOKIE", f"userset {user_id} cookies_add")
 
         if cookies_list:
             buttons.data_button(
-                "🗑️ Remove All", f"userset {user_id} cookies_remove_all"
+                "🗑️ REMOVE ALL", f"userset {user_id} cookies_remove_all"
             )
 
             # Show individual cookies
@@ -2466,9 +2464,9 @@ Configure credentials for accessing private content and higher quality downloads
                     f"userset {user_id} cookies_manage {cookie['number']}",
                 )
 
-        buttons.data_button("ℹ️ Help", f"userset {user_id} cookies_help")
-        buttons.data_button("Back", f"userset {user_id} back")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("❓ HELP", f"userset {user_id} cookies_help")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} back")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         cookies_count = len(cookies_list)
 
@@ -2528,53 +2526,53 @@ Configure credentials for accessing private content and higher quality downloads
 
     elif stype == "metadata":
         # Global metadata settings
-        buttons.data_button("Metadata All", f"userset {user_id} menu METADATA_ALL")
-        buttons.data_button("Global Title", f"userset {user_id} menu METADATA_TITLE")
+        buttons.data_button("🏷️ METADATA ALL", f"userset {user_id} menu METADATA_ALL")
+        buttons.data_button("🏷️ GLOBAL TITLE", f"userset {user_id} menu METADATA_TITLE")
         buttons.data_button(
-            "Global Author", f"userset {user_id} menu METADATA_AUTHOR"
+            "🏷️ GLOBAL AUTHOR", f"userset {user_id} menu METADATA_AUTHOR"
         )
         buttons.data_button(
-            "Global Comment", f"userset {user_id} menu METADATA_COMMENT"
+            "🏷️ GLOBAL COMMENT", f"userset {user_id} menu METADATA_COMMENT"
         )
 
         # Video metadata settings
         buttons.data_button(
-            "Video Title", f"userset {user_id} menu METADATA_VIDEO_TITLE"
+            "🎥 VIDEO TITLE", f"userset {user_id} menu METADATA_VIDEO_TITLE"
         )
         buttons.data_button(
-            "Video Author", f"userset {user_id} menu METADATA_VIDEO_AUTHOR"
+            "🎥 VIDEO AUTHOR", f"userset {user_id} menu METADATA_VIDEO_AUTHOR"
         )
         buttons.data_button(
-            "Video Comment", f"userset {user_id} menu METADATA_VIDEO_COMMENT"
+            "🎥 VIDEO COMMENT", f"userset {user_id} menu METADATA_VIDEO_COMMENT"
         )
 
         # Audio metadata settings
         buttons.data_button(
-            "Audio Title", f"userset {user_id} menu METADATA_AUDIO_TITLE"
+            "🎵 AUDIO TITLE", f"userset {user_id} menu METADATA_AUDIO_TITLE"
         )
         buttons.data_button(
-            "Audio Author", f"userset {user_id} menu METADATA_AUDIO_AUTHOR"
+            "🎵 AUDIO AUTHOR", f"userset {user_id} menu METADATA_AUDIO_AUTHOR"
         )
         buttons.data_button(
-            "Audio Comment", f"userset {user_id} menu METADATA_AUDIO_COMMENT"
+            "🎵 AUDIO COMMENT", f"userset {user_id} menu METADATA_AUDIO_COMMENT"
         )
 
         # Subtitle metadata settings
         buttons.data_button(
-            "Subtitle Title", f"userset {user_id} menu METADATA_SUBTITLE_TITLE"
+            "📄 SUBTITLE TITLE", f"userset {user_id} menu METADATA_SUBTITLE_TITLE"
         )
         buttons.data_button(
-            "Subtitle Author", f"userset {user_id} menu METADATA_SUBTITLE_AUTHOR"
+            "📄 SUBTITLE AUTHOR", f"userset {user_id} menu METADATA_SUBTITLE_AUTHOR"
         )
         buttons.data_button(
-            "Subtitle Comment", f"userset {user_id} menu METADATA_SUBTITLE_COMMENT"
+            "📄 SUBTITLE COMMENT", f"userset {user_id} menu METADATA_SUBTITLE_COMMENT"
         )
 
         buttons.data_button(
-            "Reset All Metadata", f"userset {user_id} reset metadata_all"
+            "🔄 RESET ALL METADATA", f"userset {user_id} reset metadata_all"
         )
-        buttons.data_button("Back", f"userset {user_id} back")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} back")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         # Get metadata values
         metadata_all = user_dict.get("METADATA_ALL", "None")
@@ -2622,8 +2620,8 @@ See /mediahelp for full list."""
     elif stype == "ddl":
         # DDL Settings - only show if DDL is enabled
         if not Config.DDL_ENABLED:
-            buttons.data_button("Back", f"userset {user_id} back")
-            buttons.data_button("Close", f"userset {user_id} close")
+            buttons.data_button("⬅️ BACK", f"userset {user_id} back")
+            buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
             text = f"""<u><b>🔗 DDL Settings for {name}</b></u>
 
 <b>❌ DDL (Direct Download Link) uploads are currently disabled by the bot owner.</b>
@@ -2632,23 +2630,23 @@ See /mediahelp for full list."""
         else:
             # DDL General Settings
             buttons.data_button(
-                "📤 General Settings", f"userset {user_id} ddl_general"
+                "📤 GENERAL SETTINGS", f"userset {user_id} ddl_general"
             )
             buttons.data_button(
-                "📁 Gofile Settings", f"userset {user_id} ddl_gofile"
+                "📁 GOFILE SETTINGS", f"userset {user_id} ddl_gofile"
             )
             buttons.data_button(
-                "🎬 Streamtape Settings", f"userset {user_id} ddl_streamtape"
+                "🎬 STREAMTAPE SETTINGS", f"userset {user_id} ddl_streamtape"
             )
             buttons.data_button(
-                "🚀 DevUploads Settings", f"userset {user_id} ddl_devuploads"
+                "🚀 DEVUPLOADS SETTINGS", f"userset {user_id} ddl_devuploads"
             )
             buttons.data_button(
-                "🔥 MediaFire Settings", f"userset {user_id} ddl_mediafire"
+                "🔥 MEDIAFIRE SETTINGS", f"userset {user_id} ddl_mediafire"
             )
 
-            buttons.data_button("Back", f"userset {user_id} back")
-            buttons.data_button("Close", f"userset {user_id} close")
+            buttons.data_button("⬅️ BACK", f"userset {user_id} back")
+            buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
             # Helper function to get DDL settings with user priority (local version)
             def get_ddl_setting_local(setting_name, default_value=None):
@@ -2805,9 +2803,9 @@ API Key: <code>{mediafire_api_key_display}</code> ({mediafire_api_key_source})
 
     elif stype == "ddl_general":
         # DDL General Settings
-        buttons.data_button("Default Server", f"userset {user_id} menu DDL_SERVER")
-        buttons.data_button("Back", f"userset {user_id} ddl")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("📤 DEFAULT SERVER", f"userset {user_id} menu DDL_SERVER")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} ddl")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         # Get DDL server setting
         ddl_server = user_dict.get("DDL_SERVER", Config.DDL_DEFAULT_SERVER)
@@ -2828,15 +2826,15 @@ Default Server: <code>{ddl_server}</code> (Set by {ddl_server_source})
 
     elif stype == "ddl_gofile":
         # Gofile Settings
-        buttons.data_button("API Key", f"userset {user_id} menu GOFILE_API_KEY")
+        buttons.data_button("🔑 API KEY", f"userset {user_id} menu GOFILE_API_KEY")
         buttons.data_button(
-            "Folder Name", f"userset {user_id} menu GOFILE_FOLDER_NAME"
+            "📁 FOLDER NAME", f"userset {user_id} menu GOFILE_FOLDER_NAME"
         )
         buttons.data_button(
-            "Default Password", f"userset {user_id} menu GOFILE_DEFAULT_PASSWORD"
+            "🔐 DEFAULT PASSWORD", f"userset {user_id} menu GOFILE_DEFAULT_PASSWORD"
         )
         buttons.data_button(
-            "Link Expiry Days", f"userset {user_id} menu GOFILE_LINK_EXPIRY_DAYS"
+            "⏱️ LINK EXPIRY DAYS", f"userset {user_id} menu GOFILE_LINK_EXPIRY_DAYS"
         )
 
         # Toggle buttons
@@ -2844,7 +2842,7 @@ Default Server: <code>{ddl_server}</code> (Set by {ddl_server_source})
             "GOFILE_PUBLIC_LINKS", Config.GOFILE_PUBLIC_LINKS
         )
         buttons.data_button(
-            f"Public Links: {'✅ ON' if gofile_public else '❌ OFF'}",
+            f"🔗 PUBLIC LINKS: {'✅ ON' if gofile_public else '❌ OFF'}",
             f"userset {user_id} tog GOFILE_PUBLIC_LINKS {'f' if gofile_public else 't'}",
         )
 
@@ -2852,12 +2850,12 @@ Default Server: <code>{ddl_server}</code> (Set by {ddl_server_source})
             "GOFILE_PASSWORD_PROTECTION", Config.GOFILE_PASSWORD_PROTECTION
         )
         buttons.data_button(
-            f"Password Protection: {'✅ ON' if gofile_password_protection else '❌ OFF'}",
+            f"🔐 PASSWORD PROTECTION: {'✅ ON' if gofile_password_protection else '❌ OFF'}",
             f"userset {user_id} tog GOFILE_PASSWORD_PROTECTION {'f' if gofile_password_protection else 't'}",
         )
 
-        buttons.data_button("Back", f"userset {user_id} ddl")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} ddl")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         # Get Gofile settings with user priority
         def get_gofile_setting(setting_name, default_value=None):
@@ -2919,17 +2917,17 @@ Link Expiry: <code>{gofile_expiry_display}</code> ({gofile_expiry_source})
     elif stype == "ddl_streamtape":
         # Streamtape Settings
         buttons.data_button(
-            "API Username", f"userset {user_id} menu STREAMTAPE_API_USERNAME"
+            "👤 API USERNAME", f"userset {user_id} menu STREAMTAPE_API_USERNAME"
         )
         buttons.data_button(
-            "API Password", f"userset {user_id} menu STREAMTAPE_API_PASSWORD"
+            "🔑 API PASSWORD", f"userset {user_id} menu STREAMTAPE_API_PASSWORD"
         )
         buttons.data_button(
-            "Folder Name", f"userset {user_id} menu STREAMTAPE_FOLDER_NAME"
+            "📁 FOLDER NAME", f"userset {user_id} menu STREAMTAPE_FOLDER_NAME"
         )
 
-        buttons.data_button("Back", f"userset {user_id} ddl")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} ddl")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         # Get Streamtape settings with user priority
         def get_streamtape_setting(setting_name, default_value=None):
@@ -2980,16 +2978,16 @@ Folder Name: <code>{streamtape_folder_display}</code> ({streamtape_folder_source
 
     elif stype == "ddl_devuploads":
         # DevUploads Settings
-        buttons.data_button("API Key", f"userset {user_id} menu DEVUPLOADS_API_KEY")
+        buttons.data_button("🔑 API KEY", f"userset {user_id} menu DEVUPLOADS_API_KEY")
         buttons.data_button(
-            "Folder Name", f"userset {user_id} menu DEVUPLOADS_FOLDER_NAME"
+            "📁 FOLDER NAME", f"userset {user_id} menu DEVUPLOADS_FOLDER_NAME"
         )
         buttons.data_button(
-            "Public Files", f"userset {user_id} menu DEVUPLOADS_PUBLIC_FILES"
+            "🔓 PUBLIC FILES", f"userset {user_id} menu DEVUPLOADS_PUBLIC_FILES"
         )
 
-        buttons.data_button("Back", f"userset {user_id} ddl")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} ddl")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         # Get DevUploads settings with user priority
         def get_devuploads_setting(setting_name, default_value=None):
@@ -3045,13 +3043,13 @@ Public Files: <b>{devuploads_public_display}</b> ({devuploads_public_source})
 
     elif stype == "ddl_mediafire":
         # MediaFire Settings
-        buttons.data_button("Email", f"userset {user_id} menu MEDIAFIRE_EMAIL")
-        buttons.data_button("Password", f"userset {user_id} menu MEDIAFIRE_PASSWORD")
-        buttons.data_button("App ID", f"userset {user_id} menu MEDIAFIRE_APP_ID")
-        buttons.data_button("API Key", f"userset {user_id} menu MEDIAFIRE_API_KEY")
+        buttons.data_button("📧 EMAIL", f"userset {user_id} menu MEDIAFIRE_EMAIL")
+        buttons.data_button("🔑 PASSWORD", f"userset {user_id} menu MEDIAFIRE_PASSWORD")
+        buttons.data_button("🆔 APP ID", f"userset {user_id} menu MEDIAFIRE_APP_ID")
+        buttons.data_button("🔑 API KEY", f"userset {user_id} menu MEDIAFIRE_API_KEY")
 
-        buttons.data_button("Back", f"userset {user_id} ddl")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} ddl")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         # Get MediaFire settings with user priority
         def get_mediafire_setting(setting_name, default_value=None):
@@ -3127,14 +3125,14 @@ API Key: <code>{mediafire_api_key_display}</code> ({mediafire_api_key_source})
         # Toggle button for auto leech
         if auto_leech:
             buttons.data_button(
-                "Auto Leech: ✅ ON",
+                "📥 AUTO LEECH: ✅ ON",
                 f"userset {user_id} tog auto_leech f",
             )
             status_emoji = "✅"
             status_text = "Enabled"
         else:
             buttons.data_button(
-                "Auto Leech: ❌ OFF",
+                "📥 AUTO LEECH: ❌ OFF",
                 f"userset {user_id} tog auto_leech t",
             )
             status_emoji = "❌"
@@ -3142,18 +3140,18 @@ API Key: <code>{mediafire_api_key_display}</code> ({mediafire_api_key_source})
         
         # Command template button
         buttons.data_button(
-            "Command Template",
+            "📝 COMMAND TEMPLATE",
             f"userset {user_id} menu auto_leech_cmd",
         )
         
         # Auto compress button
         buttons.data_button(
-            "Auto Compression",
+            "📦 AUTO COMPRESSION",
             f"userset {user_id} menu auto_compress_cmd",
         )
         
-        buttons.data_button("Back", f"userset {user_id} back")
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("⬅️ BACK", f"userset {user_id} back")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
         
         # Display current settings
         text = f"""<u><b>📥 Automation Settings for {name}</b></u>
@@ -3179,35 +3177,35 @@ When enabled, sending any link or media file will automatically trigger a leech 
         # Show service buttons based on individual service availability
         # Only show Leech button if Leech operations are enabled
         if Config.LEECH_ENABLED:
-            buttons.data_button("Leech", f"userset {user_id} leech")
+            buttons.data_button("📥 LEECH", f"userset {user_id} leech")
 
         # Show upload service buttons only if mirror operations are enabled
         if Config.MIRROR_ENABLED:
             # Only show Gdrive API button if Gdrive upload is enabled
             if Config.GDRIVE_UPLOAD_ENABLED:
-                buttons.data_button("Gdrive API", f"userset {user_id} gdrive")
+                buttons.data_button("☁️ GDRIVE API", f"userset {user_id} gdrive")
 
             # Only show Rclone button if Rclone operations are enabled
             if Config.RCLONE_ENABLED:
-                buttons.data_button("Rclone", f"userset {user_id} rclone")
+                buttons.data_button("🔄 RCLONE", f"userset {user_id} rclone")
 
             # Only show YouTube API button if YouTube upload is enabled
             if Config.YOUTUBE_UPLOAD_ENABLED:
-                buttons.data_button("YouTube API", f"userset {user_id} youtube")
+                buttons.data_button("🎥 YOUTUBE API", f"userset {user_id} youtube")
 
             # Only show MEGA Settings button if MEGA and MEGA upload are enabled
             if Config.MEGA_ENABLED and Config.MEGA_UPLOAD_ENABLED:
-                buttons.data_button("MEGA", f"userset {user_id} mega")
+                buttons.data_button("Ⓜ️ MEGA", f"userset {user_id} mega")
 
             # Only show DDL Settings button if DDL is enabled
             if Config.DDL_ENABLED:
-                buttons.data_button("DDL", f"userset {user_id} ddl")
+                buttons.data_button("🔗 DDL", f"userset {user_id} ddl")
         # Only show AI Settings button if AI is enabled
         if Config.AI_ENABLED:
-            buttons.data_button("AI Settings", f"userset {user_id} ai")
+            buttons.data_button("🤖 AI SETTINGS", f"userset {user_id} ai")
 
         # Automation Settings button (available to all users)
-        buttons.data_button("📥 Auto Leech", f"userset {user_id} auto_leech")
+        buttons.data_button("🤖 AUTOMATION", f"userset {user_id} auto_leech")
 
         upload_paths = user_dict.get("UPLOAD_PATHS", {})
         if (
@@ -3219,7 +3217,7 @@ When enabled, sending any link or media file will automatically trigger a leech 
         else:
             upload_paths = "None"
 
-        buttons.data_button("Upload Paths", f"userset {user_id} menu UPLOAD_PATHS")
+        buttons.data_button("📂 UPLOAD PATHS", f"userset {user_id} menu UPLOAD_PATHS")
 
         if user_dict.get("DEFAULT_UPLOAD", ""):
             default_upload = user_dict["DEFAULT_UPLOAD"]
@@ -3311,7 +3309,7 @@ When enabled, sending any link or media file will automatically trigger a leech 
             next_code, next_name = available_uploads[next_index]
 
             buttons.data_button(
-                f"Upload using {next_name}",
+                f"UPLOAD USING {next_name.upper()}",
                 f"userset {user_id} upload_toggle {next_code}",
             )
 
@@ -3328,12 +3326,12 @@ When enabled, sending any link or media file will automatically trigger a leech 
             or (Config.MEGA_ENABLED and Config.MEGA_UPLOAD_ENABLED)
         ):
             buttons.data_button(
-                f"{trr} Token/Config",
+                f"{trr} TOKEN/CONFIG",
                 f"userset {user_id} tog USER_TOKENS {'f' if user_tokens else 't'}",
             )
 
         buttons.data_button(
-            "Excluded Extensions",
+            "🚫 EXCLUDED EXTENSIONS",
             f"userset {user_id} menu EXCLUDED_EXTENSIONS",
         )
         if user_dict.get("EXCLUDED_EXTENSIONS", False):
@@ -3345,7 +3343,7 @@ When enabled, sending any link or media file will automatically trigger a leech 
 
         ns_msg = "Added" if user_dict.get("NAME_SUBSTITUTE", False) else "None"
         buttons.data_button(
-            "Name Subtitute",
+            "📝 NAME SUBSTITUTE",
             f"userset {user_id} menu NAME_SUBSTITUTE",
         )
 
@@ -3354,14 +3352,14 @@ When enabled, sending any link or media file will automatically trigger a leech 
             "Added" if user_dict.get("UNIVERSAL_FILENAME", False) else "None"
         )
         buttons.data_button(
-            "Filename",
+            "📝 FILENAME",
             f"userset {user_id} menu UNIVERSAL_FILENAME",
         )
 
         # Only show YT-DLP Options button if YT-DLP operations are enabled
         if Config.YTDLP_ENABLED:
             buttons.data_button(
-                "YT-DLP Options",
+                "⚙️ YT-DLP OPTIONS",
                 f"userset {user_id} menu YT_DLP_OPTIONS",
             )
         if user_dict.get("YT_DLP_OPTIONS", False):
@@ -3374,14 +3372,14 @@ When enabled, sending any link or media file will automatically trigger a leech 
         # Only show Gallery-dl button if Gallery-dl operations are enabled
         if Config.GALLERY_DL_ENABLED:
             buttons.data_button(
-                "Gallery-dl",
+                "🖼️ GALLERY-DL",
                 f"userset {user_id} gallerydl_main",
             )
 
         # Show User Cookies button if YT-DLP or Gallery-dl operations are enabled
         if Config.YTDLP_ENABLED or Config.GALLERY_DL_ENABLED:
             buttons.data_button(
-                "User Cookies",
+                "🍪 USER COOKIES",
                 f"userset {user_id} cookies_main",
             )
         # Count user cookies
@@ -3409,11 +3407,11 @@ When enabled, sending any link or media file will automatically trigger a leech 
             pass
 
         if is_media_tool_enabled("metadata"):
-            buttons.data_button("Metadata", f"userset {user_id} metadata")
+            buttons.data_button("🏷️ METADATA", f"userset {user_id} metadata")
 
         # Only show FFmpeg Cmds button if ffmpeg tool is enabled
         if is_media_tool_enabled("xtra"):
-            buttons.data_button("FFmpeg Cmds", f"userset {user_id} menu FFMPEG_CMDS")
+            buttons.data_button("⚙️ FFMPEG CMDS", f"userset {user_id} menu FFMPEG_CMDS")
             if user_dict.get("FFMPEG_CMDS", False):
                 ffc = "Added by User"
             elif "FFMPEG_CMDS" not in user_dict and Config.FFMPEG_CMDS:
@@ -3432,7 +3430,7 @@ When enabled, sending any link or media file will automatically trigger a leech 
             mediainfo_source = "User"
 
         buttons.data_button(
-            f"MediaInfo: {'✅ ON' if mediainfo_enabled else '❌ OFF'}",
+            f"🖼️ MEDIAINFO: {'✅ ON' if mediainfo_enabled else '❌ OFF'}",
             f"userset {user_id} tog MEDIAINFO_ENABLED {'f' if mediainfo_enabled else 't'}",
         )
 
@@ -3445,7 +3443,7 @@ When enabled, sending any link or media file will automatically trigger a leech 
             bot_pm_source = "User"
 
         buttons.data_button(
-            f"Bot PM: {'✅ ON' if bot_pm_enabled else '❌ OFF'}",
+            f"📩 BOT_PM: {'✅ ON' if bot_pm_enabled else '❌ OFF'}",
             f"userset {user_id} tog BOT_PM {'f' if bot_pm_enabled else 't'}",
         )
 
@@ -3468,9 +3466,9 @@ When enabled, sending any link or media file will automatically trigger a leech 
             mdt = "None"
             mdt_source = ""
         if user_dict:
-            buttons.data_button("Reset All", f"userset {user_id} reset all")
+            buttons.data_button("🧹 RESET ALL", f"userset {user_id} reset all")
 
-        buttons.data_button("Close", f"userset {user_id} close")
+        buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
 
         # Get MediaInfo status for display
         mediainfo_enabled = user_dict.get("MEDIAINFO_ENABLED", None)
@@ -3988,10 +3986,10 @@ async def get_menu(option, message, user_id):
 
     if option == "auto_leech_cmd":
         value = user_dict.get(option, "leech {i}")
-        text = f"<b>{user_settings_text.get(option, option)}</b>\n\n<b>Current Value:</b> <code>{escape(str(value))}</code>\n\n<i>💡 Template must contain {{i}} placeholder</i>"
+        text = f"<b>📥 Auto Leech Command Template</b>\n\n<b>Current Value:</b> <code>{escape(str(value))}</code>\n\n<i>💡 Template must contain {{i}} placeholder</i>"
     elif option == "auto_compress_cmd":
         value = user_dict.get(option, "")
-        text = f"<b>{user_settings_text.get(option, option)}</b>\n\n<b>Current Value:</b> <code>{escape(str(value)) if value else 'None (Disabled)'}</code>\n\n<i>💡 Leave empty to disable compression</i>"
+        text = f"<b>📦 Auto Compression Command</b>\n\n<b>Current Value:</b> <code>{escape(str(value)) if value else 'None (Disabled)'}</code>\n\n<i>💡 Leave empty to disable compression</i>"
 
     # Regular menu handling for all options
     if option in [
@@ -4004,29 +4002,29 @@ async def get_menu(option, message, user_id):
         key = "file"
     else:
         key = "set"
-    buttons.data_button("Set", f"userset {user_id} {key} {option}")
+    buttons.data_button("⚙️ SET", f"userset {user_id} {key} {option}")
     if option in user_dict and key != "file":
-        buttons.data_button("Reset", f"userset {user_id} reset {option}")
-    buttons.data_button("Remove", f"userset {user_id} remove {option}")
+        buttons.data_button("🔄 RESET", f"userset {user_id} reset {option}")
+    buttons.data_button("🗑️ REMOVE", f"userset {user_id} remove {option}")
     if option == "FFMPEG_CMDS":
         ffc = None
         if user_dict.get("FFMPEG_CMDS", False):
             ffc = user_dict["FFMPEG_CMDS"]
-            buttons.data_button("Add one", f"userset {user_id} addone {option}")
-            buttons.data_button("Remove one", f"userset {user_id} rmone {option}")
+            buttons.data_button("➕ ADD ONE", f"userset {user_id} addone {option}")
+            buttons.data_button("➖ REMOVE ONE", f"userset {user_id} rmone {option}")
         elif "FFMPEG_CMDS" not in user_dict and Config.FFMPEG_CMDS:
             ffc = Config.FFMPEG_CMDS
         if ffc:
-            buttons.data_button("Variables", f"userset {user_id} ffvar")
-            buttons.data_button("View", f"userset {user_id} view {option}")
+            buttons.data_button("🔢 VARIABLES", f"userset {user_id} ffvar")
+            buttons.data_button("👁️ VIEW", f"userset {user_id} view {option}")
     elif user_dict.get(option):
         if option == "THUMBNAIL":
-            buttons.data_button("View", f"userset {user_id} view {option}")
+            buttons.data_button("👁️ VIEW", f"userset {user_id} view {option}")
         elif option in ["YT_DLP_OPTIONS", "UPLOAD_PATHS"]:
-            buttons.data_button("Add one", f"userset {user_id} addone {option}")
-            buttons.data_button("Remove one", f"userset {user_id} rmone {option}")
+            buttons.data_button("➕ ADD ONE", f"userset {user_id} addone {option}")
+            buttons.data_button("➖ REMOVE ONE", f"userset {user_id} rmone {option}")
     if option == "USER_COOKIES":
-        buttons.data_button("Help", f"userset {user_id} help {option}")
+        buttons.data_button("❓ HELP", f"userset {user_id} help {option}")
     # Check if option is in leech_options and if leech is enabled
     if option in leech_options:
         # If leech is disabled, go back to main menu
@@ -4074,8 +4072,8 @@ async def get_menu(option, message, user_id):
         back_to = "back"  # Go back to main menu for general options
     else:
         back_to = "back"
-    buttons.data_button("Back", f"userset {user_id} {back_to}")
-    buttons.data_button("Close", f"userset {user_id} close")
+    buttons.data_button("⬅️ BACK", f"userset {user_id} {back_to}")
+    buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
     if not text:
         text = (
             f"Edit menu for: {option}\n\nUse /help1, /help2, /help3... for more details."
@@ -4115,22 +4113,22 @@ async def ffmpeg_variables(
                     if variables := findall(r"\{(.*?)\}", i):
                         add = True
                 if add:
-                    buttons.data_button(k, f"userset {user_id} ffvar {k}")
-            buttons.data_button("Back", f"userset {user_id} menu FFMPEG_CMDS")
-            buttons.data_button("Close", f"userset {user_id} close")
+                    buttons.data_button(k.upper(), f"userset {user_id} ffvar {k}")
+            buttons.data_button("⬅️ BACK", f"userset {user_id} menu FFMPEG_CMDS")
+            buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
         elif key in ffc and value is None:
             msg = f"Choose which variable you want to fill/edit: <u>{key}</u>\n\nCMDS:\n{ffc[key]}"
             for ind, vl in enumerate(ffc[key]):
                 if variables := set(findall(r"\{(.*?)\}", vl)):
                     for var in variables:
                         buttons.data_button(
-                            var, f"userset {user_id} ffvar {key} {var} {ind}"
+                            var.upper(), f"userset {user_id} ffvar {key} {var} {ind}"
                         )
             buttons.data_button(
-                "Reset", f"userset {user_id} ffvar {key} ffmpegvarreset"
+                "🔄 RESET", f"userset {user_id} ffvar {key} ffmpegvarreset"
             )
-            buttons.data_button("Back", f"userset {user_id} ffvar")
-            buttons.data_button("Close", f"userset {user_id} close")
+            buttons.data_button("⬅️ BACK", f"userset {user_id} ffvar")
+            buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
         elif key in ffc and value:
             old_value = (
                 user_dict.get("FFMPEG_VARIABLES", {})
@@ -4141,8 +4139,8 @@ async def ffmpeg_variables(
             msg = f"Edit/Fill this FFmpeg Variable: <u>{key}</u>\n\nItem: {ffc[key][int(index)]}\n\nVariable: {value}"
             if old_value:
                 msg += f"\n\nCurrent Value: {old_value}"
-            buttons.data_button("Back", f"userset {user_id} setevent")
-            buttons.data_button("Close", f"userset {user_id} close")
+            buttons.data_button("⬅️ BACK", f"userset {user_id} setevent")
+            buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
         else:
             return
         await edit_message(message, msg, buttons.build_menu(2))
@@ -4764,7 +4762,7 @@ You can provide your own cookies for YT-DLP and Gallery-dl downloads to access r
         elif data[2] == "rmone":
             text = f"Remove one or more key from {data[3]}. Example: key 1/key2/key 3. Timeout: 60 sec"
             func = remove_one
-        buttons.data_button("Back", f"userset {user_id} setevent")
+        buttons.data_button("Back", f"userset {user_id} menu {data[3]}")
         buttons.data_button("Close", f"userset {user_id} close")
         edit_msg = await edit_message(message, text, buttons.build_menu(1))
         create_task(  # noqa: RUF006
@@ -4829,6 +4827,16 @@ You can provide your own cookies for YT-DLP and Gallery-dl downloads to access r
         else:
             update_user_ldata(user_id, data[3], "")
             await database.update_user_data(user_id)
+        
+        # Refresh the UI after removal
+        if data[3] in auto_leech_options:
+            await update_user_settings(query, "auto_leech")
+        elif data[3] in ai_options:
+            await update_user_settings(query, "ai")
+        elif data[3] in mega_options:
+            await update_user_settings(query, "mega")
+        else:
+            await get_menu(data[3], message, user_id)
     elif data[2] == "reset":
         await query.answer("Reseted!", show_alert=True)
         if len(data) <= 3:
@@ -4863,6 +4871,14 @@ You can provide your own cookies for YT-DLP and Gallery-dl downloads to access r
             await update_user_settings(query, "main")
         elif data[3] in user_dict:
             user_dict.pop(data[3], None)
+            if data[3] in auto_leech_options:
+                await update_user_settings(query, "auto_leech")
+            elif data[3] in ai_options:
+                await update_user_settings(query, "ai")
+            elif data[3] in mega_options:
+                await update_user_settings(query, "mega")
+            else:
+                await update_user_settings(query)
         else:
             for k in list(user_dict.keys()):
                 if k not in [
@@ -4874,16 +4890,6 @@ You can provide your own cookies for YT-DLP and Gallery-dl downloads to access r
                 ]:
                     del user_dict[k]
             await update_user_settings(query)
-        await database.update_user_data(user_id)
-    elif data[2] == "remove":
-        await query.answer("Removed!", show_alert=True)
-        if data[3] in user_dict:
-            user_dict.pop(data[3], None)
-            # Update the appropriate settings page based on the removed setting
-            if data[3].startswith("MEGA_"):
-                await update_user_settings(query, "mega")
-            else:
-                await update_user_settings(query)
         await database.update_user_data(user_id)
     elif data[2] == "view":
         await query.answer()
