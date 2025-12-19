@@ -37,13 +37,21 @@ async def generate_caption(filename, directory, caption_template):
     file_path = os.path.join(directory, filename)
 
     try:
+        if not await aiopath.exists(file_path):
+             LOGGER.warning(f"File not found: {file_path}")
+             return filename
+             
         result = await cmd_exec(["mediainfo", "--Output=JSON", file_path])
         if result[1]:
             LOGGER.info(f"MediaInfo command output: {result[1]}")
 
+        if not result[0]:
+            LOGGER.error("MediaInfo returned empty output.")
+            return filename
+            
         mediainfo_data = json.loads(result[0])
     except Exception as error:
-        LOGGER.error(f"Failed to retrieve media info: {error}. File may not exist!")
+        LOGGER.error(f"Failed to retrieve media info: {error}. File may not exist!", exc_info=True)
         return filename
 
     media_data = mediainfo_data.get("media", {})
