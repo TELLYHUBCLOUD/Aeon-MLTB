@@ -4457,31 +4457,9 @@ Cookies allow you to access restricted content on YouTube, Instagram, Twitter, a
         
         # Handle auto leech menu items
         if data[3] == "auto_leech_cmd":
-            await delete_message(message)
-            pre_message = await send_message(
-                query.message,
-                "<b>Send Auto Leech Command Template</b>\n\n"
-                "Template must contain <code>{i}</code> placeholder.\n\n"
-                "<b>Examples:</b>\n"
-                "• <code>leech {i}</code> - Basic leech\n"
-                "• <code>leech {i} -s</code> - With file selection\n"
-                "• <code>leech {i} -z mypass</code> - With password\n\n"
-                "<i>Send /cancel to abort. Timeout: 60 sec</i>",
-            )
-            handler_dict[user_id] = (set_auto_leech_cmd, pre_message.id, "auto_leech_cmd")
+            await get_menu(data[3], message, user_id)
         elif data[3] == "auto_compress_cmd":
-            await delete_message(message)
-            pre_message = await send_message(
-                query.message,
-                "<b>Send Auto Compression Command</b>\n\n"
-                "FFmpeg options to append to every auto leech.\n\n"
-                "<b>Examples:</b>\n"
-                "• <code>-ff -c:v libx265 -crf 28</code> - H.265 compression\n"
-                "• <code>-ff -c:v libx264 -preset fast</code> - H.264 fast\n"
-                "• Leave empty or send /cancel to disable compression\n\n"
-                "<i>Timeout: 60 sec</i>",
-            )
-            handler_dict[user_id] = (set_auto_compress_cmd, pre_message.id, "auto_compress_cmd")
+            await get_menu(data[3], message, user_id)
         else:
             await get_menu(data[3], message, user_id)
     elif data[2] == "tog":
@@ -5043,7 +5021,7 @@ async def get_users_settings(_, message):
         )  # Auto-delete after 5 minutes
 
 
-async def set_auto_leech_cmd(client, message, pre_message, user_id):
+async def set_auto_leech_cmd(client, message, pre_message, user_id, option):
     """Handle auto leech command template input with validation"""
     try:
         cmd_template = message.text.strip()
@@ -5062,7 +5040,7 @@ async def set_auto_leech_cmd(client, message, pre_message, user_id):
             return
         
         # Update user data
-        update_user_ldata(user_id, "auto_leech_cmd", cmd_template)
+        update_user_ldata(user_id, option, cmd_template)
         await database.update_user_data(user_id)
         
         # Confirm save
@@ -5082,13 +5060,13 @@ async def set_auto_leech_cmd(client, message, pre_message, user_id):
         await send_message(message, f"❌ Error: {str(e)}")
 
 
-async def set_auto_compress_cmd(client, message, pre_message, user_id):
+async def set_auto_compress_cmd(client, message, pre_message, user_id, option):
     """Handle auto compress command input"""
     try:
         compress_cmd = message.text.strip()
         
         # Update user data (allow empty to disable)
-        update_user_ldata(user_id, "auto_compress_cmd", compress_cmd)
+        update_user_ldata(user_id, option, compress_cmd)
         await database.update_user_data(user_id)
         
         # Confirm save
