@@ -379,6 +379,11 @@ youtube_options = [
     "YOUTUBE_UPLOAD_AUTO_LEVELS",
     "YOUTUBE_UPLOAD_STABILIZE",
 ]
+auto_leech_options = [
+    "auto_leech",
+    "auto_leech_cmd",
+    "auto_compress_cmd",
+]
 mega_options = [
     "MEGA_EMAIL",
     "MEGA_PASSWORD",
@@ -3978,6 +3983,19 @@ async def get_menu(option, message, user_id):
     user_dict = user_data.get(user_id, {})
     buttons = ButtonMaker()
 
+    if option == "auto_leech_cmd":
+        buttons.data_button("Set", f"userset {user_id} set {option}")
+        buttons.data_button("Reset", f"userset {user_id} remove {option}")
+        value = user_dict.get(option, "leech {i}")
+        text = f"<b>{user_settings_text.get(option, option)}</b>\n\n<b>Current Value:</b> <code>{escape(str(value))}</code>\n\n<i>💡 Template must contain {{i}} placeholder</i>"
+        return text, buttons.build_menu(2), None
+    elif option == "auto_compress_cmd":
+        buttons.data_button("Set", f"userset {user_id} set {option}")
+        buttons.data_button("Reset", f"userset {user_id} remove {option}")
+        value = user_dict.get(option, "")
+        text = f"<b>{user_settings_text.get(option, option)}</b>\n\n<b>Current Value:</b> <code>{escape(str(value)) if value else 'None (Disabled)'}</code>\n\n<i>💡 Leave empty to disable compression</i>"
+        return text, buttons.build_menu(2), None
+
     # Regular menu handling for all options
     if option in [
         "THUMBNAIL",
@@ -4016,6 +4034,8 @@ async def get_menu(option, message, user_id):
     if option in leech_options:
         # If leech is disabled, go back to main menu
         back_to = "leech" if Config.LEECH_ENABLED else "back"
+    elif option in auto_leech_options:
+        back_to = "auto_leech"
     elif option in rclone_options:
         # If rclone is disabled, go back to main menu
         back_to = "rclone" if Config.RCLONE_ENABLED else "back"

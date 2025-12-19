@@ -3432,6 +3432,8 @@ media_tools_text = {
     "SWAP_SUBTITLE_USE_LANGUAGE": "Choose between language-based or index-based subtitle track swapping.\n\nExample: true - use language-based swapping (reorder by language priority)\nExample: false - use index-based swapping (swap specific track positions)\n\nTimeout: 60 sec",
     "SWAP_SUBTITLE_LANGUAGE_ORDER": "Set the language priority order for subtitle track swapping (used when USE_LANGUAGE is true).\n\nExample: eng,hin,jpn - English first, Hindi second, Japanese third\nExample: spa,eng - Spanish first, English second\nExample: none - don't set language order\n\nTimeout: 60 sec",
     "SWAP_SUBTITLE_INDEX_ORDER": "Set the index swap pattern for subtitle tracks (used when USE_LANGUAGE is false).\n\nExample: 0,1 - swap first two tracks\nExample: 1,2,0 - rotate first three tracks\nExample: 2,1,0 - reverse first three tracks\nExample: none - don't swap by index\n\nTimeout: 60 sec",
+    "auto_leech_cmd": "Send the Auto Leech Command Template. Use {i} as placeholder for the link. Example: /leech {i} -ss 00:00:10. Timeout: 60 sec",
+    "auto_compress_cmd": "Send the Auto Compress Command options (FFmpeg). Leave empty to disable compression. Example: -c:v libx265 -crf 28. Timeout: 60 sec",
     # MediaInfo Settings
     "MEDIAINFO_ENABLED": "Enable or disable the MediaInfo command for detailed media information.\n\nExample: true - enable MediaInfo command\nExample: false - disable MediaInfo command\n\nWhen enabled, you can use the /mediainfo command to get detailed information about media files.\n\nTimeout: 60 sec",
     # Sample Video Settings
