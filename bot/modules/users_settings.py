@@ -3156,7 +3156,7 @@ API Key: <code>{mediafire_api_key_display}</code> ({mediafire_api_key_source})
         buttons.data_button("Close", f"userset {user_id} close")
         
         # Display current settings
-        text = f"""<u><b>📥 Auto Leech Settings for {name}</b></u>
+        text = f"""<u><b>📥 Automation Settings for {name}</b></u>
 
 <b>Status:</b> {status_emoji} {status_text}
 
@@ -3206,7 +3206,7 @@ When enabled, sending any link or media file will automatically trigger a leech 
         if Config.AI_ENABLED:
             buttons.data_button("AI Settings", f"userset {user_id} ai")
 
-        # Auto Leech Settings button (available to all users)
+        # Automation Settings button (available to all users)
         buttons.data_button("📥 Auto Leech", f"userset {user_id} auto_leech")
 
         upload_paths = user_dict.get("UPLOAD_PATHS", {})
@@ -3983,18 +3983,15 @@ async def get_menu(option, message, user_id):
     user_dict = user_data.get(user_id, {})
     buttons = ButtonMaker()
 
+    text = None
+    thumbnail = None
+
     if option == "auto_leech_cmd":
-        buttons.data_button("Set", f"userset {user_id} set {option}")
-        buttons.data_button("Reset", f"userset {user_id} remove {option}")
         value = user_dict.get(option, "leech {i}")
         text = f"<b>{user_settings_text.get(option, option)}</b>\n\n<b>Current Value:</b> <code>{escape(str(value))}</code>\n\n<i>💡 Template must contain {{i}} placeholder</i>"
-        return text, buttons.build_menu(2), None
     elif option == "auto_compress_cmd":
-        buttons.data_button("Set", f"userset {user_id} set {option}")
-        buttons.data_button("Reset", f"userset {user_id} remove {option}")
         value = user_dict.get(option, "")
         text = f"<b>{user_settings_text.get(option, option)}</b>\n\n<b>Current Value:</b> <code>{escape(str(value)) if value else 'None (Disabled)'}</code>\n\n<i>💡 Leave empty to disable compression</i>"
-        return text, buttons.build_menu(2), None
 
     # Regular menu handling for all options
     if option in [
@@ -4079,10 +4076,11 @@ async def get_menu(option, message, user_id):
         back_to = "back"
     buttons.data_button("Back", f"userset {user_id} {back_to}")
     buttons.data_button("Close", f"userset {user_id} close")
-    text = (
-        f"Edit menu for: {option}\n\nUse /help1, /help2, /help3... for more details."
-    )
-    await edit_message(message, text, buttons.build_menu(2))
+    if not text:
+        text = (
+            f"Edit menu for: {option}\n\nUse /help1, /help2, /help3... for more details."
+        )
+    await edit_message(message, text, buttons.build_menu(2), thumbnail)
 
 
 async def set_ffmpeg_variable(_, message, key, value, index):
