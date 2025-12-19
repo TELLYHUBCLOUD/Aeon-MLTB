@@ -66,7 +66,10 @@ async def add_aria2_download(listener, dpath, header, ratio, seed_time):
 
     name = aria2_name(download)
     async with task_dict_lock:
-        task_dict[listener.mid] = Aria2Status(listener, gid, queued=add_to_queue)
+        if hasattr(listener, "is_merge") and listener.is_merge:
+            task_dict[f"{listener.mid}:{gid}"] = Aria2Status(listener, gid, queued=add_to_queue)
+        else:
+            task_dict[listener.mid] = Aria2Status(listener, gid, queued=add_to_queue)
     if add_to_queue:
         LOGGER.info(f"Added to Queue/Download: {name}. Gid: {gid}")
         if (

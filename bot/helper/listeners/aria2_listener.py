@@ -99,6 +99,10 @@ async def _on_download_complete(api, data):
     else:
         LOGGER.info(f"onDownloadComplete: {aria2_name(download)} - Gid: {gid}")
         if task := await get_task_by_gid(gid):
+            if hasattr(task.listener, "is_merge") and task.listener.is_merge:
+                async with task_dict_lock:
+                    if f"{task.listener.mid}:{gid}" in task_dict:
+                        del task_dict[f"{task.listener.mid}:{gid}"]
             await task.listener.on_download_complete()
             if intervals["stopAll"]:
                 return
@@ -134,6 +138,12 @@ async def _on_bt_download_complete(api, data):
                 await api.forcePause(gid)
             except (TimeoutError, ClientError, Exception) as e:
                 LOGGER.error(f"onBtDownloadComplete: {e} GID: {gid}")
+        
+        if hasattr(task.listener, "is_merge") and task.listener.is_merge:
+            async with task_dict_lock:
+                if f"{task.listener.mid}:{gid}" in task_dict:
+                     del task_dict[f"{task.listener.mid}:{gid}"]
+        
         await task.listener.on_download_complete()
         if intervals["stopAll"]:
             return
