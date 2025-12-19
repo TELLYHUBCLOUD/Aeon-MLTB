@@ -18,7 +18,7 @@ from bot.helper.ext_utils.bot_utils import (
 
 from bot.helper.ext_utils.bulk_links import extract_bulk_links
 from bot.helper.ext_utils.links_utils import is_url, is_telegram_link
-from bot.helper.ext_utils.media_utils import FFMpeg
+from bot.helper.ext_utils.media_utils import FFMpeg, get_media_info
 from bot.helper.listeners.task_listener import TaskListener
 from bot.helper.mirror_leech_utils.download_utils.aria2_download import (
     add_aria2_download,
@@ -295,7 +295,14 @@ class Merge(TaskListener):
         
         LOGGER.info(f"Running Merge CMD: {cmd}")
         
-        res = await ffmpeg.metadata_watermark_cmds(cmd, output_file) 
+        LOGGER.info(f"Running Merge CMD: {cmd}")
+
+        total_duration = 0
+        for file in input_files:
+            duration = (await get_media_info(file))[0]
+            total_duration += duration
+        
+        res = await ffmpeg.metadata_watermark_cmds(cmd, output_file, total_duration) 
         # Note: metadata_watermark_cmds uses get_media_info on "f_path" argument to set total_time.
         # But output_file doesn't exist yet!
         # This might cause FFMpegStatus to have 0 total time / progress issues.

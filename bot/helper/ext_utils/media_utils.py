@@ -468,9 +468,12 @@ class FFMpeg:
                 await remove(op)
         return False
 
-    async def metadata_watermark_cmds(self, ffmpeg, f_path):
+    async def metadata_watermark_cmds(self, ffmpeg, f_path, custom_duration=None):
         self.clear()
-        self._total_time = (await get_media_info(f_path))[0]
+        if custom_duration:
+            self._total_time = custom_duration
+        else:
+            self._total_time = (await get_media_info(f_path))[0]
         if self._listener.is_cancelled:
             return False
         self._listener.subproc = await create_subprocess_exec(
