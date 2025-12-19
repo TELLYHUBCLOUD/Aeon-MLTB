@@ -4749,7 +4749,7 @@ You can provide your own cookies for YT-DLP and Gallery-dl downloads to access r
         await query.answer()
         buttons = ButtonMaker()
         if data[2] == "set":
-            text = user_settings_text[data[3]]
+            text = user_settings_text.get(data[3], f"Send a value for {data[3]}:")
             if data[3] == "auto_leech_cmd":
                 func = set_auto_leech_cmd
             elif data[3] == "auto_compress_cmd":
