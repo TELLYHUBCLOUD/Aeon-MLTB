@@ -24,7 +24,17 @@ def is_gdrive_link(url: str):
 
 
 def is_telegram_link(url: str):
-    return url.startswith(("https://t.me/", "tg://openmessage?user_id="))
+    return url.startswith(
+        (
+            "https://t.me/",
+            "http://t.me/",
+            "t.me/",
+            "telegram.me/",
+            "https://telegram.me/",
+            "http://telegram.me/",
+            "tg://openmessage?user_id=",
+        )
+    )
 
 
 def is_share_link(url: str):

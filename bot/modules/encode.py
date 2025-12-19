@@ -1,5 +1,5 @@
 from asyncio import create_task, Event, wait_for, sleep
-from os import path as ospath
+from os import path as ospath, walk
 from time import time
 from functools import partial
 import json
@@ -435,6 +435,7 @@ class Encode(TaskListener):
              await send_message(self.message, "Invalid input for encode.")
              return
              
+    async def on_download_complete(self):
         # Walk to find the largest video file
         target_file = None
         max_size = 0

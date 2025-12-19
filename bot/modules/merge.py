@@ -188,15 +188,30 @@ class Merge(TaskListener):
 
     async def get_tg_link_message(self, link):
         message = None
-        if link.startswith("https://t.me/"):
+        if is_telegram_link(link):
             try:
-                msg_link = link.split("/")
-                msg_id = int(msg_link[-1])
-                if "c/" in link:
-                    chat_id = int("-100" + msg_link[-2])
+                # Regex to handle all standard Telegram link formats, ignoring query params
+                # Matches: t.me/(c/)?(CHAT_ID_OR_USER)/(MSG_ID)
+                pattern = r"(?:https?://)?(?:www\.)?(?:t|telegram)\.me/(?:c/)?([\w\d]+)/(\d+)"
+                match = re.search(pattern, link)
+                
+                if match:
+                    chat_identifier = match.group(1)
+                    msg_id = int(match.group(2))
+                    
+                    if "c/" in link:
+                        # Private chat ID (make it -100 prefixed)
+                        chat_id = int("-100" + chat_identifier)
+                    else:
+                        # Username or ID
+                        chat_id = chat_identifier
+                        # Try converting to int if it's purely numeric (rare but possible for some IDs)
+                        if chat_id.isdigit():
+                            chat_id = int(chat_id)
+
+                    message = await self.client.get_messages(chat_id, msg_id)
                 else:
-                    chat_id = msg_link[-2]
-                message = await self.client.get_messages(chat_id, msg_id)
+                    LOGGER.error(f"Malformed TG Link: {link}")
             except Exception as e:
                 LOGGER.error(f"Error getting TG Link: {e}")
         return message
