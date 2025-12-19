@@ -337,12 +337,8 @@ class Merge(TaskListener):
             "-metadata", f"title={self.name}",
             output_file
         ]
-
-        
         LOGGER.info(f"Running Merge CMD: {cmd}")
         
-        LOGGER.info(f"Running Merge CMD: {cmd}")
-
         total_duration = 0
         for file in input_files:
             duration = (await get_media_info(file))[0]

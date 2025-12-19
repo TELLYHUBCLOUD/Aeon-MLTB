@@ -199,8 +199,8 @@ class TelegramUploader:
             await rename(self._up_path, new_path)
             self._up_path = new_path
         # AUTO CAPTION CLEAN
-        replace_text = self._listener.user_dict.get("AUTO_CAPTION_REPLACE", "")
-        remove_text = self._listener.user_dict.get("AUTO_CAPTION_REMOVE", "")
+        replace_text = self._listener.user_dict.get("AUTO_CAPTION_REPLACE", "") or Config.AUTO_CAPTION_REPLACE
+        remove_text = self._listener.user_dict.get("AUTO_CAPTION_REMOVE", "") or Config.AUTO_CAPTION_REMOVE
         if replace_text or remove_text:
             cap_mono = clean_caption(cap_mono, replace_text, remove_text)
 

@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 class Config:
     AS_DOCUMENT: bool = False
     AUTHORIZED_CHATS: str = ""
-    AUTO_CAPTION_REMOVE: str = ""
+    AUTO_CAPTION_REMOVE: str = r"re:[Vv]egamovies[.\ ]?NL|\[HindiAnimeZone\.com\]|Moviesmod\.app|Moviesverse\.App|Moviesflix\.red|-?Moviesflix\.red|NF WEB-DL x264 \(DD\+ 5\.1 - 192Kbps\)|\[RareToonsIndia\]_|\[RareToonsIndia\]|MoviesRock"
     AUTO_CAPTION_REPLACE: str = ""
     AUTO_COMPRESS_CMD: str = ""
     AUTO_LEECH: bool = False
