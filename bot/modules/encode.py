@@ -255,7 +255,7 @@ class Encode(TaskListener):
         self.quality = args["-q"]
         self.remove_audio = args["-an"]
         self.remove_subs = args["-sn"]
-        self.multi = args["-i"]
+        self.multi = int(args["-i"])
         is_bulk = args["-b"]
         bulk_start = 0
         bulk_end = 0
