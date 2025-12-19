@@ -297,6 +297,11 @@ class TelegramUploader:
                     if self._last_msg_in_group:
                         group_lists = [
                             x for v in self._media_dict.values() for x in v
+                        ]
+                        match = re_match(
+                            r".+(?=\.0*\d+$)|.+(?=\.part\d+\..+$)",
+                            f_path,
+                        )
                         if not match or (
                             match and match.group(0) not in group_lists
                         ):
@@ -351,7 +356,8 @@ class TelegramUploader:
                 if not self._listener.is_cancelled and await aiopath.exists(
                     self._up_path,
                 ):
-                    await remove(self._up_path)        for key, value in list(self._media_dict.items()):
+                    await remove(self._up_path)
+        for key, value in list(self._media_dict.items()):
             for subkey, msgs in list(value.items()):
                 if len(msgs) > 1:
                     try:
