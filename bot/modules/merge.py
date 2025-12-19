@@ -72,7 +72,8 @@ class Merge(TaskListener):
         arg_parser(input_list[1:], args)
 
         self.link = args["link"]
-        self.name = args["-n"]
+        self.name = ""
+        self.output_name = args["-n"]
         self.up_dest = args["-up"]
         self.rc_flags = args["-rcf"]
         self.multi = args["-i"]
@@ -277,7 +278,48 @@ class Merge(TaskListener):
         
         await send_status_message(self.message)
         
-        output_file = f"{self.dir}/merged.mp4"
+        
+        # Smart Renaming Logic
+        if not self.output_name:
+            try:
+                # Try to detect series pattern from input files
+                input_filenames = [ospath.basename(f) for f in input_files]
+                # Regex for S01E01 or Episode 01
+                pattern_se = re.compile(r"(.*?)S(\d+)E(\d+)", re.IGNORECASE)
+                pattern_ep = re.compile(r"(.*?)Episode\s*(\d+)", re.IGNORECASE)
+                
+                series_name = ""
+                season = ""
+                episodes = []
+
+                for fname in input_filenames:
+                    if match := pattern_se.search(fname):
+                        series_name = match.group(1).replace(".", " ").strip()
+                        season = match.group(2)
+                        episodes.append(int(match.group(3)))
+                    elif match := pattern_ep.search(fname):
+                        series_name = match.group(1).replace(".", " ").strip()
+                        season = "01" # Default to S01 for "Episode X"
+                        episodes.append(int(match.group(2)))
+
+                if series_name and episodes:
+                    episodes.sort()
+                    start_ep = episodes[0]
+                    end_ep = episodes[-1]
+                    self.output_name = f"{series_name} S{season}E{start_ep:02d}-E{end_ep:02d}.mp4"
+                    LOGGER.info(f"Smart Renaming: {self.output_name}")
+                else:
+                     self.output_name = "merged.mp4"
+            except Exception as e:
+                LOGGER.error(f"Smart renaming failed: {e}")
+                self.output_name = "merged.mp4"
+
+        # Apply output name
+        self.name = self.output_name
+        if not self.name.endswith(".mp4"):
+            self.name += ".mp4"
+
+        output_file = f"{self.dir}/{self.name}"
         
         cmd = [
             "xtra",
@@ -290,8 +332,10 @@ class Merge(TaskListener):
             "-i", input_txt_path,
             "-map", "0",
             "-c", "copy",
+            "-metadata", f"title={self.name}",
             output_file
         ]
+
         
         LOGGER.info(f"Running Merge CMD: {cmd}")
         
@@ -317,15 +361,12 @@ class Merge(TaskListener):
              
 
 
-             if self.name and self.name != "merged.mp4":
-                  ext = ospath.splitext(output_file)[1]
-                  if not self.name.endswith(ext):
-                      self.name += ext
-                  new_path = f"{self.dir}/{self.name}"
-                  await move(output_file, new_path)
-                  LOGGER.info(f"Renamed merged file to: {self.name}")
+             if self.name != output_file.rsplit("/", 1)[-1]:
+                  # If we changed name logic above, ensure path is correct?
+                  # self.name is already applied to output_file
+                  pass
              else:
-                  self.name = "merged.mp4"
+                  pass
              
              await super().on_download_complete()
         else:
