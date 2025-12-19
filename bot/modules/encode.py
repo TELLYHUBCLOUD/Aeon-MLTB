@@ -435,20 +435,35 @@ class Encode(TaskListener):
              await send_message(self.message, "Invalid input for encode.")
              return
              
-    async def on_download_complete(self):
-        files = [f for f in await listdir(self.dir) if not f.endswith((".aria2", ".!qB"))]
-        if not files:
-            await self.on_upload_error("No files downloaded.")
-            return
-            
-        file_path = f"{self.dir}/{files[0]}" 
-        if await aiopath.isdir(file_path):
-            dir_files = await listdir(file_path)
-            if dir_files:
-                file_path = f"{file_path}/{dir_files[0]}"
-            else:
-                 await self.on_upload_error("Empty folder downloaded.")
-                 return
+        # Walk to find the largest video file
+        target_file = None
+        max_size = 0
+        video_extensions = {".mp4", ".mkv", ".avi", ".mov", ".webm", ".flv", ".wmv", ".ts", ".m4v"}
+        
+        for root, _, files_list in await sync_to_async(walk, self.dir):
+            for file_name in files_list:
+                if file_name.endswith((".aria2", ".!qB")):
+                    continue
+                file_path_ignored = ospath.join(root, file_name)
+                size = await get_path_size(file_path_ignored)
+                ext = ospath.splitext(file_name)[1].lower()
+                
+                # Priority to video files
+                if ext in video_extensions:
+                    if size > max_size:
+                        max_size = size
+                        target_file = file_path_ignored
+                elif target_file is None:
+                    # Fallback to first/largest non-video if no video found yet (unlikely to work but better than random)
+                    if size > max_size:
+                        max_size = size
+                        target_file = file_path_ignored
+        
+        if not target_file:
+             await self.on_upload_error("No valid video files found to encode.")
+             return
+
+        file_path = target_file
 
         ffmpeg = FFMpeg(self)
         
