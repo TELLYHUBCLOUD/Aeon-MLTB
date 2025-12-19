@@ -11,7 +11,7 @@ from pyrogram.handlers import CallbackQueryHandler
 from pyrogram.filters import regex, user
 
 from secrets import token_hex
-from aioshutil import move
+from aioshutil import move, rmtree
 
 from bot import LOGGER, bot_loop, task_dict, task_dict_lock, multi_tags, intervals
 from bot.helper.aeon_utils.access_check import error_check
@@ -541,25 +541,44 @@ class Encode(TaskListener):
         
         if res:
              try:
-                await remove(file_path) # Delete Original
-                files_left = await listdir(self.dir)
-                if not files_left:
-                     LOGGER.error("All files removed/missing after encode!")
-                else:
-                     encoded_file = files_left[0]
-                     if self.name and self.name != encoded_file:
-                         ext = ospath.splitext(encoded_file)[1]
-                         if not self.name.endswith(ext):
-                             self.name += ext
-                         new_path = f"{self.dir}/{self.name}"
-                         await move(f"{self.dir}/{encoded_file}", new_path)
-                         LOGGER.info(f"Renamed encoded file to: {self.name} | Size: {await get_path_size(self.dir)}")
+                if await aiopath.exists(file_path):
+                    await remove(file_path) # Delete Original
+                
+                # Cleanup leftovers like .aria2 files
+                for f in await listdir(self.dir):
+                     if f.endswith((".aria2", ".!qB")):
+                         await remove(f"{self.dir}/{f}")
+
+                if await aiopath.exists(output_file):
+                     encoded_file_name = ospath.basename(output_file)
+                     
+                     if self.name and self.name != encoded_file_name:
+                          ext = ospath.splitext(encoded_file_name)[1]
+                          if not self.name.endswith(ext):
+                              self.name += ext
+                          new_path = f"{self.dir}/{self.name}"
+                          await move(output_file, new_path)
+                          LOGGER.info(f"Renamed encoded file to: {self.name} | Size: {await get_path_size(self.dir)}")
                      else:
-                         self.name = encoded_file
-                         LOGGER.info(f"Encoded File: {self.name} | Size: {await get_path_size(self.dir)}")
+                          self.name = encoded_file_name
+                          new_path = f"{self.dir}/{self.name}"
+                          # If output_file is in subdir, move it to root self.dir
+                          if ospath.dirname(output_file) != self.dir:
+                                await move(output_file, new_path)
+                          LOGGER.info(f"Encoded File: {self.name} | Size: {await get_path_size(self.dir)}")
+                     
+                     # Cleanup empty dirs
+                     if await aiopath.isdir(ospath.dirname(file_path)) and ospath.dirname(file_path) != self.dir:
+                         try:
+                            await rmtree(ospath.dirname(file_path))
+                         except:
+                            pass
+                else:
+                     await self.on_upload_error("Encoded file not found!")
+                     return
 
              except Exception as e:
-                LOGGER.error(f"Error removing original: {e}")
+                LOGGER.error(f"Error moving/renaming: {e}")
                 
              await super().on_download_complete()
         else:
