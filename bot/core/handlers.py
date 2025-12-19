@@ -1177,6 +1177,18 @@ def add_handlers():
         group=2,  # Lower priority to not interfere with commands
     )
 
+    # Add auto-leech handler for automatic leech triggering
+    from bot.helper.ext_utils.auto_leech_handler import auto_leech_message_handler
+
+    TgClient.bot.add_handler(
+        MessageHandler(
+            auto_leech_message_handler,
+            filters=(filters.text | filters.document | filters.video | filters.photo | filters.audio | filters.animation | filters.voice | filters.video_note)
+            & CustomFilters.authorized,
+        ),
+        group=2,  # Lower priority to not interfere with commands
+    )
+
     # Add auto-forward handler for configured source chats
     if Config.FORWARD_SOURCE and Config.FORWARD_DESTINATION:
         TgClient.bot.add_handler(
@@ -1186,3 +1198,4 @@ def add_handlers():
             ),
             group=3,  # Lower priority to not interfere with commands
         )
+

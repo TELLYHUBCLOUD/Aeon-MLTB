@@ -3111,6 +3111,65 @@ API Key: <code>{mediafire_api_key_display}</code> ({mediafire_api_key_source})
 <i>Get your credentials from <a href="https://www.mediafire.com/developers/">MediaFire Developers</a></i>
 <i>Email, Password, and App ID are required. API Key is optional for enhanced features.</i>"""
 
+    elif stype == "auto_leech":
+        # Auto Leech Settings Page
+        
+        # Get auto leech settings with fallbacks
+        auto_leech = user_dict.get("auto_leech", False)
+        auto_leech_cmd = user_dict.get("auto_leech_cmd", "leech {i}")
+        auto_compress_cmd = user_dict.get("auto_compress_cmd", "")
+        
+        # Toggle button for auto leech
+        if auto_leech:
+            buttons.data_button(
+                "Auto Leech: ✅ ON",
+                f"userset {user_id} tog auto_leech f",
+            )
+            status_emoji = "✅"
+            status_text = "Enabled"
+        else:
+            buttons.data_button(
+                "Auto Leech: ❌ OFF",
+                f"userset {user_id} tog auto_leech t",
+            )
+            status_emoji = "❌"
+            status_text = "Disabled"
+        
+        # Command template button
+        buttons.data_button(
+            "Command Template",
+            f"userset {user_id} menu auto_leech_cmd",
+        )
+        
+        # Auto compress button
+        buttons.data_button(
+            "Auto Compression",
+            f"userset {user_id} menu auto_compress_cmd",
+        )
+        
+        buttons.data_button("Back", f"userset {user_id} back")
+        buttons.data_button("Close", f"userset {user_id} close")
+        
+        # Display current settings
+        text = f"""<u><b>📥 Auto Leech Settings for {name}</b></u>
+
+<b>Status:</b> {status_emoji} {status_text}
+
+<b>How It Works:</b>
+When enabled, sending any link or media file will automatically trigger a leech operation.
+
+<b>Current Settings:</b>
+• Command Template: <code>{escape(auto_leech_cmd)}</code>
+• Auto Compression: <code>{escape(auto_compress_cmd) if auto_compress_cmd else "None"}</code>
+
+<blockquote><b>Important:</b>
+• Template must contain <code>{{i}}</code> placeholder
+• <code>{{i}}</code> is replaced with your sent link/media
+• Example: <code>leech {{i}}</code> → <code>leech https://file.zip</code>
+• CMD_SUFFIX is auto-added by bot</blockquote>
+
+<i>Tip: Use <code>leech {{i}} -s</code> to enable file selection automatically!</i>"""
+
     else:
         # Show service buttons based on individual service availability
         # Only show Leech button if Leech operations are enabled
@@ -3141,6 +3200,9 @@ API Key: <code>{mediafire_api_key_display}</code> ({mediafire_api_key_source})
         # Only show AI Settings button if AI is enabled
         if Config.AI_ENABLED:
             buttons.data_button("AI Settings", f"userset {user_id} ai")
+
+        # Auto Leech Settings button (available to all users)
+        buttons.data_button("📥 Auto Leech", f"userset {user_id} auto_leech")
 
         upload_paths = user_dict.get("UPLOAD_PATHS", {})
         if (
@@ -4391,7 +4453,36 @@ Cookies allow you to access restricted content on YouTube, Instagram, Twitter, a
             LOGGER.error(f"Missing menu option in request from user {user_id}")
             await query.answer("Invalid menu request!", show_alert=True)
             return
-        await get_menu(data[3], message, user_id)
+        
+        # Handle auto leech menu items
+        if data[3] == "auto_leech_cmd":
+            await delete_message(message)
+            pre_message = await send_message(
+                query.message,
+                "<b>Send Auto Leech Command Template</b>\n\n"
+                "Template must contain <code>{i}</code> placeholder.\n\n"
+                "<b>Examples:</b>\n"
+                "• <code>leech {i}</code> - Basic leech\n"
+                "• <code>leech {i} -s</code> - With file selection\n"
+                "• <code>leech {i} -z mypass</code> - With password\n\n"
+                "<i>Send /cancel to abort. Timeout: 60 sec</i>",
+            )
+            handler_dict[user_id] = (set_auto_leech_cmd, pre_message.id, "auto_leech_cmd")
+        elif data[3] == "auto_compress_cmd":
+            await delete_message(message)
+            pre_message = await send_message(
+                query.message,
+                "<b>Send Auto Compression Command</b>\n\n"
+                "FFmpeg options to append to every auto leech.\n\n"
+                "<b>Examples:</b>\n"
+                "• <code>-ff -c:v libx265 -crf 28</code> - H.265 compression\n"
+                "• <code>-ff -c:v libx264 -preset fast</code> - H.264 fast\n"
+                "• Leave empty or send /cancel to disable compression\n\n"
+                "<i>Timeout: 60 sec</i>",
+            )
+            handler_dict[user_id] = (set_auto_compress_cmd, pre_message.id, "auto_compress_cmd")
+        else:
+            await get_menu(data[3], message, user_id)
     elif data[2] == "tog":
         await query.answer()
         if len(data) <= 4:
@@ -4447,6 +4538,8 @@ Cookies allow you to access restricted content on YouTube, Instagram, Twitter, a
             "AI_INLINE_MODE_ENABLED",
         ]:
             back_to = "ai"
+        elif data[3] == "auto_leech":
+            back_to = "auto_leech"
         # Convert settings have been moved to Media Tools settings
         else:
             back_to = "leech"
@@ -4947,3 +5040,75 @@ async def get_users_settings(_, message):
         create_task(
             auto_delete_message(error_msg, time=300)
         )  # Auto-delete after 5 minutes
+
+
+async def set_auto_leech_cmd(client, message, pre_message, user_id):
+    """Handle auto leech command template input with validation"""
+    try:
+        cmd_template = message.text.strip()
+        
+        # Validation: Must contain {i} placeholder
+        if "{i}" not in cmd_template:
+            await send_message(
+                message,
+                "❌ <b>Invalid Template</b>\n\n"
+                "Command template must contain <code>{i}</code> placeholder!\n\n"
+                "<b>Examples:</b>\n"
+                "• <code>leech {i}</code>\n"
+                "• <code>leech {i} -s</code>\n"
+                "• <code>leech {i} -z password123</code>"
+            )
+            return
+        
+        # Update user data
+        update_user_ldata(user_id, "auto_leech_cmd", cmd_template)
+        await database.update_user_data(user_id)
+        
+        # Confirm save
+        await send_message(
+            message,
+            f"✅ <b>Auto Leech Command Updated!</b>\n\n"
+            f"New template: <code>{escape(cmd_template)}</code>\n\n"
+            f"<i>The <code>{{i}}</code> placeholder will be replaced with your link/media.</i>"
+        )
+        
+        # Delete pre-message
+        if pre_message:
+            await delete_message(pre_message)
+            
+    except Exception as e:
+        LOGGER.error(f"Error setting auto leech cmd: {e}")
+        await send_message(message, f"❌ Error: {str(e)}")
+
+
+async def set_auto_compress_cmd(client, message, pre_message, user_id):
+    """Handle auto compress command input"""
+    try:
+        compress_cmd = message.text.strip()
+        
+        # Update user data (allow empty to disable)
+        update_user_ldata(user_id, "auto_compress_cmd", compress_cmd)
+        await database.update_user_data(user_id)
+        
+        # Confirm save
+        if compress_cmd:
+            await send_message(
+                message,
+                f"✅ <b>Auto Compression Updated!</b>\n\n"
+                f"Command: <code>{escape(compress_cmd)}</code>\n\n"
+                f"<i>This will be appended to every auto leech.</i>"
+            )
+        else:
+            await send_message(
+                message,
+                "✅ <b>Auto Compression Disabled</b>\n\n"
+                "<i>Auto leech will work without compression.</i>"
+            )
+        
+        # Delete pre-message
+        if pre_message:
+            await delete_message(pre_message)
+            
+    except Exception as e:
+        LOGGER.error(f"Error setting auto compress cmd: {e}")
+        await send_message(message, f"❌ Error: {str(e)}")
