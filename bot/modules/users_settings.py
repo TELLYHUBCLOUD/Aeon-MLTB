@@ -4734,7 +4734,12 @@ You can provide your own cookies for YT-DLP and Gallery-dl downloads to access r
         buttons = ButtonMaker()
         if data[2] == "set":
             text = user_settings_text[data[3]]
-            func = set_option
+            if data[3] == "auto_leech_cmd":
+                func = set_auto_leech_cmd
+            elif data[3] == "auto_compress_cmd":
+                func = set_auto_compress_cmd
+            else:
+                func = set_option
         elif data[2] == "addone":
             text = f"Add one or more string key and value to {data[3]}. Example: {{'key 1': 62625261, 'key 2': 'value 2'}}. Timeout: 60 sec"
             func = add_one
@@ -5021,8 +5026,10 @@ async def get_users_settings(_, message):
         )  # Auto-delete after 5 minutes
 
 
-async def set_auto_leech_cmd(client, message, pre_message, user_id, option):
+async def set_auto_leech_cmd(client, message, option):
     """Handle auto leech command template input with validation"""
+    user_id = message.from_user.id
+    handler_dict[user_id] = False
     try:
         cmd_template = message.text.strip()
         
@@ -5050,18 +5057,16 @@ async def set_auto_leech_cmd(client, message, pre_message, user_id, option):
             f"New template: <code>{escape(cmd_template)}</code>\n\n"
             f"<i>The <code>{{i}}</code> placeholder will be replaced with your link/media.</i>"
         )
-        
-        # Delete pre-message
-        if pre_message:
-            await delete_message(pre_message)
             
     except Exception as e:
         LOGGER.error(f"Error setting auto leech cmd: {e}")
         await send_message(message, f"❌ Error: {str(e)}")
 
 
-async def set_auto_compress_cmd(client, message, pre_message, user_id, option):
+async def set_auto_compress_cmd(client, message, option):
     """Handle auto compress command input"""
+    user_id = message.from_user.id
+    handler_dict[user_id] = False
     try:
         compress_cmd = message.text.strip()
         
@@ -5083,10 +5088,6 @@ async def set_auto_compress_cmd(client, message, pre_message, user_id, option):
                 "✅ <b>Auto Compression Disabled</b>\n\n"
                 "<i>Auto leech will work without compression.</i>"
             )
-        
-        # Delete pre-message
-        if pre_message:
-            await delete_message(pre_message)
             
     except Exception as e:
         LOGGER.error(f"Error setting auto compress cmd: {e}")
