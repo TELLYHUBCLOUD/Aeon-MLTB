@@ -75,7 +75,8 @@ class TorrentManager:
             download: A dictionary containing download information from Aria2c.
         """
         if download.get("status", "") in ["active", "paused", "waiting"]:
-            await cls.aria2.forceRemove(download.get("gid", ""))
+            with contextlib.suppress(Exception):
+                await cls.aria2.forceRemove(download.get("gid", ""))
         else:
             with contextlib.suppress(Exception):
                 await cls.aria2.removeDownloadResult(download.get("gid", ""))
