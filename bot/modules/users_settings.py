@@ -3985,10 +3985,10 @@ async def get_menu(option, message, user_id):
     thumbnail = None
 
     if option == "auto_leech_cmd":
-        value = user_dict.get(option, "leech {i}")
+        value = user_dict.get(option, getattr(Config, option, "leech {i}"))
         text = f"<b>📥 Auto Leech Command Template</b>\n\n<b>Current Value:</b> <code>{escape(str(value))}</code>\n\n<i>💡 Template must contain {{i}} placeholder</i>"
     elif option == "auto_compress_cmd":
-        value = user_dict.get(option, "")
+        value = user_dict.get(option, getattr(Config, option, ""))
         text = f"<b>📦 Auto Compression Command</b>\n\n<b>Current Value:</b> <code>{escape(str(value)) if value else 'None (Disabled)'}</code>\n\n<i>💡 Leave empty to disable compression</i>"
 
     # Regular menu handling for all options
@@ -4075,9 +4075,8 @@ async def get_menu(option, message, user_id):
     buttons.data_button("⬅️ BACK", f"userset {user_id} {back_to}")
     buttons.data_button("✖️ CLOSE", f"userset {user_id} close")
     if not text:
-        text = (
-            f"Edit menu for: {option}\n\nUse /help1, /help2, /help3... for more details."
-        )
+        curr_val = user_dict.get(option, getattr(Config, option, "None"))
+        text = f"<b>Settings for: {option}</b>\n\n<b>Current Value:</b> <code>{escape(str(curr_val))}</code>\n\nUse /help1, /help2, /help3... for more details."
     await edit_message(message, text, buttons.build_menu(2), thumbnail)
 
 
@@ -4588,6 +4587,13 @@ You can provide your own cookies for YT-DLP and Gallery-dl downloads to access r
             text = "Send your cookies.txt file for YT-DLP and Gallery-dl downloads (YouTube, Instagram, Twitter, etc.). Create it using browser extensions like 'Get cookies.txt' or 'EditThisCookie'. Timeout: 60 sec"
         else:
             text = "Send token.pickle. Timeout: 60 sec"
+        
+        curr_val = user_dict.get(data[3], "Set" if await aiopath.exists(f"thumbnails/{user_id}.jpg") if data[3] == "THUMBNAIL" else "Not Set") # For files we usually just show status if it's a path
+        if data[3] != "THUMBNAIL": # For configs/cookies/pickles
+            possible_path = f"rclone/{user_id}.conf" if data[3] == "RCLONE_CONFIG" else f"tokens/{user_id}.pickle" if "TOKEN" in data[3] else f"cookies/{user_id}.txt"
+            curr_val = "Set" if await aiopath.exists(possible_path) else "Not Set"
+        
+        text += f"\n\n<b>Current Status:</b> <code>{curr_val}</code>"
         buttons.data_button("Back", f"userset {user_id} setevent")
         buttons.data_button("Close", f"userset {user_id} close")
         await edit_message(message, text, buttons.build_menu(1))
@@ -4653,6 +4659,10 @@ You can provide your own cookies for YT-DLP and Gallery-dl downloads to access r
 
             buttons.data_button("Back", f"userset {user_id} {back_to}")
             buttons.data_button("Close", f"userset {user_id} close")
+            
+            curr_val = user_dict.get(data[3], getattr(Config, data[3], "None"))
+            text += f"\n\n<b>Current Value:</b> <code>{escape(str(curr_val))}</code>"
+            
             edit_msg = await edit_message(message, text, buttons.build_menu(1))
             create_task(  # noqa: RUF006
                 auto_delete_message(edit_msg, time=300),
@@ -4750,6 +4760,8 @@ You can provide your own cookies for YT-DLP and Gallery-dl downloads to access r
         buttons = ButtonMaker()
         if data[2] == "set":
             text = user_settings_text.get(data[3], f"Send a value for {data[3]}:")
+            curr_val = user_dict.get(data[3], getattr(Config, data[3], "None"))
+            text += f"\n\n<b>Current Value:</b> <code>{escape(str(curr_val))}</code>"
             if data[3] == "auto_leech_cmd":
                 func = set_auto_leech_cmd
             elif data[3] == "auto_compress_cmd":
@@ -4758,9 +4770,13 @@ You can provide your own cookies for YT-DLP and Gallery-dl downloads to access r
                 func = set_option
         elif data[2] == "addone":
             text = f"Add one or more string key and value to {data[3]}. Example: {{'key 1': 62625261, 'key 2': 'value 2'}}. Timeout: 60 sec"
+            curr_val = user_dict.get(data[3], getattr(Config, data[3], "{}"))
+            text += f"\n\n<b>Current Value:</b> <code>{escape(str(curr_val))}</code>"
             func = add_one
         elif data[2] == "rmone":
             text = f"Remove one or more key from {data[3]}. Example: key 1/key2/key 3. Timeout: 60 sec"
+            curr_val = user_dict.get(data[3], getattr(Config, data[3], "{}"))
+            text += f"\n\n<b>Current Value:</b> <code>{escape(str(curr_val))}</code>"
             func = remove_one
         buttons.data_button("Back", f"userset {user_id} menu {data[3]}")
         buttons.data_button("Close", f"userset {user_id} close")
