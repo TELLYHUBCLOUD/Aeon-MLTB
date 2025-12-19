@@ -118,17 +118,24 @@ class TelegramDownloadHelper:
                 download = media.file_unique_id not in GLOBAL_GID
 
             if download:
-                if not self._listener.name:
+                name = self._listener.name
+                if hasattr(self._listener, "is_merge") and self._listener.is_merge:
+                    name = ""
+                
+                if not name:
                     if hasattr(media, "file_name") and media.file_name:
                         if "/" in media.file_name:
-                            self._listener.name = media.file_name.rsplit("/", 1)[-1]
-                            path = path + self._listener.name
+                            name = media.file_name.rsplit("/", 1)[-1]
+                            path = path + name
                         else:
-                            self._listener.name = media.file_name
+                            name = media.file_name
                     else:
-                        self._listener.name = "None"
+                        name = "None"
                 else:
-                    path = path + self._listener.name
+                    path = path + name
+
+                if not (hasattr(self._listener, "is_merge") and self._listener.is_merge):
+                    self._listener.name = name
                 self._listener.size = media.file_size
                 gid = token_hex(4)
 
@@ -139,7 +146,7 @@ class TelegramDownloadHelper:
 
                 add_to_queue, event = await check_running_tasks(self._listener)
                 if add_to_queue:
-                    LOGGER.info(f"Added to Queue/Download: {self._listener.name}")
+                    LOGGER.info(f"Added to Queue/Download: {name}")
                     async with task_dict_lock:
                         task_dict[self._listener.mid] = QueueStatus(
                             self._listener,

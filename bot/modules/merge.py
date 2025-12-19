@@ -41,6 +41,7 @@ class Merge(TaskListener):
         self.client = client
         super().__init__()
         self.is_leech = True
+        self.is_merge = True
         self.bulk = []
         self.multi = 0
         self.options = ""
