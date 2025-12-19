@@ -438,23 +438,22 @@ class Encode(TaskListener):
         # Walk to find the largest video file
         target_file = None
         max_size = 0
-        video_extensions = {".mp4", ".mkv", ".avi", ".mov", ".webm", ".flv", ".wmv", ".ts", ".m4v"}
+        video_extensions = {
+            ".mp4", ".mkv", ".avi", ".mov", ".webm", ".flv", ".wmv", 
+            ".ts", ".m4v", ".dat", ".vob", ".3gp", ".mpeg", ".mpg"
+        }
         
         for root, _, files_list in await sync_to_async(walk, self.dir):
             for file_name in files_list:
                 if file_name.endswith((".aria2", ".!qB")):
                     continue
                 file_path_ignored = ospath.join(root, file_name)
-                size = await get_path_size(file_path_ignored)
+                
+                # Check extension first to avoid unnecessary stat calls on junk
                 ext = ospath.splitext(file_name)[1].lower()
                 
-                # Priority to video files
                 if ext in video_extensions:
-                    if size > max_size:
-                        max_size = size
-                        target_file = file_path_ignored
-                elif target_file is None:
-                    # Fallback to first/largest non-video if no video found yet (unlikely to work but better than random)
+                    size = await get_path_size(file_path_ignored)
                     if size > max_size:
                         max_size = size
                         target_file = file_path_ignored
