@@ -4253,6 +4253,7 @@ async def edit_user_settings(client, query):
         "gallerydl_main",
         "gallerydl_general",
         "gallerydl_auth",
+        "auto_leech",
     ]:
         await query.answer()
         # Redirect to main menu if trying to access disabled features
