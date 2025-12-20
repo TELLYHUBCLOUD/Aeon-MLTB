@@ -423,8 +423,6 @@ class YtDlp(TaskListener):
     async def get_tag(self, text: list):
          await super().get_tag(text)
 
-        self.is_leech = is_leech
-
     async def new_event(self):
         text = self.message.text.split("\n")
         input_list = text[0].split(" ")
