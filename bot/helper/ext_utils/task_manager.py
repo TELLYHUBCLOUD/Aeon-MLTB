@@ -76,9 +76,9 @@ async def check_running_tasks(listener, state="dl"):
             t_count = dl_count if state == "dl" else up_count
             is_over_limit = (
                 all_limit
-                and dl_count + up_count >= all_limit
-                and (not state_limit or t_count >= state_limit)
-            ) or (state_limit and t_count >= state_limit)
+                and all_limit <= (len(non_queued_dl) + len(non_queued_up))
+            ) or (state_limit and state_limit <= t_count)
+
             if is_over_limit:
                 LOGGER.info(f"Task Blocked: AllLimit={all_limit}, StateLimit={state_limit}, DL={dl_count}, UP={up_count}")
                 event = Event()
