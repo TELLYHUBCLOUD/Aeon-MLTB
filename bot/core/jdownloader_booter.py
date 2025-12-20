@@ -96,6 +96,8 @@ class JDownloader(MyJdApi):
         _, __, code = await cmd_exec(cmd, shell=True)
         self.is_connected = False
         if code != -9:
+            from asyncio import sleep
+            await sleep(10)
             await self.boot()
 
 
