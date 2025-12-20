@@ -77,11 +77,14 @@ async def check_running_tasks(listener, state="dl"):
                 and (not state_limit or t_count >= state_limit)
             ) or (state_limit and t_count >= state_limit)
             if is_over_limit:
+                LOGGER.info(f"Task Blocked: AllLimit={all_limit}, StateLimit={state_limit}, DL={dl_count}, UP={up_count}")
                 event = Event()
                 if state == "dl":
                     queued_dl[listener.mid] = event
                 else:
                     queued_up[listener.mid] = event
+        
+        LOGGER.info(f"Task Check: All={all_limit}, State={state_limit}, DL={dl_count}, UP={up_count}, Blocked={is_over_limit}")
         if not is_over_limit:
             if state == "up":
                 non_queued_up.add(listener.mid)
