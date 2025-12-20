@@ -290,6 +290,42 @@ class Mirror(TaskListener):
         reply_to = None
         file_ = None
         user_id = self.message.from_user.id if self.message.from_user else self.message.sender_chat.id
+        args = {
+            "-doc": False,
+            "-med": False,
+            "-d": False,
+            "-j": False,
+            "-s": False,
+            "-b": False,
+            "-e": False,
+            "-z": False,
+            "-sv": False,
+            "-ss": False,
+            "-f": False,
+            "-fd": False,
+            "-fu": False,
+            "-hl": False,
+            "-bt": False,
+            "-ut": False,
+            "-i": 0,
+            "-sp": 0,
+            "link": "",
+            "-n": "",
+            "-m": "",
+            "-up": "",
+            "-rcf": "",
+            "-au": "",
+            "-ap": "",
+            "-h": [],
+            "-t": "",
+            "-ca": "",
+            "-cv": "",
+            "-ns": "",
+            "-md": "",
+            "-tl": "",
+            "-ff": set(),
+        }
+        arg_parser(input_list[1:], args)
         if len(self.bulk) != 0:
             del self.bulk[0]
         if len(self.bulk) > 0:
