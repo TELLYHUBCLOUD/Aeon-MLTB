@@ -416,7 +416,7 @@ async def send_status_message(msg, user_id=0):
             }
         if not intervals["status"].get(sid) and not is_user:
             intervals["status"][sid] = SetInterval(
-                3,
+                1,
                 update_status_message,
                 sid,
             )
