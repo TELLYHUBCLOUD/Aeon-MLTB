@@ -326,6 +326,25 @@ class Mirror(TaskListener):
             "-ff": set(),
         }
         arg_parser(input_list[1:], args)
+        
+        path = f"{DOWNLOAD_DIR}{self.mid}{self.folder_name}"
+        
+        headers = args["-h"]
+        if headers:
+            headers = headers.split("|")
+        else:
+            headers = []
+            
+        ratio = None
+        seed_time = None
+        
+        seed = args["-d"]
+        if not isinstance(seed, bool):
+            dargs = seed.split(":")
+            ratio = dargs[0] or None
+            if len(dargs) == 2:
+                seed_time = dargs[1] or None
+
         if len(self.bulk) != 0:
             del self.bulk[0]
         if len(self.bulk) > 0:
