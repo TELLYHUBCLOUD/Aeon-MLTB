@@ -153,7 +153,7 @@ async def take_ss(video_file, ss_nb) -> bool:
         for i in range(ss_nb):
             output = f"{dirpath}/SS.{name}_{i:02}.png"
             cmd = [
-                "ffmpeg",
+                "xtra",
                 "-hide_banner",
                 "-loglevel",
                 "error",
@@ -195,7 +195,7 @@ async def get_audio_thumbnail(audio_file):
     await makedirs(output_dir, exist_ok=True)
     output = ospath.join(output_dir, f"{time()}.jpg")
     cmd = [
-        "ffmpeg",
+        "xtra",
         "-hide_banner",
         "-loglevel",
         "error",
@@ -234,7 +234,7 @@ async def get_video_thumbnail(video_file, duration):
         duration = 3
     duration = duration // 2
     cmd = [
-        "ffmpeg",
+        "xtra",
         "-hide_banner",
         "-loglevel",
         "error",
