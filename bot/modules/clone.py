@@ -42,14 +42,12 @@ class Clone(TaskListener):
         self,
         client,
         message,
-        _=None,
-        __=None,
-        ___=None,
-        ____=None,
-        _____=None,
         bulk=None,
         multi_tag=None,
         options="",
+        auto_link=None,
+        auto_ff=None,
+        **kwargs,
     ):
         if bulk is None:
             bulk = []
@@ -61,6 +59,121 @@ class Clone(TaskListener):
         self.bulk = bulk
         super().__init__()
         self.is_clone = True
+        
+    async def run_multi(self, input_list, obj):
+        await sleep(7)
+        if not self.multi_tag and self.multi > 1:
+            self.multi_tag = token_hex(2)
+            multi_tags.add(self.multi_tag)
+        elif self.multi <= 1:
+            if self.multi_tag in multi_tags:
+                multi_tags.discard(self.multi_tag)
+            return
+            
+        if self.multi_tag and self.multi_tag not in multi_tags:
+            await send_message(
+                self.message,
+                f"{self.tag} Multi-task has been cancelled!",
+            )
+            await send_status_message(self.message)
+            async with task_dict_lock:
+                 # Clone doesn't use same_dir logic typically but let's keep it safe
+                 pass
+            return
+
+        if len(self.bulk) != 0:
+            msg = input_list[:1]
+            msg.append(f"{self.bulk[0]} -i {self.multi - 1} {self.options}")
+            msgts = " ".join(msg)
+            if self.multi > 2:
+                msgts += f"\nCancel Multi: <code>/stop {self.multi_tag}</code>"
+            nextmsg = await send_message(self.message, msgts)
+        else:
+            msg = [s.strip() for s in input_list]
+            index = msg.index("-i")
+            msg[index + 1] = f"{self.multi - 1}"
+            nextmsg = await self.client.get_messages(
+                chat_id=self.message.chat.id,
+                message_ids=self.message.reply_to_message_id + 1,
+            )
+            msgts = " ".join(msg)
+            if self.multi > 2:
+                msgts += f"\nCancel Multi: <code>/stop {self.multi_tag}</code>"
+            nextmsg = await send_message(nextmsg, msgts)
+            
+        nextmsg = await self.client.get_messages(
+            chat_id=self.message.chat.id,
+            message_ids=nextmsg.id,
+        )
+        if self.message.from_user:
+            nextmsg.from_user = self.user
+        else:
+            nextmsg.sender_chat = self.user
+
+        create_task(obj(
+            self.client,
+            nextmsg,
+            bulk=self.bulk,
+            multi_tag=self.multi_tag,
+            options=self.options,
+        ).new_event())
+
+    async def init_bulk(self, input_list, bulk_start, bulk_end, obj):
+        try:
+            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
+            if len(self.bulk) == 0:
+                raise ValueError("Bulk Empty!")
+            b_msg = input_list[:1]
+            self.options = input_list[1:]
+            if "-b" in self.options:
+                index = self.options.index("-b")
+                del self.options[index]
+                if bulk_start or bulk_end:
+                    del self.options[index + 1]
+            self.options = " ".join(self.options)
+
+            if len(self.bulk) > 2:
+                self.multi_tag = token_hex(2)
+                multi_tags.add(self.multi_tag)
+
+            for index, link in enumerate(self.bulk):
+                if self.multi_tag and self.multi_tag not in multi_tags:
+                    break
+                    
+                cmd_parts = list(b_msg)
+                cmd_parts.append(f"{link} {self.options}")
+                if len(self.bulk) > 2:
+                     cmd_parts.append(f"\nCancel Multi: <code>/stop {self.multi_tag}</code>")
+                
+                msg = " ".join(cmd_parts)
+                nextmsg = await send_message(self.message, msg)
+                nextmsg = await self.client.get_messages(
+                    chat_id=self.message.chat.id,
+                    message_ids=nextmsg.id,
+                )
+                if self.message.from_user:
+                    nextmsg.from_user = self.user
+                else:
+                    nextmsg.sender_chat = self.user
+                
+                create_task(obj(
+                    self.client,
+                    nextmsg,
+                    bulk=[],
+                    multi_tag=self.multi_tag,
+                    options=self.options,
+                ).new_event())
+                
+                await sleep(2)
+        except Exception as e:
+            await send_message(
+                self.message,
+                f"Reply to a text file or a Telegram message with links separated by new lines. Error: {e}",
+            )
+            
+    async def get_tag(self, text: list): # Helper to make sure get_tag is available if missed inheritance
+         await super().get_tag(text) # Wait, it is in TaskListener/Config, should be fine.
+
 
     async def new_event(self):
         text = self.message.text.split("\n")
