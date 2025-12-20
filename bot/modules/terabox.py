@@ -34,6 +34,8 @@ class TeraboxListener(Mirror):
         bulk=None,
         multi_tag=None,
         options="",
+        auto_link=None,
+        auto_ff=None,
     ):
         super().__init__(
             client,
@@ -43,6 +45,8 @@ class TeraboxListener(Mirror):
             bulk=bulk,
             multi_tag=multi_tag,
             options=options,
+            auto_link=auto_link,
+            auto_ff=auto_ff,
         )
 
     async def new_event(self):
