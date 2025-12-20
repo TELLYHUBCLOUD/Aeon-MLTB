@@ -1,5 +1,5 @@
 # ruff: noqa: RUF006
-from asyncio import create_task
+from asyncio import create_task, sleep
 from base64 import b64encode
 from re import match as re_match
 
@@ -284,6 +284,30 @@ class Mirror(TaskListener):
 
         path = f"{DOWNLOAD_DIR}{self.mid}{self.folder_name}"
 
+    async def run_multi(self, input_list, obj):
+        await sleep(0.5)
+        if len(self.bulk) != 0:
+            del self.bulk[0]
+        if len(self.bulk) > 0:
+            b_data = self.bulk[0]
+            if self.is_jd:
+                # Update attributes if needed
+                pass 
+            await obj(
+                self.client,
+                self.message,
+                self.is_qbit,
+                self.is_leech,
+                self.is_jd,
+                self.is_nzb,
+                self.same_dir,
+                self.bulk,
+                self.multi_tag,
+                self.options,
+                self.auto_link,
+                self.auto_ff
+            ).new_event()
+
         if (
             not self.link
             and (reply_to := self.message.reply_to_message)
@@ -507,44 +531,4 @@ async def nzb_leech(client, message):
     )
 
 
-@new_task
-async def auto_leech_handler(client, message):
-    user_id = message.from_user.id
-    user_dict = user_data.get(user_id, {})
-    if not user_dict.get("AUTO_LEECH"):
-        return
-    text = message.text
-    if not text:
-        return
-    if not (
-        re_match(r"https?://\S+", text) or re_match(r"magnet:\?xt=urn:\S+", text)
-    ):
-        return
-    auto_ff = user_dict.get("AUTO_COMPRESS_CMD")
-    auto_ff = user_dict.get("AUTO_COMPRESS_CMD")
-    cmd = Config.AUTO_LEECH_CMD.lower()
-    message.text = f"/{cmd} {text}"
-    LOGGER.info(f"[AUTO_LEECH] Triggered for user {user_id} with cmd {cmd}: {text[:30]}...")
 
-    if cmd == "clone":
-        await Clone(
-            client,
-            message,
-        ).new_event()
-    elif cmd == "mirror":
-        await Mirror(
-            client,
-            message,
-            is_leech=False,
-            auto_link=text,
-            auto_ff=auto_ff,
-        ).new_event()
-    else:
-        # Default to leech
-        await Mirror(
-            client,
-            message,
-            is_leech=True,
-            auto_link=text,
-            auto_ff=auto_ff,
-        ).new_event()

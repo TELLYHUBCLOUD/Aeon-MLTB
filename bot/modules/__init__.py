@@ -14,8 +14,8 @@ from .help import arg_usage, bot_help
 from .help import arg_usage, bot_help
 from .mediainfo import mediainfo
 from .merge import merge
+from .auto_leech_handler import auto_leech_handler
 from .mirror_leech import (
-    auto_leech_handler,
     jd_leech,
     jd_mirror,
     leech,
