@@ -62,14 +62,17 @@ async def check_running_tasks(listener, state="dl"):
     async with queue_dict_lock:
         if state == "up" and listener.mid in non_queued_dl:
             non_queued_dl.remove(listener.mid)
+        
+        dl_count = len(non_queued_dl)
+        up_count = len(non_queued_up)
         if (
             (all_limit or state_limit)
             and not listener.force_run
             and not (listener.force_upload and state == "up")
             and not (listener.force_download and state == "dl")
         ):
-            dl_count = len(non_queued_dl)
-            up_count = len(non_queued_up)
+            # dl_count = len(non_queued_dl) # Removed as initialized above
+            # up_count = len(non_queued_up) # Removed as initialized above
             t_count = dl_count if state == "dl" else up_count
             is_over_limit = (
                 all_limit
