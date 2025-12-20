@@ -434,8 +434,12 @@ async def get_user_settings(from_user, stype="main"):
             ex_ex = excluded_extensions
         else:
             ex_ex = "None"
-
-        ns_msg = "✅ Added" if user_dict.get("NAME_SUBSTITUTE", False) else "❌ None"
+        if user_dict.get("NAME_SUBSTITUTE", False):
+            ns_msg = "✅ Added"
+        elif "NAME_SUBSTITUTE" not in user_dict and Config.NAME_SUBSTITUTE:
+            ns_msg = "✅ Added"
+        else:
+            ns_msg = "❌ None"
         buttons.data_button(
             "✏️ Name Subtitute",
             f"userset {user_id} menu NAME_SUBSTITUTE",

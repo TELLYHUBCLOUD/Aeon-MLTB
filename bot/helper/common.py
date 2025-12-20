@@ -977,6 +977,8 @@ class TaskConfig:
             for substitution in substitutions:
                 sen = False
                 pattern = substitution[0]
+                if pattern.startswith('"') and pattern.endswith('"'):
+                    pattern = pattern.strip('"')                
                 if len(substitution) > 1:
                     if len(substitution) > 2:
                         sen = substitution[2] == "s"
@@ -989,7 +991,7 @@ class TaskConfig:
                     res = ""
                 try:
                     name = sub(
-                        rf"{pattern}",
+                        pattern,
                         res,
                         name,
                         flags=IGNORECASE if sen else 0,
