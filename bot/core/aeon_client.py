@@ -164,7 +164,20 @@ class TgClient:
         cls.bot = Client(**client_args)
 
         try:
-            await cls.bot.start()
+            try:
+                await cls.bot.start()
+            except Exception as e:
+                # Handle FloodWait on startup
+                if "420 FLOOD_WAIT" in str(e):
+                    import re
+                    from asyncio import sleep as asleep
+                    wait_time = int(re.search(r"\d+", str(e)).group())
+                    LOGGER.warning(f"FloodWait on startup: Waiting for {wait_time} seconds...")
+                    await asleep(wait_time)
+                    await cls.bot.start()
+                else:
+                    raise e
+
             cls.NAME = cls.bot.me.username
 
             # Add decorator wrapper for cross-library compatibility after successful start
