@@ -4588,7 +4588,7 @@ You can provide your own cookies for YT-DLP and Gallery-dl downloads to access r
         else:
             text = "Send token.pickle. Timeout: 60 sec"
         
-        curr_val = user_dict.get(data[3], "Set" if await aiopath.exists(f"thumbnails/{user_id}.jpg") if data[3] == "THUMBNAIL" else "Not Set") # For files we usually just show status if it's a path
+        curr_val = user_dict.get(data[3], "Set" if await aiopath.exists(f"thumbnails/{user_id}.jpg") and data[3] == "THUMBNAIL" else "Not Set") # For files we usually just show status if it's a path
         if data[3] != "THUMBNAIL": # For configs/cookies/pickles
             possible_path = f"rclone/{user_id}.conf" if data[3] == "RCLONE_CONFIG" else f"tokens/{user_id}.pickle" if "TOKEN" in data[3] else f"cookies/{user_id}.txt"
             curr_val = "Set" if await aiopath.exists(possible_path) else "Not Set"
