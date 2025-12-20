@@ -250,6 +250,8 @@ async def get_video_thumbnail(video_file, duration):
         "1",
         "-threads",
         "1",
+        "-strict",
+        "unofficial",
         output,
     ]
     try:
