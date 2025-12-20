@@ -236,14 +236,16 @@ class TeraboxListener(Mirror):
                 if link := api_data.get(dl_key):
                     if link:
                         valid_links.append(link)
+                        return True
+            return False
 
-        # 1. api5.dl2
-        check_add("api5", "dl1")
-        check_add("api5", "dl2")
-        check_add("api6", "dl1")
-        check_add("api6", "dl2")
-        check_add("api3", "dl1")
-        check_add("api3", "dl2")
+        # 1. Check endpoints in priority order (Short-circuit)
+        (check_add("api5", "dl1") or
+         check_add("api5", "dl2") or
+         check_add("api6", "dl1") or
+         check_add("api6", "dl2") or
+         check_add("api3", "dl1") or
+         check_add("api3", "dl2"))
 
         if not valid_links:
             await msg.edit("No valid download links found from API.")
