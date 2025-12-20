@@ -286,7 +286,6 @@ class Mirror(TaskListener):
 
     async def run_multi(self, input_list, obj):
         await sleep(0.5)
-        LOGGER.info("DEBUG: run_multi V3 - Fixes applied")
         reply_to = None
         file_ = None
         user_id = self.message.from_user.id if self.message.from_user else self.message.sender_chat.id
