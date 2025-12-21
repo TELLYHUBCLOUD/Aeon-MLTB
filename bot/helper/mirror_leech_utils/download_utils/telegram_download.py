@@ -47,7 +47,7 @@ class TelegramDownloadHelper:
             )
         if not from_queue:
             await self._listener.on_download_start()
-            if self._listener.multi <= 1:
+            if self._listener.multi <= 1 and not hasattr(self._listener, "is_merge"):
                 await send_status_message(self._listener.message)
             LOGGER.info(f"Download from Telegram: {self._listener.name}")
         else:
@@ -154,7 +154,7 @@ class TelegramDownloadHelper:
                             "dl",
                         )
                     await self._listener.on_download_start()
-                    if self._listener.multi <= 1:
+                    if self._listener.multi <= 1 and not hasattr(self._listener, "is_merge"):
                         await send_status_message(self._listener.message)
                     await event.wait()
                     if self._listener.is_cancelled:

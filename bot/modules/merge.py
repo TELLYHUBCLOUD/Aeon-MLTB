@@ -18,7 +18,7 @@ from bot.helper.ext_utils.bot_utils import (
 
 from bot.helper.ext_utils.bulk_links import extract_bulk_links
 from bot.helper.ext_utils.links_utils import is_url, is_telegram_link
-from bot.helper.ext_utils.media_utils import FFMpeg, get_media_info
+from bot.helper.ext_utils.media_utils import FFMpeg, get_media_info, get_codec_info
 from bot.helper.listeners.task_listener import TaskListener
 from bot.helper.mirror_leech_utils.download_utils.aria2_download import (
     add_aria2_download,
@@ -331,8 +331,21 @@ class Merge(TaskListener):
                 self.output_name = "merged.mp4"
 
         # Apply output name
+        # Apply output name
         self.name = self.output_name
-        if not self.name.endswith(".mp4"):
+        
+        has_ass = False
+        for file in input_files:
+            codecs = await get_codec_info(file)
+            if 'ass' in codecs:
+                has_ass = True
+                break
+        
+        if has_ass:
+            if not self.name.lower().endswith(".mkv"):
+                 base_name = ospath.splitext(self.name)[0]
+                 self.name = f"{base_name}.mkv"
+        elif not self.name.endswith(".mp4"):
             self.name += ".mp4"
 
         output_file = f"{self.dir}/{self.name}"

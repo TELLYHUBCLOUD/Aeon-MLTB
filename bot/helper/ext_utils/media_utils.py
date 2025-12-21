@@ -317,6 +317,29 @@ async def get_multiple_frames_thumbnail(video_file, layout, keep_screenshots):
     return output
 
 
+
+async def get_codec_info(path):
+    try:
+        result = await cmd_exec(
+            [
+                "ffprobe",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-print_format",
+                "json",
+                "-show_streams",
+                path,
+            ],
+        )
+        if result[0]:
+            streams = json.loads(result[0]).get("streams", [])
+            return [stream.get("codec_name") for stream in streams]
+    except Exception as e:
+        LOGGER.error(f"Get Codec Info: {e}. File: {path}")
+    return []
+
+
 def is_mkv(file):
     return file.lower().endswith(".mkv")
 
