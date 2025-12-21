@@ -235,20 +235,20 @@ class Merge(TaskListener):
 
             if hasattr(link, "download"):
                  # Telegram reply object
-                create_task(TelegramDownloadHelper(self).add_download(
+                await TelegramDownloadHelper(self).add_download(
                         link,
                         current_path,
                         self.client,
-                    ))
+                    )
             elif is_telegram_link(str(link)):
                  message = await self.get_tg_link_message(link)
                  if message:
                      if message.document or message.video or message.audio:
-                         create_task(TelegramDownloadHelper(self).add_download(
+                         await TelegramDownloadHelper(self).add_download(
                             message,
                             current_path,
                             self.client,
-                        ))
+                        )
                      else:
                          self.total_batch_files -= 1
                  else:
