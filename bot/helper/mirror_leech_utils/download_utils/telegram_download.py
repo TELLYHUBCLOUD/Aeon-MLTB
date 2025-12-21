@@ -118,23 +118,11 @@ class TelegramDownloadHelper:
                 download = media.file_unique_id not in GLOBAL_GID
 
             if download:
-                name = self._listener.name
                 if hasattr(self._listener, "is_merge") and self._listener.is_merge:
-                    name = ""
-                
-                if not name:
-                    if hasattr(media, "file_name") and media.file_name:
-                        if "/" in media.file_name:
-                            name = media.file_name.rsplit("/", 1)[-1]
-                            path = path + name
-                        else:
-                            name = media.file_name
-                    else:
-                        name = "None"
-                else:
-                    path = path + name
-
-                if not (hasattr(self._listener, "is_merge") and self._listener.is_merge):
+                    if hasattr(self._listener, "current_file_index") and hasattr(self._listener, "total_batch_files"):
+                        name = f"[{self._listener.current_file_index}/{self._listener.total_batch_files}] {name}"
+                    self._listener.name = name
+                elif not (hasattr(self._listener, "is_merge") and self._listener.is_merge):
                     self._listener.name = name
                 self._listener.size = media.file_size
                 gid = token_hex(4)

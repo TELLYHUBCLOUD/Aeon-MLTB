@@ -222,8 +222,10 @@ class Merge(TaskListener):
         )
         
         path = f"{self.dir}/"
+        self.current_file_index = 0
         
         for index, link in enumerate(self.inputs):
+            self.current_file_index = index + 1
             # Check cancel
             if self.is_cancelled:
                 return
