@@ -268,7 +268,7 @@ class TeraboxListener(Mirror):
         await add_aria2_download(self, f"{DOWNLOAD_DIR}{self.mid}/", headers, None, None)
 
 async def terabox(client, message):
-    bot_loop.create_task(TeraboxListener(client, message, is_leech=False).new_event())
-
-async def terabox_leech(client, message):
     bot_loop.create_task(TeraboxListener(client, message, is_leech=True).new_event())
+
+async def terabox_mirror(client, message):
+    bot_loop.create_task(TeraboxListener(client, message, is_leech=False).new_event())

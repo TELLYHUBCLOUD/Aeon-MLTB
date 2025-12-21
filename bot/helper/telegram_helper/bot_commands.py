@@ -18,6 +18,7 @@ class BotCommands:
     EncodeCommand = f"encode{i}"
     MergeCommand = f"merge{i}"
     TeraboxCommand = [f"terabox{i}", f"tb{i}"]
+    TeraboxMirrorCommand = [f"teraboxmirror{i}", f"tbm{i}"]
     MediaInfoCommand = f"mediainfo{i}"
     CountCommand = f"count{i}"
     DeleteCommand = f"del{i}"
