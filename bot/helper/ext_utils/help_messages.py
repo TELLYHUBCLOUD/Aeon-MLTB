@@ -421,8 +421,14 @@ merge_help_main = """<blockquote expandable>╭ℹ️ <b>Merge Help</b>
 ┊<b>By replying to a message with links</b>:
 ┊Reply to a message containing links (one per line) with <code>/merge -b</code>
 ┊
+┊<b>Smart Renaming (Analysis):</b>
+┊Bot will auto-detect series name and episodes from filenames (e.g., "Show S01E01") and rename output like "Show S01E01-E10".
+┊
 ┊<b>NOTE:</b>
-╰1. All inputs will be concatenated in order.</blockquote>"""
+┊1. All inputs will be concatenated in order.
+┊2. If 'ass' subtitles are detected, output will automatically be '.mkv'.
+╰3. Downloads are processed sequentially to ensure stability.</blockquote>"""
+
 
 terabox_help_main = """<blockquote expandable>╭ℹ️ <b>Terabox Help</b>
 ┊<b>Send Terabox link along with command line or by replying.</b>
