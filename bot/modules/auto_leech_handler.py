@@ -14,7 +14,7 @@ async def auto_leech_handler(client, message):
     text = message.text
     if not text:
         return
-    if text.startswith("/"):
+    if text.strip().startswith("/"):
         return
     if not (
         re_match(r"https?://\S+", text) or re_match(r"magnet:\?xt=urn:\S+", text)
