@@ -27,13 +27,8 @@ from re import match as re_match
 # API List (UPDATED)
 # -----------------------------------------------------------
 API_CONFIGS = [
-    {"name": "API1", "url_template": "https://terabox-pro-api.vercel.app/api?link={url}"},
-    {"name": "API2", "url_template": "https://wdzone-terabox-api.vercel.app/api?url={url}"},
-    {"name": "API3", "url_template": "https://my-noor-queen-api.woodmirror.workers.dev/?url={url}"},
-    {"name": "API4", "url_template": "https://silent-noor-stream-api.woodmirror.workers.dev/api?url={url}"},
     {"name": "API5", "url_template": "https://terabox-api.tellycloudapi.workers.dev/?url={url}"},
     {"name": "API6", "url_template": "https://teraboxdl.tellycloudapi.workers.dev/?url={url}"},
-    {"name": "STREAMAPI", "url_template": "https://teraplay.tellycloudapi.workers.dev/?url={url}"},
 ]
 
 async def fetch_api(session, target_url, api_config):
@@ -46,43 +41,6 @@ async def fetch_api(session, target_url, api_config):
                  return {"success": False, "api": api_name, "error": f"HTTP {response.status}"}
             data = await response.json()
 
-            # ---------------- API1 ----------------
-            if api_name == "API1":
-                info = data.get("📋 Extracted Info", [{}])[0] if data.get("📋 Extracted Info") else {}
-                thumbnails = info.get("🖼️ Thumbnails", {})
-                return {
-                    "success": True,
-                    "api": api_name,
-                    "links": {"dl1": info.get("🔗 Direct Download Link"), "dl2": info.get("🔗 Direct Download Link")},
-                    "metadata": {"file_name": info.get("📄 Title"), "thumb": thumbnails.get("360x270"), "size": info.get("📦 Size")}
-                }
-            # ---------------- API2 ----------------
-            if api_name == "API2":
-                info = data.get("📜 Extracted Info", [{}])[0] if data.get("📜 Extracted Info") else {}
-                thumbnails = info.get("🖼️ Thumbnails", {})
-                thumb = thumbnails.get("850x580") or (list(thumbnails.values())[0] if thumbnails else None)
-                return {
-                    "success": True,
-                    "api": api_name,
-                    "links": {"dl1": info.get("🔽 Direct Download Link"), "dl2": info.get("🚀 Fast Download Link")},
-                    "metadata": {"file_name": info.get("📂 Title"), "thumb": thumb, "size": info.get("📏 Size")}
-                }
-            # ---------------- API3 ----------------
-            if api_name == "API3":
-                return {
-                    "success": True,
-                    "api": api_name,
-                    "links": {"dl1": data.get("download_link"), "dl2": data.get("proxy_url")},
-                    "metadata": {"file_name": data.get("file_name"), "thumb": data.get("thumbnail"), "size": data.get("file_size")}
-                }
-            # ---------------- API4 ----------------
-            if api_name == "API4":
-                return {
-                    "success": True,
-                    "api": api_name,
-                    "links": {"dl1": data.get("download_link"), "dl2": data.get("proxy_url")},
-                    "metadata": {"file_name": data.get("file_name"), "thumb": data.get("thumbnail"), "size": data.get("file_size")}
-                }
             # ---------------- API5 & API6 ----------------
             if api_name in ["API5", "API6"]:
                 if data.get("success"):
@@ -93,11 +51,6 @@ async def fetch_api(session, target_url, api_config):
                         "metadata": {"file_name": data.get("file_name"), "thumb": data.get("thumb"), "size": data.get("file_size") or data.get("size")}
                     }
                 return {"success": False, "api": api_name, "error": data.get("error", "API failed")}
-            # ---------------- STREAMAPI ----------------
-            if api_name == "STREAMAPI":
-                if data.get("success"):
-                     return {"success": True, "api": api_name, "links": {"stream": data.get("links", {}).get("Stream1")}, "metadata": data.get("metadata", {})}
-                return {"success": False, "api": api_name, "error": "StreamAPI failed"}
 
             return {"success": False, "api": api_name, "error": "Unknown format"}
     except Exception as e:
@@ -309,14 +262,8 @@ class TeraboxListener(Mirror):
                     break
         
         if not best_link:
-             # Try stream link as fallback?
-             for res in results:
-                if isinstance(res, dict) and res.get("success"):
-                    if link := res.get("links", {}).get("stream"):
-                        best_link = link
-                        if not self.name and res.get("metadata", {}).get("file_name"):
-                             self.name = res.get("metadata").get("file_name")
-                        break
+            await msg.edit("All APIs failed to provide a valid download link.")
+            return
 
         if not best_link:
             await msg.edit("All APIs failed to provide a valid download link.")
