@@ -288,6 +288,7 @@ class Mirror(TaskListener):
         await sleep(0.5)
         reply_to = None
         file_ = None
+        session = TgClient.bot
         user_id = self.message.from_user.id if self.message.from_user else self.message.sender_chat.id
         args = {
             "-doc": False,
