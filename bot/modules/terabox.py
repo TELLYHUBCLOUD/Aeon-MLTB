@@ -21,6 +21,88 @@ from bot.helper.telegram_helper.message_utils import (
 from bot.modules.mirror_leech import Mirror
 
 
+import asyncio
+from re import match as re_match
+# -----------------------------------------------------------
+# API List (UPDATED)
+# -----------------------------------------------------------
+API_CONFIGS = [
+    {"name": "API1", "url_template": "https://terabox-pro-api.vercel.app/api?link={url}"},
+    {"name": "API2", "url_template": "https://wdzone-terabox-api.vercel.app/api?url={url}"},
+    {"name": "API3", "url_template": "https://my-noor-queen-api.woodmirror.workers.dev/?url={url}"},
+    {"name": "API4", "url_template": "https://silent-noor-stream-api.woodmirror.workers.dev/api?url={url}"},
+    {"name": "API5", "url_template": "https://terabox-api.tellycloudapi.workers.dev/?url={url}"},
+    {"name": "API6", "url_template": "https://teraboxdl.tellycloudapi.workers.dev/?url={url}"},
+    {"name": "STREAMAPI", "url_template": "https://teraplay.tellycloudapi.workers.dev/?url={url}"},
+]
+
+async def fetch_api(session, target_url, api_config):
+    api_name = api_config["name"]
+    api_url = api_config["url_template"].format(url=quote(target_url))
+
+    try:
+        async with session.get(api_url, timeout=30) as response:
+            if response.status != 200:
+                 return {"success": False, "api": api_name, "error": f"HTTP {response.status}"}
+            data = await response.json()
+
+            # ---------------- API1 ----------------
+            if api_name == "API1":
+                info = data.get("📋 Extracted Info", [{}])[0] if data.get("📋 Extracted Info") else {}
+                thumbnails = info.get("🖼️ Thumbnails", {})
+                return {
+                    "success": True,
+                    "api": api_name,
+                    "links": {"dl1": info.get("🔗 Direct Download Link"), "dl2": info.get("🔗 Direct Download Link")},
+                    "metadata": {"file_name": info.get("📄 Title"), "thumb": thumbnails.get("360x270"), "size": info.get("📦 Size")}
+                }
+            # ---------------- API2 ----------------
+            if api_name == "API2":
+                info = data.get("📜 Extracted Info", [{}])[0] if data.get("📜 Extracted Info") else {}
+                thumbnails = info.get("🖼️ Thumbnails", {})
+                thumb = thumbnails.get("850x580") or (list(thumbnails.values())[0] if thumbnails else None)
+                return {
+                    "success": True,
+                    "api": api_name,
+                    "links": {"dl1": info.get("🔽 Direct Download Link"), "dl2": info.get("🚀 Fast Download Link")},
+                    "metadata": {"file_name": info.get("📂 Title"), "thumb": thumb, "size": info.get("📏 Size")}
+                }
+            # ---------------- API3 ----------------
+            if api_name == "API3":
+                return {
+                    "success": True,
+                    "api": api_name,
+                    "links": {"dl1": data.get("download_link"), "dl2": data.get("proxy_url")},
+                    "metadata": {"file_name": data.get("file_name"), "thumb": data.get("thumbnail"), "size": data.get("file_size")}
+                }
+            # ---------------- API4 ----------------
+            if api_name == "API4":
+                return {
+                    "success": True,
+                    "api": api_name,
+                    "links": {"dl1": data.get("download_link"), "dl2": data.get("proxy_url")},
+                    "metadata": {"file_name": data.get("file_name"), "thumb": data.get("thumbnail"), "size": data.get("file_size")}
+                }
+            # ---------------- API5 & API6 ----------------
+            if api_name in ["API5", "API6"]:
+                if data.get("success"):
+                    return {
+                        "success": True,
+                        "api": api_name,
+                        "links": {"dl1": data.get("download_link"), "dl2": data.get("download_proxy")},
+                        "metadata": {"file_name": data.get("file_name"), "thumb": data.get("thumb"), "size": data.get("file_size") or data.get("size")}
+                    }
+                return {"success": False, "api": api_name, "error": data.get("error", "API failed")}
+            # ---------------- STREAMAPI ----------------
+            if api_name == "STREAMAPI":
+                if data.get("success"):
+                     return {"success": True, "api": api_name, "links": {"stream": data.get("links", {}).get("Stream1")}, "metadata": data.get("metadata", {})}
+                return {"success": False, "api": api_name, "error": "StreamAPI failed"}
+
+            return {"success": False, "api": api_name, "error": "Unknown format"}
+    except Exception as e:
+        return {"success": False, "api": api_name, "error": str(e)}
+
 class TeraboxListener(Mirror):
     def __init__(
         self,
@@ -176,25 +258,11 @@ class TeraboxListener(Mirror):
              elif reply_to.caption:
                 self.link = reply_to.caption.split("\n", 1)[0].strip()
 
-        if not is_url(self.link):
-            if len(input_list) == 1 and not reply_to:
-                await send_message(
-                    self.message,
-                    COMMAND_USAGE["terabox"][0],
-                    COMMAND_USAGE["terabox"][1],
-                )
-            else:
-                await send_message(
-                    self.message,
-                    "Provide a valid Terabox link to download.",
-                )
-            return
-
-        if not Config.TERABOX_API:
-             await send_message(
-                self.message,
-                "TERABOX_API not configured!",
-            )
+        if not is_valid_terabox_url(self.link):
+             if len(input_list) == 1 and not reply_to:
+                await send_message(self.message, COMMAND_USAGE["terabox"][0], COMMAND_USAGE["terabox"][1])
+             else:
+                await send_message(self.message, "Provide a valid Terabox link to download.")
              return
 
         LOGGER.info(f"Terabox Link: {self.link}")
@@ -204,70 +272,56 @@ class TeraboxListener(Mirror):
         try:
             await self.process_terabox()
         except Exception as e:
-            LOGGER.error(f"Terabox Error: {e}")
+            LOGGER.error(f"Terabox Error: {e}", exc_info=True)
             await send_message(self.message, f"Terabox Error: {e}")
 
     async def process_terabox(self):
-        msg = await send_message(self.message, "Processing Terabox Link...")
+        msg = await send_message(self.message, "Processing Terabox Link with Multi-API...")
         
-        api_url = f"{Config.TERABOX_API}{quote(self.link)}"
-        
+        # Check direct link
+        if "1024tera.com/file/" in self.link or "terabox.com/file/" in self.link:
+             LOGGER.info(f"Direct Terabox link detected: {self.link}")
+             if not self.name: self.name = "Terabox_Download"
+             await msg.delete()
+             from bot.helper.mirror_leech_utils.download_utils.aria2_download import add_aria2_download
+             await self.before_start()
+             await self.on_download_start()
+             headers = ["User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"]
+             await add_aria2_download(self, f"{DOWNLOAD_DIR}{self.mid}/", headers, None, None)
+             return
+
         async with ClientSession(connector=TCPConnector(verify_ssl=False)) as session:
-            async with session.get(api_url) as resp:
-                if resp.status != 200:
-                    try:
-                        resp_text = await resp.text()
-                    except:
-                        resp_text = "N/A"
-                    LOGGER.error(f"Terabox API Error: {resp.status} | Body: {resp_text}")
-                    await msg.edit(f"API Error: {resp.status}\nBody: {resp_text[:100]}")
-                    return
-                try:
-                    data = await resp.json()
-                except Exception as e:
-                     await msg.edit(f"API JSON Error: {e}")
-                     return
+            tasks = [fetch_api(session, self.link, config) for config in API_CONFIGS]
+            results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        valid_links = []
+        best_link = None
+        for res in results:
+            if isinstance(res, dict) and res.get("success"):
+                links = res.get("links", {})
+                metadata = res.get("metadata", {})
+                
+                # Check for DL links
+                if link := (links.get("dl1") or links.get("dl2")):
+                    best_link = link
+                    # Update metadata if not set
+                    if not self.name and metadata.get("file_name"):
+                        self.name = metadata.get("file_name")
+                    break
         
-        if self.name is None and (file_name := data.get("file_name")):
-             self.name = file_name
-        
-        # Helper to check and add non-empty links
-        def check_add(api_key, dl_key):
-            if api_data := data.get(api_key):
-                if link := api_data.get(dl_key):
-                    if link:
-                        valid_links.append(link)
-                        return True
-            return False
-            
-        # 0. Check new API format (Direct Link)
-        if link := data.get("download_link"):
-            valid_links.append(link)
+        if not best_link:
+             # Try stream link as fallback?
+             for res in results:
+                if isinstance(res, dict) and res.get("success"):
+                    if link := res.get("links", {}).get("stream"):
+                        best_link = link
+                        if not self.name and res.get("metadata", {}).get("file_name"):
+                             self.name = res.get("metadata").get("file_name")
+                        break
 
-        # 1. Check endpoints in priority order (Short-circuit)
-        if not valid_links:
-            (check_add("api5", "dl1") or
-             check_add("api5", "dl2") or
-             check_add("api6", "dl1") or
-             check_add("api6", "dl2") or
-             check_add("api3", "dl1") or
-             check_add("api3", "dl2"))
-             
-        if not valid_links:
-            await msg.edit("No valid download links found from API.")
+        if not best_link:
+            await msg.edit("All APIs failed to provide a valid download link.")
             return
 
-        best_link = valid_links[0]
-        self.link = best_link
-        
-        # Extract Filename from Metadata (Fallback)
-        if self.name is None:
-            if metadata := data.get("metadata"):
-                if file_name := metadata.get("file_name"):
-                    self.name = file_name
-        
         if self.name:
              LOGGER.info(f"Terabox Filename: {self.name}")
 
@@ -277,6 +331,26 @@ class TeraboxListener(Mirror):
         await self.on_download_start()
         headers = ["User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"]
         await add_aria2_download(self, f"{DOWNLOAD_DIR}{self.mid}/", headers, None, None)
+
+def is_valid_terabox_url(url: str) -> bool:
+    pattern = (
+        r"^(https?://)?(www\.)?"
+        r"(terabox\.com|teraboxapp\.com|teraboxlink\.com|"
+        r"terabox\.app|terabox\.fun|terabox\.link|terabox\.club|terabox\.click|"
+        r"teraboxurl\.com|teraboxshare\.com|teraboxfree\.com|teraboxfan\.com|"
+        r"teraboxshortlink\.com|teraboxshort\.com|teraboxsharefile\.com|teraboxlinks\.com|"
+        r"terafileshare\.com|terasharelink\.com|terasharefile\.com|terashareus\.com|"
+        r"1024tera\.com|1024tera\.co|1024terabox\.com|1024-terabox\.com|1024box\.com|"
+        r"1024teraboxlink\.com|tera1024box\.com|"
+        r"mirrobox\.com|nephobox\.com|momerybox\.com|tibibox\.com|"
+        r"gibibox\.com|pebibox\.com|"
+        r"4funbox\.com|4funbox\.co|4funbox\.in|"
+        r"freeterabox\.com|urlshortterabox\.com|shortlinkshare\.com|"
+        r"fancybox\.in|bestclouddrive\.com|"
+        r"dubox\.com|theteraboxmod\.app)"
+        r"/s/[a-zA-Z0-9]+"
+    )
+    return re_match(pattern, url) is not None
 
 async def terabox(client, message):
     bot_loop.create_task(TeraboxListener(client, message, is_leech=True).new_event())
