@@ -230,6 +230,9 @@ class TeraboxListener(Mirror):
 
         valid_links = []
         
+        if self.name is None and (file_name := data.get("file_name")):
+             self.name = file_name
+        
         # Helper to check and add non-empty links
         def check_add(api_key, dl_key):
             if api_data := data.get(api_key):
@@ -238,15 +241,20 @@ class TeraboxListener(Mirror):
                         valid_links.append(link)
                         return True
             return False
+            
+        # 0. Check new API format (Direct Link)
+        if link := data.get("download_link"):
+            valid_links.append(link)
 
         # 1. Check endpoints in priority order (Short-circuit)
-        (check_add("api5", "dl1") or
-         check_add("api5", "dl2") or
-         check_add("api6", "dl1") or
-         check_add("api6", "dl2") or
-         check_add("api3", "dl1") or
-         check_add("api3", "dl2"))
-
+        if not valid_links:
+            (check_add("api5", "dl1") or
+             check_add("api5", "dl2") or
+             check_add("api6", "dl1") or
+             check_add("api6", "dl2") or
+             check_add("api3", "dl1") or
+             check_add("api3", "dl2"))
+             
         if not valid_links:
             await msg.edit("No valid download links found from API.")
             return
@@ -254,11 +262,14 @@ class TeraboxListener(Mirror):
         best_link = valid_links[0]
         self.link = best_link
         
-        # Extract Filename from Metadata
-        if metadata := data.get("metadata"):
-            if file_name := metadata.get("file_name"):
-                self.name = file_name
-                LOGGER.info(f"Terabox Filename: {self.name}")
+        # Extract Filename from Metadata (Fallback)
+        if self.name is None:
+            if metadata := data.get("metadata"):
+                if file_name := metadata.get("file_name"):
+                    self.name = file_name
+        
+        if self.name:
+             LOGGER.info(f"Terabox Filename: {self.name}")
 
         await msg.delete()
         from bot.helper.mirror_leech_utils.download_utils.aria2_download import add_aria2_download    
