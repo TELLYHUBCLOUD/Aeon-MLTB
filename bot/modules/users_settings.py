@@ -152,7 +152,7 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("❌ Close", f"userset {user_id} close")
 
         text = f"""<u>⚙️ Leech Settings for {name}</u>
-<blockquote expandable>
+<blockquote>
 ╭📦 Leech Type: <b>{ltype}</b>
 ┊📸 Media Group: <b>{media_group}</b>
 ┊ User Session: {usess}
@@ -189,7 +189,7 @@ async def get_user_settings(from_user, stype="main"):
             rcflags = Config.RCLONE_FLAGS
         else:
             rcflags = "None"
-        text = f"""<blockquote expandable>
+        text = f"""<blockquote>
 ╭⚙️ <b>Rclone Settings for {name}</b>
 ┊📁 <b>Rclone Config:</b> {rccmsg}
 ┊📂 <b>Rclone Path:</b> <code>{rccpath}</code>
@@ -231,7 +231,7 @@ async def get_user_settings(from_user, stype="main"):
         index = (
             user_dict["INDEX_URL"] if user_dict.get("INDEX_URL", False) else "None"
         )
-        text = f"""<blockquote expandable>
+        text = f"""<blockquote>
 ╭⚙️ <b>Gdrive API Settings for {name}</b>
 ┊🔑 <b>Gdrive Token:</b> {tokenmsg}
 ┊💾 <b>Gdrive ID:</b> <code>{gdrive_id}</code>
@@ -244,7 +244,7 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("🎥 YouTube", f"userset {user_id} set_upload yt")
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
-        text = f"""<blockquote expandable>
+        text = f"""<blockquote>
 ╭📤 <b>Upload Destination Settings for {name}</b>
 ╰Choose where to upload your files.
 </blockquote>"""
@@ -289,7 +289,7 @@ async def get_user_settings(from_user, stype="main"):
 
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
-        text = f"""<blockquote expandable>
+        text = f"""<blockquote>
 ╭🎥 <b>YouTube Settings for {name}</b>
 ┊🔒 <b>Default Privacy:</b> <code>{yt_privacy}</code>
 ┊📂 <b>Default Category:</b> <code>{yt_category}</code>
@@ -307,7 +307,7 @@ async def get_user_settings(from_user, stype="main"):
         )
         buttons.data_button("🔙 Back", f"userset {user_id} youtube")
         buttons.data_button("❌ Close", f"userset {user_id} close")
-        text = f"""<blockquote expandable>
+        text = f"""<blockquote>
 ╭📁 <b>Set Default YouTube Folder Upload Mode for {name}</b>
 ╰Choose how to handle folder uploads.
 </blockquote>"""
@@ -357,7 +357,7 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
 
-        text = f"""<blockquote expandable>
+        text = f"""<blockquote>
 ╭🤖 <b>Automation Settings for {name}</b>
 ┊🚀 <b>Auto Leech:</b> {aleech}
 ┊🎬 <b>Auto Leech Cmd:</b> <code>{escape(aleech_cmd)}</code>
@@ -372,13 +372,27 @@ async def get_user_settings(from_user, stype="main"):
             "✏️ Filename Replace",
             f"userset {user_id} menu FILENAME_REPLACE",
         )
-        fn_rep = user_dict.get("FILENAME_REPLACE") or "None"
+        if user_dict.get("FILENAME_REPLACE", False):
+            fn_rep = user_dict["FILENAME_REPLACE"]
+        elif (
+            "FILENAME_REPLACE" not in user_dict and Config.FILENAME_REPLACE
+        ):
+            fn_rep = Config.FILENAME_REPLACE
+        else:
+            fn_rep = "None"
 
+        if user_dict.get("CLEAN_FILENAME", False) or (
+            "CLEAN_FILENAME" not in user_dict and Config.CLEAN_FILENAME
+        ):
+            clean_file = "✅ Enabled"
+            btn_mode = "f"
+        else:
+            clean_file = "❌ Disabled"
+            btn_mode = "t"
         buttons.data_button(
             "🧹 Clean Filename",
-            f"userset {user_id} tog CLEAN_FILENAME {'f' if user_dict.get('CLEAN_FILENAME') else 't'}",
+            f"userset {user_id} tog CLEAN_FILENAME {btn_mode}",
         )
-        clean_file = "✅ Enabled" if user_dict.get("CLEAN_FILENAME") else "❌ Disabled"
 
         buttons.data_button(
             "📝 Leech Prefix",
@@ -421,16 +435,32 @@ async def get_user_settings(from_user, stype="main"):
             lcap = "None"
 
         buttons.data_button(
-            "📝 Auto Caption Replace",
+            "📝 Caption Replace",
             f"userset {user_id} menu AUTO_CAPTION_REPLACE",
         )
-        ac_rep = user_dict.get("AUTO_CAPTION_REPLACE") or "None"
+        if user_dict.get("AUTO_CAPTION_REPLACE", False):
+            ac_rep = user_dict["AUTO_CAPTION_REPLACE"]
+        elif (
+            "AUTO_CAPTION_REPLACE" not in user_dict
+            and Config.AUTO_CAPTION_REPLACE
+        ):
+            ac_rep = Config.AUTO_CAPTION_REPLACE
+        else:
+            ac_rep = "None"
 
         buttons.data_button(
-            "🧹 Auto Caption Remove",
+            "🧹 Caption Remove",
             f"userset {user_id} menu AUTO_CAPTION_REMOVE",
         )
-        ac_rem = user_dict.get("AUTO_CAPTION_REMOVE") or "None"
+        if user_dict.get("AUTO_CAPTION_REMOVE", False):
+            ac_rem = user_dict["AUTO_CAPTION_REMOVE"]
+        elif (
+            "AUTO_CAPTION_REMOVE" not in user_dict
+            and Config.AUTO_CAPTION_REMOVE
+        ):
+            ac_rem = Config.AUTO_CAPTION_REMOVE
+        else:
+            ac_rem = "None"
 
         buttons.data_button(
             "🔡 Leech Font",
@@ -446,7 +476,7 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
 
-        text = f"""<blockquote expandable>
+        text = f"""<blockquote>
 ╭📝 <b>Filename Options for {name}</b>
 ┊✏️ <b>Filename Replace:</b> <code>{escape(fn_rep)}</code>
 ┊🧹 <b>Clean Filename:</b> {clean_file}
@@ -572,7 +602,7 @@ async def get_user_settings(from_user, stype="main"):
 
         buttons.data_button("❌ Close", f"userset {user_id} close")
 
-        text = f"""<blockquote expandable>
+        text = f"""<blockquote>
 ╭⚙️ <b>Settings for {name}</b>
 ┊📦 <b>Default Package:</b> {du}
 ┊🚀 <b>Auto Leech:</b> {aleech}
