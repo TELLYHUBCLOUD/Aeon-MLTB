@@ -391,7 +391,7 @@ def is_valid_terabox_url(url: str) -> bool:
 
 
 async def terabox(client, message):
-    bot_loop.create_task(TeraboxListener(client, message, is_leech=False).new_event())
+    bot_loop.create_task(TeraboxListener(client, message, is_leech=True).new_event())
 
 
 async def terabox_mirror(client, message):
