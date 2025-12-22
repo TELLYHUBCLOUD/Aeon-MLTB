@@ -39,6 +39,11 @@ from tenacity import (
 from bot.core.aeon_client import TgClient
 from bot.core.config_manager import Config
 from bot.helper.aeon_utils.caption_gen import generate_caption
+from bot.helper.aeon_utils.text_utils import (
+    apply_font,
+    clean_filename,
+    replace_filename,
+)
 from bot.helper.ext_utils.bot_utils import clean_caption, sync_to_async
 from bot.helper.ext_utils.files_utils import (
     get_base_name,
@@ -73,8 +78,12 @@ class TelegramUploader:
         self._last_msg_in_group = False
         self._up_path = ""
         self._lprefix = ""
+        self._lsuffix = ""
         self._user_dump = ""
         self._lcaption = ""
+        self._lfont = ""
+        self._fname_replace = ""
+        self._clean_name = False
         self._media_group = False
         self._is_private = False
         self._sent_msg = None
@@ -111,11 +120,31 @@ class TelegramUploader:
             if "LEECH_FILENAME_PREFIX" not in self._listener.user_dict
             else ""
         )
+        self._lsuffix = self._listener.user_dict.get("LEECH_FILENAME_SUFFIX") or (
+            Config.LEECH_FILENAME_SUFFIX
+            if "LEECH_FILENAME_SUFFIX" not in self._listener.user_dict
+            else ""
+        )
         self._user_dump = self._listener.user_dict.get("USER_DUMP")
         self._lcaption = self._listener.user_dict.get("LEECH_FILENAME_CAPTION") or (
             Config.LEECH_FILENAME_CAPTION
             if "LEECH_FILENAME_CAPTION" not in self._listener.user_dict
             else ""
+        )
+        self._lfont = self._listener.user_dict.get("LEECH_CAPTION_FONT") or (
+            Config.LEECH_CAPTION_FONT
+            if "LEECH_CAPTION_FONT" not in self._listener.user_dict
+            else ""
+        )
+        self._fname_replace = self._listener.user_dict.get("FILENAME_REPLACE") or (
+            Config.FILENAME_REPLACE
+            if "FILENAME_REPLACE" not in self._listener.user_dict
+            else ""
+        )
+        self._clean_name = self._listener.user_dict.get("CLEAN_FILENAME") or (
+            Config.CLEAN_FILENAME
+            if "CLEAN_FILENAME" not in self._listener.user_dict
+            else False
         )
         if self._thumb != "none" and not await aiopath.exists(self._thumb):
             self._thumb = None
@@ -165,18 +194,46 @@ class TelegramUploader:
     async def _prepare_file(self, file_, dirpath):
         if self._lcaption:
             cap_mono = await generate_caption(file_, dirpath, self._lcaption)
-        if self._lprefix:
-            if not self._lcaption:
-                cap_mono = f"{self._lprefix} {file_}"
-            self._lprefix = re_sub("<.*?>", "", self._lprefix)
-            new_path = ospath.join(dirpath, f"{self._lprefix} {file_}")
+        else:
+            cap_mono = f"<code>{file_}</code>"
+
+        if self._fname_replace:
+            new_file = replace_filename(file_, self._fname_replace)
+            new_path = ospath.join(dirpath, new_file)
+            await rename(self._up_path, new_path)
+            self._up_path = new_path
+            file_ = new_file
+
+        if self._clean_name:
+            new_file = clean_filename(file_)
+            new_path = ospath.join(dirpath, new_file)
+            await rename(self._up_path, new_path)
+            self._up_path = new_path
+            file_ = new_file
+
+        if self._lprefix or self._lsuffix:
+            if self._lprefix:
+                self._lprefix = re_sub("<.*?>", "", self._lprefix)
+                file_ = f"{self._lprefix} {file_}"
+
+            if self._lsuffix:
+                self._lsuffix = re_sub("<.*?>", "", self._lsuffix)
+                name, ext = ospath.splitext(file_)
+                file_ = f"{name} {self._lsuffix}{ext}"
+
+            new_path = ospath.join(dirpath, file_)
             LOGGER.info(self._up_path)
             await rename(self._up_path, new_path)
             self._up_path = new_path
             LOGGER.info(self._up_path)
-        if not self._lcaption and not self._lprefix:
-            cap_mono = f"<code>{file_}</code>"
-        if len(file_) > 60:
+
+            if not self._lcaption:
+                cap_mono = f"<code>{file_}</code>"
+
+        if self._lfont:
+            cap_mono = apply_font(cap_mono, self._lfont)
+
+        if len(file_) > 200:
             if is_archive(file_):
                 name = get_base_name(file_)
                 ext = file_.split(name, 1)[1]
@@ -193,7 +250,7 @@ class TelegramUploader:
                 name = file_
                 ext = ""
             extn = len(ext)
-            remain = 60 - extn
+            remain = 200 - extn
             name = name[:remain]
             new_path = ospath.join(dirpath, f"{name}{ext}")
             await rename(self._up_path, new_path)

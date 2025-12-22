@@ -36,8 +36,6 @@ no_thumb = "https://graph.org/file/73ae908d18c6b38038071.jpg"
 leech_options = [
     "THUMBNAIL",
     "LEECH_SPLIT_SIZE",
-    "LEECH_FILENAME_PREFIX",
-    "LEECH_FILENAME_CAPTION",
     "THUMBNAIL_LAYOUT",
     "USER_DUMP",
     "USER_SESSION",
@@ -50,8 +48,16 @@ automation_options = [
     "AUTO_ENCODE",
     "AUTO_RESUME",
     "AUTO_COMPRESS_CMD",
+]
+filename_options = [
+    "FILENAME_REPLACE",
+    "CLEAN_FILENAME",
+    "LEECH_FILENAME_PREFIX",
+    "LEECH_FILENAME_SUFFIX",
+    "LEECH_FILENAME_CAPTION",
     "AUTO_CAPTION_REPLACE",
     "AUTO_CAPTION_REMOVE",
+    "LEECH_CAPTION_FONT",
 ]
 rclone_options = ["RCLONE_CONFIG", "RCLONE_PATH", "RCLONE_FLAGS"]
 gdrive_options = ["TOKEN_PICKLE", "GDRIVE_ID", "INDEX_URL"]
@@ -70,32 +76,7 @@ async def get_user_settings(from_user, stype="main"):
     if stype == "leech":
         buttons.data_button("🖼️ Thumbnail", f"userset {user_id} menu THUMBNAIL")
         buttons.data_button(
-            "📝 Leech Prefix",
-            f"userset {user_id} menu LEECH_FILENAME_PREFIX",
-        )
-        if user_dict.get("LEECH_FILENAME_PREFIX", False):
-            lprefix = user_dict["LEECH_FILENAME_PREFIX"]
-        elif (
-            "LEECH_FILENAME_PREFIX" not in user_dict and Config.LEECH_FILENAME_PREFIX
-        ):
-            lprefix = Config.LEECH_FILENAME_PREFIX
-        else:
-            lprefix = "None"
-        buttons.data_button(
-            "💬 Leech Caption",
-            f"userset {user_id} menu LEECH_FILENAME_CAPTION",
-        )
-        if user_dict.get("LEECH_FILENAME_CAPTION", False):
-            lcap = user_dict["LEECH_FILENAME_CAPTION"]
-        elif (
-            "LEECH_FILENAME_CAPTION" not in user_dict
-            and Config.LEECH_FILENAME_CAPTION
-        ):
-            lcap = Config.LEECH_FILENAME_CAPTION
-        else:
-            lcap = "None"
-        buttons.data_button(
-            "📦 User Dump",
+            " User Dump",
             f"userset {user_id} menu USER_DUMP",
         )
         if user_dict.get("USER_DUMP", False):
@@ -174,9 +155,7 @@ async def get_user_settings(from_user, stype="main"):
 <blockquote expandable>
 ╭📦 Leech Type: <b>{ltype}</b>
 ┊📸 Media Group: <b>{media_group}</b>
-┊📝 Leech Prefix: <code>{escape(lprefix)}</code>
-┊💬 Leech Caption: <code>{escape(lcap)}</code>
-┊👤 User Session: {usess}
+┊ User Session: {usess}
 ┊📦 User Dump: <code>{udump}</code>
 ┊🎨 Thumbnail Layout: <b>{thumb_layout}</b>
 ╰📩 Bot PM: <b>{bot_pm_status}</b>
@@ -370,19 +349,7 @@ async def get_user_settings(from_user, stype="main"):
         ac_cmd = user_dict.get("AUTO_COMPRESS_CMD") or "None"
 
         buttons.data_button(
-            "📝 Auto Caption Replace",
-            f"userset {user_id} menu AUTO_CAPTION_REPLACE",
-        )
-        ac_rep = user_dict.get("AUTO_CAPTION_REPLACE") or "None"
-
-        buttons.data_button(
-            "🧹 Auto Caption Remove",
-            f"userset {user_id} menu AUTO_CAPTION_REMOVE",
-        )
-        ac_rem = user_dict.get("AUTO_CAPTION_REMOVE") or "None"
-
-        buttons.data_button(
-            "🚀 Auto Resume",
+            " Auto Task Resume",
             f"userset {user_id} tog AUTO_RESUME {'f' if user_dict.get('AUTO_RESUME') else 't'}",
         )
         aresume = "✅ Enabled" if user_dict.get("AUTO_RESUME") else "❌ Disabled"
@@ -398,9 +365,97 @@ async def get_user_settings(from_user, stype="main"):
 ┊🎬 <b>Auto Mirror Cmd:</b> <code>{escape(amirror_cmd)}</code>
 ┊🚀 <b>Auto Encode:</b> {aencode}
 ┊🚀 <b>Auto Resume:</b> {aresume}
-┊🎬 <b>Auto Compress Cmd:</b> <code>{escape(ac_cmd)}</code>
+╰🎬 <b>Auto Compress Cmd:</b> <code>{escape(ac_cmd)}</code>
+</blockquote>"""
+    elif stype == "filename":
+        buttons.data_button(
+            "✏️ Filename Replace",
+            f"userset {user_id} menu FILENAME_REPLACE",
+        )
+        fn_rep = user_dict.get("FILENAME_REPLACE") or "None"
+
+        buttons.data_button(
+            "🧹 Clean Filename",
+            f"userset {user_id} tog CLEAN_FILENAME {'f' if user_dict.get('CLEAN_FILENAME') else 't'}",
+        )
+        clean_file = "✅ Enabled" if user_dict.get("CLEAN_FILENAME") else "❌ Disabled"
+
+        buttons.data_button(
+            "📝 Leech Prefix",
+            f"userset {user_id} menu LEECH_FILENAME_PREFIX",
+        )
+        if user_dict.get("LEECH_FILENAME_PREFIX", False):
+            lprefix = user_dict["LEECH_FILENAME_PREFIX"]
+        elif (
+            "LEECH_FILENAME_PREFIX" not in user_dict and Config.LEECH_FILENAME_PREFIX
+        ):
+            lprefix = Config.LEECH_FILENAME_PREFIX
+        else:
+            lprefix = "None"
+
+        buttons.data_button(
+            "📝 Leech Suffix",
+            f"userset {user_id} menu LEECH_FILENAME_SUFFIX",
+        )
+        if user_dict.get("LEECH_FILENAME_SUFFIX", False):
+            lsuffix = user_dict["LEECH_FILENAME_SUFFIX"]
+        elif (
+            "LEECH_FILENAME_SUFFIX" not in user_dict and Config.LEECH_FILENAME_SUFFIX
+        ):
+            lsuffix = Config.LEECH_FILENAME_SUFFIX
+        else:
+            lsuffix = "None"
+
+        buttons.data_button(
+            "💬 Leech Caption",
+            f"userset {user_id} menu LEECH_FILENAME_CAPTION",
+        )
+        if user_dict.get("LEECH_FILENAME_CAPTION", False):
+            lcap = user_dict["LEECH_FILENAME_CAPTION"]
+        elif (
+            "LEECH_FILENAME_CAPTION" not in user_dict
+            and Config.LEECH_FILENAME_CAPTION
+        ):
+            lcap = Config.LEECH_FILENAME_CAPTION
+        else:
+            lcap = "None"
+
+        buttons.data_button(
+            "📝 Auto Caption Replace",
+            f"userset {user_id} menu AUTO_CAPTION_REPLACE",
+        )
+        ac_rep = user_dict.get("AUTO_CAPTION_REPLACE") or "None"
+
+        buttons.data_button(
+            "🧹 Auto Caption Remove",
+            f"userset {user_id} menu AUTO_CAPTION_REMOVE",
+        )
+        ac_rem = user_dict.get("AUTO_CAPTION_REMOVE") or "None"
+
+        buttons.data_button(
+            "🔡 Leech Font",
+            f"userset {user_id} menu LEECH_CAPTION_FONT",
+        )
+        if user_dict.get("LEECH_CAPTION_FONT", False):
+            lfont = user_dict["LEECH_CAPTION_FONT"]
+        elif "LEECH_CAPTION_FONT" not in user_dict and Config.LEECH_CAPTION_FONT:
+            lfont = Config.LEECH_CAPTION_FONT
+        else:
+            lfont = "None"
+
+        buttons.data_button("🔙 Back", f"userset {user_id} back")
+        buttons.data_button("❌ Close", f"userset {user_id} close")
+
+        text = f"""<blockquote expandable>
+╭📝 <b>Filename Options for {name}</b>
+┊✏️ <b>Filename Replace:</b> <code>{escape(fn_rep)}</code>
+┊🧹 <b>Clean Filename:</b> {clean_file}
+┊📝 <b>Leech Prefix:</b> <code>{escape(lprefix)}</code>
+┊📝 <b>Leech Suffix:</b> <code>{escape(lsuffix)}</code>
+┊💬 <b>Leech Caption:</b> <code>{escape(lcap)}</code>
 ┊📝 <b>Auto Caption Replace:</b> <code>{escape(ac_rep)}</code>
-╰🧹 <b>Auto Caption Remove:</b> <code>{escape(ac_rem)}</code>
+┊🧹 <b>Auto Caption Remove:</b> <code>{escape(ac_rem)}</code>
+╰🔡 <b>Leech Font:</b> <code>{escape(lfont)}</code>
 </blockquote>"""
     else:
         buttons.data_button("📥 Leech", f"userset {user_id} leech")
@@ -409,6 +464,7 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("🎥 YouTube", f"userset {user_id} youtube")
 
         buttons.data_button("🤖 Auto Features", f"userset {user_id} automation")
+        buttons.data_button("📝 Filename Options", f"userset {user_id} filename")
 
         if user_dict.get("AUTO_LEECH", False) or (
             "AUTO_LEECH" not in user_dict and Config.AUTO_LEECH
@@ -667,6 +723,8 @@ async def get_menu(option, message, user_id):
         back_to = "leech"
     elif option in automation_options:
         back_to = "automation"
+    elif option in filename_options:
+        back_to = "filename"
     elif option in rclone_options:
         back_to = "rclone"
     elif option in gdrive_options:
@@ -801,7 +859,7 @@ async def edit_user_settings(client, query):
         await query.answer("❌ Not Yours!", show_alert=True)
     elif data[2] == "setevent":
         await query.answer()
-    elif data[2] in ["leech", "gdrive", "rclone", "youtube", "automation"]:
+    elif data[2] in ["leech", "gdrive", "rclone", "youtube", "automation", "filename"]:
         await query.answer()
         await update_user_settings(query, data[2])
     elif data[2] == "menu":
@@ -843,6 +901,8 @@ async def edit_user_settings(client, query):
             "MEDIA_GROUP",
         ]:
             back_to = "leech"
+        elif data[3] == "CLEAN_FILENAME":
+            back_to = "filename"
         else:
             back_to = "leech"
 

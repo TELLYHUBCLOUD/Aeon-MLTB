@@ -376,10 +376,11 @@ class Merge(TaskListener):
                     self.output_name = f"{series_name} S{season}E{start_ep:02d}-E{end_ep:02d}.mp4"
                     LOGGER.info(f"Smart Renaming: {self.output_name}")
                 else:
-                     self.output_name = "merged.mp4"
+                    self.output_name = ospath.basename(input_files[0])
+
             except Exception as e:
                 LOGGER.error(f"Smart renaming failed: {e}")
-                self.output_name = "merged.mp4"
+                self.output_name = ospath.basename(input_files[0])
 
         # Apply output name
         if self.name_subfix:

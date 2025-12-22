@@ -47,6 +47,10 @@ class Config:
     HYDRA_IP: str = ""
     HYDRA_API_KEY: str = ""
     NAME_SUBSTITUTE: str = r""
+    LEECH_FILENAME_SUFFIX: str = ""
+    LEECH_CAPTION_FONT: str = ""
+    FILENAME_REPLACE: str = ""
+    CLEAN_FILENAME: bool = False
     OWNER_ID: int = 0
     QUEUE_ALL: int = 0
     QUEUE_DOWNLOAD: int = 0
