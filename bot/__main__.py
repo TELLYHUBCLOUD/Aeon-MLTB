@@ -113,6 +113,19 @@ async def main():
     )
 
 
+    import signal
+    from bot.modules.restart import save_active_tasks
+
+    async def handle_sigterm(*args):
+        LOGGER.info(f"Handling signal: {args[0] if args else 'SIGTERM'}")
+        if Config.AUTO_RESUME:
+            await save_active_tasks()
+        raise SystemExit
+
+    loop = bot_loop
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        loop.add_signal_handler(sig, lambda: loop.create_task(handle_sigterm()))
+
 bot_loop.run_until_complete(main())
 
 from .core.handlers import add_handlers
