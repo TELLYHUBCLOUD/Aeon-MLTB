@@ -28,6 +28,27 @@ from bot.modules.mirror_leech import Mirror
 # -----------------------------------------------------------
 # API List (UPDATED)
 # -----------------------------------------------------------
+
+def is_valid_terabox_url(url: str) -> bool:
+    pattern = (
+        r"^(https?://)?(www\.)?"
+        r"(terabox\.com|teraboxapp\.com|teraboxlink\.com|"
+        r"terabox\.app|terabox\.fun|terabox\.link|terabox\.club|terabox\.click|"
+        r"teraboxurl\.com|teraboxshare\.com|teraboxfree\.com|teraboxfan\.com|"
+        r"teraboxshortlink\.com|teraboxshort\.com|teraboxsharefile\.com|teraboxlinks\.com|"
+        r"terafileshare\.com|terasharelink\.com|terasharefile\.com|terashareus\.com|"
+        r"1024tera\.com|1024tera\.co|1024terabox\.com|1024-terabox\.com|1024box\.com|"
+        r"1024teraboxlink\.com|tera1024box\.com|"
+        r"mirrobox\.com|nephobox\.com|momerybox\.com|tibibox\.com|"
+        r"gibibox\.com|pebibox\.com|"
+        r"4funbox\.com|4funbox\.co|4funbox\.in|"
+        r"freeterabox\.com|urlshortterabox\.com|shortlinkshare\.com|"
+        r"fancybox\.in|bestclouddrive\.com|"
+        r"dubox\.com|theteraboxmod\.app)"
+        r"/s/[a-zA-Z0-9]+"
+    )
+    return re_match(pattern, url) is not None
+
 API_CONFIGS = [
     {"name": "API5", "url_template": "https://terabox-api.tellycloudapi.workers.dev/?url={url}"},
     {"name": "API6", "url_template": "https://teraboxdl.tellycloudapi.workers.dev/?url={url}"},
@@ -74,7 +95,7 @@ class TeraboxListener(Mirror):
         client,
         message,
         is_qbit: bool = False,
-        is_leech: bool = False,
+        is_leech: bool = True,
         is_jd: bool = False,
         is_nzb: bool = False,
         same_dir=None,
@@ -369,25 +390,6 @@ class TeraboxListener(Mirror):
         await add_aria2_download(self, f"{DOWNLOAD_DIR}{self.mid}/", headers, None, None)
 
 
-def is_valid_terabox_url(url: str) -> bool:
-    pattern = (
-        r"^(https?://)?(www\.)?"
-        r"(terabox\.com|teraboxapp\.com|teraboxlink\.com|"
-        r"terabox\.app|terabox\.fun|terabox\.link|terabox\.club|terabox\.click|"
-        r"teraboxurl\.com|teraboxshare\.com|teraboxfree\.com|teraboxfan\.com|"
-        r"teraboxshortlink\.com|teraboxshort\.com|teraboxsharefile\.com|teraboxlinks\.com|"
-        r"terafileshare\.com|terasharelink\.com|terasharefile\.com|terashareus\.com|"
-        r"1024tera\.com|1024tera\.co|1024terabox\.com|1024-terabox\.com|1024box\.com|"
-        r"1024teraboxlink\.com|tera1024box\.com|"
-        r"mirrobox\.com|nephobox\.com|momerybox\.com|tibibox\.com|"
-        r"gibibox\.com|pebibox\.com|"
-        r"4funbox\.com|4funbox\.co|4funbox\.in|"
-        r"freeterabox\.com|urlshortterabox\.com|shortlinkshare\.com|"
-        r"fancybox\.in|bestclouddrive\.com|"
-        r"dubox\.com|theteraboxmod\.app)"
-        r"/s/[a-zA-Z0-9]+"
-    )
-    return re_match(pattern, url) is not None
 
 
 async def terabox(client, message):
