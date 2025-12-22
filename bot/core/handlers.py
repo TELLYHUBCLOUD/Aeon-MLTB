@@ -1,5 +1,5 @@
 # ruff: noqa: F405
-from pyrogram.filters import command, regex
+from pyrogram.filters import command, regex, document, video
 from pyrogram.handlers import (
     CallbackQueryHandler,
     EditedMessageHandler,
@@ -290,7 +290,7 @@ def add_handlers():
     TgClient.bot.add_handler(
         MessageHandler(
             merge_session_handler,
-            filters=(CustomFilters.authorized & (CustomFilters.document | CustomFilters.video)),
+            filters=(CustomFilters.authorized & (document | video)),
         ),
     )
 
