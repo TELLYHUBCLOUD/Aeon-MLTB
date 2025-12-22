@@ -58,6 +58,7 @@ filename_options = [
     "AUTO_CAPTION_REPLACE",
     "AUTO_CAPTION_REMOVE",
     "LEECH_CAPTION_FONT",
+    "NAME_SUBSTITUTE",
 ]
 rclone_options = ["RCLONE_CONFIG", "RCLONE_PATH", "RCLONE_FLAGS"]
 gdrive_options = ["TOKEN_PICKLE", "GDRIVE_ID", "INDEX_URL"]
@@ -369,6 +370,33 @@ async def get_user_settings(from_user, stype="main"):
 </blockquote>"""
     elif stype == "filename":
         buttons.data_button(
+            "🧹 Clean Filename",
+            f"userset {user_id} tog CLEAN_FILENAME {btn_mode}",
+        )
+        if user_dict.get("NAME_SUBSTITUTE", False):
+            ns_msg = "✅ Added"
+        elif "NAME_SUBSTITUTE" not in user_dict and Config.NAME_SUBSTITUTE:
+            ns_msg = "✅ Added"
+        else:
+            ns_msg = "❌ None"
+
+        buttons.data_button(
+            "✏️ Name Substitute",
+            f"userset {user_id} menu NAME_SUBSTITUTE",
+        )
+
+        buttons.data_button(
+            "🔡 Leech Font",
+            f"userset {user_id} menu LEECH_CAPTION_FONT",
+        )
+        if user_dict.get("LEECH_CAPTION_FONT", False):
+            lfont = user_dict["LEECH_CAPTION_FONT"]
+        elif "LEECH_CAPTION_FONT" not in user_dict and Config.LEECH_CAPTION_FONT:
+            lfont = Config.LEECH_CAPTION_FONT
+        else:
+            lfont = "None"
+
+        buttons.data_button(
             "✏️ Filename Replace",
             f"userset {user_id} menu FILENAME_REPLACE",
         )
@@ -389,11 +417,6 @@ async def get_user_settings(from_user, stype="main"):
         else:
             clean_file = "❌ Disabled"
             btn_mode = "t"
-        buttons.data_button(
-            "🧹 Clean Filename",
-            f"userset {user_id} tog CLEAN_FILENAME {btn_mode}",
-        )
-
         buttons.data_button(
             "📝 Leech Prefix",
             f"userset {user_id} menu LEECH_FILENAME_PREFIX",
@@ -462,16 +485,6 @@ async def get_user_settings(from_user, stype="main"):
         else:
             ac_rem = "None"
 
-        buttons.data_button(
-            "🔡 Leech Font",
-            f"userset {user_id} menu LEECH_CAPTION_FONT",
-        )
-        if user_dict.get("LEECH_CAPTION_FONT", False):
-            lfont = user_dict["LEECH_CAPTION_FONT"]
-        elif "LEECH_CAPTION_FONT" not in user_dict and Config.LEECH_CAPTION_FONT:
-            lfont = Config.LEECH_CAPTION_FONT
-        else:
-            lfont = "None"
 
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
@@ -485,6 +498,7 @@ async def get_user_settings(from_user, stype="main"):
 ┊💬 <b>Leech Caption:</b> <code>{escape(lcap)}</code>
 ┊📝 <b>Auto Caption Replace:</b> <code>{escape(ac_rep)}</code>
 ┊🧹 <b>Auto Caption Remove:</b> <code>{escape(ac_rem)}</code>
+┊✏️ <b>Name Substitute:</b> {ns_msg}
 ╰🔡 <b>Leech Font:</b> <code>{escape(lfont)}</code>
 </blockquote>"""
     else:
@@ -552,16 +566,6 @@ async def get_user_settings(from_user, stype="main"):
             ex_ex = excluded_extensions
         else:
             ex_ex = "None"
-        if user_dict.get("NAME_SUBSTITUTE", False):
-            ns_msg = "✅ Added"
-        elif "NAME_SUBSTITUTE" not in user_dict and Config.NAME_SUBSTITUTE:
-            ns_msg = "✅ Added"
-        else:
-            ns_msg = "❌ None"
-        buttons.data_button(
-            "✏️ Name Subtitute",
-            f"userset {user_id} menu NAME_SUBSTITUTE",
-        )
 
         buttons.data_button(
             "⬇️ YT-DLP Options",
@@ -608,7 +612,6 @@ async def get_user_settings(from_user, stype="main"):
 ┊🚀 <b>Auto Leech:</b> {aleech}
 ┊🔑 <b>Use {tr} token/config</b>
 ┊📤 <b>Upload Paths:</b> <code>{upload_paths}</code>
-┊✏️ <b>Name Substitution:</b> {ns_msg}
 ┊🚫 <b>Excluded Extensions:</b> <code>{ex_ex}</code>
 ┊⬇️ <b>YT-DLP Options:</b> <code>{ytopt}</code>
 ┊🎬 <b>FFMPEG Commands:</b> {ffc}
