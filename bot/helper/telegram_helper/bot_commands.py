@@ -17,6 +17,7 @@ class BotCommands:
     CloneCommand = f"clone{i}"
     EncodeCommand = f"encode{i}"
     MergeCommand = f"merge{i}"
+    MdoneCommand = f"mdone{i}"
 
     MediaInfoCommand = f"mediainfo{i}"
     CountCommand = f"count{i}"

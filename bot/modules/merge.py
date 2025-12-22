@@ -9,6 +9,7 @@ from secrets import token_hex
 from aioshutil import move
 
 from bot import LOGGER, bot_loop, task_dict, task_dict_lock, multi_tags, intervals
+MERGE_SESSIONS = {}
 from bot.helper.aeon_utils.access_check import error_check
 from bot.helper.ext_utils.bot_utils import (
     COMMAND_USAGE,
@@ -184,6 +185,43 @@ class Merge(TaskListener):
             await send_message(self.message, e)
             return
 
+        if len(self.inputs) == 1 and not is_bulk:
+             user_id = self.message.from_user.id
+             session = MERGE_SESSIONS.get(user_id)
+             
+             if not session:
+                 MERGE_SESSIONS[user_id] = {
+                     "inputs": [],
+                     "message": self.message,
+                     "client": self.client,
+                     "adapter": self, # store ref to adapter/listener for context if needed
+                 }
+                 session = MERGE_SESSIONS[user_id]
+             
+             # Check if link already exists in session to prevent dupes (optional, but good)
+             # User requested: "1 TASK ADDED MAX 9 FILE" - imply up to 10 total
+             if len(session["inputs"]) >= 10:
+                 await send_message(self.message, "Merge Limit Reached! Use /mdone to start.")
+                 return
+
+             link = self.inputs[0]
+             session["inputs"].append(link)
+             count = len(session["inputs"])
+             
+             if count == 10:
+                 # Auto start
+                 self.inputs = session["inputs"]
+                 del MERGE_SESSIONS[user_id]
+                 await send_message(self.message, "Limit reached (10/10). Starting Merge...")
+                 await self._proceed_to_download()
+             else:
+                 await send_message(
+                     self.message, 
+                     f"File Added: {count}/10\nReply to next file or use /mdone to start."
+                 )
+             return
+
+        # Explicit bulk or >1 inputs -> Immediate Start (Classic Mode)
         await self._proceed_to_download()
 
     async def get_tg_link_message(self, link):
@@ -494,3 +532,41 @@ class Merge(TaskListener):
 
 async def merge(client, message):
     bot_loop.create_task(Merge(client, message).new_event())
+
+async def merge_done(client, message):
+    user_id = message.from_user.id
+    if user_id not in MERGE_SESSIONS:
+        await send_message(message, "No active merge session! Use /merge to start one.")
+        return
+    
+    session = MERGE_SESSIONS[user_id]
+    if len(session["inputs"]) < 2:
+        await send_message(message, "Need at least 2 files to merge!")
+        return
+        
+    # Trigger Merge
+    # We can reuse the stored "adapter" or create new one. 
+    # Creating new one is safer to avoid stale state.
+    # But we need to pass inputs.
+    
+    # We'll spawn a new Merge task but override its inputs
+    # Or cleaner: Modify the stored adapter instance and run it?
+    # Session['adapter'] was created but stopped at return.
+    # It might be cleaner to just init a new listener.
+    
+    msg = session["message"] # Original first message for auth checks etc
+    # Actually, better to use current message for status updates initially? 
+    # But auth checks rely on original user.
+    
+    listener = Merge(client, message) # Use current message for listener context
+    listener.inputs = session["inputs"]
+    listener.total_batch_files = len(listener.inputs)
+    del MERGE_SESSIONS[user_id]
+    
+    await send_message(message, f"Merge Started with {listener.total_batch_files} files...")
+    
+    try:
+         await listener.before_start()
+         await listener._proceed_to_download()
+    except Exception as e:
+         await send_message(message, str(e))

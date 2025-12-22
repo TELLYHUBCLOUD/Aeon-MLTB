@@ -194,7 +194,18 @@ class EncodeSelection:
 
     async def compress_subbuttons(self):
         buttons = ButtonMaker() 
-        options = ["Original", "1080p", "720p", "480p", "360p"]
+        options = [
+            "Original",
+            "2160p",
+            "1440p",
+            "1080p",
+            "720p",
+            "576p",
+            "480p",
+            "360p",
+            "240p",
+            "144p",
+        ]
         for opt in options:
              prefix = "✅ " if self.quality == opt else ""
              buttons.data_button(f"{prefix}{opt}", f"enc qual {opt}")
@@ -535,10 +546,15 @@ class Encode(TaskListener):
         if self.quality != "Original": # and has_video (we assume yes or generic)
              cmd.extend(["-c:v", "libx264"])
              scale = ""
-             if self.quality == "1080p": scale = "scale=-2:1080"
+             if self.quality == "2160p": scale = "scale=-2:2160"
+             elif self.quality == "1440p": scale = "scale=-2:1440"
+             elif self.quality == "1080p": scale = "scale=-2:1080"
              elif self.quality == "720p": scale = "scale=-2:720"
+             elif self.quality == "576p": scale = "scale=-2:576"
              elif self.quality == "480p": scale = "scale=-2:480"
              elif self.quality == "360p": scale = "scale=-2:360"
+             elif self.quality == "240p": scale = "scale=-2:240"
+             elif self.quality == "144p": scale = "scale=-2:144"
              if scale:
                 cmd.extend(["-vf", scale])
         else:

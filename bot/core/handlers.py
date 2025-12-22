@@ -230,6 +230,11 @@ def add_handlers():
             BotCommands.MergeCommand,
             CustomFilters.authorized,
         ),
+        "merge_done": (
+            merge_done,
+            BotCommands.MdoneCommand,
+            CustomFilters.authorized,
+        ),
 
     }
 

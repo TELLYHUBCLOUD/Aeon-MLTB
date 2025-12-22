@@ -13,7 +13,7 @@ from .gd_search import gdrive_search, select_type
 from .help import arg_usage, bot_help
 from .help import arg_usage, bot_help
 from .mediainfo import mediainfo
-from .merge import merge
+from .merge import merge, merge_done
 from .auto_leech_handler import auto_leech_handler
 from .mirror_leech import (
     jd_leech,
@@ -84,6 +84,7 @@ __all__ = [
     "log",
     "mediainfo",
     "merge",
+    "merge_done",
     "mirror",
     "nzb_leech",
     "nzb_mirror",
