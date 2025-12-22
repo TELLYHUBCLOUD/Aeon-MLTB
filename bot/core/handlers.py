@@ -289,6 +289,13 @@ def add_handlers():
 
     TgClient.bot.add_handler(
         MessageHandler(
+            merge_session_handler,
+            filters=(CustomFilters.authorized & (CustomFilters.document | CustomFilters.video)),
+        ),
+    )
+
+    TgClient.bot.add_handler(
+        MessageHandler(
             auto_leech_handler,
             filters=regex(r"https?://|magnet:") & CustomFilters.authorized,
         ),

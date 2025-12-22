@@ -165,11 +165,19 @@ class Merge(TaskListener):
         self.inputs = unique_inputs
 
         if not self.inputs:
-             await send_message(
-                self.message,
-                COMMAND_USAGE["merge"][0],
-                COMMAND_USAGE["merge"][1],
-            )
+             # Check for Session Start (Blank Command)
+             user_id = self.message.from_user.id
+             if user_id not in MERGE_SESSIONS:
+                 MERGE_SESSIONS[user_id] = {
+                     "inputs": [],
+                     "message": self.message,
+                     "client": self.client,
+                     "adapter": self,
+                 }
+                 await send_message(self.message, "Merge Session Started!\nSend/Forward files to add them (Max 10).\nUse /mdone to start merging.")
+             else:
+                 count = len(MERGE_SESSIONS[user_id]["inputs"])
+                 await send_message(self.message, f"Merge Session Active.\nFiles Added: {count}/10\nSend files to add, or /mdone to start.")
              return
 
         if len(self.inputs) > 10:
@@ -570,3 +578,39 @@ async def merge_done(client, message):
          await listener._proceed_to_download()
     except Exception as e:
          await send_message(message, str(e))
+
+async def merge_session_handler(client, message):
+    user_id = message.from_user.id
+    if user_id not in MERGE_SESSIONS:
+        return
+    
+    # Check if message has media
+    media = message.document or message.video or message.audio
+    if not media:
+        return
+        
+    session = MERGE_SESSIONS[user_id]
+    
+    if len(session["inputs"]) >= 10:
+        await send_message(message, "Merge Limit Reached (10/10)!\nUse /mdone to start.")
+        return
+
+    # Add query message to session inputs
+    session["inputs"].append(message)
+    count = len(session["inputs"])
+    
+    if count == 10:
+         # Auto start
+         listener = Merge(client, session["message"])
+         listener.inputs = session["inputs"]
+         listener.total_batch_files = 10
+         del MERGE_SESSIONS[user_id]
+         
+         await send_message(message, "Limit reached (10/10). Starting Merge...")
+         try:
+             await listener.before_start()
+             await listener._proceed_to_download()
+         except Exception as e:
+             await send_message(message, str(e))
+    else:
+         await send_message(message, f"Added: {count}/10\nSend more or /mdone")
