@@ -5,7 +5,7 @@ from bot.helper.ext_utils.help_messages import (
     YT_HELP_DICT,
     ENCODE_HELP_DICT,
     MERGE_HELP_DICT,
-    TERABOX_HELP_DICT,
+
     AUTOMATION_HELP_DICT,
     help_string,
 )
@@ -54,12 +54,7 @@ async def arg_usage(_, query):
                 COMMAND_USAGE["merge"][0],
                 COMMAND_USAGE["merge"][1],
             )
-        elif data[2] == "tb":
-            await edit_message(
-                message,
-                COMMAND_USAGE["terabox"][0],
-                COMMAND_USAGE["terabox"][1],
-            )
+
         elif data[2] == "auto":
             await edit_message(
                 message,
@@ -91,11 +86,7 @@ async def arg_usage(_, query):
         buttons.data_button("Back", "help back mrg")
         button = buttons.build_menu()
         await edit_message(message, MERGE_HELP_DICT[data[2]], button)
-    elif data[1] == "terabox":
-        buttons = ButtonMaker()
-        buttons.data_button("Back", "help back tb")
-        button = buttons.build_menu()
-        await edit_message(message, TERABOX_HELP_DICT[data[2]], button)
+
     elif data[1] == "automation":
         buttons = ButtonMaker()
         buttons.data_button("Back", "help back auto")

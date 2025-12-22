@@ -41,8 +41,7 @@ COMMANDS = {
     "SetCommand": "- Set settings via arguments",
     "EncodeCommand": "- Encode a file",
     "MergeCommand": "- Merge files",
-    "TeraboxCommand": "- Leech from Terabox",
-    "TeraboxMirrorCommand": "- Mirror from Terabox",
+
     "SpeedTest": "- Run a speedtest",
     "BotSetCommand": "- [ADMIN] Open Bot settings",
     "LogCommand": "- [ADMIN] View bot log",

@@ -230,16 +230,7 @@ def add_handlers():
             BotCommands.MergeCommand,
             CustomFilters.authorized,
         ),
-        "terabox": (
-            terabox,
-            BotCommands.TeraboxCommand,
-            CustomFilters.authorized,
-        ),
-        "terabox_mirror": (
-            terabox_mirror,
-            BotCommands.TeraboxMirrorCommand,
-            CustomFilters.authorized,
-        ),
+
     }
 
     for handler_func, command_name, custom_filter in command_filters.values():

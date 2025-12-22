@@ -65,7 +65,7 @@ class Config:
     SUDO_USERS: str = ""
     TELEGRAM_API: int = 0
     TELEGRAM_HASH: str = ""
-    TERABOX_API: str = ""
+
     TG_PROXY: ClassVar[dict[str, str]] = {}
     THUMBNAIL_LAYOUT: str = ""
     TORRENT_TIMEOUT: int = 0

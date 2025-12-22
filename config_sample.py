@@ -15,7 +15,7 @@ AUTHORIZED_CHATS = ""  # Space separated chat_id/user_id to authorize
 SUDO_USERS = ""  # Space separated user_id for sudo access
 DEFAULT_UPLOAD = ""  # Default uploader if -ul is not specified. Options: "yt" (YouTube), "gd" (Google Drive), "rc" (Rclone), or "" (empty for no specific default).
 FILELION_API = ""
-TERABOX_API = "https://terabox-api.tellycloudapi.workers.dev/?url=https://true-link-vercel-api.vercel.app/api/terabox/api?url="  # Terabox Worker API URL
+
 STREAMWISH_API = ""
 EXCLUDED_EXTENSIONS = (
     ""  # Space separated file extensions to exclude (e.g., .log .exe)

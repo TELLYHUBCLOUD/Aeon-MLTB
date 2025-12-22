@@ -21,7 +21,7 @@ from .help_messages import (
     YT_HELP_DICT,
     ENCODE_HELP_DICT,
     MERGE_HELP_DICT,
-    TERABOX_HELP_DICT,
+
     AUTOMATION_HELP_DICT,
 )
 from .telegraph_helper import telegraph
@@ -128,7 +128,7 @@ def create_help_buttons():
     _build_command_usage(CLONE_HELP_DICT, "clone")
     _build_command_usage(ENCODE_HELP_DICT, "encode")
     _build_command_usage(MERGE_HELP_DICT, "merge")
-    _build_command_usage(TERABOX_HELP_DICT, "terabox")
+
     _build_command_usage(AUTOMATION_HELP_DICT, "automation")
 
 

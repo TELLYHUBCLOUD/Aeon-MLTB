@@ -45,7 +45,7 @@ from .users_settings import (
     send_user_settings,
     set_command,
 )
-from .terabox import terabox, terabox_mirror
+
 from .ytdlp import ytdl, ytdl_leech
 
 __all__ = [
@@ -104,8 +104,7 @@ __all__ = [
     "start",
     "status_pages",
     "task_status",
-    "terabox",
-    "terabox_mirror",
+
     "torrent_search",
     "torrent_search_update",
     "unauthorize",

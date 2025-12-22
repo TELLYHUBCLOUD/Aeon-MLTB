@@ -430,16 +430,7 @@ merge_help_main = """<blockquote expandable>╭ℹ️ <b>Merge Help</b>
 ╰3. Downloads are processed sequentially to ensure stability.</blockquote>"""
 
 
-terabox_help_main = """<blockquote expandable>╭ℹ️ <b>Terabox Help</b>
-┊<b>Send Terabox link along with command line or by replying.</b>
-┊
-┊<code>/terabox link</code>
-┊
-┊<b>Options (Same as Leech):</b>
-┊<code>-n new name</code> : Rename the file
-┊<code>-up destination</code> : Custom upload destination
-┊<code>-t thumbnail_link</code> : Custom thumbnail
-╰<code>-p password</code> : Zip password (if zipping)</blockquote>"""
+
 
 
 ENCODE_HELP_DICT = {
@@ -461,14 +452,7 @@ MERGE_HELP_DICT = {
     "split_size": split_size,
 }
 
-TERABOX_HELP_DICT = {
-    "main": terabox_help_main,
-    "upload": upload,
-    "new_name": new_name,
-    "thumbnail": thumb,
-    "split_size": split_size,
-    "zip": zip_arg,
-}
+
 
 automation_help_main = """<blockquote expandable>╭ℹ️ <b>Automation Help</b>
 ┊<b>Automate your leeching tasks with these settings.</b>
