@@ -113,8 +113,8 @@ UPSTREAM_REPO = (
 )
 
 UPSTREAM_BRANCH = (
-    config_file.get("UPSTREAM_BRANCH", "extended")
-    or os.getenv("UPSTREAM_BRANCH", "")
+    config_file.get("UPSTREAM_BRANCH", "extendedbk")
+    or os.getenv("UPSTREAM_BRANCH", "extendedbk")
     or "extended"
 )
 
