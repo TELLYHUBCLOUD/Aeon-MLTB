@@ -142,6 +142,7 @@ SCHEDULED_DELETION_ENABLED = True  # Enable/disable scheduled deletion functiona
 YT_DLP_OPTIONS = {}  # Additional yt-dlp options as a JSON string
 NAME_SUBSTITUTE = r""  # Regex pattern to substitute in filenames
 FFMPEG_CMDS = {}  # Custom FFmpeg commands for different file types
+FFMPEG_BINARY = "ffmpeg"  # Path to FFmpeg executable (e.g., "ffmpeg" or "C:/ffmpeg/bin/ffmpeg.exe")
 DELETE_LINKS = False  # Delete links after download
 FSUB_IDS = ""  # Force subscribe channel IDs, separated by space
 AD_KEYWORDS = ""  # Custom keywords/phrases for ad detection, separated by comma (e.g., "#ad,#ad bangla,#sponsored,InsideAds")

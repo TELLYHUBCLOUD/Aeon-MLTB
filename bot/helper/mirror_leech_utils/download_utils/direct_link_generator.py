@@ -5133,11 +5133,9 @@ def terabox(url):
     if "/file/" in url:
         return url
 
-    # Prepare both API URLs
-    proxy_base = Config.TERABOX_PROXY
+    # Prepare API URL
     apis = [
-        f"https://terabox.ashlynn.workers.dev/?link={quote(url)}&cookies=ndus={proxy_base}",
-        f"https://teradl1.tellycloudapi.workers.dev/api/api1?url={quote(url)}",
+        f"https://true-link-vercel-api.vercel.app/api/terabox/api?url={quote(url)}",
     ]
 
     with Session() as session:
@@ -5149,17 +5147,30 @@ def terabox(url):
             except Exception as e:
                 continue  # Try next API
 
-            # Case 1: direct_link structure
-            if "proxy_url" in req and "file_name" in req:
-                return req["proxy_url"]
-
-            # Case 2: fallback structure
-            if req.get("success") and "metadata" in req and "links" in req:
-                return req["links"].get("dl2") or req["links"].get("dl1")
+            # Check if response is successful
+            if req.get("success") and "metadata" in req:
+                # List of API keys to check in order of priority
+                api_keys = ["api5", "api6", "api1", "api2", "api4", "api5", "streamapi"]
+                
+                for api_key in api_keys:
+                    api_data = req.get(api_key)
+                    if api_data and not api_data.get("error"):
+                        # Try dl2 first (usually proxied), then dl1 (direct), then stream
+                        download_link = (
+                            api_data.get("dl2") or 
+                            api_data.get("dl1") or 
+                            api_data.get("stream")
+                        )
+                        if download_link:
+                            return download_link
+                
+                # Backward compatibility: check old "links" structure
+                if "links" in req:
+                    return req["links"].get("dl2") or req["links"].get("dl1")
 
     # If all APIs fail
     raise DirectDownloadLinkException(
-        "ERROR: File not found or both API requests failed!"
+        "ERROR: File not found or all API requests failed!"
     )
 
 
