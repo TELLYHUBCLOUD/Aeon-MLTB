@@ -369,37 +369,6 @@ async def get_user_settings(from_user, stype="main"):
 ╰🎬 <b>Auto Compress Cmd:</b> <code>{escape(ac_cmd)}</code>
 </blockquote>"""
     elif stype == "filename":
-        buttons.data_button(
-            "🧹 Clean Filename",
-            f"userset {user_id} tog CLEAN_FILENAME {btn_mode}",
-        )
-        if user_dict.get("NAME_SUBSTITUTE", False):
-            ns_msg = "✅ Added"
-        elif "NAME_SUBSTITUTE" not in user_dict and Config.NAME_SUBSTITUTE:
-            ns_msg = "✅ Added"
-        else:
-            ns_msg = "❌ None"
-
-        buttons.data_button(
-            "✏️ Name Substitute",
-            f"userset {user_id} menu NAME_SUBSTITUTE",
-        )
-
-        buttons.data_button(
-            "🔡 Leech Font",
-            f"userset {user_id} menu LEECH_CAPTION_FONT",
-        )
-        if user_dict.get("LEECH_CAPTION_FONT", False):
-            lfont = user_dict["LEECH_CAPTION_FONT"]
-        elif "LEECH_CAPTION_FONT" not in user_dict and Config.LEECH_CAPTION_FONT:
-            lfont = Config.LEECH_CAPTION_FONT
-        else:
-            lfont = "None"
-
-        buttons.data_button(
-            "✏️ Filename Replace",
-            f"userset {user_id} menu FILENAME_REPLACE",
-        )
         if user_dict.get("FILENAME_REPLACE", False):
             fn_rep = user_dict["FILENAME_REPLACE"]
         elif (
@@ -417,10 +386,7 @@ async def get_user_settings(from_user, stype="main"):
         else:
             clean_file = "❌ Disabled"
             btn_mode = "t"
-        buttons.data_button(
-            "📝 Leech Prefix",
-            f"userset {user_id} menu LEECH_FILENAME_PREFIX",
-        )
+
         if user_dict.get("LEECH_FILENAME_PREFIX", False):
             lprefix = user_dict["LEECH_FILENAME_PREFIX"]
         elif (
@@ -430,10 +396,6 @@ async def get_user_settings(from_user, stype="main"):
         else:
             lprefix = "None"
 
-        buttons.data_button(
-            "📝 Leech Suffix",
-            f"userset {user_id} menu LEECH_FILENAME_SUFFIX",
-        )
         if user_dict.get("LEECH_FILENAME_SUFFIX", False):
             lsuffix = user_dict["LEECH_FILENAME_SUFFIX"]
         elif (
@@ -443,10 +405,6 @@ async def get_user_settings(from_user, stype="main"):
         else:
             lsuffix = "None"
 
-        buttons.data_button(
-            "💬 Leech Caption",
-            f"userset {user_id} menu LEECH_FILENAME_CAPTION",
-        )
         if user_dict.get("LEECH_FILENAME_CAPTION", False):
             lcap = user_dict["LEECH_FILENAME_CAPTION"]
         elif (
@@ -457,10 +415,6 @@ async def get_user_settings(from_user, stype="main"):
         else:
             lcap = "None"
 
-        buttons.data_button(
-            "📝 Caption Replace",
-            f"userset {user_id} menu AUTO_CAPTION_REPLACE",
-        )
         if user_dict.get("AUTO_CAPTION_REPLACE", False):
             ac_rep = user_dict["AUTO_CAPTION_REPLACE"]
         elif (
@@ -471,10 +425,6 @@ async def get_user_settings(from_user, stype="main"):
         else:
             ac_rep = "None"
 
-        buttons.data_button(
-            "🧹 Caption Remove",
-            f"userset {user_id} menu AUTO_CAPTION_REMOVE",
-        )
         if user_dict.get("AUTO_CAPTION_REMOVE", False):
             ac_rem = user_dict["AUTO_CAPTION_REMOVE"]
         elif (
@@ -485,7 +435,56 @@ async def get_user_settings(from_user, stype="main"):
         else:
             ac_rem = "None"
 
+        if user_dict.get("NAME_SUBSTITUTE", False):
+            ns_msg = "✅ Added"
+        elif "NAME_SUBSTITUTE" not in user_dict and Config.NAME_SUBSTITUTE:
+            ns_msg = "✅ Added"
+        else:
+            ns_msg = "❌ None"
 
+        if user_dict.get("LEECH_CAPTION_FONT", False):
+            lfont = user_dict["LEECH_CAPTION_FONT"]
+        elif "LEECH_CAPTION_FONT" not in user_dict and Config.LEECH_CAPTION_FONT:
+            lfont = Config.LEECH_CAPTION_FONT
+        else:
+            lfont = "None"
+
+        buttons.data_button(
+            "✏️ Filename Replace",
+            f"userset {user_id} menu FILENAME_REPLACE",
+        )
+        buttons.data_button(
+            "🧹 Clean Filename",
+            f"userset {user_id} tog CLEAN_FILENAME {btn_mode}",
+        )
+        buttons.data_button(
+            "📝 Leech Prefix",
+            f"userset {user_id} menu LEECH_FILENAME_PREFIX",
+        )
+        buttons.data_button(
+            "📝 Leech Suffix",
+            f"userset {user_id} menu LEECH_FILENAME_SUFFIX",
+        )
+        buttons.data_button(
+            "💬 Leech Caption",
+            f"userset {user_id} menu LEECH_FILENAME_CAPTION",
+        )
+        buttons.data_button(
+            "📝 Caption Replace",
+            f"userset {user_id} menu AUTO_CAPTION_REPLACE",
+        )
+        buttons.data_button(
+            "🧹 Caption Remove",
+            f"userset {user_id} menu AUTO_CAPTION_REMOVE",
+        )
+        buttons.data_button(
+            "✏️ Name Substitute",
+            f"userset {user_id} menu NAME_SUBSTITUTE",
+        )
+        buttons.data_button(
+            "🔡 Leech Font",
+            f"userset {user_id} menu LEECH_CAPTION_FONT",
+        )
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
 
