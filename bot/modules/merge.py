@@ -28,6 +28,7 @@ from bot.helper.mirror_leech_utils.download_utils.direct_downloader import (
     add_direct_download,
 )
 from bot.helper.mirror_leech_utils.status_utils.ffmpeg_status import FFmpegStatus
+from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.message_utils import (
     auto_delete_message,
     delete_links,
@@ -52,6 +53,8 @@ class Merge(TaskListener):
         self.inputs = []
         self.total_batch_files = 0
         self.current_batch_files = 0
+        self.output_name = ""
+        self.name_subfix = ""
 
     async def new_event(self):
         text = self.message.text.split("\n")
@@ -174,10 +177,10 @@ class Merge(TaskListener):
                      "client": self.client,
                      "adapter": self,
                  }
-                 await send_message(self.message, "Merge Session Started!\nSend/Forward files to add them (Max 10).\nUse /mdone to start merging.")
+                 await send_message(self.message, f"Merge Session Started!\nSend/Forward files to add them (Max 10).\nUse /{BotCommands.MdoneCommand} to start merging.")
              else:
                  count = len(MERGE_SESSIONS[user_id]["inputs"])
-                 await send_message(self.message, f"Merge Session Active.\nFiles Added: {count}/10\nSend files to add, or /mdone to start.")
+                 await send_message(self.message, f"Merge Session Active.\nFiles Added: {count}/10\nSend files to add, or /{BotCommands.MdoneCommand} to start.")
              return
 
         if len(self.inputs) > 10:
@@ -209,7 +212,7 @@ class Merge(TaskListener):
              # Check if link already exists in session to prevent dupes (optional, but good)
              # User requested: "1 TASK ADDED MAX 9 FILE" - imply up to 10 total
              if len(session["inputs"]) >= 10:
-                 await send_message(self.message, "Merge Limit Reached! Use /mdone to start.")
+                 await send_message(self.message, f"Merge Limit Reached! Use /{BotCommands.MdoneCommand} to start.")
                  return
 
              link = self.inputs[0]
@@ -225,7 +228,7 @@ class Merge(TaskListener):
              else:
                  await send_message(
                      self.message, 
-                     f"File Added: {count}/10\nReply to next file or use /mdone to start."
+                     f"File Added: {count}/10\nReply to next file or use /{BotCommands.MdoneCommand} to start."
                  )
              return
 
@@ -379,7 +382,10 @@ class Merge(TaskListener):
                 self.output_name = "merged.mp4"
 
         # Apply output name
-        # Apply output name
+        if self.name_subfix:
+            name, ext = ospath.splitext(self.output_name)
+            self.output_name = f"{name} {self.name_subfix}{ext}"
+
         self.name = self.output_name
         
         has_ass = False
@@ -433,8 +439,6 @@ class Merge(TaskListener):
                  await remove(file)
              await remove(input_txt_path)
              
-
-
              if self.name != output_file.rsplit("/", 1)[-1]:
                   # If we changed name logic above, ensure path is correct?
                   # self.name is already applied to output_file
@@ -544,7 +548,7 @@ async def merge(client, message):
 async def merge_done(client, message):
     user_id = message.from_user.id
     if user_id not in MERGE_SESSIONS:
-        await send_message(message, "No active merge session! Use /merge to start one.")
+        await send_message(message, f"No active merge session! Use /{BotCommands.MergeCommand} to start one.")
         return
     
     session = MERGE_SESSIONS[user_id]
@@ -553,29 +557,32 @@ async def merge_done(client, message):
         return
         
     # Trigger Merge
-    # We can reuse the stored "adapter" or create new one. 
-    # Creating new one is safer to avoid stale state.
-    # But we need to pass inputs.
-    
-    # We'll spawn a new Merge task but override its inputs
-    # Or cleaner: Modify the stored adapter instance and run it?
-    # Session['adapter'] was created but stopped at return.
-    # It might be cleaner to just init a new listener.
-    
     msg = session["message"] # Original first message for auth checks etc
-    # Actually, better to use current message for status updates initially? 
-    # But auth checks rely on original user.
     
     listener = Merge(client, message) # Use current message for listener context
     listener.inputs = session["inputs"]
     listener.total_batch_files = len(listener.inputs)
     del MERGE_SESSIONS[user_id]
-    
+
+    # Parse arguments from /mdone command
+    text = message.text.split(maxsplit=1)
+    if len(text) > 1:
+        args = {"-n": ""}
+        input_args = text[1].split()
+        if "-n" in input_args:
+             arg_parser(input_args, args)
+             if args["-n"]:
+                 listener.output_name = args["-n"]
+        else:
+             # Treat raw text as suffix
+             listener.name_subfix = text[1].strip()
+
     await send_message(message, f"Merge Started with {listener.total_batch_files} files...")
     
     try:
          await listener.before_start()
          await listener._proceed_to_download()
+         await send_status_message(message)
     except Exception as e:
          await send_message(message, str(e))
 
@@ -592,7 +599,7 @@ async def merge_session_handler(client, message):
     session = MERGE_SESSIONS[user_id]
     
     if len(session["inputs"]) >= 10:
-        await send_message(message, "Merge Limit Reached (10/10)!\nUse /mdone to start.")
+        await send_message(message, f"Merge Limit Reached (10/10)!\nUse /{BotCommands.MdoneCommand} to start.")
         return
 
     # Add query message to session inputs
@@ -613,4 +620,4 @@ async def merge_session_handler(client, message):
          except Exception as e:
              await send_message(message, str(e))
     else:
-         await send_message(message, f"Added: {count}/10\nSend more or /mdone")
+         await send_message(message, f"Added: {count}/10\nSend more or /{BotCommands.MdoneCommand}")
