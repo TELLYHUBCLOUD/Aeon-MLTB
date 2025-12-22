@@ -4980,7 +4980,7 @@ class TaskConfig:
                             ffmpeg_parts.insert(-1, "input.mp4")
                             cmd[2] = f"{ulimit_part} && {' '.join(ffmpeg_parts)}"
                         else:
-                            # No ulimit, just the xtra command
+                            # No ulimit, just the ffmpeg command
                             ffmpeg_parts = cmd[2].split()
                             ffmpeg_parts.insert(-1, "-i")
                             ffmpeg_parts.insert(-1, "input.mp4")
