@@ -45,6 +45,10 @@ leech_options = [
 automation_options = [
     "AUTO_LEECH",
     "AUTO_LEECH_CMD",
+    "AUTO_MIRROR",
+    "AUTO_MIRROR_CMD",
+    "AUTO_ENCODE",
+    "AUTO_RESUME",
     "AUTO_COMPRESS_CMD",
     "AUTO_CAPTION_REPLACE",
     "AUTO_CAPTION_REMOVE",
@@ -342,6 +346,24 @@ async def get_user_settings(from_user, stype="main"):
         aleech_cmd = user_dict.get("AUTO_LEECH_CMD") or "None"
 
         buttons.data_button(
+            "🚀 Auto Mirror",
+            f"userset {user_id} tog AUTO_MIRROR {'f' if user_dict.get('AUTO_MIRROR') else 't'}",
+        )
+        amirror = "✅ Enabled" if user_dict.get("AUTO_MIRROR") else "❌ Disabled"
+
+        buttons.data_button(
+            "🎬 Auto Mirror Cmd",
+            f"userset {user_id} menu AUTO_MIRROR_CMD",
+        )
+        amirror_cmd = user_dict.get("AUTO_MIRROR_CMD") or "None"
+
+        buttons.data_button(
+            "🚀 Auto Encode",
+            f"userset {user_id} tog AUTO_ENCODE {'f' if user_dict.get('AUTO_ENCODE') else 't'}",
+        )
+        aencode = "✅ Enabled" if user_dict.get("AUTO_ENCODE") else "❌ Disabled"
+
+        buttons.data_button(
             "🎬 Auto Compress Cmd",
             f"userset {user_id} menu AUTO_COMPRESS_CMD",
         )
@@ -359,6 +381,12 @@ async def get_user_settings(from_user, stype="main"):
         )
         ac_rem = user_dict.get("AUTO_CAPTION_REMOVE") or "None"
 
+        buttons.data_button(
+            "🚀 Auto Resume",
+            f"userset {user_id} tog AUTO_RESUME {'f' if user_dict.get('AUTO_RESUME') else 't'}",
+        )
+        aresume = "✅ Enabled" if user_dict.get("AUTO_RESUME") else "❌ Disabled"
+
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
 
@@ -366,6 +394,10 @@ async def get_user_settings(from_user, stype="main"):
 ╭🤖 <b>Automation Settings for {name}</b>
 ┊🚀 <b>Auto Leech:</b> {aleech}
 ┊🎬 <b>Auto Leech Cmd:</b> <code>{escape(aleech_cmd)}</code>
+┊🚀 <b>Auto Mirror:</b> {amirror}
+┊🎬 <b>Auto Mirror Cmd:</b> <code>{escape(amirror_cmd)}</code>
+┊🚀 <b>Auto Encode:</b> {aencode}
+┊🚀 <b>Auto Resume:</b> {aresume}
 ┊🎬 <b>Auto Compress Cmd:</b> <code>{escape(ac_cmd)}</code>
 ┊📝 <b>Auto Caption Replace:</b> <code>{escape(ac_rep)}</code>
 ╰🧹 <b>Auto Caption Remove:</b> <code>{escape(ac_rem)}</code>
@@ -796,6 +828,10 @@ async def edit_user_settings(client, query):
         elif data[3] in [
             "AUTO_LEECH",
             "AUTO_LEECH_CMD",
+            "AUTO_MIRROR",
+            "AUTO_MIRROR_CMD",
+            "AUTO_ENCODE",
+            "AUTO_RESUME",
             "AUTO_COMPRESS_CMD",
             "AUTO_CAPTION_REPLACE",
             "AUTO_CAPTION_REMOVE",

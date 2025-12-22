@@ -360,3 +360,125 @@ async def load_configurations():
 
     if not await aiopath.exists("accounts"):
         Config.USE_SERVICE_ACCOUNTS = False
+
+
+async def check_resume_tasks():
+    if not Config.AUTO_RESUME or not database.db:
+        return
+
+    try:
+        config = await database.db.settings.config.find_one(
+            {"_id": TgClient.ID},
+            {"resume_tasks": 1},
+        )
+        if not config or "resume_tasks" not in config:
+            return
+
+        resume_data = config["resume_tasks"]
+        if not resume_data:
+            return
+
+        LOGGER.info(f"Found {len(resume_data)} tasks to resume. Resuming...")
+
+        from bot.modules.mirror_leech import Mirror
+        from bot.modules.clone import Clone
+        from bot.modules.encode import Encode
+        from bot.helper.telegram_helper.bot_commands import BotCommands
+
+        class MockChat:
+            def __init__(self, id):
+                self.id = id
+
+        class MockUser:
+            def __init__(self, id):
+                self.id = id
+                self.is_bot = False
+
+        class MockMessage:
+            def __init__(self, text, chat_id, user_id):
+                self.text = text
+                self.chat = MockChat(chat_id)
+                if user_id:
+                    self.from_user = MockUser(user_id)
+                    self.sender_chat = None
+                else:
+                    self.from_user = None
+                    self.sender_chat = MockChat(chat_id) # Simplify
+                self.reply_to_message = None
+
+        for task in resume_data:
+            text = task["text"]
+            chat_id = task["chat_id"]
+            user_id = task["user_id"]
+            message = MockMessage(text, chat_id, user_id)
+            
+            cmd = text.split()[0].lstrip("/")
+            # Check aliases
+            # Simplify: Check if command string starts with known commands
+            # We need to reconstruct Config.CMD_SUFFIX logic if needed
+            # But usually cmd in text already has suffix.
+            
+            # Simple dispatch based on command presence in text
+            if any(text.startswith(f"/{x}") for x in BotCommands.CloneCommand if isinstance(BotCommands.CloneCommand, list)):
+                await Clone(TgClient.bot, message).new_event()
+            elif any(text.startswith(f"/{x}") for x in BotCommands.EncodeCommand if isinstance(BotCommands.EncodeCommand, list)) or text.startswith(f"/{BotCommands.EncodeCommand}"):
+                await Encode(TgClient.bot, message).new_event()
+            elif any(text.startswith(f"/{x}") for x in BotCommands.LeechCommand) or \
+                 any(text.startswith(f"/{x}") for x in BotCommands.MirrorCommand) or \
+                 any(text.startswith(f"/{x}") for x in BotCommands.JdMirrorCommand) or \
+                 any(text.startswith(f"/{x}") for x in BotCommands.JdLeechCommand) or \
+                 any(text.startswith(f"/{x}") for x in BotCommands.NzbMirrorCommand) or \
+                 any(text.startswith(f"/{x}") for x in BotCommands.NzbLeechCommand) or \
+                 any(text.startswith(f"/{x}") for x in BotCommands.YtdlCommand) or \
+                 any(text.startswith(f"/{x}") for x in BotCommands.YtdlLeechCommand):
+                 
+                 # Determine flags based on command
+                 is_leech = False
+                 is_jd = False
+                 is_nzb = False
+                 is_qbit = False 
+                 # Message text parsing in Mirror will handle most flags, but is_leech/is_jd logic is constructor args.
+                 # We need to map command to constructor args.
+                 
+                 c_text = text.split()[0].lstrip("/")
+                 
+                 # Leech
+                 if any(c_text.startswith(x) for x in BotCommands.LeechCommand) or \
+                    any(c_text.startswith(x) for x in BotCommands.JdLeechCommand) or \
+                    any(c_text.startswith(x) for x in BotCommands.NzbLeechCommand) or \
+                    any(c_text.startswith(x) for x in BotCommands.YtdlLeechCommand):
+                     is_leech = True
+                 
+                 # JD
+                 if any(c_text.startswith(x) for x in BotCommands.JdMirrorCommand) or \
+                    any(c_text.startswith(x) for x in BotCommands.JdLeechCommand):
+                     is_jd = True
+                     
+                 # NZB
+                 if any(c_text.startswith(x) for x in BotCommands.NzbMirrorCommand) or \
+                    any(c_text.startswith(x) for x in BotCommands.NzbLeechCommand):
+                     is_nzb = True
+                 
+                 await Mirror(
+                        TgClient.bot, 
+                        message, 
+                        is_leech=is_leech, 
+                        is_jd=is_jd, 
+                        is_nzb=is_nzb
+                    ).new_event()
+            else:
+                 # Default fallback if command not recognized but text present (maybe auto-leech/mirror?)
+                 # But we only saved active tasks which usually have commands.
+                 # If it was an auto-leech task, the original message text was just a link?
+                 # Wait, in auto_leech_handler we did: message.text = f"/{cmd} {text}"
+                 # So the saved "msg.text" SHOULD contain the command!
+                 pass
+
+        # clear resume tasks
+        await database.db.settings.config.update_one(
+            {"_id": TgClient.ID},
+            {"$unset": {"resume_tasks": ""}},
+        )
+
+    except Exception as e:
+        LOGGER.error(f"Error resuming tasks: {e}")

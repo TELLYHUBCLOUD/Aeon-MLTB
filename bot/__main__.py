@@ -74,6 +74,7 @@ async def main():
         update_nzb_options,
         update_qb_options,
         update_variables,
+        check_resume_tasks,
     )
 
     await gather(TgClient.start_bot(), TgClient.start_user())
@@ -108,6 +109,7 @@ async def main():
         restart_notification(),
         telegraph.create_account(),
         rclone_serve_booter(),
+        check_resume_tasks(),
     )
 
 

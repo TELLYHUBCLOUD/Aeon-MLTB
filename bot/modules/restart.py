@@ -142,6 +142,30 @@ async def confirm_restart(_, query):
         await gather(proc1.wait(), proc2.wait())
         async with aiopen(".restartmsg", "w") as f:
             await f.write(f"{restart_message.chat.id}\n{restart_message.id}\n")
+        
+        if Config.AUTO_RESUME:
+            from bot import task_dict, task_dict_lock
+            try:
+                async with task_dict_lock:
+                    if task_dict:
+                        resume_data = []
+                        for task in task_dict.values():
+                            if hasattr(task, "listener") and task.listener.message:
+                                msg = task.listener.message
+                                resume_data.append({
+                                    "chat_id": msg.chat.id,
+                                    "text": msg.text,
+                                    "user_id": msg.from_user.id if msg.from_user else msg.sender_chat.id,
+                                })
+                        if resume_data:
+                            await database.db.settings.config.update_one(
+                                {"_id": TgClient.ID},
+                                {"$set": {"resume_tasks": resume_data}},
+                                upsert=True,
+                            )
+            except Exception as e:
+                LOGGER.error(f"Failed to save active tasks: {e}")
+
         osexecl(executable, executable, "-m", "bot")
     else:
         await delete_message(message)
