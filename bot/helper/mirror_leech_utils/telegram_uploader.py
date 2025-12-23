@@ -172,7 +172,7 @@ class TelegramUploader:
                     self._is_private = self._sent_msg.chat.type.name == "PRIVATE"
                 self.log_msg = self._sent_msg
             except Exception as e:
-                LOGGER.error(f"Error checking up_dest: {e}", exc_info=True)
+                LOGGER.error(f"[{self._listener.mid}] Error checking up_dest: {e}", exc_info=True)
                 await self._listener.on_upload_error(str(e))
                 return False
         elif self._user_session:
@@ -337,14 +337,14 @@ class TelegramUploader:
                 self._error = ""
                 self._up_path = f_path = ospath.join(dirpath, file_)
                 if not await aiopath.exists(self._up_path):
-                    LOGGER.error(f"{self._up_path} not exists! Continue uploading!")
+                    LOGGER.error(f"[{self._listener.mid}] {self._up_path} not exists! Continue uploading!")
                     continue
                 try:
                     f_size = await aiopath.getsize(self._up_path)
                     self._total_files += 1
                     if f_size == 0:
                         LOGGER.error(
-                            f"{self._up_path} size is zero, telegram don't upload zero size files",
+                            f"[{self._listener.mid}] {self._up_path} size is zero, telegram don't upload zero size files",
                         )
                         self._corrupted += 1
                         continue
@@ -402,10 +402,10 @@ class TelegramUploader:
                 except Exception as err:
                     if isinstance(err, RetryError):
                         LOGGER.info(
-                            f"Total Attempts: {err.last_attempt.attempt_number}",
+                            f"[{self._listener.mid}] Total Attempts: {err.last_attempt.attempt_number}",
                         )
                         err = err.last_attempt.exception()
-                    LOGGER.error(f"{err}. Path: {self._up_path}", exc_info=True)
+                    LOGGER.error(f"[{self._listener.mid}] {err}. Path: {self._up_path}", exc_info=True)
                     self._error = str(err)
                     self._corrupted += 1
                     if self._listener.is_cancelled:
@@ -435,7 +435,7 @@ class TelegramUploader:
                 f"Files Corrupted or unable to upload. {self._error or 'Check logs!'}",
             )
             return
-        LOGGER.info(f"Leech Completed: {self._listener.name}")
+        LOGGER.info(f"[{self._listener.mid}] Leech Completed: {self._listener.name}")
         await self._listener.on_upload_complete(
             None,
             self._msgs_dict,
@@ -458,7 +458,12 @@ class TelegramUploader:
             self._thumb = None
         thumb = self._thumb
         self._is_corrupted = False
+        if self._listener.is_cancelled:
+            return
         try:
+            if not await aiopath.exists(self._up_path):
+                 LOGGER.error(f"[{self._listener.mid}] File vanished before upload: {self._up_path}")
+                 return
             is_video, is_audio, is_image = await get_document_type(self._up_path)
 
             if not is_image and thumb is None:
@@ -601,9 +606,9 @@ class TelegramUploader:
             ):
                 await remove(thumb)
             err_type = "RPCError: " if isinstance(err, RPCError) else ""
-            LOGGER.error(f"{err_type}{err}. Path: {self._up_path}")
+            LOGGER.error(f"[{self._listener.mid}] {err_type}{err}. Path: {self._up_path}")
             if isinstance(err, BadRequest) and key != "documents":
-                LOGGER.error(f"Retrying As Document. Path: {self._up_path}")
+                LOGGER.error(f"[{self._listener.mid}] Retrying As Document. Path: {self._up_path}")
                 return await self._upload_file(cap_mono, file, o_path, True)
             raise err
 
@@ -671,5 +676,5 @@ class TelegramUploader:
 
     async def cancel_task(self):
         self._listener.is_cancelled = True
-        LOGGER.info(f"Cancelling Upload: {self._listener.name}")
+        LOGGER.info(f"[{self._listener.mid}] Cancelling Upload: {self._listener.name}")
         await self._listener.on_upload_error("your upload has been stopped!")

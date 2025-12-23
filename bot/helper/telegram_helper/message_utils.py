@@ -69,13 +69,15 @@ async def send_message(
             parse_mode=parse_mode,
         )
     except FloodWait as f:
-        LOGGER.warning(str(f))
+        mid = message.id if hasattr(message, "id") else message
+        LOGGER.warning(f"[{mid}] {f}")
         if not block:
             return message
         await sleep(f.value * 1.2)
         return await send_message(message, text, buttons, photo, markdown)
     except Exception as e:
-        LOGGER.error(str(e))
+        mid = message.id if hasattr(message, "id") else message
+        LOGGER.error(f"[{mid}] {e}")
         return str(e)
 
 
@@ -108,10 +110,11 @@ async def edit_message(
             # parse_mode=parse_mode,
         )
     except FloodWait as f:
+        mid = message.id if hasattr(message, "id") else message
         if f.value > 20:
-            LOGGER.warning(str(f))
+            LOGGER.warning(f"[{mid}] {f}")
         else:
-            LOGGER.info(str(f))
+            LOGGER.info(f"[{mid}] {f}")
         if not block:
             return message
         await sleep(f.value * 1.5)
@@ -119,7 +122,8 @@ async def edit_message(
     except (MessageNotModified, MessageEmpty):
         return message
     except Exception as e:
-        LOGGER.error(str(e))
+        mid = message.id if hasattr(message, "id") else message
+        LOGGER.error(f"[{mid}] {e}")
         return str(e)
 
 
@@ -133,11 +137,13 @@ async def send_file(message, file, caption="", buttons=None):
             reply_markup=buttons,
         )
     except FloodWait as f:
-        LOGGER.warning(str(f))
+        mid = message.id if hasattr(message, "id") else message
+        LOGGER.warning(f"[{mid}] {f}")
         await sleep(f.value * 1.2)
         return await send_file(message, file, caption, buttons)
     except Exception as e:
-        LOGGER.error(str(e))
+        mid = message.id if hasattr(message, "id") else message
+        LOGGER.error(f"[{mid}] {e}")
         return str(e)
 
 
@@ -153,7 +159,7 @@ async def send_rss(text, chat_id, thread_id):
         )
     #   except (FloodWait, FloodPremiumWait) as f:
     except FloodWait as f:
-        LOGGER.warning(str(f))
+        LOGGER.warning(f"[{chat_id}] {f}")
         await sleep(f.value * 1.2)
         return await send_rss(text)
     except Exception as e:

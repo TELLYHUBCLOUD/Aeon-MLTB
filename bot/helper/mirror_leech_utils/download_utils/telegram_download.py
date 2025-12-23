@@ -49,10 +49,10 @@ class TelegramDownloadHelper:
             await self._listener.on_download_start()
             if self._listener.multi <= 1 and not hasattr(self._listener, "is_merge"):
                 await send_status_message(self._listener.message)
-            LOGGER.info(f"Download from Telegram: {self._listener.name}")
+            LOGGER.info(f"[{self._listener.mid}] Download from Telegram: {self._listener.name}")
         else:
             LOGGER.info(
-                f"Start Queued Download from Telegram: {self._listener.name}",
+                f"[{self._listener.mid}] Start Queued Download from Telegram: {self._listener.name}",
             )
 
     async def _on_download_progress(self, current, _):
@@ -80,12 +80,12 @@ class TelegramDownloadHelper:
                 return
         # except (FloodWait, FloodPremiumWait) as f:
         except FloodWait as f:
-            LOGGER.warning(str(f))
+            LOGGER.warning(f"[{self._listener.mid}] {f}")
             await sleep(f.value)
             await self._download(message, path)
             return
         except Exception as e:
-            LOGGER.error(str(e))
+            LOGGER.error(f"[{self._listener.mid}] {e}")
             await self._on_download_error(str(e))
             return
         if download is not None:
@@ -150,7 +150,7 @@ class TelegramDownloadHelper:
 
                 add_to_queue, event = await check_running_tasks(self._listener)
                 if add_to_queue:
-                    LOGGER.info(f"Added to Queue/Download: {name}")
+                    LOGGER.info(f"[{self._listener.mid}] Added to Queue/Download: {name}")
                     async with task_dict_lock:
                         task_dict[self._listener.mid] = QueueStatus(
                             self._listener,
@@ -179,6 +179,6 @@ class TelegramDownloadHelper:
     async def cancel_task(self):
         self._listener.is_cancelled = True
         LOGGER.info(
-            f"Cancelling download on user request: name: {self._listener.name} id: {self._id}",
+            f"[{self._listener.mid}] Cancelling download on user request: name: {self._listener.name} id: {self._id}",
         )
         await self._on_download_error("Stopped by user!")
