@@ -143,7 +143,7 @@ class YoutubeDLHelper:
         async_to_sync(self._listener.on_download_error, error)
 
     def _extract_meta_data(self):
-        if self._listener.link.startswith(("rtmp", "mms", "rstp", "rtmps")):
+        if self._listener.link.startswith(("rtmp", "mms", "rstp", "rtmps")) or ".m3u8" in self._listener.link:
             self.opts["external_downloader"] = "xtra"
         with YoutubeDL(self.opts) as ydl:
             try:

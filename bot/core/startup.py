@@ -297,8 +297,16 @@ async def update_variables():
                         if web_url := app_data.get("web_url"):
                             Config.set("BASE_URL", web_url.rstrip("/"))
                             return
+                except aiohttp.ClientResponseError as e:
+                    if e.status == 401:
+                        LOGGER.warning(
+                            "Heroku API 401 Unauthorized: Invalid HEROKU_API_KEY or HEROKU_APP_NAME!",
+                        )
+                    else:
+                        LOGGER.warning(f"BASE_URL Heroku response error: {e}")
+                    continue
                 except Exception as e:
-                    LOGGER.error(f"BASE_URL error: {e}")
+                    LOGGER.warning(f"BASE_URL error: {e}")
                     continue
 
 

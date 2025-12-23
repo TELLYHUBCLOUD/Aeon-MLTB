@@ -691,8 +691,9 @@ async def rss_listener(client, query):
 async def rss_monitor():
     chat = Config.RSS_CHAT
     if not chat:
-        LOGGER.warning("RSS_CHAT not added! Shutting down rss scheduler...")
-        scheduler.shutdown(wait=False)
+        LOGGER.info("RSS_CHAT not added! RSS scheduler will remain inactive.")
+        if scheduler.running:
+            scheduler.shutdown(wait=False)
         return
     if len(rss_dict) == 0:
         scheduler.pause()
