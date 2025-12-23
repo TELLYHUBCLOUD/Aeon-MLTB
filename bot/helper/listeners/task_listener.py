@@ -776,14 +776,19 @@ class TaskListener(TaskConfig):
         lulu = LuluStream(api_key)
         LOGGER.info(f"Uploading to LuluStream: {self.name}")
         
-        # Simple status update
         async with task_dict_lock:
             from bot.helper.mirror_leech_utils.status_utils.lulu_status import LuluStatus
             task_dict[self.mid] = LuluStatus(self, "LuluUpload", "Up")
         await update_status_message(self.message.chat.id)
 
+        self.subproc = lulu # To allow cancellation if we implement cancel logic later
+        self.total_size = await aiopath.getsize(up_path)
+
+        def progress_callback(current):
+            self.processed_bytes = current
+
         try:
-            link = await lulu.upload_file(up_path, self.name)
+            link = await lulu.upload_file(up_path, self.name, progress_callback)
             if link:
                 return link
             else:
