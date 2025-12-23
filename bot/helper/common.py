@@ -1,6 +1,6 @@
 import contextlib
 import os
-from asyncio import gather, sleep
+from asyncio import create_task, gather, sleep
 from collections import Counter
 from copy import deepcopy
 from os import path as ospath
@@ -679,18 +679,20 @@ class TaskConfig:
             nextmsg.sender_chat = self.user
         if intervals["stopAll"]:
             return
-        create_task(obj(
-            self.client,
-            nextmsg,
-            self.is_qbit,
-            self.is_leech,
-            self.is_jd,
-            self.is_nzb,
-            self.same_dir,
-            self.bulk,
-            self.multi_tag,
-            self.options,
-        ).new_event())
+        create_task(
+            obj(
+                client=self.client,
+                message=nextmsg,
+                is_qbit=getattr(self, "is_qbit", False),
+                is_leech=getattr(self, "is_leech", False),
+                is_jd=getattr(self, "is_jd", False),
+                is_nzb=getattr(self, "is_nzb", False),
+                same_dir=getattr(self, "same_dir", {}),
+                bulk=getattr(self, "bulk", []),
+                multi_tag=self.multi_tag,
+                options=self.options,
+            ).new_event()
+        )
 
     async def init_bulk(self, input_list, bulk_start, bulk_end, obj):
         try:
@@ -733,18 +735,20 @@ class TaskConfig:
                 else:
                     nextmsg.sender_chat = self.user
                 
-                create_task(obj(
-                    self.client,
-                    nextmsg,
-                    self.is_qbit,
-                    self.is_leech,
-                    self.is_jd,
-                    self.is_nzb,
-                    self.same_dir,
-                    [], # Pass empty bulk to prevent recursion
-                    self.multi_tag,
-                    self.options,
-                ).new_event())
+                create_task(
+                    obj(
+                        client=self.client,
+                        message=nextmsg,
+                        is_qbit=getattr(self, "is_qbit", False),
+                        is_leech=getattr(self, "is_leech", False),
+                        is_jd=getattr(self, "is_jd", False),
+                        is_nzb=getattr(self, "is_nzb", False),
+                        same_dir=getattr(self, "same_dir", {}),
+                        bulk=[],  # Pass empty bulk to prevent recursion
+                        multi_tag=self.multi_tag,
+                        options=self.options,
+                    ).new_event()
+                )
                 
                 # Delay to prevent FloodWait and staggered start
                 await sleep(2)

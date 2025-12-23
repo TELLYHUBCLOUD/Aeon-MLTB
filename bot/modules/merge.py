@@ -38,7 +38,7 @@ from bot.helper.telegram_helper.message_utils import (
 
 
 class Merge(TaskListener):
-    def __init__(self, client, message):
+    def __init__(self, client, message, **kwargs):
         self.message = message
         self.client = client
         super().__init__()

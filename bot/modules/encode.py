@@ -217,7 +217,7 @@ class EncodeSelection:
 
 
 class Encode(TaskListener):
-    def __init__(self, client, message):
+    def __init__(self, client, message, **kwargs):
         self.message = message
         self.client = client
         self.quality = ""

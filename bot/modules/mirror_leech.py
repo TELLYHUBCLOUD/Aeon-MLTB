@@ -68,6 +68,7 @@ class Mirror(TaskListener):
         options="",
         auto_link=None,
         auto_ff=None,
+        **kwargs,
     ):
         if same_dir is None:
             same_dir = {}
