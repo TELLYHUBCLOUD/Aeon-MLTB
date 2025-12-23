@@ -768,12 +768,21 @@ class TaskListener(TaskConfig):
         if not api_key:
             # Fallback to old key for backward compatibility
             api_key = self.user_dict.get("LULUSTREAM_API_KEY", "")
+        
         if not api_key:
-            await self.on_upload_error("Lulu API Key not found! Please set it in settings.")
+            msg = "Lulu API Key not found! Please set it in settings."
+            if not self.is_leech and self.raw_up_dest == "":
+                await self.on_upload_error(msg)
+            else:
+                await send_message(self.message, f"❌ <b>LuluStream Warning</b>\n{msg}")
             return None
 
         if not await aiopath.isfile(up_path):
-             await self.on_upload_error("Lulu only supports single file uploads. Please use -z to compress folders.")
+             msg = "Lulu only supports single file uploads. Please use -z to compress folders."
+             if not self.is_leech and self.raw_up_dest == "":
+                 await self.on_upload_error(msg)
+             else:
+                 await send_message(self.message, f"❌ <b>LuluStream Warning</b>\n{msg}")
              return None
 
         lulu = LuluStream(api_key)
@@ -795,7 +804,16 @@ class TaskListener(TaskConfig):
             if link:
                 return link
             else:
-                await self.on_upload_error("Lulu upload failed! Check logs.")
+                msg = "Lulu upload failed! Check logs."
+                if not self.is_leech and self.raw_up_dest == "":
+                    await self.on_upload_error(msg)
+                else:
+                    await send_message(self.message, f"❌ <b>LuluStream Warning</b>\n{msg}")
         except Exception as e:
-            await self.on_upload_error(f"Lulu Error: {e}")
+            msg = f"Lulu Error: {e}"
+            if not self.is_leech and self.raw_up_dest == "":
+                await self.on_upload_error(msg)
+            else:
+                await send_message(self.message, f"❌ <b>LuluStream Warning</b>\n{msg}")
+        
         return None
