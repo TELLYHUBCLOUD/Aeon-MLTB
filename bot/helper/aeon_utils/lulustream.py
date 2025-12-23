@@ -92,7 +92,8 @@ class LuluStream:
                         else:
                             LOGGER.error(f"LuluStream Upload API Error: {result.get('msg')}")
                     else:
-                        LOGGER.error(f"LuluStream Upload HTTP Error: {resp.status}")
+                        error_text = await resp.text()
+                        LOGGER.error(f"LuluStream Upload HTTP Error: {resp.status} | Response: {error_text[:500]}")
         except Exception as e:
             LOGGER.error(f"LuluStream Upload Exception: {e}")
         return None
