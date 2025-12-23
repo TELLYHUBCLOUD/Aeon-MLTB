@@ -102,6 +102,7 @@ class TaskConfig:
         self.is_jd = False
         self.is_qbit = False
         self.is_nzb = False
+        self.lulu = False
         self.is_clone = False
         self.is_ytdlp = False
         self.user_transmission = False

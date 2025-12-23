@@ -131,6 +131,7 @@ class Mirror(TaskListener):
             "-md": "",
             "-tl": "",
             "-ff": set(),
+            "-lulu": False,
         }
 
         # AUTO LEECH + AUTO COMPRESS CMD
@@ -178,6 +179,7 @@ class Mirror(TaskListener):
         self.bot_trans = args["-bt"]
         self.user_trans = args["-ut"]
         self.ffmpeg_cmds = args["-ff"]
+        self.lulu = args["-lulu"]
 
         self.yt_privacy = None
         self.yt_mode = None

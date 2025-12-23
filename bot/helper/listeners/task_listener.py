@@ -35,6 +35,7 @@ from bot.helper.ext_utils.files_utils import (
 )
 from bot.helper.ext_utils.links_utils import is_gdrive_id
 from bot.helper.ext_utils.status_utils import get_readable_file_size
+from bot.helper.aeon_utils.lulustream import LuluStream
 from bot.helper.ext_utils.task_manager import check_running_tasks, start_from_queued
 from bot.helper.mirror_leech_utils.gdrive_utils.upload import GoogleDriveUpload
 from bot.helper.mirror_leech_utils.rclone_utils.transfer import RcloneTransferHelper
@@ -326,6 +327,16 @@ class TaskListener(TaskConfig):
             self.clear()
 
         self.subproc = None
+
+        if self.lulu:
+            lulu_link = await self.proceed_lulu(up_path)
+            if lulu_link:
+                if not self.is_leech and self.raw_up_dest == "":
+                    # If only lulu was requested and no other destination, we can finish here
+                    return await self.on_upload_complete(lulu_link, 0, 0, "")
+                # Else, we might want to include the lulu link in the final message
+                # For now let's just send it
+                await send_message(self.message, f"<b>LuluStream Link:</b> <code>{lulu_link}</code>")
 
         add_to_queue, event = await check_running_tasks(self, "up")
         await start_from_queued()
@@ -751,3 +762,31 @@ class TaskListener(TaskConfig):
             await clean_download(self.up_dir)
         if self.thumb and await aiopath.exists(self.thumb):
             await remove(self.thumb)
+    async def proceed_lulu(self, up_path):
+        api_key = self.user_dict.get("LULUSTREAM_API_KEY", Config.LULUSTREAM_API_KEY)
+        if not api_key:
+            await self.on_upload_error("LuluStream API Key not found! Please set it in settings.")
+            return None
+
+        if not await aiopath.isfile(up_path):
+             await self.on_upload_error("LuluStream only supports single file uploads. Please use -z to compress folders.")
+             return None
+
+        lulu = LuluStream(api_key)
+        LOGGER.info(f"Uploading to LuluStream: {self.name}")
+        
+        # Simple status update
+        async with task_dict_lock:
+            from bot.helper.mirror_leech_utils.status_utils.lulu_status import LuluStatus
+            task_dict[self.mid] = LuluStatus(self, "LuluUpload", "Up")
+        await update_status_message(self.message.chat.id)
+
+        try:
+            link = await lulu.upload_file(up_path, self.name)
+            if link:
+                return link
+            else:
+                await self.on_upload_error("LuluStream upload failed! Check logs.")
+        except Exception as e:
+            await self.on_upload_error(f"LuluStream Error: {e}")
+        return None

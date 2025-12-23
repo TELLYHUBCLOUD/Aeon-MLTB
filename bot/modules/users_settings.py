@@ -62,6 +62,7 @@ filename_options = [
 ]
 rclone_options = ["RCLONE_CONFIG", "RCLONE_PATH", "RCLONE_FLAGS"]
 gdrive_options = ["TOKEN_PICKLE", "GDRIVE_ID", "INDEX_URL"]
+lulustream_options = ["LULUSTREAM_API_KEY"]
 
 
 async def get_user_settings(from_user, stype="main"):
@@ -312,6 +313,27 @@ async def get_user_settings(from_user, stype="main"):
 ╭📁 <b>Set Default YouTube Folder Upload Mode for {name}</b>
 ╰Choose how to handle folder uploads.
 </blockquote>"""
+    elif stype == "lulustream":
+        buttons.data_button(
+            "🔑 LuluStream API Key",
+            f"userset {user_id} menu LULUSTREAM_API_KEY",
+        )
+        buttons.data_button("🔙 Back", f"userset {user_id} back")
+        buttons.data_button("❌ Close", f"userset {user_id} close")
+
+        if user_dict.get("LULUSTREAM_API_KEY", False):
+            lulu_api = user_dict["LULUSTREAM_API_KEY"]
+        elif (
+            "LULUSTREAM_API_KEY" not in user_dict and Config.LULUSTREAM_API_KEY
+        ):
+            lulu_api = Config.LULUSTREAM_API_KEY
+        else:
+            lulu_api = "None"
+
+        text = f"""<blockquote>
+╭⚙️ <b>LuluStream Settings for {name}</b>
+╰🔑 <b>API Key:</b> <code>{lulu_api}</code>
+</blockquote>"""
     elif stype == "automation":
         buttons.data_button(
             "🚀 Auto Leech",
@@ -505,6 +527,7 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("📁 Rclone", f"userset {user_id} rclone")
         buttons.data_button("☁️ Gdrive API", f"userset {user_id} gdrive")
         buttons.data_button("🎥 YouTube", f"userset {user_id} youtube")
+        buttons.data_button("🎞️ LuluStream", f"userset {user_id} lulustream")
 
         buttons.data_button("🤖 Auto Features", f"userset {user_id} automation")
         buttons.data_button("📝 Filename Options", f"userset {user_id} filename")
@@ -761,6 +784,8 @@ async def get_menu(option, message, user_id):
         back_to = "rclone"
     elif option in gdrive_options:
         back_to = "gdrive"
+    elif option in lulustream_options:
+        back_to = "lulustream"
     elif option in [
         "YT_DEFAULT_PRIVACY",
         "YT_DEFAULT_CATEGORY",

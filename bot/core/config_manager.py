@@ -70,6 +70,7 @@ class Config:
     RSS_SIZE_LIMIT: int = 0
     STOP_DUPLICATE: bool = False
     STREAMWISH_API: str = ""
+    LULUSTREAM_API_KEY: str = ""
     SUDO_USERS: str = ""
     TELEGRAM_API: int = 0
     TELEGRAM_HASH: str = ""
