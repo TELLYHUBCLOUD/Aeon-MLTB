@@ -400,6 +400,7 @@ user_settings_text = {
     "AUTO_COMPRESS_CMD": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send your default FFmpeg command to be appended to leech commands automatically. Example: -ff -metadata title='My Title'. Timeout: 60 sec</blockquote>",
     "AUTO_CAPTION_REPLACE": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send your caption replacement rules. Format: old1:new1|old2:new2. Case-insensitive. Timeout: 60 sec</blockquote>",
     "AUTO_CAPTION_REMOVE": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send keywords to remove from captions. Format: word1|word2|word3 or re:regex_pattern. Case-insensitive. Timeout: 60 sec</blockquote>",
+    "LULUSTREAM_API_KEY": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send your LuluStream API Key. You can get it from your LuluStream account settings. Timeout: 60 sec</blockquote>",
 }
 
 encode_help_main = """<blockquote expandable>╭ℹ️ <b>Encode Help</b>
