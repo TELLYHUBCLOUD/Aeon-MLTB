@@ -693,6 +693,7 @@ class TaskConfig:
                 options=self.options,
             ).new_event()
         )
+        await sleep(10)
 
     async def init_bulk(self, input_list, bulk_start, bulk_end, obj):
         try:
@@ -751,7 +752,7 @@ class TaskConfig:
                 )
                 
                 # Delay to prevent FloodWait and staggered start
-                await sleep(2)
+                await sleep(10)
         except Exception as e:
             await send_message(
                 self.message,
