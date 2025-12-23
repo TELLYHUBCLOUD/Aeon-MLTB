@@ -1,4 +1,5 @@
 import aiohttp
+import io
 import os
 from urllib.parse import quote
 from bot import LOGGER
@@ -40,7 +41,7 @@ class LuluStream:
         try:
             file_size = os.path.getsize(file_path)
             
-            class ProgressReader:
+            class ProgressReader(io.IOBase):
                 def __init__(self, filepath, callback):
                     self._file = open(filepath, 'rb')
                     self._callback = callback
@@ -53,6 +54,9 @@ class LuluStream:
                         self._callback(self._total_read)
                     return chunk
 
+                def readable(self):
+                    return True
+
                 def seek(self, offset, whence=0):
                     return self._file.seek(offset, whence)
 
@@ -64,13 +68,9 @@ class LuluStream:
                     return self._file.name
 
                 def close(self):
-                    self._file.close()
-
-                def __enter__(self):
-                    return self
-
-                def __exit__(self, exc_type, exc_val, exc_tb):
-                    self.close()
+                    if not self._file.closed:
+                        self._file.close()
+                    super().close()
 
             f = ProgressReader(file_path, progress_callback)
             
