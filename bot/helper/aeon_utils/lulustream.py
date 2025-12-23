@@ -1,5 +1,6 @@
 import aiohttp
 import os
+from urllib.parse import quote
 from bot import LOGGER
 
 class LuluStream:
@@ -8,7 +9,9 @@ class LuluStream:
         self.base_url = "https://lulustream.com/api/"
 
     async def get_upload_server(self):
-        url = f"{self.base_url}upload/server?key={self.api_key}"
+        # URL-encode the API key to handle special characters
+        encoded_key = quote(self.api_key, safe='')
+        url = f"{self.base_url}upload/server?key={encoded_key}"
         LOGGER.info(f"LuluStream Key Diagnostic: Length={len(self.api_key)}, Key={self.api_key[:4]}...{self.api_key[-4:] if len(self.api_key) > 8 else ''}")
         try:
             async with aiohttp.ClientSession() as session:
