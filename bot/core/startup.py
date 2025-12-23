@@ -462,8 +462,6 @@ async def check_resume_tasks():
             {"_id": TgClient.ID},
             {"$unset": {"resume_tasks": ""}},
         )
-        if await database.db.tasks[TgClient.ID].find_one():
-            await database.db.tasks[TgClient.ID].drop()
 
     except Exception as e:
         LOGGER.error(f"Error resuming tasks: {e}")

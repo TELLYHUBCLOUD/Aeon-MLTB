@@ -64,6 +64,7 @@ async def restart_notification():
     if (
         Config.INCOMPLETE_TASK_NOTIFIER
         and Config.DATABASE_URL
+        and not Config.AUTO_RESUME
         and (notifier_dict := await database.get_incomplete_tasks())
     ):
         for cid, data in notifier_dict.items():

@@ -228,7 +228,8 @@ class DbManager:
     async def add_incomplete_task(self, cid, link, tag, msg_text, user_id):
         if self._return:
             return
-        await self.db.tasks[TgClient.ID].insert_one(
+        await self.db.tasks[TgClient.ID].replace_one(
+            {"_id": link},
             {
                 "_id": link,
                 "cid": cid,
@@ -236,6 +237,7 @@ class DbManager:
                 "text": msg_text,
                 "user_id": user_id,
             },
+            upsert=True,
         )
 
     async def get_pm_uids(self):

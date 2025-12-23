@@ -91,7 +91,7 @@ class TaskListener(TaskConfig):
     async def on_download_start(self):
         if (
             self.is_super_chat
-            and Config.INCOMPLETE_TASK_NOTIFIER
+            and (Config.INCOMPLETE_TASK_NOTIFIER or Config.AUTO_RESUME)
             and Config.DATABASE_URL
         ):
             await database.add_incomplete_task(
