@@ -9,6 +9,8 @@ from pyrogram.errors import (
     FloodWait,
     MessageEmpty,
     MessageNotModified,
+    MessageDeleteForbidden,
+    RPCError,
 )
 from pyrogram.types import InputMediaPhoto
 
@@ -164,7 +166,14 @@ async def delete_message(*args):
     results = await gather(*msgs, return_exceptions=True)
 
     for msg, result in zip(args, results, strict=False):
-        if isinstance(result, Exception):
+        if isinstance(result, MessageDeleteForbidden):
+            pass
+        elif isinstance(result, RPCError):
+            if result.code == 403 and "MESSAGE_DELETE_FORBIDDEN" in result.name:
+                pass
+            else:
+                LOGGER.error(f"Failed to delete message {msg}: {result}", exc_info=True)
+        elif isinstance(result, Exception):
             LOGGER.error(f"Failed to delete message {msg}: {result}", exc_info=True)
 
 
