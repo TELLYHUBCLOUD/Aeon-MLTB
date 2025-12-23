@@ -106,11 +106,12 @@ async def main():
         clean_all(),
         initiate_search_tools(),
         get_packages_version(),
-        restart_notification(),
         telegraph.create_account(),
         rclone_serve_booter(),
-        check_resume_tasks(),
     )
+    
+    await check_resume_tasks()
+    await restart_notification()
 
 
     import signal

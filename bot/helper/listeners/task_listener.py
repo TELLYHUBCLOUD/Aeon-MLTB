@@ -98,6 +98,8 @@ class TaskListener(TaskConfig):
                 self.message.chat.id,
                 self.message.link,
                 self.tag,
+                self.message.text,
+                self.message.from_user.id,
             )
 
     async def on_download_complete(self):

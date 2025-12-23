@@ -225,11 +225,17 @@ class DbManager:
             return
         await self.db.rss[TgClient.ID].delete_one({"_id": user_id})
 
-    async def add_incomplete_task(self, cid, link, tag):
+    async def add_incomplete_task(self, cid, link, tag, msg_text, user_id):
         if self._return:
             return
         await self.db.tasks[TgClient.ID].insert_one(
-            {"_id": link, "cid": cid, "tag": tag},
+            {
+                "_id": link,
+                "cid": cid,
+                "tag": tag,
+                "text": msg_text,
+                "user_id": user_id,
+            },
         )
 
     async def get_pm_uids(self):
