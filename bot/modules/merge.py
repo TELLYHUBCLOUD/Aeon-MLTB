@@ -93,30 +93,15 @@ class Merge(TaskListener):
                 bulk_end = dargs[1] or 0
             is_bulk = True
 
+        if not is_bulk:
+            from bot.helper.ext_utils.bulk_links import extract_bulk_links
+            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
+            if len(self.bulk) > 1:
+                is_bulk = True
+
         if is_bulk:
-            try:
-                self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
-                if len(self.bulk) == 0:
-                    raise ValueError("Bulk Empty!")
-                # For merge, bulk means inputs for THIS task
-                for link in self.bulk:
-                     if is_telegram_link(link):
-                         match = re.search(r"(https?://t\.me/(?:c/)?(?:[\w\d]+)/)(\d+)-(\d+)", link)
-                         if match:
-                             base = match.group(1)
-                             start = int(match.group(2))
-                             end = int(match.group(3))
-                             if start <= end:
-                                 for i in range(start, end + 1):
-                                     self.inputs.append(f"{base}{i}")
-                             continue
-                     self.inputs.append(link)
-            except Exception as e:
-                await send_message(
-                    self.message,
-                    f"Reply to a text file or a Telegram message with links separated by new lines. Error: {e}",
-                )
-                return
+            await self.init_bulk(input_list, bulk_start, bulk_end, Merge)
+            return
 
         # Parse Inputs from text (Multiple links / Ranges)
         for line in text:
@@ -452,99 +437,15 @@ class Merge(TaskListener):
              await self.on_upload_error("Merge Failed. Check logs.")
 
 
-    async def run_multi(self, input_list, obj):
-        await sleep(7)
-        if not self.multi_tag and self.multi > 1:
-            self.multi_tag = token_hex(2)
-            multi_tags.add(self.multi_tag)
-        elif self.multi <= 1:
-            if self.multi_tag in multi_tags:
-                multi_tags.discard(self.multi_tag)
-            return
-        if self.multi_tag and self.multi_tag not in multi_tags:
-            await send_message(
-                self.message,
-                f"{self.tag} Multi-task has been cancelled!",
-            )
-            await send_status_message(self.message)
-            async with task_dict_lock:
-                for fd_name in self.same_dir:
-                    self.same_dir[fd_name]["total"] -= self.multi
-            return
-        if len(self.bulk) != 0:
-            msg = input_list[:1]
-            msg.append(f"{self.bulk[0]} -i {self.multi - 1} {self.options}")
-            msgts = " ".join(msg)
-            if self.multi > 2:
-                msgts += f"\nCancel Multi: <code>/stop {self.multi_tag}</code>"
-            nextmsg = await send_message(self.message, msgts)
-        else:
-            msg = [s.strip() for s in input_list]
-            index = msg.index("-i")
-            msg[index + 1] = f"{self.multi - 1}"
-            nextmsg = await self.client.get_messages(
-                chat_id=self.message.chat.id,
-                message_ids=self.message.reply_to_message_id + 1,
-            )
-            msgts = " ".join(msg)
-            if self.multi > 2:
-                msgts += f"\nCancel Multi: <code>/stop {self.multi_tag}</code>"
-            nextmsg = await send_message(nextmsg, msgts)
-        nextmsg = await self.client.get_messages(
-            chat_id=self.message.chat.id,
-            message_ids=nextmsg.id,
-        )
-        if self.message.from_user:
-            nextmsg.from_user = self.user
-        else:
-            nextmsg.sender_chat = self.user
-        if intervals["stopAll"]:
-            return
-        await obj(
-            self.client,
-            nextmsg,
-        ).new_event()
-
-    async def init_bulk(self, input_list, bulk_start, bulk_end, obj):
-        try:
-            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
-            if len(self.bulk) == 0:
-                raise ValueError("Bulk Empty!")
-            b_msg = input_list[:1]
-            self.options = input_list[1:]
-            index = self.options.index("-b")
-            del self.options[index]
-            if bulk_start or bulk_end:
-                del self.options[index + 1]
-            self.options = " ".join(self.options)
-            b_msg.append(f"{self.bulk[0]} -i {len(self.bulk)} {self.options}")
-            msg = " ".join(b_msg)
-            if len(self.bulk) > 2:
-                self.multi_tag = token_hex(2)
-                multi_tags.add(self.multi_tag)
-                msg += f"\nCancel Multi: <code>/stop {self.multi_tag}</code>"
-            nextmsg = await send_message(self.message, msg)
-            nextmsg = await self.client.get_messages(
-                chat_id=self.message.chat.id,
-                message_ids=nextmsg.id,
-            )
-            if self.message.from_user:
-                nextmsg.from_user = self.user
-            else:
-                nextmsg.sender_chat = self.user
-            await obj(
-                self.client,
-                nextmsg,
-            ).new_event()
-        except Exception as e:
-            await send_message(
-                self.message,
-                f"Reply to a text file or a Telegram message with links separated by new lines. Error: {e}",
-            )
 
 
 async def merge(client, message):
-    bot_loop.create_task(Merge(client, message).new_event())
+    from bot.helper.ext_utils.bulk_links import extract_bulk_links
+    bulk = await extract_bulk_links(message, "0", "0")
+    if len(bulk) > 1:
+        await Merge(client, message).init_bulk(message.text.split("\n")[0].split(), 0, 0, Merge)
+    else:
+        bot_loop.create_task(Merge(client, message).new_event())
 
 async def merge_done(client, message):
     user_id = message.from_user.id

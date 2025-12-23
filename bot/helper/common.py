@@ -651,16 +651,24 @@ class TaskConfig:
             nextmsg = await send_message(self.message, msgts)
         else:
             msg = [s.strip() for s in input_list]
-            index = msg.index("-i")
-            msg[index + 1] = f"{self.multi - 1}"
+            if "-i" in msg:
+                index = msg.index("-i")
+                msg[index + 1] = f"{self.multi - 1}"
+            else:
+                msg.append("-i")
+                msg.append(f"{self.multi - 1}")
+            
+            # Use reply_to_message_id if available to keep the chain
+            reply_id = self.message.reply_to_message_id or self.message.id
             nextmsg = await self.client.get_messages(
                 chat_id=self.message.chat.id,
-                message_ids=self.message.reply_to_message_id + 1,
+                message_ids=reply_id,
             )
             msgts = " ".join(msg)
             if self.multi > 2:
                 msgts += f"\nCancel Multi: <code>/stop {self.multi_tag}</code>"
             nextmsg = await send_message(nextmsg, msgts)
+
         nextmsg = await self.client.get_messages(
             chat_id=self.message.chat.id,
             message_ids=nextmsg.id,
@@ -697,6 +705,9 @@ class TaskConfig:
                 if bulk_start or bulk_end:
                     del self.options[index + 1]
             self.options = " ".join(self.options)
+
+            if self.multi > 0:
+                self.bulk = self.bulk[:self.multi]
 
             if len(self.bulk) > 2:
                 self.multi_tag = token_hex(2)

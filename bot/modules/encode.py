@@ -260,6 +260,30 @@ class Encode(TaskListener):
         arg_parser(input_list[1:], args)
 
         self.link = args["link"]
+        self.multi = args["-i"]
+        is_bulk = args["-b"]
+        bulk_start = 0
+        bulk_end = 0
+
+        if not isinstance(is_bulk, bool):
+            dargs = is_bulk.split(":")
+            bulk_start = dargs[0] or 0
+            if len(dargs) == 2:
+                bulk_end = dargs[1] or 0
+            is_bulk = True
+
+        if not is_bulk:
+            from bot.helper.ext_utils.bulk_links import extract_bulk_links
+            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
+            if len(self.bulk) > 1:
+                is_bulk = True
+
+        if is_bulk:
+            await self.init_bulk(input_list, bulk_start, bulk_end, Encode)
+            return
+
+        await self.run_multi(input_list, Encode)
+
         self.name = args["-n"]
         self.up_dest = args["-up"]
         self.rc_flags = args["-rcf"]
@@ -616,109 +640,11 @@ class Encode(TaskListener):
              await self.on_upload_error("Encoding Failed. Check logs.")
 
 
-    async def run_multi(self, input_list, obj):
-        await sleep(7)
-        if not self.multi_tag and self.multi > 1:
-            self.multi_tag = token_hex(2)
-            multi_tags.add(self.multi_tag)
-        elif self.multi <= 1:
-            if self.multi_tag in multi_tags:
-                multi_tags.discard(self.multi_tag)
-            return
-        if self.multi_tag and self.multi_tag not in multi_tags:
-            await send_message(
-                self.message,
-                f"{self.tag} Multi-task has been cancelled!",
-            )
-            await send_status_message(self.message)
-            async with task_dict_lock:
-                for fd_name in self.same_dir:
-                    self.same_dir[fd_name]["total"] -= self.multi
-            return
-        if len(self.bulk) != 0:
-            msg = input_list[:1]
-            msg.append(f"{self.bulk[0]} -i {self.multi - 1} {self.options}")
-            msgts = " ".join(msg)
-            if self.multi > 2:
-                msgts += f"\nCancel Multi: <code>/stop {self.multi_tag}</code>"
-            nextmsg = await send_message(self.message, msgts)
-        else:
-            msg = [s.strip() for s in input_list]
-            index = msg.index("-i")
-            msg[index + 1] = f"{self.multi - 1}"
-            nextmsg = await self.client.get_messages(
-                chat_id=self.message.chat.id,
-                message_ids=self.message.reply_to_message_id + 1,
-            )
-            msgts = " ".join(msg)
-            if self.multi > 2:
-                msgts += f"\nCancel Multi: <code>/stop {self.multi_tag}</code>"
-            nextmsg = await send_message(nextmsg, msgts)
-        nextmsg = await self.client.get_messages(
-            chat_id=self.message.chat.id,
-            message_ids=nextmsg.id,
-        )
-        if self.message.from_user:
-            nextmsg.from_user = self.user
-        else:
-            nextmsg.sender_chat = self.user
-        if intervals["stopAll"]:
-            return
-        create_task(obj(
-            self.client,
-            nextmsg,
-        ).new_event())
-
-    async def init_bulk(self, input_list, bulk_start, bulk_end, obj):
-        try:
-            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
-            if len(self.bulk) == 0:
-                raise ValueError("Bulk Empty!")
-            b_msg = input_list[:1]
-            self.options = input_list[1:]
-            if "-b" in self.options:
-                index = self.options.index("-b")
-                del self.options[index]
-                if bulk_start or bulk_end:
-                    del self.options[index + 1]
-            self.options = " ".join(self.options)
-
-            if len(self.bulk) > 2:
-                self.multi_tag = token_hex(2)
-                multi_tags.add(self.multi_tag)
-
-            for index, link in enumerate(self.bulk):
-                if self.multi_tag and self.multi_tag not in multi_tags:
-                    break
-                    
-                cmd_parts = list(b_msg) # Copy base command
-                cmd_parts.append(f"{link} {self.options}")
-                if len(self.bulk) > 2:
-                     cmd_parts.append(f"\nCancel Multi: <code>/stop {self.multi_tag}</code>")
-                
-                msg = " ".join(cmd_parts)
-                nextmsg = await send_message(self.message, msg)
-                nextmsg = await self.client.get_messages(
-                    chat_id=self.message.chat.id,
-                    message_ids=nextmsg.id,
-                )
-                if self.message.from_user:
-                    nextmsg.from_user = self.user
-                else:
-                    nextmsg.sender_chat = self.user
-                
-                create_task(obj(
-                    self.client,
-                    nextmsg,
-                ).new_event())
-                
-                # Delay to prevent FloodWait and staggered start
-                await sleep(2)
-        except Exception as e:
-            await send_message(
-                self.message,
-                f"Reply to a text file or a Telegram message with links separated by new lines. Error: {e}",
-            )
 
 async def encode(client, message):
-    bot_loop.create_task(Encode(client, message).new_event())
+    from bot.helper.ext_utils.bulk_links import extract_bulk_links
+    bulk = await extract_bulk_links(message, "0", "0")
+    if len(bulk) > 1:
+        await Encode(client, message).init_bulk(message.text.split("\n")[0].split(), 0, 0, Encode)
+    else:
+        bot_loop.create_task(Encode(client, message).new_event())

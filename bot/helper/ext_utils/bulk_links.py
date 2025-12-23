@@ -25,8 +25,9 @@ def filter_links(links_list: list, bulk_start: int, bulk_end: int) -> list:
 
 def get_links_from_message(text: str) -> list:
     """
-    Extracts links from a string, assuming one link per line.
-    Empty lines are ignored.
+    Extracts valid links from a string, assuming one link per line or separated by spaces.
+    Empty lines and lines starting with / (commands) are ignored.
+    Only valid URLs, magnets, and Telegram links are returned.
 
     Args:
         text: The string containing links.
@@ -34,8 +35,20 @@ def get_links_from_message(text: str) -> list:
     Returns:
         A list of extracted links.
     """
+    from bot.helper.ext_utils.links_utils import is_url, is_magnet, is_telegram_link
+    
     links_list = text.split("\n")
-    return [item.strip() for item in links_list if len(item) != 0]
+    valid_links = []
+    for line in links_list:
+        line = line.strip()
+        if not line or line.startswith("/"):
+            continue
+        # Split by space in case multiple links are on one line (though Usually it's one per line for bulk)
+        parts = line.split()
+        for part in parts:
+            if is_url(part) or is_magnet(part) or is_telegram_link(part):
+                valid_links.append(part)
+    return valid_links
 
 
 async def get_links_from_file(message) -> list:
@@ -61,7 +74,7 @@ async def get_links_from_file(message) -> list:
 async def extract_bulk_links(message, bulk_start: str, bulk_end: str) -> list:
     """
     Extracts bulk links from a Pyrogram message.
-    Links can be in the replied-to message's text or an attached text file.
+    Links can be in the replied-to message, an attached text file, or the message itself.
     The extracted links are then filtered based on start and end indices.
 
     Args:
@@ -78,8 +91,11 @@ async def extract_bulk_links(message, bulk_start: str, bulk_end: str) -> list:
     if reply_to := message.reply_to_message:
         if (file_ := reply_to.document) and (file_.mime_type == "text/plain"):
             links_list = await get_links_from_file(reply_to)
-        elif text := reply_to.text:
+        elif text := (reply_to.text or reply_to.caption):
             links_list = get_links_from_message(text)
-    return (
-        filter_links(links_list, bulk_start, bulk_end) if links_list else links_list
-    )
+    else:
+        text = message.text or message.caption
+        if text and "\n" in text:
+            links_list = get_links_from_message(text)
+    
+    return filter_links(links_list, bulk_start, bulk_end) if links_list else []

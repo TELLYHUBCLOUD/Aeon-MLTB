@@ -23,10 +23,17 @@ async def auto_leech_handler(client, message):
         return
     if text.strip().startswith("/"):
         return
+
+    lines = [l.strip() for l in text.split("\n") if l.strip()]
+    is_bulk = len(lines) > 1
+
     if not (
-        re_match(r"https?://\S+", text) or re_match(r"magnet:\?xt=urn:\S+", text)
+        is_bulk or re_match(r"https?://\S+", text) or re_match(r"magnet:\?xt=urn:\S+", text)
     ):
         return
+
+    if is_bulk:
+        text = f"-b {text}"
     
     auto_ff = user_dict.get("AUTO_COMPRESS_CMD")
     

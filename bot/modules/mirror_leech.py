@@ -244,6 +244,12 @@ class Mirror(TaskListener):
             is_bulk = True
 
         if not is_bulk:
+            from bot.helper.ext_utils.bulk_links import extract_bulk_links
+            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
+            if len(self.bulk) > 1:
+                is_bulk = True
+
+        if not is_bulk:
             if self.multi > 0:
                 if self.folder_name:
                     async with task_dict_lock:
@@ -275,97 +281,11 @@ class Mirror(TaskListener):
             await self.init_bulk(input_list, bulk_start, bulk_end, Mirror)
             return None
 
-        if len(self.bulk) != 0:
-            del self.bulk[0]
-
         await self.run_multi(input_list, Mirror)
 
         await self.get_tag(text)
 
         path = f"{DOWNLOAD_DIR}{self.mid}{self.folder_name}"
-
-    async def run_multi(self, input_list, obj):
-        await sleep(0.5)
-        reply_to = None
-        file_ = None
-        session = TgClient.bot
-        user_id = self.message.from_user.id if self.message.from_user else self.message.sender_chat.id
-        args = {
-            "-doc": False,
-            "-med": False,
-            "-d": False,
-            "-j": False,
-            "-s": False,
-            "-b": False,
-            "-e": False,
-            "-z": False,
-            "-sv": False,
-            "-ss": False,
-            "-f": False,
-            "-fd": False,
-            "-fu": False,
-            "-hl": False,
-            "-bt": False,
-            "-ut": False,
-            "-i": 0,
-            "-sp": 0,
-            "link": "",
-            "-n": "",
-            "-m": "",
-            "-up": "",
-            "-rcf": "",
-            "-au": "",
-            "-ap": "",
-            "-h": [],
-            "-t": "",
-            "-ca": "",
-            "-cv": "",
-            "-ns": "",
-            "-md": "",
-            "-tl": "",
-            "-ff": set(),
-        }
-        arg_parser(input_list[1:], args)
-        
-        path = f"{DOWNLOAD_DIR}{self.mid}{self.folder_name}"
-        
-        headers = args["-h"]
-        if headers:
-            headers = headers.split("|")
-        else:
-            headers = []
-            
-        ratio = None
-        seed_time = None
-        
-        seed = args["-d"]
-        if not isinstance(seed, bool):
-            dargs = seed.split(":")
-            ratio = dargs[0] or None
-            if len(dargs) == 2:
-                seed_time = dargs[1] or None
-
-        if len(self.bulk) != 0:
-            del self.bulk[0]
-        if len(self.bulk) > 0:
-            b_data = self.bulk[0]
-            if self.is_jd:
-                # Update attributes if needed
-                pass 
-            await obj(
-                self.client,
-                self.message,
-                self.is_qbit,
-                self.is_leech,
-                self.is_jd,
-                self.is_nzb,
-                self.same_dir,
-                self.bulk,
-                self.multi_tag,
-                self.options,
-                self.auto_link,
-                self.auto_ff
-            ).new_event()
 
         if (
             not self.link
@@ -373,6 +293,7 @@ class Mirror(TaskListener):
             and reply_to.text
         ):
             self.link = reply_to.text.split("\n", 1)[0].strip()
+
         if is_telegram_link(self.link):
             try:
                 reply_to, session = await get_tg_link_message(self.link, user_id)
@@ -563,31 +484,61 @@ class Mirror(TaskListener):
 
 
 async def mirror(client, message):
-    bot_loop.create_task(Mirror(client, message).new_event())
+    from bot.helper.ext_utils.bulk_links import extract_bulk_links
+    bulk = await extract_bulk_links(message, "0", "0")
+    if len(bulk) > 1:
+        await Mirror(client, message).init_bulk(message.text.split("\n")[0].split(), 0, 0, Mirror)
+    else:
+        bot_loop.create_task(Mirror(client, message).new_event())
 
 
 async def leech(client, message):
-    bot_loop.create_task(Mirror(client, message, is_leech=True).new_event())
+    from bot.helper.ext_utils.bulk_links import extract_bulk_links
+    bulk = await extract_bulk_links(message, "0", "0")
+    if len(bulk) > 1:
+        await Mirror(client, message, is_leech=True).init_bulk(message.text.split("\n")[0].split(), 0, 0, Mirror)
+    else:
+        bot_loop.create_task(Mirror(client, message, is_leech=True).new_event())
 
 
 async def jd_mirror(client, message):
-    bot_loop.create_task(Mirror(client, message, is_jd=True).new_event())
+    from bot.helper.ext_utils.bulk_links import extract_bulk_links
+    bulk = await extract_bulk_links(message, "0", "0")
+    if len(bulk) > 1:
+        await Mirror(client, message, is_jd=True).init_bulk(message.text.split("\n")[0].split(), 0, 0, Mirror)
+    else:
+        bot_loop.create_task(Mirror(client, message, is_jd=True).new_event())
 
 
 async def nzb_mirror(client, message):
-    bot_loop.create_task(Mirror(client, message, is_nzb=True).new_event())
+    from bot.helper.ext_utils.bulk_links import extract_bulk_links
+    bulk = await extract_bulk_links(message, "0", "0")
+    if len(bulk) > 1:
+        await Mirror(client, message, is_nzb=True).init_bulk(message.text.split("\n")[0].split(), 0, 0, Mirror)
+    else:
+        bot_loop.create_task(Mirror(client, message, is_nzb=True).new_event())
 
 
 async def jd_leech(client, message):
-    bot_loop.create_task(
-        Mirror(client, message, is_leech=True, is_jd=True).new_event(),
-    )
+    from bot.helper.ext_utils.bulk_links import extract_bulk_links
+    bulk = await extract_bulk_links(message, "0", "0")
+    if len(bulk) > 1:
+        await Mirror(client, message, is_leech=True, is_jd=True).init_bulk(message.text.split("\n")[0].split(), 0, 0, Mirror)
+    else:
+        bot_loop.create_task(
+            Mirror(client, message, is_leech=True, is_jd=True).new_event(),
+        )
 
 
 async def nzb_leech(client, message):
-    bot_loop.create_task(
-        Mirror(client, message, is_leech=True, is_nzb=True).new_event(),
-    )
+    from bot.helper.ext_utils.bulk_links import extract_bulk_links
+    bulk = await extract_bulk_links(message, "0", "0")
+    if len(bulk) > 1:
+        await Mirror(client, message, is_leech=True, is_nzb=True).init_bulk(message.text.split("\n")[0].split(), 0, 0, Mirror)
+    else:
+        bot_loop.create_task(
+            Mirror(client, message, is_leech=True, is_nzb=True).new_event(),
+        )
 
 
 
