@@ -916,7 +916,7 @@ async def edit_user_settings(client, query):
         await query.answer("❌ Not Yours!", show_alert=True)
     elif data[2] == "setevent":
         await query.answer()
-    elif data[2] in ["leech", "gdrive", "rclone", "youtube", "automation", "filename"]:
+    elif data[2] in ["leech", "gdrive", "rclone", "youtube", "automation", "filename", "lulustream"]:
         await query.answer()
         await update_user_settings(query, data[2])
     elif data[2] == "menu":
