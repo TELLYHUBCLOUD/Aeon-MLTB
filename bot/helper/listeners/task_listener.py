@@ -766,6 +766,9 @@ class TaskListener(TaskConfig):
     async def proceed_lulu(self, up_path):
         api_key = self.user_dict.get("LULU_API_KEY", Config.LULU_API_KEY)
         if not api_key:
+            # Fallback to old key for backward compatibility
+            api_key = self.user_dict.get("LULUSTREAM_API_KEY", "")
+        if not api_key:
             await self.on_upload_error("Lulu API Key not found! Please set it in settings.")
             return None
 
