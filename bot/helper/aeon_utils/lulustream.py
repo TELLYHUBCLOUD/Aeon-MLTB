@@ -38,35 +38,40 @@ class LuluStream:
         title = file_title or filename
         
         try:
-            # Wrap file object to track progress
             file_size = os.path.getsize(file_path)
             
-            # Using a custom reader or feeding chunks if possible, but aiohttp FormData handles files directly.
-            # To track progress with aiohttp client, we can't easily hook into the request body write unless we provide a stream.
-            # A simple way for smaller files is to read chunks, but for large files we need a proper async generator or 
-            # we can rely on a custom IO wrapper.
-            
             class ProgressReader:
-                def __init__(self, filename, callback):
-                    self._file = open(filename, 'rb')
+                def __init__(self, filepath, callback):
+                    self._file = open(filepath, 'rb')
                     self._callback = callback
                     self._total_read = 0
 
                 def read(self, size=-1):
                     chunk = self._file.read(size)
-                    if chunk:
+                    if chunk and self._callback:
                         self._total_read += len(chunk)
-                        if self._callback:
-                            self._callback(self._total_read)
+                        self._callback(self._total_read)
                     return chunk
+
+                def seek(self, offset, whence=0):
+                    return self._file.seek(offset, whence)
+
+                def tell(self):
+                    return self._file.tell()
+
+                @property
+                def name(self):
+                    return self._file.name
 
                 def close(self):
                     self._file.close()
 
-            # Note: For strict async with aiohttp, we ideally want async file read, but doing it sync in thread or simple read usually works for upload logic if main loop isn't blocked heavily. 
-            # However, aiohttp FormData expects a file-like object or bytes.
-            # A wrapper around the open file that updates progress on read() is the standard way.
-            
+                def __enter__(self):
+                    return self
+
+                def __exit__(self, exc_type, exc_val, exc_tb):
+                    self.close()
+
             f = ProgressReader(file_path, progress_callback)
             
             data = aiohttp.FormData()
