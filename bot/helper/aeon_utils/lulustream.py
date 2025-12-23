@@ -4,7 +4,7 @@ from bot import LOGGER
 
 class LuluStream:
     def __init__(self, api_key):
-        self.api_key = api_key
+        self.api_key = api_key.strip()
         self.base_url = "https://lulustream.com/api/"
 
     async def get_upload_server(self):

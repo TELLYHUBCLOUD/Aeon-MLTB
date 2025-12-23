@@ -330,13 +330,14 @@ class TaskListener(TaskConfig):
 
         if self.lulu:
             lulu_link = await self.proceed_lulu(up_path)
+            if self.is_cancelled:
+                return
             if lulu_link:
                 if not self.is_leech and self.raw_up_dest == "":
-                    # If only lulu was requested and no other destination, we can finish here
                     return await self.on_upload_complete(lulu_link, 0, 0, "")
-                # Else, we might want to include the lulu link in the final message
-                # For now let's just send it
                 await send_message(self.message, f"<b>LuluStream Link:</b> <code>{lulu_link}</code>")
+            elif not self.is_leech and self.raw_up_dest == "":
+                return
 
         add_to_queue, event = await check_running_tasks(self, "up")
         await start_from_queued()
