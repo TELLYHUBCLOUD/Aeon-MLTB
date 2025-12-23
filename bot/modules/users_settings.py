@@ -315,18 +315,18 @@ async def get_user_settings(from_user, stype="main"):
 </blockquote>"""
     elif stype == "lulustream":
         buttons.data_button(
-            "🔑 LuluStream API Key",
-            f"userset {user_id} menu LULUSTREAM_API_KEY",
+            "🔑 Lulu API Key",
+            f"userset {user_id} menu LULU_API_KEY",
         )
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
 
-        if user_dict.get("LULUSTREAM_API_KEY", False):
-            lulu_api = user_dict["LULUSTREAM_API_KEY"]
+        if user_dict.get("LULU_API_KEY", False):
+            lulu_api = user_dict["LULU_API_KEY"]
         elif (
-            "LULUSTREAM_API_KEY" not in user_dict and Config.LULUSTREAM_API_KEY
+            "LULU_API_KEY" not in user_dict and Config.LULU_API_KEY
         ):
-            lulu_api = Config.LULUSTREAM_API_KEY
+            lulu_api = Config.LULU_API_KEY
         else:
             lulu_api = "None"
 
