@@ -764,7 +764,7 @@ class TaskListener(TaskConfig):
         if self.thumb and await aiopath.exists(self.thumb):
             await remove(self.thumb)
     async def proceed_lulu(self, up_path):
-        api_key = self.user_dict.get("LULUSTREAM_API_KEY", Config.LULUSTREAM_API_KEY)
+        api_key = self.user_dict.get("LULU_API_KEY", Config.LULU_API_KEY)
         if not api_key:
             await self.on_upload_error("LuluStream API Key not found! Please set it in settings.")
             return None

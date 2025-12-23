@@ -17,6 +17,7 @@ DEFAULT_UPLOAD = ""  # Default uploader if -ul is not specified. Options: "yt" (
 FILELION_API = ""
 
 STREAMWISH_API = ""
+LULU_API_KEY = ""
 EXCLUDED_EXTENSIONS = (
     ""  # Space separated file extensions to exclude (e.g., .log .exe)
 )

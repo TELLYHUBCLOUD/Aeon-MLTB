@@ -62,7 +62,7 @@ filename_options = [
 ]
 rclone_options = ["RCLONE_CONFIG", "RCLONE_PATH", "RCLONE_FLAGS"]
 gdrive_options = ["TOKEN_PICKLE", "GDRIVE_ID", "INDEX_URL"]
-lulustream_options = ["LULUSTREAM_API_KEY"]
+lulustream_options = ["LULU_API_KEY"]
 
 
 async def get_user_settings(from_user, stype="main"):

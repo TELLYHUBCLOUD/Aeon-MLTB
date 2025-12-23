@@ -9,6 +9,7 @@ class LuluStream:
 
     async def get_upload_server(self):
         url = f"{self.base_url}upload/server?key={self.api_key}"
+        LOGGER.info(f"LuluStream Key Diagnostic: Length={len(self.api_key)}, Key={self.api_key[:4]}...{self.api_key[-4:] if len(self.api_key) > 8 else ''}")
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(url, timeout=15) as resp:
@@ -17,7 +18,7 @@ class LuluStream:
                         if data.get("status") == 200:
                             return data.get("result")
                         else:
-                            LOGGER.error(f"LuluStream API Error: {data.get('msg')}")
+                            LOGGER.error(f"LuluStream API Error: {data.get('msg')} | Full Response: {data}")
                     else:
                         LOGGER.error(f"LuluStream Server Error: {resp.status}")
         except Exception as e:
