@@ -345,6 +345,37 @@ class TaskListener(TaskConfig):
                 
                 await send_message(self.message, msg)
                 
+                # Send screenshots if they were generated (look for _ss folder)
+                if self.screen_shots:
+                    from pyrogram.types import InputMediaPhoto
+                    from os import path as ospath
+                    from os import walk
+                    from aioshutil import rmtree
+                    
+                    # Get parent directory
+                    if await aiopath.isfile(up_path):
+                        parent_dir = ospath.dirname(up_path)
+                    else:
+                        parent_dir = up_path
+                    
+                    # Search for _ss folder
+                    for dirpath, _, files in walk(parent_dir):
+                        if dirpath.strip().endswith("_ss") and files:
+                            LOGGER.info(f"Found screenshots folder: {dirpath}")
+                            inputs = [
+                                InputMediaPhoto(ospath.join(dirpath, f))
+                                for f in files[:10] if f.lower().endswith(('.jpg', '.png', '.jpeg'))
+                            ]
+                            if inputs:
+                                await self.message.reply_media_group(
+                                    media=inputs,
+                                    quote=True,
+                                    disable_notification=True,
+                                )
+                                LOGGER.info(f"Screenshots sent: {len(inputs)}")
+                            await rmtree(dirpath, ignore_errors=True)
+                            break
+                
                 # Task complete - don't upload to Telegram/other destinations
                 return await self.on_upload_complete(lulu_link, 0, 0, "")
             else:
