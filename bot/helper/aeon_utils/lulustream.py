@@ -86,18 +86,25 @@ class LuluStream:
                         self.path = path
                         self.callback = callback
                         self.uploaded_bytes = 0
-                        self._file = None
+                        self._file = open(path, 'rb')
+                        self.mode = 'rb'
+                        self.name = path
                     
                     def read(self, size=-1):
                         """Read method called by aiohttp during upload."""
-                        if self._file is None:
-                            self._file = open(self.path, 'rb')
-                        
                         chunk = self._file.read(size)
                         if chunk:
                             self.uploaded_bytes += len(chunk)
                             self.callback(self.uploaded_bytes)
                         return chunk
+                    
+                    def seek(self, offset, whence=0):
+                        """Seek to position in file."""
+                        return self._file.seek(offset, whence)
+                    
+                    def tell(self):
+                        """Return current position in file."""
+                        return self._file.tell()
                     
                     def close(self):
                         """Close the underlying file."""
