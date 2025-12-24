@@ -65,8 +65,8 @@ class LuluStream:
             str: LuluStream video URL if successful, None otherwise
             
         Note:
-            - Streams file in 1MB chunks to avoid loading entire file into memory
-            - Supports progress tracking without memory accumulation
+            - Uses aiohttp's built-in file streaming to avoid loading entire file into memory
+            - Supports progress tracking with custom wrapper
         """
         server_url = await self.get_upload_server()
         if not server_url:
@@ -78,65 +78,89 @@ class LuluStream:
         try:
             file_size = os.path.getsize(file_path)
             
-            # Create async file stream iterator with progress tracking
-            class FileStreamWithProgress:
-                """Async iterator that streams file in chunks with progress tracking."""
-                def __init__(self, path, chunk_size=1024*1024, callback=None):
-                    self.path = path
-                    self.chunk_size = chunk_size
-                    self.callback = callback
-                    self.uploaded_bytes = 0
+            if progress_callback:
+                # Create a wrapper that tracks progress while reading
+                class ProgressFileReader:
+                    """File-like object that tracks upload progress."""
+                    def __init__(self, path, callback):
+                        self.path = path
+                        self.callback = callback
+                        self.uploaded_bytes = 0
+                        self._file = None
+                    
+                    def read(self, size=-1):
+                        """Read method called by aiohttp during upload."""
+                        if self._file is None:
+                            self._file = open(self.path, 'rb')
+                        
+                        chunk = self._file.read(size)
+                        if chunk:
+                            self.uploaded_bytes += len(chunk)
+                            self.callback(self.uploaded_bytes)
+                        return chunk
+                    
+                    def close(self):
+                        """Close the underlying file."""
+                        if self._file:
+                            self._file.close()
+                    
+                    def __enter__(self):
+                        return self
+                    
+                    def __exit__(self, *args):
+                        self.close()
                 
-                async def __aiter__(self):
-                    # Import aiofiles for async file operations
-                    try:
-                        import aiofiles
-                        async with aiofiles.open(self.path, 'rb') as f:
-                            while True:
-                                chunk = await f.read(self.chunk_size)
-                                if not chunk:
-                                    break
-                                self.uploaded_bytes += len(chunk)
-                                if self.callback:
-                                    self.callback(self.uploaded_bytes)
-                                yield chunk
-                    except ImportError:
-                        # Fallback to synchronous file operations if aiofiles not available
-                        LOGGER.warning("aiofiles not available, using sync file operations")
-                        with open(self.path, 'rb') as f:
-                            while True:
-                                chunk = f.read(self.chunk_size)
-                                if not chunk:
-                                    break
-                                self.uploaded_bytes += len(chunk)
-                                if self.callback:
-                                    self.callback(self.uploaded_bytes)
-                                yield chunk
-            
-            # Prepare form data with streaming file
-            data = aiohttp.FormData()
-            data.add_field('key', self.api_key)
-            
-            # Use streaming iterator - this doesn't load file into memory
-            file_stream = FileStreamWithProgress(file_path, callback=progress_callback)
-            data.add_field('file', file_stream, filename=filename, content_type='application/octet-stream')
-            data.add_field('file_title', title)
-            
-            # Upload with streaming
-            async with aiohttp.ClientSession() as session:
-                async with session.post(server_url, data=data) as resp:
-                    if resp.status == 200:
-                        result = await resp.json()
-                        if result.get("status") == 200:
-                            files = result.get("files", [])
-                            if files:
-                                file_code = files[0].get("filecode")
-                                return f"https://lulustream.com/{file_code}"
-                        else:
-                            LOGGER.error(f"LuluStream Upload API Error: {result.get('msg')}")
-                    else:
-                        error_text = await resp.text()
-                        LOGGER.error(f"LuluStream Upload HTTP Error: {resp.status} | Response: {error_text[:500]}")
+                # Use progress wrapper
+                file_obj = ProgressFileReader(file_path, progress_callback)
+                
+                # Prepare form data
+                data = aiohttp.FormData()
+                data.add_field('key', self.api_key)
+                data.add_field('file', file_obj, filename=filename, content_type='application/octet-stream')
+                data.add_field('file_title', title)
+                
+                try:
+                    # Upload with progress tracking
+                    async with aiohttp.ClientSession() as session:
+                        async with session.post(server_url, data=data, timeout=aiohttp.ClientTimeout(total=3600)) as resp:
+                            if resp.status == 200:
+                                result = await resp.json()
+                                if result.get("status") == 200:
+                                    files = result.get("files", [])
+                                    if files:
+                                        file_code = files[0].get("filecode")
+                                        return f"https://lulustream.com/{file_code}"
+                                else:
+                                    LOGGER.error(f"LuluStream Upload API Error: {result.get('msg')}")
+                            else:
+                                error_text = await resp.text()
+                                LOGGER.error(f"LuluStream Upload HTTP Error: {resp.status} | Response: {error_text[:500]}")
+                finally:
+                    file_obj.close()
+            else:
+                # No progress tracking - use simple file upload
+                data = aiohttp.FormData()
+                data.add_field('key', self.api_key)
+                
+                # Open file and add to form - aiohttp streams it automatically
+                with open(file_path, 'rb') as f:
+                    data.add_field('file', f, filename=filename, content_type='application/octet-stream')
+                    
+                    # Upload
+                    async with aiohttp.ClientSession() as session:
+                        async with session.post(server_url, data=data, timeout=aiohttp.ClientTimeout(total=3600)) as resp:
+                            if resp.status == 200:
+                                result = await resp.json()
+                                if result.get("status") == 200:
+                                    files = result.get("files", [])
+                                    if files:
+                                        file_code = files[0].get("filecode")
+                                        return f"https://lulustream.com/{file_code}"
+                                else:
+                                    LOGGER.error(f"LuluStream Upload API Error: {result.get('msg')}")
+                            else:
+                                error_text = await resp.text()
+                                LOGGER.error(f"LuluStream Upload HTTP Error: {resp.status} | Response: {error_text[:500]}")
         except Exception as e:
             LOGGER.error(f"LuluStream Upload Exception: {e}")
         return None
