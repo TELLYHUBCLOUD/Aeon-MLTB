@@ -4,12 +4,34 @@ import os
 from urllib.parse import quote
 from bot import LOGGER
 
+# Supported video formats for LuluStream
+VIDEO_FORMATS = ('.mp4', '.mkv', '.avi', '.mov', '.flv', '.webm', '.m4v')
+
 class LuluStream:
+    """
+    LuluStream API client for video hosting service.
+    
+    Handles authentication, server discovery, and file uploads to LuluStream.
+    Supports progress tracking during uploads.
+    
+    Attributes:
+        api_key (str): User's LuluStream API key
+        base_url (str): Base URL for LuluStream API endpoints
+    """
     def __init__(self, api_key):
         self.api_key = api_key.strip()
         self.base_url = "https://lulustream.com/api/"
 
     async def get_upload_server(self):
+        """
+        Get upload server URL from LuluStream API.
+        
+        Returns:
+            str: Upload server URL if successful, None otherwise
+            
+        Note:
+            The API key is URL-encoded to handle special characters properly.
+        """
         # URL-encode the API key to handle special characters
         encoded_key = quote(self.api_key, safe='')
         url = f"{self.base_url}upload/server?key={encoded_key}"
@@ -31,6 +53,21 @@ class LuluStream:
         return None
 
     async def upload_file(self, file_path, file_title=None, progress_callback=None):
+        """
+        Upload a video file to LuluStream.
+        
+        Args:
+            file_path (str): Path to the video file to upload
+            file_title (str, optional): Custom title for the video. Defaults to filename.
+            progress_callback (callable, optional): Function called with bytes uploaded for progress tracking
+            
+        Returns:
+            str: LuluStream video URL if successful, None otherwise
+            
+        Note:
+            - Reads file in 1MB chunks when progress tracking is enabled
+            - For no progress tracking, reads entire file at once (more efficient)
+        """
         server_url = await self.get_upload_server()
         if not server_url:
             return None

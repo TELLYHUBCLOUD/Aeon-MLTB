@@ -328,7 +328,6 @@ class TaskListener(TaskConfig):
 
         self.subproc = None
 
-        LOGGER.info(f"[DEBUG] LuluStream flag: self.lulu={self.lulu}, is_leech={self.is_leech}, raw_up_dest='{self.raw_up_dest}'")
         if self.lulu:
             lulu_link = await self.proceed_lulu(up_path)
             if self.is_cancelled:
@@ -778,17 +777,32 @@ class TaskListener(TaskConfig):
         if self.thumb and await aiopath.exists(self.thumb):
             await remove(self.thumb)
     async def proceed_lulu(self, up_path):
+        """
+        Upload file to LuluStream video hosting service.
+        
+        Args:
+            up_path: Path to file or folder containing the file to upload
+            
+        Returns:
+            str: LuluStream video URL if successful, None otherwise
+            
+        Note:
+            - Automatically detects newest file in folder (e.g., after FFmpeg processing)
+            - Falls back to legacy LULUSTREAM_API_KEY for backward compatibility
+            - Shows warning messages instead of aborting task if upload fails
+        """
+        # Get API key with fallback to legacy key name
         api_key = self.user_dict.get("LULU_API_KEY", Config.LULU_API_KEY)
         if not api_key:
             # Fallback to old key for backward compatibility
             api_key = self.user_dict.get("LULUSTREAM_API_KEY", "")
         
         if not api_key:
-            msg = "Lulu API Key not found! Please set it in settings."
+            msg = "⚠️ LuluStream API Key not configured!\n\n💡 Set it via:\n• /settings → 🎞️ LuluStream → ✏️ Set\n• Or add LULU_API_KEY to config.py"
             if not self.is_leech and self.raw_up_dest == "":
                 await self.on_upload_error(msg)
             else:
-                await send_message(self.message, f"❌ <b>LuluStream Warning</b>\n{msg}")
+                await send_message(self.message, f"<blockquote>{msg}</blockquote>")
             return None
 
         # Handle case where up_path is a folder (after FFmpeg etc.)
@@ -810,16 +824,16 @@ class TaskListener(TaskConfig):
                 up_path = file_times[0][0]  # Take the newest file
                 LOGGER.info(f"LuluStream: Found newest file in directory: {file_times[0][2]}")
             else:
-                msg = "No video file found in directory after processing."
-                await send_message(self.message, f"❌ <b>LuluStream Warning</b>\n{msg}")
+                msg = "⚠️ No video file found after processing.\n\n💡 Supported formats: MP4, MKV, AVI, MOV, FLV, WEBM, M4V"
+                await send_message(self.message, f"<blockquote>{msg}</blockquote>")
                 return None
 
         if not await aiopath.isfile(up_path):
-             msg = "Lulu only supports single file uploads. Please use -z to compress folders."
+             msg = "⚠️ LuluStream requires a single file.\n\n💡 Use -z flag to compress folders into a single archive"
              if not self.is_leech and self.raw_up_dest == "":
                  await self.on_upload_error(msg)
              else:
-                 await send_message(self.message, f"❌ <b>LuluStream Warning</b>\n{msg}")
+                 await send_message(self.message, f"<blockquote>{msg}</blockquote>")
              return None
 
         lulu = LuluStream(api_key)
@@ -841,16 +855,16 @@ class TaskListener(TaskConfig):
             if link:
                 return link
             else:
-                msg = "Lulu upload failed! Check logs."
+                msg = "⚠️ LuluStream upload failed!\n\n💡 Check logs for details or verify your API key"
                 if not self.is_leech and self.raw_up_dest == "":
                     await self.on_upload_error(msg)
                 else:
-                    await send_message(self.message, f"❌ <b>LuluStream Warning</b>\n{msg}")
+                    await send_message(self.message, f"<blockquote>{msg}</blockquote>")
         except Exception as e:
-            msg = f"Lulu Error: {e}"
+            msg = f"⚠️ LuluStream Error:\n{str(e)[:200]}\n\n💡 Try again or check your network connection"
             if not self.is_leech and self.raw_up_dest == "":
                 await self.on_upload_error(msg)
             else:
-                await send_message(self.message, f"❌ <b>LuluStream Warning</b>\n{msg}")
+                await send_message(self.message, f"<blockquote>{msg}</blockquote>")
         
         return None
