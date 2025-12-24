@@ -92,7 +92,7 @@ async def log(_, message):
     buttons.data_button("View log", f"aeon {message.from_user.id} view")
     reply_message = await send_file(
         message,
-        "<blockquote expandable>log.txt</blockquote>",
+        "log.txt",
         buttons=buttons.build_menu(1),
     )
     await delete_message(message)
