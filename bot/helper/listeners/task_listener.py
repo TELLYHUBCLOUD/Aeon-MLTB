@@ -335,22 +335,23 @@ class TaskListener(TaskConfig):
                 return
             if lulu_link:
                 # Beautiful message with file details
-                from bot.helper.ext_utils.status_utils import get_readable_file_size, get_readable_time
+                from bot.helper.ext_utils.status_utils import get_readable_file_size
                 size_str = get_readable_file_size(self.size)
                 
-                msg = f"""<blockquote expandable>╭🎞️ <b>LuluStream Upload Complete</b>
-┊📁 <b>Name:</b> <code>{self.name}</code>
-┊📊 <b>Size:</b> <code>{size_str}</code>
-┊🔗 <b>Link:</b> <code>{lulu_link}</code>
-╰✅ <b>Status:</b> Ready to stream!</blockquote>"""
+                msg = f"""<blockquote>🎞️ <b>LuluStream Upload Complete</blockquote></b>
+╭📁 <b>Name:</b> <code>{self.name}</code>
+├📊 <b>Size:</b> <code>{size_str}</code>
+├🔗 <b>Link:</b> <code>{lulu_link}</code>
+╰✅ <b>Status: Ready to stream!</b>"""
                 
                 await send_message(self.message, msg)
                 
+                # Task complete - don't upload to Telegram/other destinations
+                return await self.on_upload_complete(lulu_link, 0, 0, "")
+            else:
+                # LuluStream upload failed, but if not leech-only, continue to regular upload
                 if not self.is_leech and self.raw_up_dest == "":
-                    # LuluStream is the only destination, task complete
-                    return await self.on_upload_complete(lulu_link, 0, 0, "")
-            elif not self.is_leech and self.raw_up_dest == "":
-                return
+                    return
 
         add_to_queue, event = await check_running_tasks(self, "up")
         await start_from_queued()
