@@ -793,12 +793,22 @@ class TaskListener(TaskConfig):
 
         # Handle case where up_path is a folder (after FFmpeg etc.)
         if await aiopath.isdir(up_path):
-            # Find the video file inside
+            # Find the video file inside - pick the NEWEST one (FFmpeg output)
             files = await listdir(up_path)
             video_files = [f for f in files if f.endswith(('.mp4', '.mkv', '.avi', '.mov', '.flv', '.webm', '.m4v'))]
             if video_files:
-                up_path = f"{up_path}/{video_files[0]}"
-                LOGGER.info(f"LuluStream: Found file in directory: {video_files[0]}")
+                # Sort by modification time, newest first
+                from aiofiles.os import stat
+                file_times = []
+                for f in video_files:
+                    full_path = f"{up_path}/{f}"
+                    stat_result = await stat(full_path)
+                    file_times.append((full_path, stat_result.st_mtime, f))
+                
+                # Sort by modification time (newest first)
+                file_times.sort(key=lambda x: x[1], reverse=True)
+                up_path = file_times[0][0]  # Take the newest file
+                LOGGER.info(f"LuluStream: Found newest file in directory: {file_times[0][2]}")
             else:
                 msg = "No video file found in directory after processing."
                 await send_message(self.message, f"❌ <b>LuluStream Warning</b>\n{msg}")
