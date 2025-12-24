@@ -851,7 +851,17 @@ class TaskListener(TaskConfig):
             self.processed_bytes = current
 
         try:
-            link = await lulu.upload_file(up_path, self.name, progress_callback)
+            link = await lulu.upload_file(
+                up_path, 
+                file_title=self.lulu_title or self.name,
+                file_descr=self.lulu_descr,
+                fld_id=self.lulu_fld_id,
+                cat_id=self.lulu_cat_id,
+                tags=self.lulu_tags,
+                file_public=self.lulu_public,
+                file_adult=self.lulu_adult,
+                progress_callback=progress_callback
+            )
             if link:
                 return link
             else:

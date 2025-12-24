@@ -52,13 +52,21 @@ class LuluStream:
             LOGGER.error(f"LuluStream Request Exception: {e}")
         return None
 
-    async def upload_file(self, file_path, file_title=None, progress_callback=None):
+    async def upload_file(self, file_path, file_title=None, file_descr=None, fld_id=None, 
+                          cat_id=None, tags=None, file_public=None, file_adult=None, 
+                          progress_callback=None):
         """
-        Upload a video file to LuluStream.
+        Upload a video file to LuluStream with optional metadata and organization.
         
         Args:
             file_path (str): Path to the video file to upload
             file_title (str, optional): Custom title for the video. Defaults to filename.
+            file_descr (str, optional): Description for the uploaded file
+            fld_id (str, optional): Folder ID for file organization
+            cat_id (str, optional): Category ID for file categorization
+            tags (str, optional): Comma-separated tags for the file
+            file_public (str, optional): Public visibility flag ("0" or "1")
+            file_adult (str, optional): Adult content flag ("0" or "1")
             progress_callback (callable, optional): Function called with bytes uploaded for progress tracking
             
         Returns:
@@ -67,6 +75,7 @@ class LuluStream:
         Note:
             - Reads file in 1MB chunks when progress tracking is enabled
             - For no progress tracking, reads entire file at once (more efficient)
+            - All optional metadata parameters are only sent if provided
         """
         server_url = await self.get_upload_server()
         if not server_url:
@@ -106,6 +115,20 @@ class LuluStream:
                     file_content = f.read()
                 data.add_field('file', file_content, filename=filename, content_type='application/octet-stream')
                 data.add_field('file_title', title)
+            
+            # Add optional metadata parameters if provided
+            if file_descr is not None:
+                data.add_field('file_descr', file_descr)
+            if fld_id is not None:
+                data.add_field('fld_id', fld_id)
+            if cat_id is not None:
+                data.add_field('cat_id', cat_id)
+            if tags is not None:
+                data.add_field('tags', tags)
+            if file_public is not None:
+                data.add_field('file_public', file_public)
+            if file_adult is not None:
+                data.add_field('file_adult', file_adult)
             
             # Upload (works for both progress and non-progress cases)
             async with aiohttp.ClientSession() as session:
