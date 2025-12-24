@@ -35,7 +35,7 @@ from bot.helper.ext_utils.files_utils import (
 )
 from bot.helper.ext_utils.links_utils import is_gdrive_id
 from bot.helper.ext_utils.status_utils import get_readable_file_size
-from bot.helper.aeon_utils.lulustream import LuluStream
+from bot.helper.mirror_leech_utils.lulustream_utils.lulustream import LuluStream
 from bot.helper.ext_utils.task_manager import check_running_tasks, start_from_queued
 from bot.helper.mirror_leech_utils.gdrive_utils.upload import GoogleDriveUpload
 from bot.helper.mirror_leech_utils.rclone_utils.transfer import RcloneTransferHelper
