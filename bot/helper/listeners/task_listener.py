@@ -334,9 +334,21 @@ class TaskListener(TaskConfig):
             if self.is_cancelled:
                 return
             if lulu_link:
+                # Beautiful message with file details
+                from bot.helper.ext_utils.status_utils import get_readable_file_size, get_readable_time
+                size_str = get_readable_file_size(self.size)
+                
+                msg = f"""<blockquote expandable>╭🎞️ <b>LuluStream Upload Complete</b>
+┊📁 <b>Name:</b> <code>{self.name}</code>
+┊📊 <b>Size:</b> <code>{size_str}</code>
+┊🔗 <b>Link:</b> <code>{lulu_link}</code>
+╰✅ <b>Status:</b> Ready to stream!</blockquote>"""
+                
+                await send_message(self.message, msg)
+                
                 if not self.is_leech and self.raw_up_dest == "":
+                    # LuluStream is the only destination, task complete
                     return await self.on_upload_complete(lulu_link, 0, 0, "")
-                await send_message(self.message, f"<b>LuluStream Link:</b> <code>{lulu_link}</code>")
             elif not self.is_leech and self.raw_up_dest == "":
                 return
 
@@ -778,6 +790,19 @@ class TaskListener(TaskConfig):
                 await send_message(self.message, f"❌ <b>LuluStream Warning</b>\n{msg}")
             return None
 
+        # Handle case where up_path is a folder (after FFmpeg etc.)
+        if await aiopath.isdir(up_path):
+            # Find the video file inside
+            files = await listdir(up_path)
+            video_files = [f for f in files if f.endswith(('.mp4', '.mkv', '.avi', '.mov', '.flv', '.webm', '.m4v'))]
+            if video_files:
+                up_path = f"{up_path}/{video_files[0]}"
+                LOGGER.info(f"LuluStream: Found file in directory: {video_files[0]}")
+            else:
+                msg = "No video file found in directory after processing."
+                await send_message(self.message, f"❌ <b>LuluStream Warning</b>\n{msg}")
+                return None
+
         if not await aiopath.isfile(up_path):
              msg = "Lulu only supports single file uploads. Please use -z to compress folders."
              if not self.is_leech and self.raw_up_dest == "":
@@ -794,7 +819,7 @@ class TaskListener(TaskConfig):
             task_dict[self.mid] = LuluStatus(self, "LuluUpload", "Up")
         await update_status_message(self.message.chat.id)
 
-        self.subproc = lulu # To allow cancellation if we implement cancel logic later
+        self.subproc = lulu
         self.total_size = await aiopath.getsize(up_path)
 
         def progress_callback(current):
