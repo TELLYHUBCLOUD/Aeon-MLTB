@@ -328,6 +328,7 @@ class TaskListener(TaskConfig):
 
         self.subproc = None
 
+        LOGGER.info(f"[DEBUG] LuluStream flag: self.lulu={self.lulu}, is_leech={self.is_leech}, raw_up_dest='{self.raw_up_dest}'")
         if self.lulu:
             lulu_link = await self.proceed_lulu(up_path)
             if self.is_cancelled:
