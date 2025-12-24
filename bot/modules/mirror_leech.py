@@ -131,7 +131,7 @@ class Mirror(TaskListener):
             "-md": "",
             "-tl": "",
             "-ff": set(),
-            "-lulu": "",
+            "-lulu": False,
         }
 
         # AUTO LEECH + AUTO COMPRESS CMD
@@ -180,48 +180,6 @@ class Mirror(TaskListener):
         self.user_trans = args["-ut"]
         self.ffmpeg_cmds = args["-ff"]
         self.lulu = args["-lulu"]
-        
-        # Parse LuluStream parameters if provided
-        self.lulu_title = None
-        self.lulu_descr = None
-        self.lulu_fld_id = None
-        self.lulu_cat_id = None
-        self.lulu_tags = None
-        self.lulu_public = None
-        self.lulu_adult = None
-        
-        if self.lulu and self.lulu not in [True, "True", "true", "1"]:
-            # Parse parameter string format: title:value|descr:value|fld:123|cat:1|tags:a,b|public:1|adult:0
-            try:
-                param_pairs = self.lulu.split("|")
-                for pair in param_pairs:
-                    if ":" in pair:
-                        key, value = pair.split(":", 1)
-                        key = key.strip().lower()
-                        value = value.strip()
-                        
-                        if key in ["title", "file_title"]:
-                            self.lulu_title = value
-                        elif key in ["descr", "desc", "description", "file_descr"]:
-                            self.lulu_descr = value
-                        elif key in ["fld", "fld_id", "folder"]:
-                            self.lulu_fld_id = value
-                        elif key in ["cat", "cat_id", "category"]:
-                            self.lulu_cat_id = value
-                        elif key in ["tags", "tag"]:
-                            self.lulu_tags = value
-                        elif key in ["public", "file_public"]:
-                            self.lulu_public = value
-                        elif key in ["adult", "file_adult"]:
-                            self.lulu_adult = value
-            except Exception as e:
-                LOGGER.warning(f"Failed to parse LuluStream parameters: {e}. Using defaults.")
-        
-        # Convert to boolean True if lulu flag is present (backward compatibility)
-        if self.lulu:
-            self.lulu = True
-        else:
-            self.lulu = False
 
         self.yt_privacy = None
         self.yt_mode = None
