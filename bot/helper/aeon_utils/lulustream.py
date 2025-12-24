@@ -82,11 +82,12 @@ class LuluStream:
                 # Create a wrapper that tracks progress while reading
                 class ProgressFileReader:
                     """File-like object that tracks upload progress."""
-                    def __init__(self, path, callback):
+                    def __init__(self, path, callback, size):
                         self.path = path
                         self.callback = callback
                         self.uploaded_bytes = 0
                         self._file = open(path, 'rb')
+                        self._size = size
                         self.mode = 'rb'
                         self.name = path
                     
@@ -106,6 +107,10 @@ class LuluStream:
                         """Return current position in file."""
                         return self._file.tell()
                     
+                    def __len__(self):
+                        """Return total file size for aiohttp payload."""
+                        return self._size
+                    
                     def close(self):
                         """Close the underlying file."""
                         if self._file:
@@ -118,7 +123,7 @@ class LuluStream:
                         self.close()
                 
                 # Use progress wrapper
-                file_obj = ProgressFileReader(file_path, progress_callback)
+                file_obj = ProgressFileReader(file_path, progress_callback, file_size)
                 
                 # Prepare form data
                 data = aiohttp.FormData()
