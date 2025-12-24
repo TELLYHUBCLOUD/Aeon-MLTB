@@ -54,7 +54,7 @@ class LuluStream:
 
     async def upload_file(self, file_path, file_title=None, progress_callback=None):
         """
-        Upload a video file to LuluStream.
+        Upload a video file to LuluStream using streaming to minimize memory usage.
         
         Args:
             file_path (str): Path to the video file to upload
@@ -65,8 +65,8 @@ class LuluStream:
             str: LuluStream video URL if successful, None otherwise
             
         Note:
-            - Reads file in 1MB chunks when progress tracking is enabled
-            - For no progress tracking, reads entire file at once (more efficient)
+            - Streams file in 1MB chunks to avoid loading entire file into memory
+            - Supports progress tracking without memory accumulation
         """
         server_url = await self.get_upload_server()
         if not server_url:
@@ -76,38 +76,53 @@ class LuluStream:
         title = file_title or filename
         
         try:
-            # Read file in chunks to track progress
             file_size = os.path.getsize(file_path)
             
-            if progress_callback:
-                # Read file into memory with progress tracking
-                file_data = bytearray()
-                chunk_size = 1024 * 1024  # 1MB chunks
+            # Create async file stream iterator with progress tracking
+            class FileStreamWithProgress:
+                """Async iterator that streams file in chunks with progress tracking."""
+                def __init__(self, path, chunk_size=1024*1024, callback=None):
+                    self.path = path
+                    self.chunk_size = chunk_size
+                    self.callback = callback
+                    self.uploaded_bytes = 0
                 
-                with open(file_path, 'rb') as f:
-                    while True:
-                        chunk = f.read(chunk_size)
-                        if not chunk:
-                            break
-                        file_data.extend(chunk)
-                        progress_callback(len(file_data))
-                
-                # Upload the complete data
-                data = aiohttp.FormData()
-                data.add_field('key', self.api_key)
-                data.add_field('file', bytes(file_data), filename=filename, content_type='application/octet-stream')
-                data.add_field('file_title', title)
-            else:
-                # No progress tracking, read file directly
-                data = aiohttp.FormData()
-                data.add_field('key', self.api_key)
-                
-                with open(file_path, 'rb') as f:
-                    file_content = f.read()
-                data.add_field('file', file_content, filename=filename, content_type='application/octet-stream')
-                data.add_field('file_title', title)
+                async def __aiter__(self):
+                    # Import aiofiles for async file operations
+                    try:
+                        import aiofiles
+                        async with aiofiles.open(self.path, 'rb') as f:
+                            while True:
+                                chunk = await f.read(self.chunk_size)
+                                if not chunk:
+                                    break
+                                self.uploaded_bytes += len(chunk)
+                                if self.callback:
+                                    self.callback(self.uploaded_bytes)
+                                yield chunk
+                    except ImportError:
+                        # Fallback to synchronous file operations if aiofiles not available
+                        LOGGER.warning("aiofiles not available, using sync file operations")
+                        with open(self.path, 'rb') as f:
+                            while True:
+                                chunk = f.read(self.chunk_size)
+                                if not chunk:
+                                    break
+                                self.uploaded_bytes += len(chunk)
+                                if self.callback:
+                                    self.callback(self.uploaded_bytes)
+                                yield chunk
             
-            # Upload (works for both progress and non-progress cases)
+            # Prepare form data with streaming file
+            data = aiohttp.FormData()
+            data.add_field('key', self.api_key)
+            
+            # Use streaming iterator - this doesn't load file into memory
+            file_stream = FileStreamWithProgress(file_path, callback=progress_callback)
+            data.add_field('file', file_stream, filename=filename, content_type='application/octet-stream')
+            data.add_field('file_title', title)
+            
+            # Upload with streaming
             async with aiohttp.ClientSession() as session:
                 async with session.post(server_url, data=data) as resp:
                     if resp.status == 200:
