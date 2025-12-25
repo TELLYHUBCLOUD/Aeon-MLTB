@@ -19,6 +19,29 @@ from .files_utils import get_mime_type, is_archive, is_archive_split
 from .status_utils import time_to_seconds
 
 
+async def get_streams(path):
+    """Extract stream information from media file using ffprobe."""
+    try:
+        result = await cmd_exec(
+            [
+                "ffprobe",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-print_format",
+                "json",
+                "-show_streams",
+                path,
+            ],
+        )
+        if result[0]:
+            data = json.loads(result[0])
+            return data.get("streams", [])
+    except Exception as e:
+        LOGGER.error(f"Error extracting streams from {path}: {e}")
+    return []
+
+
 async def create_thumb(msg, _id=""):
     if not _id:
         _id = time()

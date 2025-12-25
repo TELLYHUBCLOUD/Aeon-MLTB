@@ -103,6 +103,8 @@ class TaskConfig:
         self.is_qbit = False
         self.is_nzb = False
         self.lulu = False
+        self.is_buzzheavier = False
+        self.is_pixeldrain = False
         self.is_clone = False
         self.is_ytdlp = False
         self.user_transmission = False

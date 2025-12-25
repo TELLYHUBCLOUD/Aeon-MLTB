@@ -63,6 +63,20 @@ filename_options = [
 rclone_options = ["RCLONE_CONFIG", "RCLONE_PATH", "RCLONE_FLAGS"]
 gdrive_options = ["TOKEN_PICKLE", "GDRIVE_ID", "INDEX_URL"]
 lulustream_options = ["LULU_API_KEY"]
+uphoster_options = [
+    "GOFILE_TOKEN",
+    "GOFILE_FOLDER_ID",
+    "BUZZHEAVIER_TOKEN",
+    "BUZZHEAVIER_FOLDER_ID",
+    "PIXELDRAIN_KEY",
+]
+ffset_options = [
+    "FFMPEG_CMDS",
+    "METADATA",
+    "AUDIO_METADATA",
+    "VIDEO_METADATA",
+    "SUBTITLE_METADATA",
+]
 
 
 async def get_user_settings(from_user, stype="main"):
@@ -336,6 +350,42 @@ async def get_user_settings(from_user, stype="main"):
 ╭⚙️ <b>LuluStream Settings for {name}</b>
 ╰🔑 <b>API Key:</b> <code>{lulu_api}</code>
 </blockquote>"""
+    elif stype == "uphoster":
+        buttons.data_button("🔑 Pixeldrain Key", f"userset {user_id} menu PIXELDRAIN_KEY")
+        buttons.data_button("🔑 Buzzheavier Token", f"userset {user_id} menu BUZZHEAVIER_TOKEN")
+        buttons.data_button("💾 Buzzheavier Folder ID", f"userset {user_id} menu BUZZHEAVIER_FOLDER_ID")
+        buttons.data_button("🔙 Back", f"userset {user_id} back")
+        buttons.data_button("❌ Close", f"userset {user_id} close")
+        pdk = user_dict.get("PIXELDRAIN_KEY", Config.PIXELDRAIN_KEY or "None")
+        bht = user_dict.get("BUZZHEAVIER_TOKEN", Config.BUZZHEAVIER_TOKEN or "None")
+        bhf = user_dict.get("BUZZHEAVIER_FOLDER_ID", Config.BUZZHEAVIER_FOLDER_ID or "None")
+        text = f"""<blockquote>
+╭⚙️ <b>Upload Hoster Settings for {name}</b>
+┊🔑 <b>Pixeldrain Key:</b> <code>{pdk}</code>
+┊🔑 <b>Buzzheavier Token:</b> <code>{bht}</code>
+╰💾 <b>Buzzheavier Folder ID:</b> <code>{bhf}</code>
+</blockquote>"""
+    elif stype == "ffset":
+        buttons.data_button("🎬 FFMPEG Commands", f"userset {user_id} menu FFMPEG_CMDS")
+        buttons.data_button("📋 Metadata", f"userset {user_id} menu METADATA")
+        buttons.data_button("🔊 Audio Metadata", f"userset {user_id} menu AUDIO_METADATA")
+        buttons.data_button("🎞️ Video Metadata", f"userset {user_id} menu VIDEO_METADATA")
+        buttons.data_button("📜 Subtitle Metadata", f"userset {user_id} menu SUBTITLE_METADATA")
+        buttons.data_button("🔙 Back", f"userset {user_id} back")
+        buttons.data_button("❌ Close", f"userset {user_id} close")
+        ffc = "✅ Added" if user_dict.get("FFMPEG_CMDS") or Config.FFMPEG_CMDS else "❌ None"
+        mdt = user_dict.get("METADATA", Config.METADATA or "None")
+        amdt = user_dict.get("AUDIO_METADATA", Config.AUDIO_METADATA or "None")
+        vmdt = user_dict.get("VIDEO_METADATA", Config.VIDEO_METADATA or "None")
+        smdt = user_dict.get("SUBTITLE_METADATA", Config.SUBTITLE_METADATA or "None")
+        text = f"""<blockquote>
+╭⚙️ <b>FFmpeg Set Settings for {name}</b>
+┊🎬 <b>FFMPEG Commands:</b> {ffc}
+┊📋 <b>Metadata:</b> <code>{mdt}</code>
+┊🔊 <b>Audio Metadata:</b> <code>{amdt}</code>
+┊🎞️ <b>Video Metadata:</b> <code>{vmdt}</code>
+╰📜 <b>Subtitle Metadata:</b> <code>{smdt}</code>
+</blockquote>"""
     elif stype == "automation":
         buttons.data_button(
             "🚀 Auto Leech",
@@ -530,6 +580,8 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("☁️ Gdrive API", f"userset {user_id} gdrive")
         buttons.data_button("🎥 YouTube", f"userset {user_id} youtube")
         buttons.data_button("🎞️ LuluStream", f"userset {user_id} lulustream")
+        buttons.data_button("☁️ Upload Hosters", f"userset {user_id} uphoster")
+        buttons.data_button("🎬 FFmpeg Set", f"userset {user_id} ffset")
 
         buttons.data_button("🤖 Auto Features", f"userset {user_id} automation")
         buttons.data_button("📝 Filename Options", f"userset {user_id} filename")
@@ -788,6 +840,10 @@ async def get_menu(option, message, user_id):
         back_to = "gdrive"
     elif option in lulustream_options:
         back_to = "lulustream"
+    elif option in uphoster_options:
+        back_to = "uphoster"
+    elif option in ffset_options:
+        back_to = "ffset"
     elif option in [
         "YT_DEFAULT_PRIVACY",
         "YT_DEFAULT_CATEGORY",
@@ -918,7 +974,7 @@ async def edit_user_settings(client, query):
         await query.answer("❌ Not Yours!", show_alert=True)
     elif data[2] == "setevent":
         await query.answer()
-    elif data[2] in ["leech", "gdrive", "rclone", "youtube", "automation", "filename", "lulustream"]:
+    elif data[2] in ["leech", "gdrive", "rclone", "youtube", "automation", "filename", "lulustream", "uphoster", "ffset"]:
         await query.answer()
         await update_user_settings(query, data[2])
     elif data[2] == "menu":

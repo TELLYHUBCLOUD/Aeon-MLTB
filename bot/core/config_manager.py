@@ -102,6 +102,15 @@ class Config:
     INSTADL_API: str = ""
     HEROKU_APP_NAME: str = ""
     HEROKU_API_KEY: str = ""
+    MEGA_EMAIL: str = ""
+    MEGA_PASSWORD: str = ""
+    BUZZHEAVIER_TOKEN: str = ""
+    BUZZHEAVIER_FOLDER_ID: str = ""
+    PIXELDRAIN_KEY: str = ""
+    METADATA: str = ""
+    AUDIO_METADATA: str = ""
+    VIDEO_METADATA: str = ""
+    SUBTITLE_METADATA: str = ""
 
     @classmethod
     def _convert(cls, key, value):

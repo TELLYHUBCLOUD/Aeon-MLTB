@@ -65,3 +65,13 @@ def is_gdrive_id(id_: str):
             id_,
         ),
     )
+
+
+def is_mega_link(url: str):
+    return "mega.nz" in url or "mega.co.nz" in url
+
+
+def get_mega_link_type(url: str):
+    if "folder" in url or "/#F!" in url:
+        return "folder"
+    return "file"

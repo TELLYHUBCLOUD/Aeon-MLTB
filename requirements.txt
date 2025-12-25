@@ -23,6 +23,7 @@ langcodes
 lxml
 natsort
 pillow
+pycountry
 psutil
 pymongo
 pyshorteners
