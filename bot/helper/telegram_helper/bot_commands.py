@@ -18,6 +18,7 @@ class BotCommands:
     EncodeCommand = f"encode{i}"
     MergeCommand = f"merge{i}"
     MdoneCommand = f"mdone{i}"
+    CancelTaskCommand = [f"cancel{i}", f"c{i}"]
 
     MediaInfoCommand = f"mediainfo{i}"
     CountCommand = f"count{i}"

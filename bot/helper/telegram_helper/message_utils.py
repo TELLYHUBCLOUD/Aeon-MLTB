@@ -46,7 +46,6 @@ async def send_message(
             return await TgClient.bot.send_message(
                 chat_id=message,
                 text=text,
-                disable_web_page_preview=True,
                 disable_notification=True,
                 reply_markup=buttons,
                 parse_mode=parse_mode,
@@ -63,7 +62,6 @@ async def send_message(
         return await message.reply(
             text=text,
             quote=True,
-            disable_web_page_preview=True,
             disable_notification=True,
             reply_markup=buttons,
             parse_mode=parse_mode,
@@ -105,7 +103,6 @@ async def edit_message(
             )
         return await message.edit(
             text=text,
-            disable_web_page_preview=True,
             reply_markup=buttons,
             # parse_mode=parse_mode,
         )
@@ -153,7 +150,6 @@ async def send_rss(text, chat_id, thread_id):
         return await app.send_message(
             chat_id=chat_id,
             text=text,
-            disable_web_page_preview=True,
             message_thread_id=thread_id,
             disable_notification=True,
         )

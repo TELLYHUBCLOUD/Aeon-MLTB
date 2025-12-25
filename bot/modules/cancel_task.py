@@ -21,17 +21,23 @@ from bot.helper.telegram_helper.message_utils import (
 @new_task
 async def cancel(_, message):
     user_id = message.from_user.id if message.from_user else message.sender_chat.id
-    msg = message.text.split("_", maxsplit=1)
+    msg = message.text.split()
     await delete_message(message)
     if len(msg) > 1:
-        gid = msg[1].split("@", maxsplit=1)
-        gid = gid[0]
+        gid = msg[1]
         if len(gid) == 4:
             multi_tags.discard(gid)
             return
         task = await get_task_by_gid(gid)
         if task is None:
-            await delete_message(message)
+            return
+    elif len(msg) == 1 and "_" in msg[0]:
+        gid = msg[0].split("_", 1)[1]
+        if len(gid) == 4:
+            multi_tags.discard(gid)
+            return
+        task = await get_task_by_gid(gid)
+        if task is None:
             return
     elif reply_to_id := message.reply_to_message_id:
         async with task_dict_lock:
