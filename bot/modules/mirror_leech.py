@@ -138,6 +138,8 @@ class Mirror(TaskListener):
             "-tl": "",
             "-ff": set(),
             "-lulu": False,
+            "-buz": False,
+            "-pix": False,
         }
 
         # AUTO LEECH + AUTO COMPRESS CMD
