@@ -36,6 +36,7 @@ from tenacity import (
     wait_exponential,
 )
 
+from bot import LOGGER, intervals
 from bot.core.aeon_client import TgClient
 from bot.core.config_manager import Config
 from bot.helper.aeon_utils.caption_gen import generate_caption
@@ -337,6 +338,8 @@ class TelegramUploader:
                 self._error = ""
                 self._up_path = f_path = ospath.join(dirpath, file_)
                 if not await aiopath.exists(self._up_path):
+                    if intervals["stopAll"]:
+                        return
                     LOGGER.error(f"[{self._listener.mid}] {self._up_path} not exists! Continue uploading!")
                     continue
                 try:
