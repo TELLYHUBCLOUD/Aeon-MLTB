@@ -173,9 +173,9 @@ def get_progress_bar_string(pct):
         pct = float(pct.strip("%"))
     p = min(max(pct, 0), 100)
     c_full = int((p + 5) // 10)
-    p_str = "✦" * c_full
-    p_str += "✧" * (10 - c_full)
-    return f"〖{p_str}〗"
+    p_str = "▰" * c_full
+    p_str += "▱" * (10 - c_full)
+    return f"<b>[{p_str}]</b>"
 
 
 def source(self):
@@ -214,11 +214,30 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
         else:
             tstatus = task.status()
 
-        # Task header with status
+        # Task header with dynamic status
+        header = tstatus
+        if hasattr(task, 'tool') and task.tool:
+            if tstatus == MirrorStatus.STATUS_UPLOAD:
+                header = f"Uploading to {task.tool} 📤"
+            elif tstatus == MirrorStatus.STATUS_DOWNLOAD:
+                 header = f"Downloading via {task.tool} 📥"
+            elif tstatus == MirrorStatus.STATUS_ARCHIVE:
+                 header = f"Archiving with {task.tool} 🗜️"
+            elif tstatus == MirrorStatus.STATUS_EXTRACT:
+                 header = f"Extracting with {task.tool} 📂"
+            elif tstatus == MirrorStatus.STATUS_SPLIT:
+                 header = f"Splitting with {task.tool} ✂️"
+            elif tstatus == MirrorStatus.STATUS_CHECK:
+                 header = f"Checking with {task.tool} 🔎"
+            elif tstatus == MirrorStatus.STATUS_SEED:
+                 header = f"Seeding with {task.tool} 🌱"
+            elif tstatus == MirrorStatus.STATUS_FFMPEG:
+                 header = f"Processing with {task.tool} 🎬"
+
         if task.listener.is_super_chat:
-            msg += f"<b>{index + start_position}. <a href='{task.listener.message.link}'>{tstatus}</a></b>\n"
+            msg += f"<b>{index + start_position}. <a href='{task.listener.message.link}'>{header}</a></b>\n"
         else:
-            msg += f"<b>{index + start_position}. {tstatus}</b>\n"
+            msg += f"<b>{index + start_position}. {header}</b>\n"
 
         # File name
         msg += f"<blockquote>{escape(f'{task.name()}')}</blockquote>\n"
@@ -267,7 +286,7 @@ async def get_readable_message(sid, is_user, page_no=1, status="All", page_step=
         else:
             msg += f"┊💾 <b>Size:</b> {task.size()}\n"
 
-        msg += f"┊🔧 <b>Tool:</b> {task.tool}\n"
+        msg += f"┊⚙️ <b>Engine:</b> {task.tool}\n"
         msg += f"┊👤 <b>By:</b> {source(task.listener)}\n"
 
         task_gid = task.gid()

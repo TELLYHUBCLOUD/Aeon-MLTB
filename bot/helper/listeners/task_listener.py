@@ -479,6 +479,31 @@ class TaskListener(TaskConfig):
                 "DEFAULT_UPLOAD", Config.DEFAULT_UPLOAD
             )
 
+        hosters = {
+            "lulu": "LuluStream",
+            "lulustream": "LuluStream",
+            "go": "GoFile",
+            "gofile": "GoFile",
+            "biz": "BuzzHeavier",
+            "buzzheavier": "BuzzHeavier",
+            "pix": "PixelDrain",
+            "pixeldrain": "PixelDrain"
+        }
+
+        if not self.is_leech and upload_service in hosters:
+            service_name = hosters[upload_service]
+            status_text = "Ready to stream!" if "LuluStream" in service_name else "Ready to share!"
+            emoji = "🎞️" if "LuluStream" in service_name else "☁️"
+            msg = f"<blockquote>{emoji} <b>{service_name} Upload Complete</blockquote></b>\n" \
+                  f"╭<b>Name: </b><code>{escape(self.name)}</code>\n" \
+                  f"├<b>Size: </b>{get_readable_file_size(self.size)}\n" \
+                  f"├<b>Link: </b><code>{link}</code>\n" \
+                  f"╰✅ <b>Status: {status_text}</b>"
+        else:
+            msg = f"╭<b>Name: </b><code>{escape(self.name)}</code>\n┊<b>Size: </b>{get_readable_file_size(self.size)}"
+
+        done_msg = f"{self.tag}\nYour task is complete\nPlease check your inbox."
+
         if self.is_leech:
             msg += f"\n┊<b>Total Files: </b>{folders}"
             if mime_type != 0:
@@ -635,12 +660,9 @@ class TaskListener(TaskConfig):
                 f"{self.tag}\nYour YouTube upload is complete!",
             )
         else:
-            if upload_service in ["lulu", "lulustream"]:
-                msg = f"<blockquote>🎞️ <b>LuluStream Upload Complete</blockquote></b>\n" \
-                      f"╭📁 <b>Name: </b><code>{escape(self.name)}</code>\n" \
-                      f"├📊 <b>Size: </b>{get_readable_file_size(self.size)}\n" \
-                      f"├🔗 <b>Link: </b><code>{link}</code>\n" \
-                      f"╰✅ <b>Status: Ready to stream!</b>"
+            if upload_service in ["lulu", "lulustream", "go", "gofile", "biz", "buzzheavier", "pix", "pixeldrain"]:
+                # Message is already constructed properly above for these hosters
+                pass
             else:
                 msg += f"\n┊<b>Type: </b>{mime_type}"
                 if mime_type == "Folder":
@@ -896,7 +918,7 @@ class TaskListener(TaskConfig):
         try:
             link = await lulu.upload_file(up_path, self.name, progress_callback)
             if link:
-                return link
+                return await self.on_upload_complete(link, 1, 0, "File")
             else:
                 msg = "⚠️ LuluStream upload failed!\n\n💡 Check logs for details or verify your API key"
                 if not self.is_leech and self.raw_up_dest == "":
