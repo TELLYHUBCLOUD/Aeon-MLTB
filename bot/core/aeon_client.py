@@ -29,7 +29,6 @@ class TgClient:
             workdir="/usr/src/app",
             parse_mode=enums.ParseMode.HTML,
             max_message_cache_size=0,
-            max_topic_cache_size=0,
             sleep_threshold=60,
             #    max_concurrent_transmissions=100,
         )
@@ -51,7 +50,6 @@ class TgClient:
                     no_updates=True,
                     max_concurrent_transmissions=100,
                     max_message_cache_size=0,
-                    max_topic_cache_size=0,
                     sleep_threshold=60,
                 )
                 await cls.user.start()
