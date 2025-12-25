@@ -7,12 +7,16 @@ from bot.core.config_manager import Config
 class CustomFilters:
     async def owner_filter(self, _, update):
         user = update.from_user or update.sender_chat
+        if not user:
+            return False
         return user.id == Config.OWNER_ID
 
     owner = create(owner_filter)
 
     async def authorized_user(self, _, update):
         user = update.from_user or update.sender_chat
+        if not user:
+            return False
         uid = user.id
         chat_id = update.chat.id
         thread_id = update.message_thread_id if update.is_topic_message else None
@@ -52,6 +56,8 @@ class CustomFilters:
 
     async def sudo_user(self, _, update):
         user = update.from_user or update.sender_chat
+        if not user:
+            return False
         uid = user.id
         return bool(
             uid == Config.OWNER_ID
