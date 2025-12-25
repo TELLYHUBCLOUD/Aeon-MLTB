@@ -34,8 +34,8 @@ THREAD_POOL = ThreadPoolExecutor(max_workers=500)
 
 def check_size_limit(listener, size_bytes):
     if (
-        user_data.get(listener.message.from_user.id, {}).get("SUDO")
-        or listener.message.from_user.id == Config.OWNER_ID
+        user_data.get(listener.user_id, {}).get("SUDO")
+        or listener.user_id == Config.OWNER_ID
     ):
         return None
     limit = Config.LEECH_LIMIT if listener.is_leech else Config.MIRROR_LIMIT

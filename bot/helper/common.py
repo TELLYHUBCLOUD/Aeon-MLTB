@@ -76,7 +76,7 @@ class TaskConfig:
         """Initializes the TaskConfig object based on the incoming message."""
         self.mid = self.message.id
         self.user = self.message.from_user or self.message.sender_chat
-        self.user_id = self.user.id
+        self.user_id = self.user.id if self.user else self.message.chat.id
         self.user_dict = user_data.get(self.user_id, {})
         self.dir = f"{DOWNLOAD_DIR}{self.mid}"
         self.up_dir = ""

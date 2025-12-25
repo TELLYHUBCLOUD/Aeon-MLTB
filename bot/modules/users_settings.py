@@ -66,6 +66,8 @@ lulustream_options = ["LULU_API_KEY"]
 
 
 async def get_user_settings(from_user, stype="main"):
+    if not from_user:
+        return "User not found!", None, None
     user_id = from_user.id
     name = from_user.mention
     buttons = ButtonMaker()

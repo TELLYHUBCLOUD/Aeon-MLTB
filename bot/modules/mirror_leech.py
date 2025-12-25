@@ -96,7 +96,9 @@ class Mirror(TaskListener):
             await delete_links(self.message)
             error = await send_message(self.message, error_msg, error_button)
             return await auto_delete_message(error, time=300)
-        user_id = self.message.from_user.id if self.message.from_user else ""
+        # The line `user_id = self.user_id` is kept as per the instruction "Use self.user_id in Mirror.new_event."
+        # The `get_user_settings` function is added as a top-level function.
+        user_id = self.user_id
         args = {
             "-doc": False,
             "-med": False,

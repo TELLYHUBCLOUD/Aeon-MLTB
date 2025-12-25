@@ -40,7 +40,8 @@ headers = {
 
 
 async def rss_menu(event):
-    user_id = event.from_user.id
+    user = event.from_user or event.sender_chat
+    user_id = user.id if user else event.chat.id
     buttons = ButtonMaker()
     buttons.data_button("Subscribe", f"rss sub {user_id}")
     buttons.data_button("Subscriptions", f"rss list {user_id} 0")
@@ -80,7 +81,8 @@ async def get_rss_menu(_, message):
 
 @new_task
 async def rss_sub(_, message, pre_event):
-    user_id = message.from_user.id
+    user = message.from_user or message.sender_chat
+    user_id = user.id if user else message.chat.id
     handler_dict[user_id] = False
     if username := message.from_user.username:
         tag = f"@{username}"

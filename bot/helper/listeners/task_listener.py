@@ -100,7 +100,7 @@ class TaskListener(TaskConfig):
                 self.message.link,
                 self.tag,
                 self.message.text,
-                self.message.from_user.id,
+                self.user_id,
             )
 
     async def on_download_complete(self):
