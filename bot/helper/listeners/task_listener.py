@@ -1,6 +1,7 @@
 # ruff: noqa: RUF006
 from asyncio import create_task, gather, sleep
 from html import escape
+from time import time
 
 from aiofiles.os import listdir, makedirs, remove
 from aiofiles.os import path as aiopath
@@ -48,6 +49,10 @@ from bot.helper.mirror_leech_utils.status_utils.telegram_status import TelegramS
 from bot.helper.mirror_leech_utils.status_utils.yt_status import YtStatus
 from bot.helper.mirror_leech_utils.telegram_uploader import TelegramUploader
 from bot.helper.mirror_leech_utils.youtube_utils.youtube_upload import YouTubeUpload
+from bot.helper.mirror_leech_utils.gofile_utils.upload import GoFileUpload
+from bot.helper.mirror_leech_utils.uphoster_utils.buzzheavier_utils.upload import BuzzHeavierUpload
+from bot.helper.mirror_leech_utils.uphoster_utils.pixeldrain_utils.upload import PixelDrainUpload
+from bot.helper.mirror_leech_utils.status_utils.lulu_status import LuluStatus
 from bot.helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.telegram_helper.message_utils import (
     auto_delete_message,
@@ -328,60 +333,8 @@ class TaskListener(TaskConfig):
 
         self.subproc = None
 
-        if self.lulu:
-            lulu_link = await self.proceed_lulu(up_path)
-            if self.is_cancelled:
-                return
-            if lulu_link:
-                # Beautiful message with file details
-                from bot.helper.ext_utils.status_utils import get_readable_file_size
-                size_str = get_readable_file_size(self.size)
-                
-                msg = f"""<blockquote>🎞️ <b>LuluStream Upload Complete</blockquote></b>
-╭📁 <b>Name:</b> <code>{self.name}</code>
-├📊 <b>Size:</b> <code>{size_str}</code>
-├🔗 <b>Link:</b> <code>{lulu_link}</code>
-╰✅ <b>Status: Ready to stream!</b>"""
-                
-                await send_message(self.message, msg)
-                
-                # Send screenshots if they were generated (look for _ss folder)
-                if self.screen_shots:
-                    from pyrogram.types import InputMediaPhoto
-                    from os import path as ospath
-                    from os import walk
-                    from aioshutil import rmtree
-                    
-                    # Get parent directory
-                    if await aiopath.isfile(up_path):
-                        parent_dir = ospath.dirname(up_path)
-                    else:
-                        parent_dir = up_path
-                    
-                    # Search for _ss folder
-                    for dirpath, _, files in walk(parent_dir):
-                        if dirpath.strip().endswith("_ss") and files:
-                            LOGGER.info(f"Found screenshots folder: {dirpath}")
-                            inputs = [
-                                InputMediaPhoto(ospath.join(dirpath, f))
-                                for f in files[:10] if f.lower().endswith(('.jpg', '.png', '.jpeg'))
-                            ]
-                            if inputs:
-                                await self.message.reply_media_group(
-                                    media=inputs,
-                                    quote=True,
-                                    disable_notification=True,
-                                )
-                                LOGGER.info(f"Screenshots sent: {len(inputs)}")
-                            await rmtree(dirpath, ignore_errors=True)
-                            break
-                
-                # Task complete - don't upload to Telegram/other destinations
-                return await self.on_upload_complete(lulu_link, 0, 0, "")
-            else:
-                # LuluStream upload failed, but if not leech-only, continue to regular upload
-                if not self.is_leech and self.raw_up_dest == "":
-                    return
+        # LuluStream and other uploaders are now handled in the upload_service block below
+        # to ensure they respect the upload queue and display proper status.
 
         add_to_queue, event = await check_running_tasks(self, "up")
         await start_from_queued()
@@ -398,13 +351,17 @@ class TaskListener(TaskConfig):
 
         upload_service = ""
 
-        if self.raw_up_dest == "yt":
-            upload_service = "yt"
-        elif self.raw_up_dest == "gd":
-            upload_service = "gd"
-        elif self.raw_up_dest == "rc":
-            upload_service = "rc"
-
+        if self.raw_up_dest in ["yt", "gd", "rc", "go", "biz", "pix", "lulu"]:
+            upload_service = self.raw_up_dest
+        elif self.lulu:
+            upload_service = "lulu"
+        elif self.is_gofile:
+            upload_service = "go"
+        elif self.is_buzzheavier:
+            upload_service = "biz"
+        elif self.is_pixeldrain:
+            upload_service = "pix"
+        
         if not upload_service:
             upload_service = self.user_dict.get(
                 "DEFAULT_UPLOAD", Config.DEFAULT_UPLOAD
@@ -421,6 +378,18 @@ class TaskListener(TaskConfig):
             )
             await delete_message(tg.log_msg)
             del tg
+        elif upload_service in ["lulu", "lulustream"]:
+            LOGGER.info(f"Uploading to LuluStream: {self.name}")
+            await self.proceed_lulu(up_path)
+        elif upload_service in ["go", "gofile"]:
+            LOGGER.info(f"Uploading to GoFile: {self.name}")
+            await self.proceed_gofile(up_path)
+        elif upload_service in ["biz", "buzzheavier"]:
+            LOGGER.info(f"Uploading to BuzzHeavier: {self.name}")
+            await self.proceed_buzzheavier(up_path)
+        elif upload_service in ["pix", "pixeldrain"]:
+            LOGGER.info(f"Uploading to PixelDrain: {self.name}")
+            await self.proceed_pixeldrain(up_path)
         elif upload_service == "yt":
             LOGGER.info(f"Uploading to YouTube: {self.name}")
 
@@ -493,9 +462,17 @@ class TaskListener(TaskConfig):
         done_msg = f"{self.tag}\nYour task is complete\nPlease check your inbox."
         LOGGER.info(f"Task Done: {self.name}")
 
-        upload_service = (
-            "yt" if self.raw_up_dest and self.raw_up_dest.startswith("yt") else ""
-        )
+        upload_service = ""
+        if self.lulu:
+            upload_service = "lulu"
+        elif getattr(self, "is_gofile", False):
+            upload_service = "go"
+        elif self.is_buzzheavier:
+            upload_service = "biz"
+        elif self.is_pixeldrain:
+            upload_service = "pix"
+        elif self.raw_up_dest and self.raw_up_dest.startswith("yt"):
+            upload_service = "yt"
 
         if not upload_service:
             upload_service = self.user_dict.get(
@@ -658,10 +635,17 @@ class TaskListener(TaskConfig):
                 f"{self.tag}\nYour YouTube upload is complete!",
             )
         else:
-            msg += f"\n┊<b>Type: </b>{mime_type}"
-            if mime_type == "Folder":
-                msg += f"\n┊<b>SubFolders: </b>{folders}"
-                msg += f"\n┊<b>Files: </b>{files}"
+            if upload_service in ["lulu", "lulustream"]:
+                msg = f"<blockquote>🎞️ <b>LuluStream Upload Complete</blockquote></b>\n" \
+                      f"╭📁 <b>Name: </b><code>{escape(self.name)}</code>\n" \
+                      f"├📊 <b>Size: </b>{get_readable_file_size(self.size)}\n" \
+                      f"├🔗 <b>Link: </b><code>{link}</code>\n" \
+                      f"╰✅ <b>Status: Ready to stream!</b>"
+            else:
+                msg += f"\n┊<b>Type: </b>{mime_type}"
+                if mime_type == "Folder":
+                    msg += f"\n┊<b>SubFolders: </b>{folders}"
+                    msg += f"\n┊<b>Files: </b>{files}"
             if link or (
                 rclone_path and Config.RCLONE_SERVE_URL and not self.private_link
             ):
@@ -700,6 +684,30 @@ class TaskListener(TaskConfig):
             if Config.LOG_CHAT_ID:
                 await send_message(int(Config.LOG_CHAT_ID), msg, button)
             await send_message(self.message, done_msg)
+
+        if self.screen_shots:
+            from pyrogram.types import InputMediaPhoto
+            from os import path as ospath
+            from os import walk
+            from aioshutil import rmtree
+            ss_path = ospath.join(self.dir, "_ss")
+            if await aiopath.exists(ss_path):
+                files = await listdir(ss_path)
+                if files:
+                    LOGGER.info(f"Found screenshots folder: {ss_path}")
+                    inputs = [
+                        InputMediaPhoto(ospath.join(ss_path, f))
+                        for f in files[:10] if f.lower().endswith(('.jpg', '.png', '.jpeg'))
+                    ]
+                    if inputs:
+                        await self.message.reply_media_group(
+                            media=inputs,
+                            quote=True,
+                            disable_notification=True,
+                        )
+                        LOGGER.info(f"Screenshots sent: {len(inputs)}")
+                await rmtree(ss_path, ignore_errors=True)
+
         if self.seed:
             await clean_target(self.up_dir)
             async with queue_dict_lock:
@@ -872,14 +880,18 @@ class TaskListener(TaskConfig):
         
         async with task_dict_lock:
             from bot.helper.mirror_leech_utils.status_utils.lulu_status import LuluStatus
-            task_dict[self.mid] = LuluStatus(self, "LuluUpload", "Up")
+            task_dict[self.mid] = LuluStatus(self, lulu, "Up")
         await update_status_message(self.message.chat.id)
 
         self.subproc = lulu
         self.total_size = await aiopath.getsize(up_path)
+        start_time = time()
 
         def progress_callback(current):
-            self.processed_bytes = current
+            lulu.processed_bytes = current
+            duration = time() - start_time
+            if duration > 0:
+                lulu.speed = current / duration
 
         try:
             link = await lulu.upload_file(up_path, self.name, progress_callback)
@@ -899,3 +911,29 @@ class TaskListener(TaskConfig):
                 await send_message(self.message, f"<blockquote>{msg}</blockquote>")
         
         return None
+
+    async def proceed_gofile(self, up_path):
+        gofile = GoFileUpload(self, up_path)
+        async with task_dict_lock:
+            from bot.helper.mirror_leech_utils.status_utils.lulu_status import LuluStatus
+            task_dict[self.mid] = LuluStatus(self, gofile, "Up")
+            # Reusing LuluStatus since it's compatible with any object having speed/processed_bytes properties
+            # Although we should ideally rename it or use a more generic status class.
+        await update_status_message(self.message.chat.id)
+        await gofile.upload()
+
+    async def proceed_buzzheavier(self, up_path):
+        buzz = BuzzHeavierUpload(self, up_path)
+        async with task_dict_lock:
+            from bot.helper.mirror_leech_utils.status_utils.lulu_status import LuluStatus
+            task_dict[self.mid] = LuluStatus(self, buzz, "Up")
+        await update_status_message(self.message.chat.id)
+        await buzz.upload()
+
+    async def proceed_pixeldrain(self, up_path):
+        pix = PixelDrainUpload(self, up_path)
+        async with task_dict_lock:
+            from bot.helper.mirror_leech_utils.status_utils.lulu_status import LuluStatus
+            task_dict[self.mid] = LuluStatus(self, pix, "Up")
+        await update_status_message(self.message.chat.id)
+        await pix.upload()

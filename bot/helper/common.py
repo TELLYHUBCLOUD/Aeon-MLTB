@@ -103,6 +103,7 @@ class TaskConfig:
         self.is_qbit = False
         self.is_nzb = False
         self.lulu = False
+        self.is_gofile = False
         self.is_buzzheavier = False
         self.is_pixeldrain = False
         self.is_clone = False
@@ -313,9 +314,25 @@ class TaskConfig:
             ) or self.up_dest == "gd":
                 self.up_dest = self.user_dict.get("GDRIVE_ID") or Config.GDRIVE_ID
             elif (
-                not self.up_dest and default_upload == "gofile"
-            ) or self.up_dest in ["gofile", "gf"]:
+                not self.up_dest and default_upload in ["gofile", "go"]
+            ) or self.up_dest in ["gofile", "go", "gf"]:
                 self.up_dest = "gofile"
+                self.is_gofile = True
+            elif (
+                not self.up_dest and default_upload in ["buzzheavier", "biz"]
+            ) or self.up_dest in ["buzzheavier", "biz"]:
+                self.up_dest = "buzzheavier"
+                self.is_buzzheavier = True
+            elif (
+                not self.up_dest and default_upload in ["pixeldrain", "pix"]
+            ) or self.up_dest in ["pixeldrain", "pix"]:
+                self.up_dest = "pixeldrain"
+                self.is_pixeldrain = True
+            elif (
+                not self.up_dest and default_upload in ["lulustream", "lulu"]
+            ) or self.up_dest in ["lulustream", "lulu"]:
+                self.up_dest = "lulustream"
+                self.lulu = True
 
             chosen_service = ""
             if self.up_dest == "yt" or (

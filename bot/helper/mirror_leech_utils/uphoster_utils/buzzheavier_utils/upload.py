@@ -53,6 +53,7 @@ class BuzzHeavierUpload:
         self.total_folders = 0
         self.is_uploading = True
         self.update_interval = 3
+        self.tool = "BuzzHeavier"
 
         from bot import user_data
 

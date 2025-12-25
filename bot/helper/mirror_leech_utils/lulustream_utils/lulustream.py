@@ -82,6 +82,9 @@ class LuluStream:
     def __init__(self, api_key):
         self.api_key = api_key.strip()
         self.base_url = "https://lulustream.com/api/"
+        self.tool = "LuluStream"
+        self.speed = 0
+        self.processed_bytes = 0
 
     async def get_upload_server(self):
         """

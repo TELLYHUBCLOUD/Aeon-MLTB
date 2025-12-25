@@ -67,14 +67,9 @@ gofile_options = ["GOFILE_TOKEN", "GOFILE_FOLDER_ID"]
 buzzheavier_options = ["BUZZHEAVIER_TOKEN", "BUZZHEAVIER_FOLDER_ID"]
 pixeldrain_options = ["PIXELDRAIN_KEY"]
 uphoster_options = (
-    rclone_options + gdrive_options + gofile_options + buzzheavier_options + pixeldrain_options
+    rclone_options + gdrive_options + gofile_options + buzzheavier_options + pixeldrain_options + lulustream_options
 )
-ffset_options = [
-    "METADATA",
-    "AUDIO_METADATA",
-    "VIDEO_METADATA",
-    "SUBTITLE_METADATA",
-]
+ffset_options = ["METADATA", "AUDIO_METADATA", "VIDEO_METADATA", "SUBTITLE_METADATA"]
 
 
 async def get_user_settings(from_user, stype="main"):
@@ -181,7 +176,11 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("☁️ Gdrive", f"userset {user_id} set_upload gd")
         buttons.data_button("📁 Rclone", f"userset {user_id} set_upload rc")
         buttons.data_button("🎥 YouTube", f"userset {user_id} set_upload yt")
-        buttons.data_button("🔙 Back", f"userset {user_id} back")
+        buttons.data_button("� Gofile", f"userset {user_id} set_upload go")
+        buttons.data_button("💾 Buzzheavier", f"userset {user_id} set_upload biz")
+        buttons.data_button("💧 Pixeldrain", f"userset {user_id} set_upload pix")
+        buttons.data_button("🎞️ LuluStream", f"userset {user_id} set_upload lulu")
+        buttons.data_button("�🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
         text = f"""<blockquote>
 ╭📤 <b>Upload Destination Settings for {name}</b>
@@ -222,7 +221,7 @@ async def get_user_settings(from_user, stype="main"):
 </blockquote>"""
     elif stype == "lulustream":
         buttons.data_button("🔑 API Key", f"userset {user_id} menu LULU_API_KEY")
-        buttons.data_button("🔙 Back", f"userset {user_id} back")
+        buttons.data_button("🔙 Back", f"userset {user_id} uphoster")
         buttons.data_button("❌ Close", f"userset {user_id} close")
         lulu_api = user_dict.get("LULU_API_KEY", Config.LULU_API_KEY or "None")
         text = f"""<blockquote>
@@ -237,42 +236,41 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("💾 Buzz Folder", f"userset {user_id} menu BUZZHEAVIER_FOLDER_ID")
         buttons.data_button("🔑 GoFile Token", f"userset {user_id} menu GOFILE_TOKEN")
         buttons.data_button("💾 GoFile Folder", f"userset {user_id} menu GOFILE_FOLDER_ID")
+        buttons.data_button("🎞️ LuluStream", f"userset {user_id} lulustream")
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
         pdk = user_dict.get("PIXELDRAIN_KEY", Config.PIXELDRAIN_KEY or "None")
         bht = user_dict.get("BUZZHEAVIER_TOKEN", Config.BUZZHEAVIER_TOKEN or "None")
         bhf = user_dict.get("BUZZHEAVIER_FOLDER_ID", Config.BUZZHEAVIER_FOLDER_ID or "None")
-        gft = user_dict.get("GOFILE_TOKEN", Config.GOFILE_TOKEN or "None")
+        gft = user_dict.get("GOFILE_TOKEN", Config.GOFILE_API or "None")
         gff = user_dict.get("GOFILE_FOLDER_ID", Config.GOFILE_FOLDER_ID or "None")
+        lulu_api = user_dict.get("LULU_API_KEY", Config.LULU_API_KEY or "None")
         text = f"""<blockquote>
 ╭⚙️ <b>Upload Hoster Settings</b>
 ┊🔑 <b>Pixeldrain:</b> <code>{pdk}</code>
 ┊🔑 <b>Buzzheavier:</b> <code>{bht}</code>
 ┊💾 <b>Buzz Folder:</b> <code>{bhf}</code>
 ┊🔑 <b>GoFile Token:</b> <code>{gft}</code>
-╰💾 <b>GoFile Folder:</b> <code>{gff}</code>
+┊💾 <b>GoFile Folder:</b> <code>{gff}</code>
+╰🎞️ <b>LuluStream:</b> <code>{lulu_api}</code>
 </blockquote>"""
     elif stype == "ffset":
         buttons.data_button("📋 Metadata", f"userset {user_id} menu METADATA")
         buttons.data_button("🔊 Audio Meta", f"userset {user_id} menu AUDIO_METADATA")
         buttons.data_button("🎞️ Video Meta", f"userset {user_id} menu VIDEO_METADATA")
         buttons.data_button("📜 Sub Meta", f"userset {user_id} menu SUBTITLE_METADATA")
-        buttons.data_button("💧 Watermark", f"userset {user_id} menu WATERMARK_KEY")
-        buttons.data_button("🎞️ FFmpeg Cmds", f"userset {user_id} menu FFMPEG_CMDS")
-        buttons.data_button("🔙 Back", f"userset {user_id} back")
+        buttons.data_button(" Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
-        mdt = user_dict.get("METADATA", Config.METADATA_KEY or "None")
-        amdt = user_dict.get("AUDIO_METADATA", Config.AUDIO_METADATA_KEY or "None")
-        vmdt = user_dict.get("VIDEO_METADATA", Config.VIDEO_METADATA_KEY or "None")
-        smdt = user_dict.get("SUBTITLE_METADATA", Config.SUBTITLE_METADATA_KEY or "None")
-        wmt = user_dict.get("WATERMARK_KEY", Config.WATERMARK_KEY or "None")
+        mdt = user_dict.get("METADATA", Config.METADATA or "None")
+        amdt = user_dict.get("AUDIO_METADATA", Config.AUDIO_METADATA or "None")
+        vmdt = user_dict.get("VIDEO_METADATA", Config.VIDEO_METADATA or "None")
+        smdt = user_dict.get("SUBTITLE_METADATA", Config.SUBTITLE_METADATA or "None")
         text = f"""<blockquote>
 ╭⚙️ <b>Metadata Settings</b>
 ┊📋 <b>Metadata:</b> <code>{mdt}</code>
 ┊🔊 <b>Audio Meta:</b> <code>{amdt}</code>
 ┊🎞️ <b>Video Meta:</b> <code>{vmdt}</code>
-┊📜 <b>Subtitle Meta:</b> <code>{smdt}</code>
-╰💧 <b>Watermark:</b> <code>{wmt}</code>
+╰📜 <b>Subtitle Meta:</b> <code>{smdt}</code>
 </blockquote>"""
     elif stype == "automation":
         buttons.data_button("🚀 Auto Leech", f"userset {user_id} tog AUTO_LEECH {'f' if user_dict.get('AUTO_LEECH') else 't'}")
@@ -309,7 +307,7 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("💬 Caption", f"userset {user_id} menu LEECH_FILENAME_CAPTION")
         buttons.data_button("📝 Cap Replace", f"userset {user_id} menu AUTO_CAPTION_REPLACE")
         buttons.data_button("🧹 Cap Remove", f"userset {user_id} menu AUTO_CAPTION_REMOVE")
-        buttons.data_button("✏️ Substitue", f"userset {user_id} menu NAME_SUBSTITUTE")
+        buttons.data_button("✏️ Substitute", f"userset {user_id} menu NAME_SUBSTITUTE")
         buttons.data_button("🔡 Leech Font", f"userset {user_id} menu LEECH_CAPTION_FONT")
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
@@ -333,19 +331,20 @@ async def get_user_settings(from_user, stype="main"):
 ┊💬 <b>Caption:</b> <code>{escape(lcap)}</code>
 ┊📝 <b>Cap Replace:</b> <code>{escape(ac_rep)}</code>
 ┊🧹 <b>Cap Remove:</b> <code>{escape(ac_rem)}</code>
-┊✏️ <b>Substitue:</b> <code>{ns_msg}</code>
+┊✏️ <b>Substitute:</b> <code>{ns_msg}</code>
 ╰🔡 <b>Leech Font:</b> <code>{escape(lfont)}</code>
 </blockquote>"""
     else:
         buttons.data_button("📥 Leech", f"userset {user_id} leech")
         buttons.data_button("🎥 YouTube", f"userset {user_id} youtube")
-        buttons.data_button("🎞️ LuluStream", f"userset {user_id} lulustream")
         buttons.data_button("☁️ Upload Hosters", f"userset {user_id} uphoster")
         buttons.data_button("🎬 Metadata Set", f"userset {user_id} ffset")
         buttons.data_button("🤖 Auto Features", f"userset {user_id} automation")
         buttons.data_button("📝 Fn Options", f"userset {user_id} filename")
         buttons.data_button("📤 Upload Paths", f"userset {user_id} menu UPLOAD_PATHS")
         buttons.data_button("🚫 Excluded Ext", f"userset {user_id} menu EXCLUDED_EXTENSIONS")
+        buttons.data_button("💧 Watermark", f"userset {user_id} menu WATERMARK_KEY")
+        buttons.data_button("🎞️ FFmpeg Cmds", f"userset {user_id} menu FFMPEG_CMDS")
         buttons.data_button("⬇️ YT-DLP Options", f"userset {user_id} menu YT_DLP_OPTIONS")
 
         default_upload = user_dict.get("DEFAULT_UPLOAD", Config.DEFAULT_UPLOAD or "gd")
@@ -353,8 +352,18 @@ async def get_user_settings(from_user, stype="main"):
             du = "☁️ Gdrive API"
         elif default_upload == "rc":
             du = "📁 Rclone"
-        else:
+        elif default_upload == "yt":
             du = "🎥 YouTube"
+        elif default_upload == "go":
+            du = "📂 Gofile"
+        elif default_upload == "biz":
+            du = "💾 Buzzheavier"
+        elif default_upload == "pix":
+            du = "💧 Pixeldrain"
+        elif default_upload == "lulu":
+            du = "🎞️ LuluStream"
+        else:
+            du = "☁️ Gdrive API"
 
         buttons.data_button(f"📤 Default: {default_upload.upper()}", f"userset {user_id} upload_dest")
 
