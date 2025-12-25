@@ -75,6 +75,17 @@ class JDownloader(MyJdApi):
         ) as rf:
             rf.truncate(0)
             dump(remote_data, rf)
+        from shutil import which
+        ffmpeg_data = {
+            "ffmpegprobebinpath": which("ffprobe") or "/usr/bin/ffprobe",
+            "ffmpegbinpath": which("ffmpeg") or "/usr/bin/ffmpeg",
+        }
+        with open(  # noqa: ASYNC230
+            "/JDownloader/cfg/org.jdownloader.container.FFmpegSetup.json",
+            "w",
+        ) as ff:
+            ff.truncate(0)
+            dump(ffmpeg_data, ff)
         if not await path.exists("/JDownloader/JDownloader.jar"):
             pattern = r"JDownloader\.jar\.backup.\d$"
             for filename in await listdir("/JDownloader"):
