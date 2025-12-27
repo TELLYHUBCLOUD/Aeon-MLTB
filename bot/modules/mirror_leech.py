@@ -995,16 +995,7 @@ class Mirror(TaskListener):
 
         # Check limits before proceeding
         if size > 0:
-            limit_msg = await limit_checker(
-                size,
-                self,
-                isTorrent=self.is_qbit
-                or is_magnet(self.link)
-                or (self.link and self.link.endswith(".torrent")),
-                isMega=is_mega_link(self.link),
-                isDriveLink=is_gdrive_link(self.link) or is_gdrive_id(self.link),
-                isYtdlp=False,
-            )
+            limit_msg = await limit_checker(self)
             if limit_msg:
                 # limit_msg is already a tuple with (message_object, error_message)
                 # and the message has already been sent with the tag
@@ -1102,14 +1093,7 @@ class Mirror(TaskListener):
         if is_url(self.link) and not file_:
             # We don't have the size for most direct links yet,
             # but we can check if it's Mega or Drive
-            limit_msg = await limit_checker(
-                0,
-                self,
-                isTorrent=False,
-                isMega=is_mega_link(self.link),
-                isDriveLink=is_gdrive_link(self.link) or is_gdrive_id(self.link),
-                isYtdlp=False,
-            )
+            limit_msg = await limit_checker(self)
             if limit_msg:
                 # limit_msg is already handled by limit_checker
                 await self.remove_from_same_dir()
