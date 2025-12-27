@@ -3,12 +3,15 @@ Optimized Zotify special downloads handler
 """
 
 import asyncio
+from typing import Any
 
 try:
     from zotify import Session
     from zotify.app import Selection
     ZOTIFY_AVAILABLE = True
 except ImportError:
+    Session = Any
+    Selection = Any
     ZOTIFY_AVAILABLE = False
 
 from bot import LOGGER

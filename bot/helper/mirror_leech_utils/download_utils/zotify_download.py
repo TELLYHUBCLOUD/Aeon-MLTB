@@ -10,6 +10,7 @@ import shutil
 import time
 from collections import deque
 from pathlib import Path
+from typing import Any
 
 try:
     from tqdm import tqdm
@@ -19,6 +20,14 @@ try:
 
     ZOTIFY_AVAILABLE = True
 except ImportError:
+    tqdm = Any
+    Session = Any
+    Album = Any
+    Artist = Any
+    Playlist = Any
+    Show = Any
+    AudioFormat = Any
+    ImageSize = Any
     ZOTIFY_AVAILABLE = False
 
 from bot import DOWNLOAD_DIR, LOGGER, task_dict, task_dict_lock

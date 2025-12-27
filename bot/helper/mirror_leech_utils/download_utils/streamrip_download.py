@@ -11,6 +11,8 @@ from bot.helper.mirror_leech_utils.status_utils.streamrip_status import (
 )
 from bot.helper.telegram_helper.message_utils import send_status_message
 
+from typing import Any
+
 try:
     from streamrip.client import (
         DeezerClient,
@@ -21,6 +23,10 @@ try:
 
     STREAMRIP_AVAILABLE = True
 except ImportError:
+    DeezerClient = Any
+    QobuzClient = Any
+    SoundcloudClient = Any
+    TidalClient = Any
     STREAMRIP_AVAILABLE = False
 
 

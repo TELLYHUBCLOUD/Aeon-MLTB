@@ -5,6 +5,8 @@ from bot import DOWNLOAD_DIR, LOGGER
 from bot.core.config_manager import Config
 from bot.helper.ext_utils.db_handler import database
 
+from typing import Any
+
 try:
     from streamrip.config import Config as StreamripConfig
 
@@ -18,6 +20,7 @@ try:
         STREAMRIP_AVAILABLE = True
 
 except ImportError as e:
+    StreamripConfig = Any
     STREAMRIP_AVAILABLE = False
     LOGGER.warning(
         f"Streamrip not installed: {e}. Streamrip features will be disabled."

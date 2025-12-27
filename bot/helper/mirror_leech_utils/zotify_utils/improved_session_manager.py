@@ -12,6 +12,7 @@ try:
     from zotify import Session
     ZOTIFY_AVAILABLE = True
 except ImportError:
+    Session = Any
     ZOTIFY_AVAILABLE = False
 
 from bot import LOGGER

@@ -12,6 +12,9 @@ try:
 
     ZOTIFY_AVAILABLE = True
 except ImportError:
+    AudioFormat = Any
+    ImageSize = Any
+    Quality = Any
     ZOTIFY_AVAILABLE = False
 
 from bot import LOGGER
