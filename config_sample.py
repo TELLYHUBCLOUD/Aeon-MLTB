@@ -170,3 +170,22 @@ RSS_SIZE_LIMIT = 0  # Max size for RSS items in bytes (0 for no limit)
 # Heroku config for get BASE_URL automatically
 HEROKU_APP_NAME = ""  # Name of your Heroku app, used to get BASE_URL automatically
 HEROKU_API_KEY = ""  # API key for your Heroku account
+ 
+# Zotify Settings
+ZOTIFY_ENABLED = False
+ZOTIFY_CREDENTIALS_PATH = "zotify_credentials.json"
+ZOTIFY_DOWNLOAD_QUALITY = "auto"  # auto, normal, high, very_high
+ZOTIFY_AUDIO_FORMAT = "vorbis"  # vorbis, mp3, flac, aac, wav
+ZOTIFY_ARTWORK_SIZE = "large"  # small, medium, large
+
+# Streamrip Settings
+STREAMRIP_ENABLED = False
+STREAMRIP_QOBUZ_EMAIL = ""
+STREAMRIP_QOBUZ_PASSWORD = ""
+STREAMRIP_TIDAL_ACCESS_TOKEN = ""
+STREAMRIP_DEEZER_ARL = ""
+STREAMRIP_SOUNDCLOUD_CLIENT_ID = ""
+STREAMRIP_QOBUZ_QUALITY = 3  # 1: 320kbps MP3, 2: 16-bit FLAC, 3: 24/<=96 FLAC, 4: 24/>=96 FLAC
+STREAMRIP_TIDAL_QUALITY = 3  # 0: 256kbps AAC, 1: 320kbps AAC, 2: 16-bit FLAC, 3: 24-bit MQA
+STREAMRIP_DEEZER_QUALITY = 2  # 0: 128kbps MP3, 1: 320kbps MP3, 2: FLAC
+\ No newline at end of file
