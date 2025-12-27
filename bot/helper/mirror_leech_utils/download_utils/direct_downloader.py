@@ -19,29 +19,31 @@ from bot.helper.telegram_helper.message_utils import send_status_message
 
 
 async def add_direct_download(listener, path):
-    details = listener.link
-    if not (contents := details.get("contents")):
-        await listener.on_download_error("There is nothing to download!")
-        return
-    listener.size = details["total_size"]
-
-    if not listener.name:
-        listener.name = details["title"]
-    path = f"{path}/{listener.name}"
-
-    # Check size limits
-    if listener.size > 0:
-        limit_msg = await limit_checker(
-            listener.size,
-            listener,
-            isTorrent=False,
-            isMega=False,
-            isDriveLink=False,
-            isYtdlp=False,
-        )
-        if limit_msg:
-            await listener.on_download_error(limit_msg)
+    # listener.link can be either:
+    # 1. A dictionary with {"contents": [...], "total_size": ..., "title": ...}
+    # 2. A plain string URL
+    
+    if isinstance(listener.link, dict):
+        details = listener.link
+        if not (contents := details.get("contents")):
+            await listener.on_download_error("There is nothing to download!")
             return
+        listener.size = details.get("total_size", 0)
+        
+        if not listener.name:
+            listener.name = details.get("title", "Download")
+        path = f"{path}/{listener.name}"
+        
+        # Check size limits
+        if listener.size > 0:
+            limit_msg = await limit_checker(listener)
+            if limit_msg:
+                await listener.on_download_error(limit_msg)
+                return
+    else:
+        # listener.link is a plain URL string
+        # We'll let DirectListener handle the download directly
+        pass
 
     msg, button = await stop_duplicate_check(listener)
     if msg:
