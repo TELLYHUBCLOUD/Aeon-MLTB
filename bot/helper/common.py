@@ -146,6 +146,52 @@ class TaskConfig:
         self.auto_rename_start_season = 0
         self.is_super_chat = self.message.chat.type.name in ["SUPERGROUP", "CHANNEL"]
 
+        # Swap flags
+        self.swap_enabled = False
+        self.swap_audio_enabled = False
+        self.swap_video_enabled = False
+        self.swap_subtitle_enabled = False
+
+        # Compression flags
+        self.compression_enabled = False
+        self.compress_video = False
+        self.compress_audio = False
+        self.compress_image = False
+        self.compress_document = False
+        self.compress_subtitle = False
+        self.compress_archive = False
+
+        # Compression presets
+        self.video_preset = None
+        self.audio_preset = None
+        self.image_preset = None
+        self.document_preset = None
+        self.subtitle_preset = None
+        self.archive_preset = None
+
+        # Merge flags
+        self.merge_video = False
+        self.merge_audio = False
+        self.merge_subtitle = False
+        self.merge_all = False
+        self.merge_image = False
+        self.merge_pdf = False
+
+        # Add/Metadata flags
+        self.add_audio_enabled = False
+        self.add_video_enabled = False
+        self.add_subtitle_enabled = False
+        self.metadata_audio_comment = ""
+        self.metadata_video_comment = ""
+        self.metadata_subtitle_comment = ""
+
+        # Watermark flags
+        self.watermark_text = ""
+        self.watermark_image = ""
+
+        # Trim flag
+        self.trim = ""
+
         self.yt_privacy = None
         self.yt_mode = "playlist"
         self.yt_tags = None
