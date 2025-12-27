@@ -46,11 +46,21 @@ async def add_direct_download(listener, path):
                 return
     else:
         # listener.link is a plain URL string
-        # Create a simple details dict and contents list
-        details = {"header": "", "contents": [listener.link]}
+        # Create proper contents structure expected by DirectListener
+        # Each content item needs: {"path": "", "filename": "name", "url": "url"}
+        from os import path as ospath
+        filename = listener.name if listener.name else "Download"
+        details = {
+            "header": "",
+            "contents": [{
+                "path": "",
+                "filename": filename,
+                "url": listener.link
+            }]
+        }
         contents = details["contents"]
         if not listener.name:
-            listener.name = "Download"
+            listener.name = filename
         path = f"{path}/{listener.name}"
 
     msg, button = await stop_duplicate_check(listener)
