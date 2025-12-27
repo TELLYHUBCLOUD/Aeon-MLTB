@@ -23,9 +23,13 @@ async def add_direct_download(listener, path):
     # 1. A dictionary with {"contents": [...], "total_size": ..., "title": ...}
     # 2. A plain string URL
     
+    details = None
+    contents = None
+    
     if isinstance(listener.link, dict):
         details = listener.link
-        if not (contents := details.get("contents")):
+        contents = details.get("contents")
+        if not contents:
             await listener.on_download_error("There is nothing to download!")
             return
         listener.size = details.get("total_size", 0)
@@ -42,8 +46,12 @@ async def add_direct_download(listener, path):
                 return
     else:
         # listener.link is a plain URL string
-        # We'll let DirectListener handle the download directly
-        pass
+        # Create a simple details dict and contents list
+        details = {"header": "", "contents": [listener.link]}
+        contents = details["contents"]
+        if not listener.name:
+            listener.name = "Download"
+        path = f"{path}/{listener.name}"
 
     msg, button = await stop_duplicate_check(listener)
     if msg:
