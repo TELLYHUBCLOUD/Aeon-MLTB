@@ -839,9 +839,11 @@ class Mirror(TaskListener):
         # 1. If reply has text (no media) -> use text as link
         # 2. If reply has media + caption with valid URL -> use caption URL
         # 3. If reply has media + caption without URL -> ignore caption, download media
+        reply_to = self.message.reply_to_message
+
         if (
             not self.link
-            and (reply_to := self.message.reply_to_message)
+            and reply_to
             and reply_to.text
         ):
             has_media = (
@@ -939,6 +941,15 @@ class Mirror(TaskListener):
             ):
                 self.link = await reply_to.download()
                 file_ = None
+
+        if (
+            file_
+            and self.link
+            and not self.link.startswith(("http://", "https://", "magnet:", "ftp://"))
+        ):
+            if not self.name:
+                self.name = self.link
+            self.link = ""
 
         try:
             if (

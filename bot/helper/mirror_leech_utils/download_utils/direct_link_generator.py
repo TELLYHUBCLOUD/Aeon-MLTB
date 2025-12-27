@@ -5624,11 +5624,11 @@ def gofile(url, user_id=None):
                         session, _id, token=token, is_authenticated=is_authenticated
                     )
                 except Exception as fallback_error:
-                    raise DirectDownloadLinkException(
-                        f"ERROR: Both authenticated and guest access failed: {e}, Fallback: {fallback_error}"
-                    )
+                    LOGGER.warning(f"Gofile fallback error: {fallback_error}. Using Worker Fallback.")
+                    return f"https://gofile.dd-bypassed.workers.dev/{_id}"
             else:
-                raise DirectDownloadLinkException(e)
+                LOGGER.warning(f"Gofile error: {e}. Using Worker Fallback.")
+                return f"https://gofile.dd-bypassed.workers.dev/{_id}"
 
     if len(details["contents"]) == 1:
         return (details["contents"][0]["url"], details["header"])
