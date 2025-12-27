@@ -30,6 +30,30 @@ async def _on_download_complete(gid):
                     "ALL",
                     package_ids=jd_downloads[gid]["ids"],
                 )
+        
+        # Fix for HLS downloads without extensions
+        # JDownloader downloads HLS streams but doesn't add proper file extensions
+        # This causes "No files to upload" error during leech
+        try:
+            from os import walk, rename
+            from os.path import splitext, join
+            
+            download_path = jd_downloads[gid]["path"]
+            for dirpath, _, files in walk(download_path):
+                for file in files:
+                    file_path = join(dirpath, file)
+                    name, ext = splitext(file)
+                    
+                    # If file has no extension, add .mp4 (common for HLS streams)
+                    if not ext:
+                        new_path = f"{file_path}.mp4"
+                        rename(file_path, new_path)
+                        from bot import LOGGER
+                        LOGGER.info(f"Added .mp4 extension to HLS file: {file} -> {file}.mp4")
+        except Exception as e:
+            from bot import LOGGER
+            LOGGER.error(f"Error adding extension to JD files: {e}")
+        
         await task.listener.on_download_complete()
         if intervals["stopAll"]:
             return
