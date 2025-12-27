@@ -112,6 +112,21 @@ class Config:
     VIDEO_METADATA: str = ""
     SUBTITLE_METADATA: str = ""
 
+    # Feature Enablement Flags
+    LEECH_ENABLED: bool = True
+    TORRENT_ENABLED: bool = True
+    GDRIVE_UPLOAD_ENABLED: bool = True
+    MEGA_ENABLED: bool = True
+    MEGA_UPLOAD_ENABLED: bool = True
+    YOUTUBE_UPLOAD_ENABLED: bool = True
+    DDL_ENABLED: bool = True
+    MULTI_LINK_ENABLED: bool = True
+    BULK_ENABLED: bool = True
+    SAME_DIR_ENABLED: bool = True
+    JD_ENABLED: bool = True
+    NZB_ENABLED: bool = True
+    MEDIA_TOOLS: bool = True
+
     # Auto Thumbnail & Rename Settings
     TMDB_API_KEY: str = ""
     TMDB_ENABLED: bool = True

@@ -7,6 +7,21 @@ TELEGRAM_HASH = ""
 # Recommended for persisting settings, RSS feeds, and task history. Essential for some features.
 DATABASE_URL = ""
 
+# FEATURE ENABLEMENT FLAGS
+LEECH_ENABLED = True
+TORRENT_ENABLED = True
+GDRIVE_UPLOAD_ENABLED = True
+MEGA_ENABLED = True
+MEGA_UPLOAD_ENABLED = True
+YOUTUBE_UPLOAD_ENABLED = True
+DDL_ENABLED = True
+MULTI_LINK_ENABLED = True
+BULK_ENABLED = True
+SAME_DIR_ENABLED = True
+JD_ENABLED = True
+NZB_ENABLED = True
+MEDIA_TOOLS = True
+
 # OPTIONAL CONFIG
 TG_PROXY = {}  # Example: {"scheme": "socks5", "hostname": "11.22.33.44", "port": 1234, "username": "user", "password": "pass"}
 USER_SESSION_STRING = ""
