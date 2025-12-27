@@ -467,21 +467,19 @@ class Mirror(TaskListener):
                     if "://" in self.link or self.link.startswith("magnet:"):
                         try:
                             res = await direct_link_generator(self.link)
-                        if res:
-                            if isinstance(res, str):
-                                self.link = res
-                            elif (
-                                isinstance(res, dict)
-                                and "links" in res
-                                and len(res["links"]) > 0
-                            ):
-                                # If it returns a list (e.g. folder), use first link for now
-                                # or handle it as FolderResult if needed
-                                self.link = res["links"][0]
-                                if not self.name and "title" in res:
-                                    self.name = res["title"]
-                    except Exception as e:
-                        LOGGER.error(f"Direct Link Generator Error: {e}")
+                            if res:
+                                if isinstance(res, str):
+                                    self.link = res
+                                elif (
+                                    isinstance(res, dict)
+                                    and "links" in res
+                                    and len(res["links"]) > 0
+                                ):
+                                    self.link = res["links"][0]
+                                    if not self.name and "title" in res:
+                                        self.name = res["title"]
+                        except Exception as e:
+                            LOGGER.error(f"Direct Link Generator Error: {e}")
 
         if file_ is not None:
             create_task(
