@@ -130,8 +130,8 @@ async def media_tools_callback(_, query, obj):
         obj.event.set()
 
 async def show_media_tools_for_task(client, message, listener):
-    \"\"\"
+    """
     Shows an interactive menu for selecting advanced media tools before a mirror/leech task starts.
-    \"\"\"
+    """
     selector = MediaToolsSelection(client, message, listener)
     return await selector.get_selection()
