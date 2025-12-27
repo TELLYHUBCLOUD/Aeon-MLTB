@@ -834,11 +834,17 @@ class Mirror(TaskListener):
         path = f"{DOWNLOAD_DIR}{self.mid}{self.folder_name}"
 
 
+        # Extract link from reply_to text/caption
+        # Priority: 
+        # 1. If reply has text (no media) -> use text as link
+        # 2. If reply has media + caption with valid URL -> use caption URL
+        # 3. If reply has media + caption without URL -> ignore caption, download media
         if (
             not self.link
             and (reply_to := self.message.reply_to_message)
             and reply_to.text
-            and not (  # Don't treat caption as link if there's media
+        ):
+            has_media = (
                 reply_to.document
                 or reply_to.photo
                 or reply_to.video
@@ -848,8 +854,22 @@ class Mirror(TaskListener):
                 or reply_to.sticker
                 or reply_to.animation
             )
-        ):
-            self.link = reply_to.text.split("\n", 1)[0].strip()
+            
+            # Extract first line from text/caption
+            potential_link = reply_to.text.split("\n", 1)[0].strip()
+            
+            # If there's media, only use caption if it contains a valid URL
+            if has_media:
+                # Check if caption contains valid URL (http/https/ftp/magnet)
+                if (
+                    potential_link.startswith(("http://", "https://", "ftp://", "magnet:"))
+                    or "://" in potential_link
+                ):
+                    self.link = potential_link
+                # Otherwise, ignore caption and let media download handler take over
+            else:
+                # No media, treat text as link
+                self.link = potential_link
 
         if is_telegram_link(self.link):
             try:
