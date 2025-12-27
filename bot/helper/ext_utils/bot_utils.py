@@ -426,3 +426,12 @@ def loop_thread(func):
         return future.result() if wait else future
 
     return wrapper
+
+
+def is_flag_enabled(flag):
+    """
+    Checks if a specific command-line flag is enabled based on the bot's configuration.
+    """
+    # For now, we assume all flags are enabled.
+    # We can add granular checks here based on Config if needed.
+    return True
