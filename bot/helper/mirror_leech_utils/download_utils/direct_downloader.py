@@ -102,8 +102,6 @@ async def add_direct_download(listener, path):
     # Force garbage collection after direct download
     # Direct downloads can create large objects in memory
     if smart_garbage_collection:
-        smart_garbage_collection(
-            aggressive=True
-        )  # Use aggressive mode for direct downloads
+        await smart_garbage_collection()
     else:
         gc.collect()

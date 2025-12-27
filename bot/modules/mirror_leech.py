@@ -1109,6 +1109,8 @@ class Mirror(TaskListener):
                     session,
                 ),
             )
+            await delete_links(self.message)
+            return None
         elif self.is_jd:
             await add_jd_download(self, path)
         elif self.is_nzb:
