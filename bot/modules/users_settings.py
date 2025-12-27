@@ -31,7 +31,7 @@ from bot.helper.telegram_helper.message_utils import (
 )
 
 handler_dict = {}
-no_thumb = "https://graph.org/file/73ae908d18c6b38038071.jpg"
+no_thumb = "https://i.ibb.co/HD9N8mXt/file-000000001ec861f8b1743e7f048f648f.png"
 
 leech_options = [
     "LEECH_SPLIT_SIZE",
@@ -377,8 +377,7 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
         
-        # Auto Rename/Thumbnail settings
-        auto_thumb = "✅ Enabled" if user_dict.get("AUTO_THUMBNAIL_ENABLED", Config.AUTO_THUMBNAIL_ENABLED) else "❌ Disabled"
+        # Auto Rename settings
         auto_rename = "✅ Enabled" if user_dict.get("AUTO_RENAME_ENABLED", Config.AUTO_RENAME_ENABLED) else "❌ Disabled"
         rename_template = user_dict.get("AUTO_RENAME_TEMPLATE", Config.AUTO_RENAME_TEMPLATE or "S{season}E{episode}Q{quality}")
         start_episode = user_dict.get("AUTO_RENAME_START_EPISODE", Config.AUTO_RENAME_START_SEASON or "1")
@@ -396,6 +395,7 @@ async def get_user_settings(from_user, stype="main"):
 
         text = f"""<blockquote>
 ╭📝 <b>Filename Options</b>
+┊🔄 <b>Auto Rename:</b> <code>{auto_rename}</code>
 ┊📋 <b>Rename Template:</b> <code>{escape(rename_template)}</code>
 ┊1️⃣ <b>Start Episode:</b> <code>{start_episode}</code>
 ┊📺 <b>Start Season:</b> <code>{start_season}</code>
