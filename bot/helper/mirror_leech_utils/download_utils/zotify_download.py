@@ -11,10 +11,15 @@ import time
 from collections import deque
 from pathlib import Path
 
-from tqdm import tqdm
-from zotify import Session
-from zotify.collections import Album, Artist, Playlist, Show
-from zotify.utils import AudioFormat, ImageSize
+try:
+    from tqdm import tqdm
+    from zotify import Session
+    from zotify.collections import Album, Artist, Playlist, Show
+    from zotify.utils import AudioFormat, ImageSize
+
+    ZOTIFY_AVAILABLE = True
+except ImportError:
+    ZOTIFY_AVAILABLE = False
 
 from bot import DOWNLOAD_DIR, LOGGER, task_dict, task_dict_lock
 from bot.core.config_manager import Config
@@ -1273,6 +1278,10 @@ async def _estimate_zotify_size(url: str) -> int:
 
 async def add_zotify_download(listener, url: str):
     """Add Zotify download to task queue"""
+    if not ZOTIFY_AVAILABLE:
+        await listener.on_download_error("Zotify is not available!")
+        return
+
     if not zotify_config.is_enabled():
         await listener.on_download_error("Zotify is disabled")
         return

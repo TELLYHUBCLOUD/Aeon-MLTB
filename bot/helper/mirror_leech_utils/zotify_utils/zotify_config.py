@@ -7,7 +7,12 @@ import json
 from pathlib import Path
 from typing import Any
 
-from zotify.utils import AudioFormat, ImageSize, Quality
+try:
+    from zotify.utils import AudioFormat, ImageSize, Quality
+
+    ZOTIFY_AVAILABLE = True
+except ImportError:
+    ZOTIFY_AVAILABLE = False
 
 from bot import LOGGER
 from bot.core.config_manager import Config
@@ -139,7 +144,10 @@ class ZotifyConfigManager:
         """Create a Zotify Config object from our settings"""
         from argparse import Namespace
 
-        from zotify.config import Config as ZotifyConfig
+        try:
+            from zotify.config import Config as ZotifyConfig
+        except ImportError:
+            return None
 
         # Create a namespace with our config values
         args = Namespace()

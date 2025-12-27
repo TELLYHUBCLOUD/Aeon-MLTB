@@ -19,7 +19,11 @@ from pyrogram.types import (
     InlineQueryResultArticle,
     InputTextMessageContent,
 )
-from zotify import Session
+try:
+    from zotify import Session
+    ZOTIFY_AVAILABLE = True
+except ImportError:
+    ZOTIFY_AVAILABLE = False
 
 from bot import LOGGER
 from bot.core.aeon_client import TgClient

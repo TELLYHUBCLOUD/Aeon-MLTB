@@ -7,7 +7,11 @@ import contextlib
 import time
 from typing import Any
 
-from zotify.utils import AudioFormat, Quality
+try:
+    from zotify.utils import AudioFormat, Quality
+    ZOTIFY_AVAILABLE = True
+except ImportError:
+    ZOTIFY_AVAILABLE = False
 
 from bot import LOGGER
 from bot.helper.ext_utils.status_utils import get_readable_time

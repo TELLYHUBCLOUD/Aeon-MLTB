@@ -8,7 +8,11 @@ import contextlib
 import time
 from typing import Any
 
-from zotify import Session
+try:
+    from zotify import Session
+    ZOTIFY_AVAILABLE = True
+except ImportError:
+    ZOTIFY_AVAILABLE = False
 
 from bot import LOGGER
 from bot.helper.mirror_leech_utils.zotify_utils.zotify_config import zotify_config

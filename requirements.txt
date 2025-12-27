@@ -40,3 +40,7 @@ uvloop
 xattr
 yt-dlp[default,curl-cffi]
 urllib3
+tqdm
+toml
+git+https://github.com/shabbirmahmud/streamrip.git@dev
+git+https://github.com/DraftKinner/zotify.git@dev

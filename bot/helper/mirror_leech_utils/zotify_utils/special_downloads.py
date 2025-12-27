@@ -4,8 +4,12 @@ Optimized Zotify special downloads handler
 
 import asyncio
 
-from zotify import Session
-from zotify.app import Selection
+try:
+    from zotify import Session
+    from zotify.app import Selection
+    ZOTIFY_AVAILABLE = True
+except ImportError:
+    ZOTIFY_AVAILABLE = False
 
 from bot import LOGGER
 
