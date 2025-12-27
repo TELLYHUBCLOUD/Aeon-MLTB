@@ -112,6 +112,40 @@ class Config:
     VIDEO_METADATA: str = ""
     SUBTITLE_METADATA: str = ""
 
+    # Auto Thumbnail & Rename Settings
+    TMDB_API_KEY: str = ""
+    TMDB_ENABLED: bool = True
+    IMDB_ENABLED: bool = True
+    AUTO_THUMBNAIL_ENABLED: bool = False
+    AUTO_THUMBNAIL_FORMAT: str = "poster"
+    AUTO_RENAME_ENABLED: bool = False
+    AUTO_RENAME_TEMPLATE: str = "S{season}E{episode}Q{quality}"
+    AUTO_RENAME_START_EPISODE: int = 1
+    AUTO_RENAME_START_SEASON: int = 1
+
+    # Premium Debrid Services
+    DEBRID_LINK_API: str = ""
+    DEBRID_LINK_ACCESS_TOKEN: str = ""
+    DEBRID_LINK_REFRESH_TOKEN: str = ""
+    DEBRID_LINK_CLIENT_ID: str = ""
+    DEBRID_LINK_CLIENT_SECRET: str = ""
+    DEBRID_LINK_TOKEN_EXPIRES: int = 0
+    ALLDEBRID_API_KEY: str = ""
+    REAL_DEBRID_API_KEY: str = ""
+    REAL_DEBRID_ACCESS_TOKEN: str = ""
+    REAL_DEBRID_REFRESH_TOKEN: str = ""
+    REAL_DEBRID_CLIENT_ID: str = ""
+    REAL_DEBRID_CLIENT_SECRET: str = ""
+    REAL_DEBRID_TOKEN_EXPIRES: int = 0
+    MEGA_DEBRID_API_TOKEN: str = ""
+    MEGA_DEBRID_LOGIN: str = ""
+    MEGA_DEBRID_PASSWORD: str = ""
+    TORBOX_API_KEY: str = ""
+    MEDIAFIRE_EMAIL: str = ""
+    MEDIAFIRE_PASSWORD: str = ""
+    MEDIAFIRE_APP_ID: str = ""
+    MEDIAFIRE_API_KEY: str = ""
+
     @classmethod
     def _convert(cls, key, value):
         expected_type = type(getattr(cls, key))

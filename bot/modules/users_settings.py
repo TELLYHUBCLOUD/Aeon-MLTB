@@ -34,7 +34,6 @@ handler_dict = {}
 no_thumb = "https://graph.org/file/73ae908d18c6b38038071.jpg"
 
 leech_options = [
-    "THUMBNAIL",
     "LEECH_SPLIT_SIZE",
     "THUMBNAIL_LAYOUT",
     "USER_DUMP",
@@ -60,6 +59,11 @@ filename_options = [
     "LEECH_CAPTION_FONT",
     "NAME_SUBSTITUTE",
 ]
+auto_rename_options = [
+    "AUTO_RENAME_TEMPLATE",
+    "AUTO_RENAME_START_EPISODE",
+    "AUTO_RENAME_START_SEASON",
+]
 rclone_options = ["RCLONE_CONFIG", "RCLONE_PATH", "RCLONE_FLAGS"]
 gdrive_options = ["TOKEN_PICKLE", "GDRIVE_ID", "INDEX_URL"]
 lulustream_options = ["LULU_API_KEY"]
@@ -70,6 +74,8 @@ uphoster_options = (
     rclone_options + gdrive_options + gofile_options + buzzheavier_options + pixeldrain_options + lulustream_options
 )
 ffset_options = ["METADATA", "AUDIO_METADATA", "VIDEO_METADATA", "SUBTITLE_METADATA"]
+auto_thumb_options = ["TMDB_API_KEY", "AUTO_THUMBNAIL_FORMAT"]
+thumbnail_menu_options = ["THUMBNAIL", "THUMBNAIL_LAYOUT"]
 
 
 async def get_user_settings(from_user, stype="main"):
@@ -85,11 +91,9 @@ async def get_user_settings(from_user, stype="main"):
     thumbnail = thumbpath if await aiopath.exists(thumbpath) else no_thumb
 
     if stype == "leech":
-        buttons.data_button("🖼️ Thumbnail", f"userset {user_id} menu THUMBNAIL")
         buttons.data_button("📦 Split Size", f"userset {user_id} menu LEECH_SPLIT_SIZE")
         buttons.data_button(" User Dump", f"userset {user_id} menu USER_DUMP")
         buttons.data_button("👤 User Session", f"userset {user_id} menu USER_SESSION")
-        buttons.data_button("🎨 Layout", f"userset {user_id} menu THUMBNAIL_LAYOUT")
         
         if user_dict.get("AS_DOCUMENT", False) or (
             "AS_DOCUMENT" not in user_dict and Config.AS_DOCUMENT
@@ -272,6 +276,64 @@ async def get_user_settings(from_user, stype="main"):
 ┊🎞️ <b>Video Meta:</b> <code>{vmdt}</code>
 ╰📜 <b>Subtitle Meta:</b> <code>{smdt}</code>
 </blockquote>"""
+    elif stype == "thumbnail_menu":
+        buttons.data_button("📤 Upload Thumbnail", f"userset {user_id} menu THUMBNAIL")
+        buttons.data_button("🖼️ Auto Thumbnail", f"userset {user_id} auto_thumb")
+        buttons.data_button("🎨 Thumbnail Layout", f"userset {user_id} menu THUMBNAIL_LAYOUT")
+        buttons.data_button("🔙 Back", f"userset {user_id} leech")
+        buttons.data_button("❌ Close", f"userset {user_id} close")
+        
+        # Check if manual thumbnail exists
+        thumb_path = f"thumbnails/{user_id}.jpg"
+        thumb_status = "✅ Set" if await aiopath.exists(thumb_path) else "❌ Not Set"
+        
+        # Check auto thumbnail status
+        auto_thumb_enabled = user_dict.get("AUTO_THUMBNAIL_ENABLED", Config.AUTO_THUMBNAIL_ENABLED if hasattr(Config, 'AUTO_THUMBNAIL_ENABLED') else False)
+        auto_thumb_status = "✅ Enabled" if auto_thumb_enabled else "❌ Disabled"
+        
+        # Thumbnail layout
+        thumb_layout = user_dict.get("THUMBNAIL_LAYOUT", Config.THUMBNAIL_LAYOUT or "None")
+        
+        text = f"""<blockquote>
+╭🖼️ <b>Thumbnail Settings</b>
+┊📤 <b>Manual Thumbnail:</b> <code>{thumb_status}</code>
+┊🖼️ <b>Auto Thumbnail:</b> <code>{auto_thumb_status}</code>
+╰🎨 <b>Layout:</b> <code>{thumb_layout}</code>
+</blockquote>"""
+    elif stype == "auto_thumb":
+        buttons.data_button("🔑 TMDB API Key", f"userset {user_id} menu TMDB_API_KEY")
+        buttons.data_button("🖼️ Format", f"userset {user_id} auto_thumb_format_menu")
+        buttons.data_button("🎬 TMDB Source", f"userset {user_id} tog TMDB_ENABLED {'f' if user_dict.get('TMDB_ENABLED', Config.TMDB_ENABLED if hasattr(Config, 'TMDB_ENABLED') else True) else 't'}")
+        buttons.data_button("📽️ IMDB Source", f"userset {user_id} tog IMDB_ENABLED {'f' if user_dict.get('IMDB_ENABLED', Config.IMDB_ENABLED if hasattr(Config, 'IMDB_ENABLED') else True) else 't'}")
+        buttons.data_button("🔙 Back", f"userset {user_id} thumbnail_menu")
+        buttons.data_button("❌ Close", f"userset {user_id} close")
+        
+        tmdb_key = user_dict.get("TMDB_API_KEY", Config.TMDB_API_KEY if hasattr(Config, 'TMDB_API_KEY') else "")
+        tmdb_key_status = "✅ Set" if tmdb_key else "❌ Not Set"
+        thumb_format = user_dict.get("AUTO_THUMBNAIL_FORMAT", Config.AUTO_THUMBNAIL_FORMAT if hasattr(Config, 'AUTO_THUMBNAIL_FORMAT') else "poster")
+        thumb_format_display = "🖼️ Poster" if thumb_format == "poster" else "🎞️ Backdrop"
+        tmdb_enabled = "✅ Enabled" if user_dict.get("TMDB_ENABLED", Config.TMDB_ENABLED if hasattr(Config, 'TMDB_ENABLED') else True) else "❌ Disabled"
+        imdb_enabled = "✅ Enabled" if user_dict.get("IMDB_ENABLED", Config.IMDB_ENABLED if hasattr(Config, 'IMDB_ENABLED') else True) else "❌ Disabled"
+        
+        text = f"""<blockquote>
+╭🖼️ <b>Auto Thumbnail Settings</b>
+┊🔑 <b>TMDB API Key:</b> <code>{tmdb_key_status}</code>
+┊🖼️ <b>Format:</b> <code>{thumb_format_display}</code>
+┊🎬 <b>TMDB Source:</b> <code>{tmdb_enabled}</code>
+╰📽️ <b>IMDB Source:</b> <code>{imdb_enabled}</code>
+</blockquote>"""
+    elif stype == "auto_thumb_format_menu":
+        buttons.data_button("🖼️ Poster", f"userset {user_id} set_thumb_format poster")
+        buttons.data_button("🎞️ Backdrop", f"userset {user_id} set_thumb_format backdrop")
+        buttons.data_button("🔙 Back", f"userset {user_id} auto_thumb")
+        buttons.data_button("❌ Close", f"userset {user_id} close")
+        text = f"""<blockquote>
+╭🖼️ <b>Thumbnail Format Selection</b>
+┊Select thumbnail format for auto thumbnails:
+┊
+┊🖼️ <b>Poster</b> - Movie/TV show poster
+╰🎞️ <b>Backdrop</b> - Background/scene image
+</blockquote>"""
     elif stype == "automation":
         buttons.data_button("🚀 Auto Leech", f"userset {user_id} tog AUTO_LEECH {'f' if user_dict.get('AUTO_LEECH') else 't'}")
         buttons.data_button("🚀 Auto Mirror", f"userset {user_id} tog AUTO_MIRROR {'f' if user_dict.get('AUTO_MIRROR') else 't'}")
@@ -300,6 +362,10 @@ async def get_user_settings(from_user, stype="main"):
 ╰🎬 <b>Compress Cmd:</b> <code>{escape(ac_cmd)}</code>
 </blockquote>"""
     elif stype == "filename":
+        buttons.data_button("🔄 Auto Rename", f"userset {user_id} tog AUTO_RENAME_ENABLED {'f' if user_dict.get('AUTO_RENAME_ENABLED') else 't'}")
+        buttons.data_button("📋 Rename Template", f"userset {user_id} menu AUTO_RENAME_TEMPLATE")
+        buttons.data_button("1️⃣ Start Episode", f"userset {user_id} menu AUTO_RENAME_START_EPISODE")
+        buttons.data_button("📺 Start Season", f"userset {user_id} menu AUTO_RENAME_START_SEASON")
         buttons.data_button("✏️ Fn Replace", f"userset {user_id} menu FILENAME_REPLACE")
         buttons.data_button("🧹 Clean Fn", f"userset {user_id} tog CLEAN_FILENAME {'f' if user_dict.get('CLEAN_FILENAME') else 't'}")
         buttons.data_button("📝 Prefix", f"userset {user_id} menu LEECH_FILENAME_PREFIX")
@@ -311,6 +377,13 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("🔡 Leech Font", f"userset {user_id} menu LEECH_CAPTION_FONT")
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
+        
+        # Auto Rename/Thumbnail settings
+        auto_thumb = "✅ Enabled" if user_dict.get("AUTO_THUMBNAIL_ENABLED", Config.AUTO_THUMBNAIL_ENABLED) else "❌ Disabled"
+        auto_rename = "✅ Enabled" if user_dict.get("AUTO_RENAME_ENABLED", Config.AUTO_RENAME_ENABLED) else "❌ Disabled"
+        rename_template = user_dict.get("AUTO_RENAME_TEMPLATE", Config.AUTO_RENAME_TEMPLATE or "S{season}E{episode}Q{quality}")
+        start_episode = user_dict.get("AUTO_RENAME_START_EPISODE", Config.AUTO_RENAME_START_SEASON or "1")
+        start_season = user_dict.get("AUTO_RENAME_START_SEASON", Config.AUTO_RENAME_START_SEASON or "1")
         
         fn_rep = user_dict.get("FILENAME_REPLACE", Config.FILENAME_REPLACE or "None")
         clean_file = "✅ Enabled" if user_dict.get("CLEAN_FILENAME", Config.CLEAN_FILENAME) else "❌ Disabled"
@@ -324,6 +397,9 @@ async def get_user_settings(from_user, stype="main"):
 
         text = f"""<blockquote>
 ╭📝 <b>Filename Options</b>
+┊📋 <b>Rename Template:</b> <code>{escape(rename_template)}</code>
+┊1️⃣ <b>Start Episode:</b> <code>{start_episode}</code>
+┊📺 <b>Start Season:</b> <code>{start_season}</code>
 ┊✏️ <b>Fn Replace:</b> <code>{escape(fn_rep)}</code>
 ┊🧹 <b>Clean Fn:</b> <code>{clean_file}</code>
 ┊📝 <b>Prefix:</b> <code>{escape(lprefix)}</code>
@@ -528,7 +604,7 @@ async def get_menu(option, message, user_id):
         back_to = "leech"
     elif option in automation_options:
         back_to = "automation"
-    elif option in filename_options:
+    elif option in filename_options or option in auto_rename_options:
         back_to = "filename"
     elif option in rclone_options:
         back_to = "rclone"
@@ -540,6 +616,10 @@ async def get_menu(option, message, user_id):
         back_to = "uphoster"
     elif option in ffset_options:
         back_to = "ffset"
+    elif option in auto_thumb_options:
+        back_to = "auto_thumb"
+    elif option in thumbnail_menu_options:
+        back_to = "thumbnail_menu"
     elif option in [
         "YT_DEFAULT_PRIVACY",
         "YT_DEFAULT_CATEGORY",
@@ -670,7 +750,7 @@ async def edit_user_settings(client, query):
         await query.answer("❌ Not Yours!", show_alert=True)
     elif data[2] == "setevent":
         await query.answer()
-    elif data[2] in ["leech", "gdrive", "rclone", "youtube", "automation", "filename", "lulustream", "uphoster", "ffset"]:
+    elif data[2] in ["leech", "gdrive", "rclone", "youtube", "automation", "filename", "lulustream", "uphoster", "ffset", "auto_thumb", "auto_thumb_format_menu", "thumbnail_menu"]:
         await query.answer()
         await update_user_settings(query, data[2])
     elif data[2] == "menu":
@@ -685,6 +765,12 @@ async def edit_user_settings(client, query):
         update_user_ldata(user_id, "YT_DEFAULT_FOLDER_MODE", new_mode)
         await database.update_user_data(user_id)
         await update_user_settings(query, "youtube")
+    elif data[2] == "set_thumb_format":
+        await query.answer()
+        new_format = data[3]
+        update_user_ldata(user_id, "AUTO_THUMBNAIL_FORMAT", new_format)
+        await database.update_user_data(user_id)
+        await update_user_settings(query, "auto_thumb")
     elif data[2] == "tog":
         await query.answer()
         update_user_ldata(user_id, data[3], data[4] == "t")
@@ -698,6 +784,8 @@ async def edit_user_settings(client, query):
             back_to = "automation"
         elif data[3] in filename_options:
             back_to = "filename"
+        elif data[3] in ["TMDB_ENABLED", "IMDB_ENABLED"]:
+            back_to = "auto_thumb"
         elif data[3] in [
             "BOT_PM",
             "AS_DOCUMENT",

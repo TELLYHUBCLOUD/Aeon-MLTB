@@ -3,6 +3,8 @@ from asyncio import create_task, gather, sleep
 from html import escape
 from time import time
 
+from os import path as ospath
+from os import walk
 from aiofiles.os import listdir, makedirs, remove
 from aiofiles.os import path as aiopath
 from aioshutil import move
@@ -37,6 +39,10 @@ from bot.helper.ext_utils.files_utils import (
 from bot.helper.ext_utils.links_utils import is_gdrive_id
 from bot.helper.ext_utils.status_utils import get_readable_file_size
 from bot.helper.mirror_leech_utils.lulustream_utils.lulustream import LuluStream
+from bot.helper.ext_utils.template_processor import (
+    extract_metadata_from_filename,
+    process_template,
+)
 from bot.helper.ext_utils.task_manager import check_running_tasks, start_from_queued
 from bot.helper.mirror_leech_utils.gdrive_utils.upload import GoogleDriveUpload
 from bot.helper.mirror_leech_utils.rclone_utils.transfer import RcloneTransferHelper
@@ -107,6 +113,56 @@ class TaskListener(TaskConfig):
                 self.message.text,
                 self.user_id,
             )
+
+    async def proceed_auto_rename(self, dl_path):
+        if not self.auto_rename or not self.auto_rename_template:
+            return dl_path
+
+        LOGGER.info(f"Auto Renaming: {self.name}")
+
+        async def rename_file(f_path):
+            import contextlib
+            filename = ospath.basename(f_path)
+            metadata = await extract_metadata_from_filename(filename)
+
+            if metadata.get("episode") and self.auto_rename_start_episode > 1:
+                with contextlib.suppress(Exception):
+                    ep_num = int(metadata["episode"])
+                    metadata["episode"] = f"{ep_num + self.auto_rename_start_episode - 1:02d}"
+
+            if metadata.get("season") and self.auto_rename_start_season > 1:
+                with contextlib.suppress(Exception):
+                    sea_num = int(metadata["season"])
+                    metadata["season"] = f"{sea_num + self.auto_rename_start_season - 1:02d}"
+
+            if not metadata.get("title"):
+                metadata["title"] = self.name
+
+            new_name = await process_template(self.auto_rename_template, metadata)
+            if not new_name:
+                return f_path
+
+            _, ext = ospath.splitext(filename)
+            if not new_name.lower().endswith(ext.lower()):
+                new_name += ext
+
+            new_path = ospath.join(ospath.dirname(f_path), new_name)
+            if f_path != new_path:
+                with contextlib.suppress(Exception):
+                    await move(f_path, new_path)
+                    return new_path
+            return f_path
+
+        if self.is_file:
+            return await rename_file(dl_path)
+
+        from bot.helper.ext_utils.bot_utils import sync_to_async
+        for dirpath, _, files in await sync_to_async(walk, dl_path, topdown=False):
+            for file_ in files:
+                f_path = ospath.join(dirpath, file_)
+                await rename_file(f_path)
+
+        return dl_path
 
     async def on_download_complete(self):
         await sleep(2)
@@ -268,6 +324,13 @@ class TaskListener(TaskConfig):
 
         if self.name_sub:
             up_path = await self.substitute(up_path)
+            if self.is_cancelled:
+                return
+            self.is_file = await aiopath.isfile(up_path)
+            self.name = up_path.replace(f"{up_dir}/", "").split("/", 1)[0]
+
+        if self.auto_rename:
+            up_path = await self.proceed_auto_rename(up_path)
             if self.is_cancelled:
                 return
             self.is_file = await aiopath.isfile(up_path)

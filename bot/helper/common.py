@@ -140,6 +140,10 @@ class TaskConfig:
         self.thumb = None
         self.excluded_extensions = []
         self.files_to_proceed = []
+        self.auto_rename = False
+        self.auto_rename_template = ""
+        self.auto_rename_start_episode = 0
+        self.auto_rename_start_season = 0
         self.is_super_chat = self.message.chat.type.name in ["SUPERGROUP", "CHANNEL"]
 
         self.yt_privacy = None
@@ -212,6 +216,26 @@ class TaskConfig:
             or (
                 Config.WATERMARK_KEY if "WATERMARK_KEY" not in self.user_dict else ""
             )
+        )
+        self.auto_rename = self.user_dict.get("AUTO_RENAME_ENABLED") or (
+            Config.AUTO_RENAME_ENABLED
+            if "AUTO_RENAME_ENABLED" not in self.user_dict
+            else False
+        )
+        self.auto_rename_template = self.user_dict.get("AUTO_RENAME_TEMPLATE") or (
+            Config.AUTO_RENAME_TEMPLATE
+            if "AUTO_RENAME_TEMPLATE" not in self.user_dict
+            else ""
+        )
+        self.auto_rename_start_episode = self.user_dict.get("AUTO_RENAME_START_EPISODE") or (
+            Config.AUTO_RENAME_START_EPISODE
+            if "AUTO_RENAME_START_EPISODE" not in self.user_dict
+            else 1
+        )
+        self.auto_rename_start_season = self.user_dict.get("AUTO_RENAME_START_SEASON") or (
+            Config.AUTO_RENAME_START_SEASON
+            if "AUTO_RENAME_START_SEASON" not in self.user_dict
+            else 1
         )
         if self.name_sub:
             self.name_sub = [x.split("/") for x in self.name_sub.split(" | ")]

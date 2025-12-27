@@ -1,6 +1,13 @@
+import gc
 from secrets import token_hex
 
 from bot import LOGGER, task_dict, task_dict_lock
+
+try:
+    from bot.helper.ext_utils.gc_utils import smart_garbage_collection
+except ImportError:
+    smart_garbage_collection = None
+from bot.helper.ext_utils.limit_checker import limit_checker
 from bot.helper.ext_utils.task_manager import (
     check_running_tasks,
     stop_duplicate_check,
@@ -13,14 +20,28 @@ from bot.helper.telegram_helper.message_utils import send_status_message
 
 async def add_direct_download(listener, path):
     details = listener.link
-    if not (contents := details.contents):
+    if not (contents := details.get("contents")):
         await listener.on_download_error("There is nothing to download!")
         return
-    listener.size = details.total_size
+    listener.size = details["total_size"]
 
     if not listener.name:
-        listener.name = details.title
+        listener.name = details["title"]
     path = f"{path}/{listener.name}"
+
+    # Check size limits
+    if listener.size > 0:
+        limit_msg = await limit_checker(
+            listener.size,
+            listener,
+            isTorrent=False,
+            isMega=False,
+            isDriveLink=False,
+            isYtdlp=False,
+        )
+        if limit_msg:
+            await listener.on_download_error(limit_msg)
+            return
 
     msg, button = await stop_duplicate_check(listener)
     if msg:
@@ -41,9 +62,8 @@ async def add_direct_download(listener, path):
             return
 
     a2c_opt = {"follow-torrent": "false", "follow-metalink": "false"}
-    if headers_dict := details.headers:
-        headers = [f"{k}: {v}" for k, v in headers_dict.items()]
-        a2c_opt["header"] = headers
+    if header := details.get("header"):
+        a2c_opt["header"] = header
     directListener = DirectListener(path, listener, a2c_opt)
 
     async with task_dict_lock:
@@ -58,3 +78,12 @@ async def add_direct_download(listener, path):
             await send_status_message(listener.message)
 
     await directListener.download(contents)
+
+    # Force garbage collection after direct download
+    # Direct downloads can create large objects in memory
+    if smart_garbage_collection:
+        smart_garbage_collection(
+            aggressive=True
+        )  # Use aggressive mode for direct downloads
+    else:
+        gc.collect()

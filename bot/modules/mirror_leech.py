@@ -37,6 +37,9 @@ from bot.helper.mirror_leech_utils.download_utils.direct_downloader import (
 from bot.helper.mirror_leech_utils.download_utils.gd_download import add_gd_download
 from bot.helper.mirror_leech_utils.download_utils.jd_download import add_jd_download
 from bot.helper.mirror_leech_utils.download_utils.nzb_downloader import add_nzb
+from bot.helper.mirror_leech_utils.download_utils.direct_link_generator import (
+    direct_link_generator,
+)
 from bot.helper.mirror_leech_utils.download_utils.qbit_download import add_qb_torrent
 from bot.helper.mirror_leech_utils.download_utils.rclone_download import (
     add_rclone_download,
@@ -448,19 +451,32 @@ class Mirror(TaskListener):
                                     f"{k}: {v}" for k, v in result.headers.items()
                                 ]
                 except TrueLinkException as e:
-                    x = await send_message(self.message, f"<blockquote expandable>╭❌ <b>Error</b>\n╰{e}</blockquote>")
-                    await self.remove_from_same_dir()
-                    await delete_links(self.message)
-                    return await auto_delete_message(x, time=300)
+                    LOGGER.error(f"TrueLink Error: {e}")
                 except Exception as e:
                     LOGGER.error(f"Unexpected exception in resolver: {e}")
-                    x = await send_message(
-                        self.message,
-                        "<blockquote expandable>╭❌ <b>Error</b>\n╰An unexpected error occurred.</blockquote>",
-                    )
-                    await self.remove_from_same_dir()
-                    await delete_links(self.message)
-                    return await auto_delete_message(x, time=300)
+
+                # AEON: Direct Link Generator Integration
+                if is_url(self.link) and not any(
+                    x in self.link.lower()
+                    for x in ["drive.google.com", "mega.nz", "rclone"]
+                ):
+                    try:
+                        res = await direct_link_generator(self.link)
+                        if res:
+                            if isinstance(res, str):
+                                self.link = res
+                            elif (
+                                isinstance(res, dict)
+                                and "links" in res
+                                and len(res["links"]) > 0
+                            ):
+                                # If it returns a list (e.g. folder), use first link for now
+                                # or handle it as FolderResult if needed
+                                self.link = res["links"][0]
+                                if not self.name and "title" in res:
+                                    self.name = res["title"]
+                    except Exception as e:
+                        LOGGER.error(f"Direct Link Generator Error: {e}")
 
         if file_ is not None:
             create_task(

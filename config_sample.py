@@ -45,6 +45,52 @@ HYDRA_IP = ""  # IP of NZBHydra2 instance
 HYDRA_API_KEY = ""  # API key for NZBHydra2
 INSTADL_API = ""  # URL/endpoint for InstaDL API
 
+# Auto Thumbnail & TMDB/IMDB Rename Configuration
+TMDB_API_KEY = ""  # TMDB API key for metadata and thumbnails (get from https://www.themoviedb.org/settings/api)
+TMDB_ENABLED = True  # Enable TMDB for auto thumbnails and metadata
+IMDB_ENABLED = True  # Enable IMDB for auto thumbnails and metadata
+AUTO_THUMBNAIL_ENABLED = False  # Enable automatic thumbnail generation from IMDB/TMDB
+AUTO_THUMBNAIL_FORMAT = "poster"  # Thumbnail format: "poster" (default) or "backdrop" for background images
+AUTO_RENAME_ENABLED = False  # Enable automatic file renaming with IMDB/TMDB metadata
+AUTO_RENAME_TEMPLATE = "S{season}E{episode}Q{quality}"  # Template for file renaming
+AUTO_RENAME_START_EPISODE = 1  # Starting episode number for sequential renaming
+AUTO_RENAME_START_SEASON = 1  # Starting season number for sequential renaming
+
+# Premium Debrid Services (for direct download link generation)
+# Debrid-Link (supports 100+ file hosts and torrents)
+DEBRID_LINK_API = ""  # Debrid-Link API key or access token (get from https://debrid-link.com/webapp/apikey)
+DEBRID_LINK_ACCESS_TOKEN = ""  # OAuth2 access token (preferred for better security)
+DEBRID_LINK_REFRESH_TOKEN = ""  # OAuth2 refresh token (for automatic token refresh)
+DEBRID_LINK_CLIENT_ID = ""  # OAuth2 client ID (for apps)
+DEBRID_LINK_CLIENT_SECRET = ""  # OAuth2 client secret (optional, for server-side apps)
+DEBRID_LINK_TOKEN_EXPIRES = 0  # Token expiration timestamp (managed automatically)
+
+# AllDebrid (supports 100+ file hosts, torrents, and streaming)
+ALLDEBRID_API_KEY = ""  # AllDebrid API key (get from https://alldebrid.com/apikeys/)
+
+# Real-Debrid (supports 100+ file hosts and torrents)
+REAL_DEBRID_API_KEY = ""  # Real-Debrid API key or access token
+REAL_DEBRID_ACCESS_TOKEN = ""  # OAuth2 access token (preferred for better security)
+REAL_DEBRID_REFRESH_TOKEN = ""  # OAuth2 refresh token (for automatic token refresh)
+REAL_DEBRID_CLIENT_ID = ""  # OAuth2 client ID (default: "X245A4XAIBGVM" for opensource apps)
+REAL_DEBRID_CLIENT_SECRET = ""  # OAuth2 client secret (optional)
+REAL_DEBRID_TOKEN_EXPIRES = 0  # Token expiration timestamp (managed automatically)
+
+# Mega-Debrid (European debrid service with torrent/magnet support)
+MEGA_DEBRID_API_TOKEN = ""  # Mega-Debrid API token
+MEGA_DEBRID_LOGIN = ""  # Mega-Debrid login email (alternative to API token)
+MEGA_DEBRID_PASSWORD = ""  # Mega-Debrid password (used with login)
+
+# TorBox (supports torrents, usenet, and web downloads)
+TORBOX_API_KEY = ""  # TorBox API key (get from https://torbox.app/settings)
+
+# MediaFire API (for private file/folder access and higher rate limits)
+MEDIAFIRE_EMAIL = ""  # MediaFire account email
+MEDIAFIRE_PASSWORD = ""  # MediaFire account password
+MEDIAFIRE_APP_ID = ""  # MediaFire app ID (get from https://www.mediafire.com/developers/)
+MEDIAFIRE_API_KEY = ""  # MediaFire API key
+
+
 # GDrive Tools
 GDRIVE_ID = ""  # Default Google Drive Folder/TeamDrive ID or "root"
 IS_TEAM_DRIVE = False  # Set True if GDRIVE_ID is a TeamDrive
