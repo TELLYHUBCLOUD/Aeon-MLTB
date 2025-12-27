@@ -9,7 +9,7 @@ cloudscraper
 dnspython
 ElectroCrypto
 #kurigram
-pyrofork
+pyrofork==2.2.11
 motor
 fastapi
 feedparser
@@ -23,6 +23,7 @@ langcodes
 lxml
 natsort
 pillow
+pycountry
 psutil
 pymongo
 pyshorteners
@@ -38,3 +39,4 @@ uvicorn
 uvloop
 xattr
 yt-dlp[default,curl-cffi]
+urllib3
