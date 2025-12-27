@@ -94,6 +94,7 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("📦 Split Size", f"userset {user_id} menu LEECH_SPLIT_SIZE")
         buttons.data_button(" User Dump", f"userset {user_id} menu USER_DUMP")
         buttons.data_button("👤 User Session", f"userset {user_id} menu USER_SESSION")
+        buttons.data_button("🖼️ Thumbnail", f"userset {user_id} thumbnail_menu")
         
         if user_dict.get("AS_DOCUMENT", False) or (
             "AS_DOCUMENT" not in user_dict and Config.AS_DOCUMENT
@@ -126,7 +127,6 @@ async def get_user_settings(from_user, stype="main"):
 
         udump = user_dict.get("USER_DUMP", "None")
         usess = "✅ Added" if user_dict.get("USER_SESSION", False) else "❌ None"
-        thumb_layout = user_dict.get("THUMBNAIL_LAYOUT", Config.THUMBNAIL_LAYOUT or "None")
         lsplit = user_dict.get("LEECH_SPLIT_SIZE", Config.LEECH_SPLIT_SIZE or "Default")
 
         text = f"""<blockquote>
@@ -136,7 +136,6 @@ async def get_user_settings(from_user, stype="main"):
 ┊📸 <b>Media Group:</b> <code>{media_group}</code>
 ┊👤 <b>User Session:</b> <code>{usess}</code>
 ┊📦 <b>User Dump:</b> <code>{udump}</code>
-┊🎨 <b>Thumbnail Layout:</b> <code>{thumb_layout}</code>
 ╰📩 <b>Bot PM:</b> <code>{bot_pm_status}</code>
 </blockquote>"""
     elif stype == "rclone":
