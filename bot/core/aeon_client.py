@@ -28,7 +28,6 @@ class TgClient:
             bot_token=Config.BOT_TOKEN,
             workdir="/usr/src/app",
             parse_mode=enums.ParseMode.HTML,
-            message_cache_size=0,
             sleep_threshold=60,
             #    max_concurrent_transmissions=100,
         )
@@ -49,7 +48,6 @@ class TgClient:
                     parse_mode=enums.ParseMode.HTML,
                     no_updates=True,
                     max_concurrent_transmissions=100,
-                    message_cache_size=0,
                     sleep_threshold=60,
                 )
                 await cls.user.start()
