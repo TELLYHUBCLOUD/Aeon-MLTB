@@ -928,6 +928,7 @@ class Mirror(TaskListener):
                 or reply_to.animation
                 or None
             )
+            LOGGER.info(f"DEBUG: reply_to found. file_ object: {file_ is not None}. Link: {self.link}")
 
             # Note: Caption/text extraction is handled earlier (line 836-869)
             # with smart URL detection. Don't duplicate that logic here.

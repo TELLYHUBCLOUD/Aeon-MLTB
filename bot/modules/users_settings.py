@@ -58,6 +58,7 @@ filename_options = [
     "AUTO_CAPTION_REMOVE",
     "LEECH_CAPTION_FONT",
     "NAME_SUBSTITUTE",
+    "AUTO_RENAME_ENABLED",
 ]
 auto_rename_options = [
     "AUTO_RENAME_TEMPLATE",
@@ -75,7 +76,7 @@ uphoster_options = (
 )
 ffset_options = ["METADATA", "AUDIO_METADATA", "VIDEO_METADATA", "SUBTITLE_METADATA"]
 auto_thumb_options = ["TMDB_API_KEY", "AUTO_THUMBNAIL_FORMAT"]
-thumbnail_menu_options = ["THUMBNAIL", "THUMBNAIL_LAYOUT"]
+thumbnail_menu_options = ["THUMBNAIL", "THUMBNAIL_LAYOUT", "AUTO_THUMBNAIL_ENABLED"]
 
 
 async def get_user_settings(from_user, stype="main"):
@@ -279,6 +280,11 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("📤 Upload Thumbnail", f"userset {user_id} menu THUMBNAIL")
         buttons.data_button("🖼️ Auto Thumbnail", f"userset {user_id} auto_thumb")
         buttons.data_button("🎨 Thumbnail Layout", f"userset {user_id} menu THUMBNAIL_LAYOUT")
+        
+        # Check auto thumbnail status
+        auto_thumb_enabled = user_dict.get("AUTO_THUMBNAIL_ENABLED", Config.AUTO_THUMBNAIL_ENABLED if hasattr(Config, 'AUTO_THUMBNAIL_ENABLED') else False)
+        buttons.data_button(f"✅ Enabled" if auto_thumb_enabled else "❌ Disabled", f"userset {user_id} tog AUTO_THUMBNAIL_ENABLED {'f' if auto_thumb_enabled else 't'}")
+        
         buttons.data_button("🔙 Back", f"userset {user_id} leech")
         buttons.data_button("❌ Close", f"userset {user_id} close")
         
@@ -793,6 +799,8 @@ async def edit_user_settings(client, query):
             back_to = "leech"
         elif data[3] == "CLEAN_FILENAME":
             back_to = "filename"
+        elif data[3] == "AUTO_THUMBNAIL_ENABLED":
+            back_to = "thumbnail_menu"
         else:
             back_to = "leech"
 
