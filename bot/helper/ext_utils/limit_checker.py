@@ -3,7 +3,7 @@ from bot.core.config_manager import Config
 from bot.helper.ext_utils.bot_utils import get_readable_file_size
 
 
-async def task_limit_checker(listener):
+async def limit_checker(listener):
     user_id = listener.user_id
     user_dict = user_data.get(user_id, {})
     
