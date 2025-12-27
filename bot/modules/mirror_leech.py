@@ -456,12 +456,17 @@ class Mirror(TaskListener):
                     LOGGER.error(f"Unexpected exception in resolver: {e}")
 
                 # AEON: Direct Link Generator Integration
-                if is_url(self.link) and not any(
+                if (
+                    is_url(self.link)
+                    or is_magnet(self.link)
+                ) and not any(
                     x in self.link.lower()
                     for x in ["drive.google.com", "mega.nz", "rclone"]
                 ):
-                    try:
-                        res = await direct_link_generator(self.link)
+                    # Only call generator if it looks like a real URL or magnet
+                    if "://" in self.link or self.link.startswith("magnet:"):
+                        try:
+                            res = await direct_link_generator(self.link)
                         if res:
                             if isinstance(res, str):
                                 self.link = res

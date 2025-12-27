@@ -440,11 +440,15 @@ def direct_link_generator(link, user_id=None):
     Returns:
         Direct download link or details dictionary
     """
-    domain = urlparse(link).hostname
-    if not domain:
-        raise DirectDownloadLinkException(
-            "ERROR: Invalid URL - Unable to parse domain from the provided link"
-        )
+    if link.startswith("magnet:") or link.endswith(".torrent"):
+        # Handle these directly without needing a domain hostname
+        pass
+    else:
+        domain = urlparse(link).hostname
+        if not domain:
+            raise DirectDownloadLinkException(
+                "ERROR: Invalid URL - Unable to parse domain from the provided link"
+            )
     if "yadi.sk" in link or "disk.yandex." in link:
         return yandex_disk(link)
     if Config.DEBRID_LINK_API and any(
