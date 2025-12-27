@@ -927,10 +927,11 @@ class Mirror(TaskListener):
                 or None
             )
 
+            # Note: Caption/text extraction is handled earlier (line 836-869)
+            # with smart URL detection. Don't duplicate that logic here.
             if file_ is None:
-                if reply_text := reply_to.text:
-                    self.link = reply_text.split("\n", 1)[0].strip()
-                else:
+                # If no file and no text extracted earlier, mark reply_to as None
+                if not self.link:
                     reply_to = None
             elif reply_to.document and (
                 file_.mime_type == "application/x-bittorrent"
