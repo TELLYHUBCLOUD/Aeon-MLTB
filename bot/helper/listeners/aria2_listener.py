@@ -189,6 +189,7 @@ async def _on_download_error(api, data):
     await sleep(1)
     LOGGER.info(f"onDownloadError: {gid}")
     error = "None"
+    options = {}
     with contextlib.suppress(TimeoutError, ClientError, Exception):
         download = await api.tellStatus(gid)
         options = await api.getOption(gid)
