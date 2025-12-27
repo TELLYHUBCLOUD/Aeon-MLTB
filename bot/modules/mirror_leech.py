@@ -1057,14 +1057,26 @@ class Mirror(TaskListener):
                 r"text/html|text/plain",
                 content_type,
             ):
-                # Attempt TrueLink resolution first
+                # Attempt TrueLink resolution first (if library is properly installed)
                 try:
                     resolver = TrueLinkResolver()
-                    res = await resolver.resolve_link(self.link)
+                    # Try different possible method names
+                    if hasattr(resolver, 'resolve'):
+                        res = await resolver.resolve(self.link)
+                    elif hasattr(resolver, 'get_direct_link'):
+                        res = await resolver.get_direct_link(self.link)
+                    elif hasattr(resolver, 'resolve_link'):
+                        res = await resolver.resolve_link(self.link)
+                    else:
+                        raise AttributeError("TrueLinkResolver has no known resolution method")
+                    
                     if res and hasattr(res, 'url'):
                         self.link = res.url
+                    elif isinstance(res, str):
+                        self.link = res
                 except Exception as e:
-                    LOGGER.error(f"TrueLink resolution failed: {e}")
+                    # Non-critical: TrueLink is optional, continue with fallback
+                    LOGGER.debug(f"TrueLink resolution skipped: {e}")
 
                 # Fallback to direct_link_generator with improved error handling
                 # REQUIRE protocol or magnet
