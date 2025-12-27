@@ -11,8 +11,22 @@ try:
     from zotify.utils import AudioFormat, Quality
     ZOTIFY_AVAILABLE = True
 except ImportError:
-    AudioFormat = Any
-    Quality = Any
+    class Quality:
+        NORMAL = "NORMAL"
+        HIGH = "HIGH"
+        VERY_HIGH = "VERY_HIGH"
+        AUTO = "AUTO"
+
+    class AudioFormat:
+        VORBIS = "VORBIS"
+        MP3 = "MP3"
+        FLAC = "FLAC"
+        AAC = "AAC"
+        FDK_AAC = "FDK_AAC"
+        OPUS = "OPUS"
+        WAV = "WAV"
+        WAVPACK = "WAVPACK"
+
     ZOTIFY_AVAILABLE = False
 
 from bot import LOGGER

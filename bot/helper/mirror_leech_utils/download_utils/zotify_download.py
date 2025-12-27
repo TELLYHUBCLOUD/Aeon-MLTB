@@ -26,8 +26,22 @@ except ImportError:
     Artist = Any
     Playlist = Any
     Show = Any
-    AudioFormat = Any
-    ImageSize = Any
+
+    class AudioFormat:
+        VORBIS = "VORBIS"
+        MP3 = "MP3"
+        FLAC = "FLAC"
+        AAC = "AAC"
+        FDK_AAC = "FDK_AAC"
+        OPUS = "OPUS"
+        WAV = "WAV"
+        WAVPACK = "WAVPACK"
+
+    class ImageSize:
+        SMALL = "SMALL"
+        MEDIUM = "MEDIUM"
+        LARGE = "LARGE"
+
     ZOTIFY_AVAILABLE = False
 
 from bot import DOWNLOAD_DIR, LOGGER, task_dict, task_dict_lock
