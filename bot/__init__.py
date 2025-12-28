@@ -17,10 +17,10 @@ from logging import (
     StreamHandler,
     basicConfig,
     getLogger,
-    TgClient,
+    
 )
 from time import time
-
+from bot.helper.aeon_client import TgClient
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
 from uvloop import install
