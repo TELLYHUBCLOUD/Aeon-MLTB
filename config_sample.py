@@ -203,4 +203,16 @@ STREAMRIP_SOUNDCLOUD_CLIENT_ID = ""
 STREAMRIP_QOBUZ_QUALITY = 3  # 1: 320kbps MP3, 2: 16-bit FLAC, 3: 24/<=96 FLAC, 4: 24/>=96 FLAC
 STREAMRIP_TIDAL_QUALITY = 3  # 0: 256kbps AAC, 1: 320kbps AAC, 2: 16-bit FLAC, 3: 24-bit MQA
 STREAMRIP_DEEZER_QUALITY = 2  # 0: 128kbps MP3, 1: 320kbps MP3, 2: FLAC
+
+# URL Shortener Configuration
+SHORTENER_ENABLED = True  # Enable/disable URL shortener
+SHORTENER_API_TOKEN = ""  # API token for shortener service
+SHORTENER_API_URL = "https://arolinks.com/api"  #Your shortener API URL
+SHORTENER_DOMAIN = "arolinks.com"  # Your shortener domain
+SHORTENER_WORKER_URL = "https://antibypass.tellycloudapi.workers.dev/create"  # Cloudflare Worker URL
+SHORTENER_CHANNELS = [  # Channels to show on shortened links
+    {"name": "TellY Mirror", "url": "https://t.me/tellY_mirror"}
+]
+SHORTENER_DEFAULT_EXPIRY = 7  # Default link expiry in days
+SHORTENER_USE_PASSWORD = True  # Auto-generate 4-digit password for links
 # No newline at end of file

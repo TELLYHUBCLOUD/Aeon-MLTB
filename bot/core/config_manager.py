@@ -198,6 +198,16 @@ class Config:
     STREAMRIP_DEEZER_DEEZLOADER_WARNINGS: bool = True
     STREAMRIP_SOUNDCLOUD_QUALITY: int = 0
     STREAMRIP_YOUTUBE_QUALITY: int = 0
+
+    # URL Shortener Settings
+    SHORTENER_ENABLED: bool = True
+    SHORTENER_API_TOKEN: str = ""
+    SHORTENER_API_URL: str = "https://arolinks.com/api"
+    SHORTENER_DOMAIN: str = "arolinks.com"
+    SHORTENER_WORKER_URL: str = "https://antibypass.tellycloudapi.workers.dev/create"
+    SHORTENER_CHANNELS: ClassVar[list[dict[str, str]]] = [{"name": "TellY Mirror", "url": "https://t.me/tellY_mirror"}]
+    SHORTENER_DEFAULT_EXPIRY: int = 7
+    SHORTENER_USE_PASSWORD: bool = True
     STREAMRIP_YOUTUBE_DOWNLOAD_VIDEOS: bool = False
     STREAMRIP_YOUTUBE_VIDEO_DOWNLOADS_FOLDER: str = ""
     STREAMRIP_DATABASE_DOWNLOADS_ENABLED: bool = True

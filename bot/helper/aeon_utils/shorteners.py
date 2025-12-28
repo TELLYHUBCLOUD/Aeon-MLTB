@@ -1,70 +1,73 @@
-from asyncio import sleep
-from random import choice
-from urllib.parse import quote
-
+from random import randint
 from aiohttp import ClientSession
-from pyshorteners import Shortener
+from bot import LOGGER
+from bot.core.config_manager import Config
 
-from bot import shorteners_list
+# POST-based Shortener Configuration (loaded from Config)
+POST_SHORTENER_CONFIG = {
+    "url": Config.SHORTENER_WORKER_URL,
+    "apitoken": Config.SHORTENER_API_TOKEN,
+    "apiurl": Config.SHORTENER_API_URL,
+    "apidomain": Config.SHORTENER_DOMAIN,
+    "channels": Config.SHORTENER_CHANNELS,
+    "enabled": Config.SHORTENER_ENABLED,
+}
 
-# Cloudflare Worker URL (Apna worker URL yahan daalein)
-WORKER_URL = "https://tellylinks.tellycloudapi.workers.dev/shorten"
+
+async def generate_random_password(length=4):
+    """Generate random numeric password"""
+    return ''.join([str(randint(0, 9)) for _ in range(length)])
 
 
-async def short(long_url):
-    """
-    Shortens URL with multiple fallback methods:
-    1. Cloudflare Worker (GPLinks) - Primary
-    2. Custom shorteners list - Secondary
-    3. TinyURL - Final fallback
-
-    Args:
-        long_url: The long URL to be shortened.
-
-    Returns:
-        Shortened URL (worker domain preferred) or original URL if all fail.
-    """
-
-    async with ClientSession() as session:
-        # Method 1: Try Cloudflare Worker first (GPLinks with worker domain)
-        try:
-            async with session.get(
-                f"{WORKER_URL}?url={quote(long_url)}", timeout=10
+async def short(long_url, alias=None, expiry=7, password="auto"):
+    if not POST_SHORTENER_CONFIG.get("enabled"):
+        LOGGER.warning("POST shortener is disabled")
+        return long_url
+    
+    if not POST_SHORTENER_CONFIG.get("apitoken"):
+        LOGGER.warning("POST shortener API token not configured")
+        return long_url
+    
+    # Generate random password if "auto"
+    if password == "auto":
+        password = await generate_random_password()
+    
+    try:
+        payload = {
+            "url": long_url,
+            "expiry": expiry,
+            "apitoken": POST_SHORTENER_CONFIG["apitoken"],
+            "apiurl": POST_SHORTENER_CONFIG["apiurl"],
+            "apidomain": POST_SHORTENER_CONFIG["apidomain"],
+            "channels": POST_SHORTENER_CONFIG["channels"],
+        }
+        
+        # Add optional fields
+        if alias:
+            payload["alias"] = alias
+        if password:
+            payload["password"] = password
+        
+        async with ClientSession() as session:
+            async with session.post(
+                POST_SHORTENER_CONFIG["url"],
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=15
             ) as response:
                 if response.status == 200:
                     result = await response.json()
                     if result.get("success"):
-                        # Worker domain URL milega: https://your-worker.workers.dev/hh5CY9
-                        return result.get("shortUrl")
-        except Exception as e:
-            print(f"Worker failed: {e}")
-
-        # Method 2: Try custom shorteners list (fallback)
-        if shorteners_list:
-            for _attempt in range(3):
-                shortener_info = choice(shorteners_list)
-                try:
-                    async with session.get(
-                        f"https://{shortener_info['domain']}/api?api={shortener_info['api_key']}&url={quote(long_url)}",
-                        timeout=10,
-                    ) as response:
-                        if response.status == 200:
-                            result = await response.json()
-                            short_url = result.get("shortenedUrl", long_url)
-                            if short_url != long_url:
-                                return short_url
-                except Exception as e:
-                    print(f"Custom shortener failed: {e}")
-                    continue
-
-        # Method 3: Final fallback to TinyURL
-        s = Shortener()
-        for _attempt in range(3):
-            try:
-                return s.tinyurl.short(long_url)
-            except Exception as e:
-                print(f"TinyURL attempt {_attempt + 1} failed: {e}")
-                await sleep(1)
-
-        # If all methods fail, return original URL
-        return long_url
+                        short_url = result.get("shortUrl")
+                        LOGGER.info(f"Shortened: {long_url} -> {short_url}")
+                        if password:
+                            LOGGER.info(f"Password: {password}")
+                        return short_url
+                else:
+                    error_text = await response.text()
+                    LOGGER.error(f"Shortener failed: {response.status} - {error_text}")
+    except Exception as e:
+        LOGGER.error(f"Shortener error: {e}")
+    
+    # Return original URL if failed
+    return long_url

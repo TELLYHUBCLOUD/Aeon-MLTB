@@ -68,6 +68,7 @@ CATEGORIES = {
     "DEBRID": ["DEBRID_LINK_API", "DEBRID_LINK_ACCESS_TOKEN", "DEBRID_LINK_REFRESH_TOKEN", "DEBRID_LINK_CLIENT_ID", "DEBRID_LINK_CLIENT_SECRET", "ALLDEBRID_API_KEY", "REAL_DEBRID_API_KEY", "REAL_DEBRID_ACCESS_TOKEN", "REAL_DEBRID_REFRESH_TOKEN", "REAL_DEBRID_CLIENT_ID", "REAL_DEBRID_CLIENT_SECRET", "MEGA_DEBRID_API_TOKEN", "MEGA_DEBRID_LOGIN", "MEGA_DEBRID_PASSWORD", "TORBOX_API_KEY"],
     "ZOTIFY": ["ZOTIFY_ENABLED", "ZOTIFY_CREDENTIALS_PATH", "ZOTIFY_DOWNLOAD_QUALITY", "ZOTIFY_AUDIO_FORMAT", "ZOTIFY_ARTWORK_SIZE"],
     "STREAMRIP": ["STREAMRIP_ENABLED", "STREAMRIP_QOBUZ_EMAIL", "STREAMRIP_QOBUZ_PASSWORD", "STREAMRIP_QOBUZ_APP_ID", "STREAMRIP_TIDAL_ACCESS_TOKEN", "STREAMRIP_TIDAL_REFRESH_TOKEN", "STREAMRIP_TIDAL_USER_ID", "STREAMRIP_TIDAL_COUNTRY_CODE", "STREAMRIP_DEEZER_ARL", "STREAMRIP_SOUNDCLOUD_CLIENT_ID"],
+    "SHORTENER": ["SHORTENER_ENABLED", "SHORTENER_API_TOKEN", "SHORTENER_API_URL", "SHORTENER_DOMAIN", "SHORTENER_WORKER_URL", "SHORTENER_CHANNELS", "SHORTENER_DEFAULT_EXPIRY", "SHORTENER_USE_PASSWORD"],
     "FILTER": ["AUTO_CAPTION_REMOVE", "AUTO_CAPTION_REPLACE", "FILENAME_REPLACE", "NAME_SUBSTITUTE", "EXCLUDED_EXTENSIONS"],
     "GENERAL": ["OWNER_ID", "SUDO_USERS", "AUTHORIZED_CHATS", "BOT_TOKEN", "TELEGRAM_API", "TELEGRAM_HASH", "DATABASE_URL", "UPSTREAM_REPO", "UPSTREAM_BRANCH", "CMD_SUFFIX", "BASE_URL", "BASE_URL_PORT", "LOG_CHAT_ID"]
 }
@@ -85,11 +86,12 @@ async def get_buttons(key=None, edit_type=None):
     elif key == "conf":
         buttons.data_button("⛔ Limits", "botset key LIMIT")
         buttons.data_button("📥 Leech", "botset key LEECH")
-        buttons.data_button("📡 LEECH ON/OFF", "botset key MIRROR")
+        buttons.data_button("📡 Leech ON/OFF", "botset key MIRROR")
         buttons.data_button("⚗️ Debrid", "botset key DEBRID")
         buttons.data_button("🤖 Auto Features", "botset key AUTO")
         buttons.data_button("🎵 Zotify", "botset key ZOTIFY")
         buttons.data_button("🎧 Streamrip", "botset key STREAMRIP")
+        buttons.data_button("🔗 Shortener", "botset key SHORTENER")
         buttons.data_button("🔍 Filters", "botset key FILTER")
         buttons.data_button("📝 General", "botset key GENERAL")
         buttons.data_button("📋 All Config", "botset var")
