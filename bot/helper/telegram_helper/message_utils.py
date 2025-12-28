@@ -87,24 +87,24 @@ async def edit_message(
     markdown=False,
     block=True,
 ):
-    # parse_mode = enums.ParseMode.MARKDOWN if markdown else enums.ParseMode.HTML
+    parse_mode = enums.ParseMode.MARKDOWN if markdown else enums.ParseMode.HTML
     try:
         if message.media:
             if photo:
                 return await message.edit_media(
                     InputMediaPhoto(photo, text),
                     reply_markup=buttons,
-                    # parse_mode=parse_mode,
+                    parse_mode=parse_mode,
                 )
             return await message.edit_caption(
                 caption=text,
                 reply_markup=buttons,
-                # parse_mode=parse_mode,
+                parse_mode=parse_mode,
             )
         return await message.edit(
             text=text,
             reply_markup=buttons,
-            # parse_mode=parse_mode,
+            parse_mode=parse_mode,
         )
     except FloodWait as f:
         mid = message.id if hasattr(message, "id") else message
@@ -132,6 +132,7 @@ async def send_file(message, file, caption="", buttons=None):
             caption=caption,
             disable_notification=True,
             reply_markup=buttons,
+            parse_mode=enums.ParseMode.HTML,
         )
     except FloodWait as f:
         mid = message.id if hasattr(message, "id") else message
@@ -152,6 +153,7 @@ async def send_rss(text, chat_id, thread_id):
             text=text,
             message_thread_id=thread_id,
             disable_notification=True,
+            parse_mode=enums.ParseMode.HTML,
         )
     #   except (FloodWait, FloodPremiumWait) as f:
     except FloodWait as f:
