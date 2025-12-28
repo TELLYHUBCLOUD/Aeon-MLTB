@@ -86,6 +86,8 @@ class Mirror(TaskListener):
         options="",
         auto_link=None,
         auto_ff=None,
+        name=None,
+        size=None,
         **kwargs,
     ):
         if same_dir is None:
@@ -100,6 +102,8 @@ class Mirror(TaskListener):
         self.bulk = bulk
         self.auto_link = auto_link
         self.auto_ff = auto_ff
+        self.name = name
+        self.size = size
         super().__init__()
         self.is_qbit = is_qbit
         self.is_leech = is_leech
@@ -432,6 +436,11 @@ class Mirror(TaskListener):
         self.add_attachment_enabled = args["-add-attachment"]
         self.preserve_flag = args["-preserve"]
         self.replace_flag = args["-replace"]
+        
+        if self.name is None:
+            self.name = args["name"]
+        if self.size is None:
+            self.size = 0
 
         # Remove settings
         self.remove_enabled = args["-remove"]

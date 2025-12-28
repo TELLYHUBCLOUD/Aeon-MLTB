@@ -63,7 +63,15 @@ async def terabox_handler(client, message):
         )
         
         # Start mirror/leech process using auto_link to avoid link echoing
-        await Mirror(client, message, is_leech=True, auto_link=direct_link).new_event()
+        # Pass name and size directly for accurate status message display
+        await Mirror(
+            client, 
+            message, 
+            is_leech=True, 
+            auto_link=direct_link,
+            name=file_name,
+            size=result.get("size_bytes", 0)
+        ).new_event()
         
         # Delete processing message once mirror/leech has started
         await delete_message(wait_msg)
