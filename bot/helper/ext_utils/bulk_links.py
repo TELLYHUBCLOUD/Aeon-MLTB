@@ -92,7 +92,19 @@ async def extract_bulk_links(message, bulk_start: str, bulk_end: str) -> list:
         if (file_ := reply_to.document) and (file_.mime_type == "text/plain"):
             links_list = await get_links_from_file(reply_to)
         elif text := (reply_to.text or reply_to.caption):
-            links_list = get_links_from_message(text)
+            # If it's a media message (caption), only extract links if no other media is present
+            if reply_to.text or not any(
+                [
+                    reply_to.photo,
+                    reply_to.video,
+                    reply_to.audio,
+                    reply_to.document,
+                    reply_to.voice,
+                    reply_to.video_note,
+                    reply_to.animation,
+                ]
+            ):
+                links_list = get_links_from_message(text)
     else:
         text = message.text or message.caption
         if text and "\n" in text:
