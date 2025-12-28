@@ -412,7 +412,7 @@ class Mirror(TaskListener):
                 _default_server, _ = get_ddl_setting(user_id, "DDL_SERVER", "gofile")
 
         self.rc_flags = args["-rcf"]
-        self.link = args["link"]
+        self.link = self.auto_link or args["link"]
         self.compress = args["-z"]
         # Enable compression if -z flag is set and archive flags are enabled
         from bot.helper.ext_utils.bot_utils import is_flag_enabled

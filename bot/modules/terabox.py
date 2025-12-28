@@ -1,13 +1,16 @@
 from bot import LOGGER
+LOGGER.info("terabox.py module imported!")
 from bot.helper.aeon_utils.terabox_helper import get_terabox_direct_link
 from bot.helper.ext_utils.bot_utils import new_task
-from bot.helper.telegram_helper.message_utils import send_message, edit_message
+from bot.helper.telegram_helper.message_utils import send_message, edit_message, delete_message
+from bot.modules.mirror_leech import Mirror
 
 
 @new_task
 async def terabox_handler(client, message):
     """Handle /terabox command - Get Terabox direct download link"""
-    user_id = message.from_user.id
+    LOGGER.info("terabox_handler triggered!")
+    user_id = message.from_user.id if message.from_user else message.chat.id
     input_text = message.text.split(maxsplit=1)
     
     LOGGER.info(f"Terabox command received from user {user_id}")
@@ -50,16 +53,20 @@ async def terabox_handler(client, message):
         
         LOGGER.info(f"[{user_id}] Terabox success: {file_name} ({file_size})")
         
-        # Send file info and download link
-        response_text = (
+        # Send file info and notify user download is starting
+        await edit_message(
+            wait_msg,
             f"✅ <b>File Information:</b>\n\n"
             f"<b>📁 Name:</b> <code>{file_name}</code>\n"
             f"<b>📊 Size:</b> {file_size}\n\n"
-            f"<b>🔗 Direct Link:</b>\n<code>{direct_link}</code>\n\n"
-            f"<i>Use /leech command with this link to download</i>"
+            f"⏳ <b>Starting download...</b>"
         )
         
-        await edit_message(wait_msg, response_text)
+        # Start mirror/leech process using auto_link to avoid link echoing
+        await Mirror(client, message, is_leech=True, auto_link=direct_link).new_event()
+        
+        # Delete processing message once mirror/leech has started
+        await delete_message(wait_msg)
         
     except Exception as e:
         LOGGER.error(f"Terabox handler error: {e}", exc_info=True)
