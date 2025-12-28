@@ -618,6 +618,11 @@ class TelegramUploader:
     async def _copy_message(self):
         await sleep(0.5)
 
+        # Check if message exists before trying to copy
+        if not self._sent_msg:
+            LOGGER.warning(f"[{self._listener.mid}] Cannot copy message - sent_msg is None")
+            return
+
         async def _copy(target, retries=2):
             for attempt in range(retries):
                 try:
