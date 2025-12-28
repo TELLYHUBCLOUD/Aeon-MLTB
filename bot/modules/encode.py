@@ -429,9 +429,10 @@ class Encode(TaskListener):
                         if await aiopath.exists(des_path):
                             await aioremove(des_path)
 
-            await delete_message(wait_msg)
             if streams:
                 is_remote_successful = True
+            
+            await delete_message(wait_msg)
         
         # Interactive Menu (Pre-Download)
         selector = EncodeSelection(self, streams)
