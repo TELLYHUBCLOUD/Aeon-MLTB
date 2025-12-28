@@ -17,6 +17,7 @@ from logging import (
     StreamHandler,
     basicConfig,
     getLogger,
+    TgClient,
 )
 from time import time
 
