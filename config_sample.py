@@ -203,4 +203,4 @@ STREAMRIP_SOUNDCLOUD_CLIENT_ID = ""
 STREAMRIP_QOBUZ_QUALITY = 3  # 1: 320kbps MP3, 2: 16-bit FLAC, 3: 24/<=96 FLAC, 4: 24/>=96 FLAC
 STREAMRIP_TIDAL_QUALITY = 3  # 0: 256kbps AAC, 1: 320kbps AAC, 2: 16-bit FLAC, 3: 24-bit MQA
 STREAMRIP_DEEZER_QUALITY = 2  # 0: 128kbps MP3, 1: 320kbps MP3, 2: FLAC
-\ No newline at end of file
+# No newline at end of file
