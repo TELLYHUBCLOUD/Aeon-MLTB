@@ -13,7 +13,7 @@ from pyrogram.filters import regex, user
 from secrets import token_hex
 from aioshutil import move, rmtree
 
-from bot import LOGGER, bot_loop, task_dict, task_dict_lock, multi_tags, intervals
+from bot import LOGGER, bot_loop, task_dict, task_dict_lock, multi_tags, intervals, TgClient
 from bot.helper.aeon_utils.access_check import error_check
 from bot.helper.ext_utils.bot_utils import (
     COMMAND_USAGE,
@@ -227,7 +227,6 @@ class Encode(TaskListener):
         super().__init__()
         self.is_leech = True
 
-        self.is_leech = True
         self.bulk = []
         self.multi = 0
         self.options = ""
