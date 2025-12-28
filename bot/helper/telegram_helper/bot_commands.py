@@ -10,10 +10,12 @@ class BotCommands:
     JdMirrorCommand = [f"jdmirror{i}", f"jm{i}"]
     NzbMirrorCommand = [f"nzbmirror{i}", f"nm{i}"]
     YtdlCommand = [f"ytdl{i}", f"y{i}"]
+
     LeechCommand = [f"leech{i}", f"l{i}"]
     JdLeechCommand = [f"jdleech{i}", f"jl{i}"]
     NzbLeechCommand = [f"nzbleech{i}", f"nl{i}"]
     YtdlLeechCommand = [f"ytdlleech{i}", f"yl{i}"]
+    
     CloneCommand = f"clone{i}"
     EncodeCommand = f"encode{i}"
     MergeCommand = f"merge{i}"

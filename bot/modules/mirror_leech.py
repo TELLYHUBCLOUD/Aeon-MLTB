@@ -834,87 +834,14 @@ class Mirror(TaskListener):
         path = f"{DOWNLOAD_DIR}{self.mid}{self.folder_name}"
 
 
-        # Extract link from reply_to text/caption
-        # Priority: 
-        # 1. If reply has text (no media) -> use text as link
-        # 2. If reply has media + caption with valid URL -> use caption URL
-        # 3. If reply has media + caption without URL -> ignore caption, download media
+        # Consolidated reply_to handling
+        # Priority: Media > Caption Link > Command Link
         reply_to = self.message.reply_to_message
         if not reply_to and self.message.reply_to_message_id:
             reply_to = await self.client.get_messages(self.message.chat.id, self.message.reply_to_message_id)
-        
-        if (
-            not self.link
-            and reply_to
-            and reply_to.text
-        ):
-            has_media = (
-                reply_to.document
-                or reply_to.photo
-                or reply_to.video
-                or reply_to.audio
-                or reply_to.voice
-                or reply_to.video_note
-                or reply_to.sticker
-                or reply_to.animation
-            )
-            
-            # Extract first line from text/caption
-            potential_link = reply_to.text.split("\n", 1)[0].strip()
-            
-            # Priority:
-            # If there's media, always ignore caption/text and let media download handler take over
-            # Only use text/caption as a link if THERE IS NO MEDIA
-            if not has_media:
-                self.link = potential_link
-            # else: self.link remains empty, which triggers media detection logic later
 
-        if is_telegram_link(self.link):
-            try:
-                reply_to, session = await get_tg_link_message(self.link, user_id)
-            except Exception as e:
-                # Convert exception to string to avoid TypeError in send_message
-                error_msg = (
-                    f"ERROR: {e!s}"
-                    if e
-                    else "ERROR: Failed to process Telegram link"
-                )
-                x = await send_message(self.message, error_msg)
-                await self.remove_from_same_dir()
-                await delete_links(self.message)
-                return await auto_delete_message(x, time=300)
-
-        if isinstance(reply_to, list):
-            self.bulk = reply_to
-            b_msg = input_list[:1]
-            self.options = " ".join(input_list[1:])
-            b_msg.append(f"{self.bulk[0]} -i {len(self.bulk)} {self.options}")
-            nextmsg = await send_message(self.message, " ".join(b_msg))
-            nextmsg = await self.client.get_messages(
-                chat_id=self.message.chat.id,
-                message_ids=nextmsg.id,
-            )
-            if self.message.from_user:
-                nextmsg.from_user = self.user
-            else:
-                nextmsg.sender_chat = self.user
-            await Mirror(
-                self.client,
-                nextmsg,
-                self.is_qbit,
-                self.is_leech,
-                self.is_jd,
-                self.is_nzb,
-                self.same_dir,
-                self.bulk,
-                self.multi_tag,
-                self.options,
-            ).new_event()
-            return await delete_links(self.message)
-
+        file_ = None
         if reply_to:
-            LOGGER.info(f"DEBUG: reply_to detected. ID: {reply_to.id}")
-            LOGGER.info(f"DEBUG: Attributes - Doc: {bool(reply_to.document)}, Photo: {bool(reply_to.photo)}, Video: {bool(reply_to.video)}, Audio: {bool(reply_to.audio)}")
             file_ = (
                 reply_to.document
                 or reply_to.photo
@@ -926,20 +853,46 @@ class Mirror(TaskListener):
                 or reply_to.animation
                 or None
             )
-            LOGGER.info(f"DEBUG: Final file_ object: {file_ is not None}. Link: {self.link}")
 
-            # Note: Caption/text extraction is handled earlier (line 836-869)
-            # with smart URL detection. Don't duplicate that logic here.
-            if file_ is None:
-                # If no file and no text extracted earlier, mark reply_to as None
-                if not self.link:
-                    reply_to = None
-            elif reply_to.document and (
-                file_.mime_type == "application/x-bittorrent"
-                or file_.file_name.endswith((".torrent", ".dlc", ".nzb"))
-            ):
-                self.link = await reply_to.download()
-                file_ = None
+            if file_:
+                if reply_to.document and (
+                    file_.mime_type == "application/x-bittorrent"
+                    or file_.file_name.endswith((".torrent", ".dlc", ".nzb"))
+                ):
+                    self.link = await reply_to.download()
+                    file_ = None
+                else:
+                    # Media detected, ignore all links in caption as per user request
+                    self.link = ""
+            elif not self.link and reply_to.text:
+                # Only extract links from plain text messages (no media)
+                potential_link = reply_to.text.split("\n", 1)[0].strip()
+                if is_url(potential_link) or is_magnet(potential_link) or is_telegram_link(potential_link):
+                    self.link = potential_link
+
+        if is_telegram_link(self.link):
+            try:
+                reply_to, session = await get_tg_link_message(self.link, user_id)
+            except Exception as e:
+                error_msg = f"ERROR: {e!s}" if e else "ERROR: Failed to process Telegram link"
+                x = await send_message(self.message, error_msg)
+                await self.remove_from_same_dir()
+                await delete_links(self.message)
+                return await auto_delete_message(x, time=300)
+
+        if isinstance(reply_to, list):
+            self.bulk = reply_to
+            b_msg = input_list[:1]
+            self.options = " ".join(input_list[1:])
+            b_msg.append(f"{self.bulk[0]} -i {len(self.bulk)} {self.options}")
+            nextmsg = await send_message(self.message, " ".join(b_msg))
+            nextmsg = await self.client.get_messages(chat_id=self.message.chat.id, message_ids=nextmsg.id)
+            if self.message.from_user:
+                nextmsg.from_user = self.user
+            else:
+                nextmsg.sender_chat = self.user
+            await Mirror(self.client, nextmsg, self.is_qbit, self.is_leech, self.is_jd, self.is_nzb, self.same_dir, self.bulk, self.multi_tag, self.options).new_event()
+            return await delete_links(self.message)
 
         if (
             file_

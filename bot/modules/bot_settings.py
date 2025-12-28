@@ -76,35 +76,35 @@ CATEGORIES = {
 async def get_buttons(key=None, edit_type=None):
     buttons = ButtonMaker()
     if key is None:
-        buttons.data_button("Bot Config", "botset conf")
-        buttons.data_button("Pvt Files", "botset private")
-        buttons.data_button("Sabnzbd", "botset nzb")
-        buttons.data_button("JD Sync", "botset syncjd")
-        buttons.data_button("Close", "botset close")
-        msg = "<blockquote expandable>╭⚙️ <b>Bot Settings\n╰Choose a setting to configure:</blockquote>"
+        buttons.data_button("⚙️ Bot Config", "botset conf")
+        buttons.data_button("📂 Pvt Files", "botset private")
+        buttons.data_button("☁️ Sabnzbd", "botset nzb")
+        buttons.data_button("🔄 JD Sync", "botset syncjd")
+        buttons.data_button("❌ Close", "botset close")
+        msg = "<blockquote expandable>╭⚙️ <b>Bot Settings</b>\n╰Choose a setting to configure:</blockquote>"
     elif key == "conf":
-        buttons.data_button("Limits", "botset key LIMIT")
-        buttons.data_button("Leech", "botset key LEECH")
-        buttons.data_button("Mirror", "botset key MIRROR")
-        buttons.data_button("Debrid", "botset key DEBRID")
-        buttons.data_button("Auto", "botset key AUTO")
-        buttons.data_button("Zotify", "botset key ZOTIFY")
-        buttons.data_button("Streamrip", "botset key STREAMRIP")
-        buttons.data_button("Filters", "botset key FILTER")
-        buttons.data_button("General", "botset key GENERAL")
-        buttons.data_button("All Config", "botset var")
-        buttons.data_button("Back", "botset back")
-        buttons.data_button("Close", "botset close")
-        msg = "<blockquote expandable>╭⚙️ <b>Bot Config\n╰Choose a category:</blockquote>"
+        buttons.data_button("⛔ Limits", "botset key LIMIT")
+        buttons.data_button("📥 Leech", "botset key LEECH")
+        buttons.data_button("📡 LEECH ON/OFF", "botset key MIRROR")
+        buttons.data_button("⚗️ Debrid", "botset key DEBRID")
+        buttons.data_button("🤖 Auto Features", "botset key AUTO")
+        buttons.data_button("🎵 Zotify", "botset key ZOTIFY")
+        buttons.data_button("🎧 Streamrip", "botset key STREAMRIP")
+        buttons.data_button("🔍 Filters", "botset key FILTER")
+        buttons.data_button("📝 General", "botset key GENERAL")
+        buttons.data_button("📋 All Config", "botset var")
+        buttons.data_button("🔙 Back", "botset back")
+        buttons.data_button("❌ Close", "botset close")
+        msg = "<blockquote expandable>╭⚙️ <b>Bot Config</b>\n╰Choose a category:</blockquote>"
     elif edit_type is not None:
         if edit_type.startswith("botvar"):
             cat = edit_type.replace("botvar", "")
             back_data = f"botset key {cat}" if cat else "botset var"
             msg = ""
-            buttons.data_button("Back", back_data)
+            buttons.data_button("🔙 Back", back_data)
             if key not in ["TELEGRAM_HASH", "TELEGRAM_API", "OWNER_ID", "BOT_TOKEN"]:
-                buttons.data_button("Default", f"botset resetvar {key} {cat}")
-            buttons.data_button("Close", "botset close")
+                buttons.data_button("🔄 Default", f"botset resetvar {key} {cat}")
+            buttons.data_button("❌ Close", "botset close")
             if key in [
                 "CMD_SUFFIX",
                 "OWNER_ID",
@@ -117,21 +117,21 @@ async def get_buttons(key=None, edit_type=None):
                 msg += "Restart required for this edit to take effect! You will not see the changes in bot vars, the edit will be in database only!\n\n"
             msg += f"<blockquote expandable>╭✏️ <b>Edit Bot Variable</b>\n┊<b>Variable:</b> {key}\n┊<b>Current Value:</b> {Config.get(key)}\n╰<b>Timeout:</b> 60 sec</blockquote>"
         elif edit_type == "nzbvar":
-            buttons.data_button("Back", "botset nzb")
-            buttons.data_button("Default", f"botset resetnzb {key}")
-            buttons.data_button("Empty String", f"botset emptynzb {key}")
-            buttons.data_button("Close", "botset close")
+            buttons.data_button("🔙 Back", "botset nzb")
+            buttons.data_button("🔄 Default", f"botset resetnzb {key}")
+            buttons.data_button("🧹 Empty String", f"botset emptynzb {key}")
+            buttons.data_button("❌ Close", "botset close")
             msg = f"<blockquote expandable>╭✏️ <b>Edit WS Variable</b>\n┊<b>Variable:</b> {key}\n┊<b>Current Value:</b> {nzb_options[key]}\n┊<b>Note:</b> If list, separate by space or ','\n┊<b>Example:</b> .exe,info or .exe .info\n╰<b>Timeout:</b> 60 sec</blockquote>"
         elif edit_type.startswith("nzbsevar"):
             index = 0 if key == "newser" else int(edit_type.replace("nzbsevar", ""))
             if key == "newser":
-                buttons.data_button("Back", "botset nzbserver")
+                buttons.data_button("🔙 Back", "botset nzbserver")
                 msg = "Send one server as dictionary {}, like in config.py without []. Timeout: 60 sec"
             else:
-                buttons.data_button("Empty", f"botset emptyserkey {index} {key}")
-                buttons.data_button("Back", f"botset nzbser{index}")
+                buttons.data_button("🧹 Empty", f"botset emptyserkey {index} {key}")
+                buttons.data_button("🔙 Back", f"botset nzbser{index}")
                 msg = f"╭✏️ <b>Edit Server Variable</b>\n┊<b>Server:</b> {Config.USENET_SERVERS[index]['name']}\n┊<b>Variable:</b> {key}\n┊<b>Current Value:</b> {Config.USENET_SERVERS[index][key]}\n╰<b>Timeout:</b> 60 sec"
-            buttons.data_button("Close", "botset close")
+            buttons.data_button("❌ Close", "botset close")
     elif key == "var":
         conf_dict = Config.get_all()
         keys = list(conf_dict.keys())
@@ -140,11 +140,11 @@ async def get_buttons(key=None, edit_type=None):
                 continue
             buttons.data_button(k, f"botset botvar {k}")
         if state == "view":
-            buttons.data_button("Edit", "botset edit var")
+            buttons.data_button("✏️ Edit", "botset edit var")
         else:
-            buttons.data_button("View", "botset view var")
-        buttons.data_button("Back", "botset conf")
-        buttons.data_button("Close", "botset close")
+            buttons.data_button("👁️ View", "botset view var")
+        buttons.data_button("🔙 Back", "botset conf")
+        buttons.data_button("❌ Close", "botset close")
         for x in range(0, len(keys), 10):
             buttons.data_button(
                 f"{int(x / 10)}",
@@ -158,11 +158,11 @@ async def get_buttons(key=None, edit_type=None):
         for k in keys[start : 10 + start]:
             buttons.data_button(k, f"botset botvar {k} {category}")
         if state == "view":
-            buttons.data_button("Edit", f"botset edit key {category}")
+            buttons.data_button("✏️ Edit", f"botset edit key {category}")
         else:
-            buttons.data_button("View", f"botset view key {category}")
-        buttons.data_button("Back", "botset conf")
-        buttons.data_button("Close", "botset close")
+            buttons.data_button("👁️ View", f"botset view key {category}")
+        buttons.data_button("🔙 Back", "botset conf")
+        buttons.data_button("❌ Close", "botset close")
         if len(keys) > 10:
             for x in range(0, len(keys), 10):
                 buttons.data_button(
@@ -172,8 +172,8 @@ async def get_buttons(key=None, edit_type=None):
                 )
         msg = f"╭🛠 <b>{category} Variables</b>\n┊<b>Page:</b> {int(start / 10)}\n╰<b>State:</b> {state}"
     elif key == "private":
-        buttons.data_button("Back", "botset back")
-        buttons.data_button("Close", "botset close")
+        buttons.data_button("🔙 Back", "botset back")
+        buttons.data_button("❌ Close", "botset close")
         msg = """╭🔒 <b>Private Files</b>
 ┊Send private file: config.py, token.pickle, rclone.conf, accounts.zip, list_drives.txt, cookies.txt, .netrc or any other private file!
 ┊To delete private file send only the file name as text message.
@@ -183,13 +183,13 @@ async def get_buttons(key=None, edit_type=None):
         for k in list(nzb_options.keys())[start : 10 + start]:
             buttons.data_button(k, f"botset nzbvar {k}")
         if state == "view":
-            buttons.data_button("Edit", "botset edit nzb")
+            buttons.data_button("✏️ Edit", "botset edit nzb")
         else:
-            buttons.data_button("View", "botset view nzb")
-        buttons.data_button("Servers", "botset nzbserver")
-        buttons.data_button("Sync Sabnzbd", "botset syncnzb")
-        buttons.data_button("Back", "botset back")
-        buttons.data_button("Close", "botset close")
+            buttons.data_button("👁️ View", "botset view nzb")
+        buttons.data_button("🌍 Servers", "botset nzbserver")
+        buttons.data_button("🔄 Sync Sabnzbd", "botset syncnzb")
+        buttons.data_button("🔙 Back", "botset back")
+        buttons.data_button("❌ Close", "botset close")
         for x in range(0, len(nzb_options), 10):
             buttons.data_button(
                 f"{int(x / 10)}",
@@ -201,9 +201,9 @@ async def get_buttons(key=None, edit_type=None):
         if len(Config.USENET_SERVERS) > 0:
             for index, k in enumerate(Config.USENET_SERVERS[start : 10 + start]):
                 buttons.data_button(k["name"], f"botset nzbser{index}")
-        buttons.data_button("Add New", "botset nzbsevar newser")
-        buttons.data_button("Back", "botset nzb")
-        buttons.data_button("Close", "botset close")
+        buttons.data_button("➕ Add New", "botset nzbsevar newser")
+        buttons.data_button("🔙 Back", "botset nzb")
+        buttons.data_button("❌ Close", "botset close")
         if len(Config.USENET_SERVERS) > 10:
             for x in range(0, len(Config.USENET_SERVERS), 10):
                 buttons.data_button(
@@ -217,12 +217,12 @@ async def get_buttons(key=None, edit_type=None):
         for k in list(Config.USENET_SERVERS[index].keys())[start : 10 + start]:
             buttons.data_button(k, f"botset nzbsevar{index} {k}")
         if state == "view":
-            buttons.data_button("Edit", f"botset edit {key}")
+            buttons.data_button("✏️ Edit", f"botset edit {key}")
         else:
-            buttons.data_button("View", f"botset view {key}")
-        buttons.data_button("Remove Server", f"botset remser {index}")
-        buttons.data_button("Back", "botset nzbserver")
-        buttons.data_button("Close", "botset close")
+            buttons.data_button("👁️ View", f"botset view {key}")
+        buttons.data_button("🗑️ Remove Server", f"botset remser {index}")
+        buttons.data_button("🔙 Back", "botset nzbserver")
+        buttons.data_button("❌ Close", "botset close")
         if len(Config.USENET_SERVERS[index].keys()) > 10:
             for x in range(0, len(Config.USENET_SERVERS[index]), 10):
                 buttons.data_button(

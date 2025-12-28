@@ -180,11 +180,11 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("☁️ Gdrive", f"userset {user_id} set_upload gd")
         buttons.data_button("📁 Rclone", f"userset {user_id} set_upload rc")
         buttons.data_button("🎥 YouTube", f"userset {user_id} set_upload yt")
-        buttons.data_button("� Gofile", f"userset {user_id} set_upload go")
+        buttons.data_button("📂 Gofile", f"userset {user_id} set_upload go")
         buttons.data_button("💾 Buzzheavier", f"userset {user_id} set_upload biz")
         buttons.data_button("💧 Pixeldrain", f"userset {user_id} set_upload pix")
         buttons.data_button("🎞️ LuluStream", f"userset {user_id} set_upload lulu")
-        buttons.data_button("�🔙 Back", f"userset {user_id} back")
+        buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
         text = f"""<blockquote>
 ╭📤 <b>Upload Destination Settings for {name}</b>

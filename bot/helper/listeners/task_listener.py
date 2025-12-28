@@ -557,7 +557,7 @@ class TaskListener(TaskConfig):
             service_name = hosters[upload_service]
             status_text = "Ready to stream!" if "LuluStream" in service_name else "Ready to share!"
             emoji = "🎞️" if "LuluStream" in service_name else "☁️"
-            msg = f"<blockquote>{emoji} <b>{service_name} Upload Complete</blockquote></b>\n" \
+            msg = f"<blockquote>{emoji} <b>{service_name} Upload Complete</b></blockquote>\n" \
                   f"╭<b>Name: </b><code>{escape(self.name)}</code>\n" \
                   f"├<b>Size: </b>{get_readable_file_size(self.size)}\n" \
                   f"├<b>Link: </b><code>{link}</code>\n" \
