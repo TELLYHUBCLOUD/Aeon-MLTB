@@ -196,8 +196,6 @@ class EncodeSelection:
         buttons = ButtonMaker() 
         options = [
             "Original",
-            "2160p",
-            "1440p",
             "1080p",
             "720p",
             "576p",
@@ -400,9 +398,37 @@ class Encode(TaskListener):
         streams = []
         is_remote_successful = False
         
-        if isinstance(self.link, str) and is_url(self.link):
+        if (isinstance(self.link, str) and is_url(self.link)) or hasattr(self.link, "document") or hasattr(self.link, "video") or hasattr(self.link, "audio"):
             wait_msg = await send_message(self.message, "⏳ Fetching Metadata...")
-            streams = await get_remote_media_info(self.link)
+            if isinstance(self.link, str) and is_url(self.link):
+                streams = await get_remote_media_info(self.link)
+            else:
+                # Telegram media (Message object)
+                media = self.link.document or self.link.video or self.link.audio
+                if media:
+                    from os import makedirs
+                    from bot import DOWNLOAD_DIR
+                    from bot.helper.ext_utils.media_utils import get_streams
+                    from aiofiles import open as aiopen
+                    from aiofiles.os import remove as aioremove
+                    
+                    path = f"{DOWNLOAD_DIR}Metadata/"
+                    if not await aiopath.isdir(path):
+                        await sync_to_async(makedirs, path, exist_ok=True)
+                    
+                    des_path = ospath.join(path, f"{self.mid}_{media.file_name or 'temp'}")
+                    try:
+                        async for chunk in TgClient.bot.stream_media(media, limit=5):
+                            async with aiopen(des_path, "ab") as f:
+                                await f.write(chunk)
+                        
+                        streams = await get_streams(des_path)
+                    except Exception as e:
+                        LOGGER.error(f"Error fetching TG metadata: {e}")
+                    finally:
+                        if await aiopath.exists(des_path):
+                            await aioremove(des_path)
+
             await delete_message(wait_msg)
             if streams:
                 is_remote_successful = True
@@ -570,9 +596,7 @@ class Encode(TaskListener):
         if self.quality != "Original": # and has_video (we assume yes or generic)
              cmd.extend(["-c:v", "libx264"])
              scale = ""
-             if self.quality == "2160p": scale = "scale=-2:2160"
-             elif self.quality == "1440p": scale = "scale=-2:1440"
-             elif self.quality == "1080p": scale = "scale=-2:1080"
+             if self.quality == "1080p": scale = "scale=-2:1080"
              elif self.quality == "720p": scale = "scale=-2:720"
              elif self.quality == "576p": scale = "scale=-2:576"
              elif self.quality == "480p": scale = "scale=-2:480"

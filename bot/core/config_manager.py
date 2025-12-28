@@ -134,7 +134,7 @@ class Config:
     AUTO_THUMBNAIL_ENABLED: bool = False
     AUTO_THUMBNAIL_FORMAT: str = "poster"
     AUTO_RENAME_ENABLED: bool = False
-    AUTO_RENAME_TEMPLATE: str = "S{season}E{episode}Q{quality}"
+    AUTO_RENAME_TEMPLATE: str = "{title} S{season}E{episode} {quality}"
     AUTO_RENAME_START_EPISODE: int = 1
     AUTO_RENAME_START_SEASON: int = 1
 

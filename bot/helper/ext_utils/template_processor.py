@@ -143,20 +143,20 @@ async def extract_metadata_from_filename(name):
     season = ""
     episode = ""
     quality = ""
+    title = ""
+
+    # Keep track of all matches to find the first metadata indicator
+    all_matches = []
 
     # Try to find season
     for pattern in season_patterns:
         season_match = re.search(pattern, name, re.IGNORECASE)
         if season_match:
+            all_matches.append(season_match)
             season = season_match.group(1)
             # Remove leading zeros but keep at least 2 digits for formatting
             season_num = int(season)
-            if season_num < 10:
-                season = (
-                    f"0{season_num}"  # Pad single digit seasons with a leading zero
-                )
-            else:
-                season = str(season_num)
+            season = f"{season_num:02d}" if season_num < 10 else str(season_num)
             break
 
     # Special case for anime titles with season information in the description
@@ -204,6 +204,7 @@ async def extract_metadata_from_filename(name):
     for pattern in episode_patterns:
         episode_match = re.search(pattern, name, re.IGNORECASE)
         if episode_match:
+            all_matches.append(episode_match)
             episode = episode_match.group(1)
             # Format episode numbers consistently
             episode_num = int(episode)
@@ -278,10 +279,11 @@ async def extract_metadata_from_filename(name):
             if match:
                 # Extract group, title, and episode
                 match.group(1)
-                title = match.group(2).strip()
+                t_title = match.group(2).strip()
                 ep_num = match.group(3)
 
-                # Set episode number
+                # Set title and episode number
+                title = t_title
                 episode = ep_num
 
                 # Try to extract season from title if it contains "S2", "Season 2", etc.
@@ -310,6 +312,7 @@ async def extract_metadata_from_filename(name):
             for pattern in anime_explicit_patterns:
                 match = re.search(pattern, name, re.IGNORECASE)
                 if match:
+                    all_matches.append(match)
                     episode = match.group(1)
                     # Don't remove leading zeros for high episode numbers
                     # This preserves the full episode number
@@ -376,6 +379,7 @@ async def extract_metadata_from_filename(name):
     for pattern in quality_patterns:
         matches = re.finditer(pattern, name, re.IGNORECASE)
         for match in matches:
+            all_matches.append(match)
             quality_match = match.group(1)
             # Avoid duplicates
             if quality_match.lower() not in [q.lower() for q in quality_matches]:
@@ -390,6 +394,7 @@ async def extract_metadata_from_filename(name):
     year_pattern = r"(?<![a-zA-Z0-9])(?:19|20)(\d{2})(?![a-zA-Z0-9])"
     year_matches = re.finditer(year_pattern, name, re.IGNORECASE)
     for year_match in year_matches:
+        all_matches.append(year_match)
         year = year_match.group(0)
         # Avoid mistaking episode numbers for years
         if not (episode and year.endswith(episode)):
@@ -410,6 +415,7 @@ async def extract_metadata_from_filename(name):
     for pattern in codec_patterns:
         matches = re.finditer(pattern, name, re.IGNORECASE)
         for match in matches:
+            all_matches.append(match)
             codec_match = match.group(1)
             # Avoid duplicates
             if codec_match.lower() not in [c.lower() for c in codec_matches]:
@@ -443,11 +449,34 @@ async def extract_metadata_from_filename(name):
     for pattern in fps_patterns:
         fps_match = re.search(pattern, name, re.IGNORECASE)
         if fps_match:
+            all_matches.append(fps_match)
             framerate = f"{fps_match.group(1)} fps"
             break
 
+    # Extract title if not already found (for non-anime or mixed files)
+    if not title and all_matches:
+        # Sort matches by starting position
+        all_matches.sort(key=lambda x: x.start())
+        first_match = all_matches[0]
+        if first_match.start() > 0:
+            title = name[:first_match.start()]
+            # Clean up the title: remove dots, underscores, dashes, and extra spaces
+            title = re.sub(r'[._\-]', ' ', title).strip()
+            # Remove leading/trailing brackets with text inside (often group names)
+            title = re.sub(r'^\[[^\]]+\]\s*', '', title)
+            title = re.sub(r'\s*\[[^\]]+\]$', '', title)
+            # Remove any trailing " - " or other punctuation
+            title = re.sub(r'\s+-\s*$', '', title).strip()
+
+    # Final fallback for title if no metadata matches were found
+    if not title:
+        # Use filename without extension
+        title = name.rsplit('.', 1)[0]
+        title = re.sub(r'[._\-]', ' ', title).strip()
+
     # Return the enhanced metadata
     return {
+        "title": title,
         "season": season,
         "episode": episode,
         "quality": quality,

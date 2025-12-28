@@ -385,7 +385,7 @@ async def get_user_settings(from_user, stype="main"):
         
         # Auto Rename settings
         auto_rename = "✅ Enabled" if user_dict.get("AUTO_RENAME_ENABLED", Config.AUTO_RENAME_ENABLED) else "❌ Disabled"
-        rename_template = user_dict.get("AUTO_RENAME_TEMPLATE", Config.AUTO_RENAME_TEMPLATE or "S{season}E{episode}Q{quality}")
+        rename_template = user_dict.get("AUTO_RENAME_TEMPLATE", Config.AUTO_RENAME_TEMPLATE or "{title} S{season}E{episode} {quality}")
         start_episode = user_dict.get("AUTO_RENAME_START_EPISODE", Config.AUTO_RENAME_START_SEASON or "1")
         start_season = user_dict.get("AUTO_RENAME_START_SEASON", Config.AUTO_RENAME_START_SEASON or "1")
         

@@ -60,22 +60,50 @@ DEFAULT_VALUES = {
     "DEFAULT_UPLOAD": "gd",
 }
 
+CATEGORIES = {
+    "LIMIT": ["USER_TASK_LIMIT", "LEECH_LIMIT", "MIRROR_LIMIT", "CLONE_LIMIT", "RSS_SIZE_LIMIT", "QUEUE_ALL", "QUEUE_DOWNLOAD", "QUEUE_UPLOAD", "LEECH_SPLIT_SIZE"],
+    "LEECH": ["BOT_PM", "LEECH_DUMP_CHAT", "LEECH_FILENAME_PREFIX", "LEECH_FILENAME_SUFFIX", "LEECH_FILENAME_CAPTION", "LEECH_CAPTION_FONT", "AS_DOCUMENT", "MEDIA_GROUP", "HYBRID_LEECH", "LEECH_ENABLED"],
+    "MIRROR": ["TORRENT_ENABLED", "GDRIVE_UPLOAD_ENABLED", "MEGA_ENABLED", "MEGA_UPLOAD_ENABLED", "YOUTUBE_UPLOAD_ENABLED", "DDL_ENABLED", "MULTI_LINK_ENABLED", "BULK_ENABLED", "JD_ENABLED", "NZB_ENABLED", "MEDIA_TOOLS", "STOP_DUPLICATE", "IS_TEAM_DRIVE"],
+    "AUTO": ["AUTO_LEECH", "AUTO_MIRROR", "AUTO_ENCODE", "AUTO_RESUME", "AUTO_LEECH_CMD", "AUTO_MIRROR_CMD", "AUTO_COMPRESS_CMD", "AUTO_RENAME_ENABLED", "AUTO_RENAME_TEMPLATE", "AUTO_RENAME_START_EPISODE", "AUTO_RENAME_START_SEASON", "AUTO_THUMBNAIL_ENABLED", "AUTO_THUMBNAIL_FORMAT"],
+    "DEBRID": ["DEBRID_LINK_API", "DEBRID_LINK_ACCESS_TOKEN", "DEBRID_LINK_REFRESH_TOKEN", "DEBRID_LINK_CLIENT_ID", "DEBRID_LINK_CLIENT_SECRET", "ALLDEBRID_API_KEY", "REAL_DEBRID_API_KEY", "REAL_DEBRID_ACCESS_TOKEN", "REAL_DEBRID_REFRESH_TOKEN", "REAL_DEBRID_CLIENT_ID", "REAL_DEBRID_CLIENT_SECRET", "MEGA_DEBRID_API_TOKEN", "MEGA_DEBRID_LOGIN", "MEGA_DEBRID_PASSWORD", "TORBOX_API_KEY"],
+    "ZOTIFY": ["ZOTIFY_ENABLED", "ZOTIFY_CREDENTIALS_PATH", "ZOTIFY_DOWNLOAD_QUALITY", "ZOTIFY_AUDIO_FORMAT", "ZOTIFY_ARTWORK_SIZE"],
+    "STREAMRIP": ["STREAMRIP_ENABLED", "STREAMRIP_QOBUZ_EMAIL", "STREAMRIP_QOBUZ_PASSWORD", "STREAMRIP_QOBUZ_APP_ID", "STREAMRIP_TIDAL_ACCESS_TOKEN", "STREAMRIP_TIDAL_REFRESH_TOKEN", "STREAMRIP_TIDAL_USER_ID", "STREAMRIP_TIDAL_COUNTRY_CODE", "STREAMRIP_DEEZER_ARL", "STREAMRIP_SOUNDCLOUD_CLIENT_ID"],
+    "FILTER": ["AUTO_CAPTION_REMOVE", "AUTO_CAPTION_REPLACE", "FILENAME_REPLACE", "NAME_SUBSTITUTE", "EXCLUDED_EXTENSIONS"],
+    "GENERAL": ["OWNER_ID", "SUDO_USERS", "AUTHORIZED_CHATS", "BOT_TOKEN", "TELEGRAM_API", "TELEGRAM_HASH", "DATABASE_URL", "UPSTREAM_REPO", "UPSTREAM_BRANCH", "CMD_SUFFIX", "BASE_URL", "BASE_URL_PORT", "LOG_CHAT_ID"]
+}
+
 
 async def get_buttons(key=None, edit_type=None):
     buttons = ButtonMaker()
     if key is None:
-        buttons.data_button("Config", "botset var")
+        buttons.data_button("Bot Config", "botset conf")
         buttons.data_button("Pvt Files", "botset private")
         buttons.data_button("Sabnzbd", "botset nzb")
         buttons.data_button("JD Sync", "botset syncjd")
         buttons.data_button("Close", "botset close")
         msg = "<blockquote expandable>╭⚙️ <b>Bot Settings\n╰Choose a setting to configure:</blockquote>"
+    elif key == "conf":
+        buttons.data_button("Limits", "botset key LIMIT")
+        buttons.data_button("Leech", "botset key LEECH")
+        buttons.data_button("Mirror", "botset key MIRROR")
+        buttons.data_button("Debrid", "botset key DEBRID")
+        buttons.data_button("Auto", "botset key AUTO")
+        buttons.data_button("Zotify", "botset key ZOTIFY")
+        buttons.data_button("Streamrip", "botset key STREAMRIP")
+        buttons.data_button("Filters", "botset key FILTER")
+        buttons.data_button("General", "botset key GENERAL")
+        buttons.data_button("All Config", "botset var")
+        buttons.data_button("Back", "botset back")
+        buttons.data_button("Close", "botset close")
+        msg = "<blockquote expandable>╭⚙️ <b>Bot Config\n╰Choose a category:</blockquote>"
     elif edit_type is not None:
-        if edit_type == "botvar":
+        if edit_type.startswith("botvar"):
+            cat = edit_type.replace("botvar", "")
+            back_data = f"botset key {cat}" if cat else "botset var"
             msg = ""
-            buttons.data_button("Back", "botset var")
+            buttons.data_button("Back", back_data)
             if key not in ["TELEGRAM_HASH", "TELEGRAM_API", "OWNER_ID", "BOT_TOKEN"]:
-                buttons.data_button("Default", f"botset resetvar {key}")
+                buttons.data_button("Default", f"botset resetvar {key} {cat}")
             buttons.data_button("Close", "botset close")
             if key in [
                 "CMD_SUFFIX",
@@ -106,7 +134,8 @@ async def get_buttons(key=None, edit_type=None):
             buttons.data_button("Close", "botset close")
     elif key == "var":
         conf_dict = Config.get_all()
-        for k in list(conf_dict.keys())[start : 10 + start]:
+        keys = list(conf_dict.keys())
+        for k in keys[start : 10 + start]:
             if k == "DATABASE_URL" and state != "view":
                 continue
             buttons.data_button(k, f"botset botvar {k}")
@@ -114,15 +143,34 @@ async def get_buttons(key=None, edit_type=None):
             buttons.data_button("Edit", "botset edit var")
         else:
             buttons.data_button("View", "botset view var")
-        buttons.data_button("Back", "botset back")
+        buttons.data_button("Back", "botset conf")
         buttons.data_button("Close", "botset close")
-        for x in range(0, len(conf_dict), 10):
+        for x in range(0, len(keys), 10):
             buttons.data_button(
                 f"{int(x / 10)}",
                 f"botset start var {x}",
                 position="footer",
             )
-        msg = f"╭🛠 <b>Config Variables</b>\n┊<b>Page:</b> {int(start / 10)}\n╰<b>State:</b> {state}"
+        msg = f"╭🛠 <b>All Variables</b>\n┊<b>Page:</b> {int(start / 10)}\n╰<b>State:</b> {state}"
+    elif key.startswith("key"):
+        category = key.split()[1]
+        keys = CATEGORIES[category]
+        for k in keys[start : 10 + start]:
+            buttons.data_button(k, f"botset botvar {k} {category}")
+        if state == "view":
+            buttons.data_button("Edit", f"botset edit key {category}")
+        else:
+            buttons.data_button("View", f"botset view key {category}")
+        buttons.data_button("Back", "botset conf")
+        buttons.data_button("Close", "botset close")
+        if len(keys) > 10:
+            for x in range(0, len(keys), 10):
+                buttons.data_button(
+                    f"{int(x / 10)}",
+                    f"botset start key {category} {x}",
+                    position="footer",
+                )
+        msg = f"╭🛠 <b>{category} Variables</b>\n┊<b>Page:</b> {int(start / 10)}\n╰<b>State:</b> {state}"
     elif key == "private":
         buttons.data_button("Back", "botset back")
         buttons.data_button("Close", "botset close")
@@ -194,7 +242,7 @@ async def update_buttons(message, key=None, edit_type=None):
 
 
 @new_task
-async def edit_variable(_, message, pre_message, key):
+async def edit_variable(_, message, pre_message, key, category=""):
     handler_dict[message.chat.id] = False
     value = message.text
     if value.lower() == "true":
@@ -248,7 +296,7 @@ async def edit_variable(_, message, pre_message, key):
     ):
         value = eval(value)
     Config.set(key, value)
-    await update_buttons(pre_message, "var")
+    await update_buttons(pre_message, f"key {category}" if category else "var")
     await delete_message(message)
     await database.update_config({key: value})
     if key in ["QUEUE_ALL", "QUEUE_DOWNLOAD", "QUEUE_UPLOAD"]:
@@ -469,15 +517,19 @@ async def edit_bot_settings(client, query):
             show_alert=True,
         )
         await sync_jdownloader()
-    elif data[1] in ["var", "nzb", "nzbserver"] or data[1].startswith(
+    elif data[1] in ["var", "nzb", "nzbserver", "conf"] or data[1].startswith(
         "nzbser",
-    ):
-        if data[1] == "nzbserver":
+    ) or data[1] == "key":
+        if data[1] in ["nzbserver", "conf"]:
             globals()["start"] = 0
         await query.answer()
-        await update_buttons(message, data[1])
+        key = data[1]
+        if key == "key":
+            key = f"key {data[2]}"
+        await update_buttons(message, key)
     elif data[1] == "resetvar":
         await query.answer()
+        category = data[3] if len(data) > 3 else ""
         expected_type = type(getattr(Config, data[2]))
         if expected_type == bool:
             value = False
@@ -530,7 +582,7 @@ async def edit_bot_settings(client, query):
         elif data[2] == "SUDO_USERS":
             sudo_users.clear()
         Config.set(data[2], value)
-        await update_buttons(message, "var")
+        await update_buttons(message, f"key {category}" if category else "var")
         if data[2] == "DATABASE_URL":
             await database.disconnect()
         await database.update_config({data[2]: value})
@@ -579,10 +631,11 @@ async def edit_bot_settings(client, query):
         rfunc = partial(update_buttons, message)
         await event_handler(client, query, pfunc, rfunc, True)
     elif data[1] == "botvar" and state == "edit":
+        category = data[3] if len(data) > 3 else ""
         await query.answer()
-        await update_buttons(message, data[2], data[1])
-        pfunc = partial(edit_variable, pre_message=message, key=data[2])
-        rfunc = partial(update_buttons, message, "var")
+        await update_buttons(message, data[2], f"botvar{category}")
+        pfunc = partial(edit_variable, pre_message=message, key=data[2], category=category)
+        rfunc = partial(update_buttons, message, f"key {category}" if category else "var")
         await event_handler(client, query, pfunc, rfunc)
     elif data[1] == "botvar" and state == "view":
         value = f"{Config.get(data[2])}"
@@ -659,9 +712,15 @@ async def edit_bot_settings(client, query):
         await update_buttons(message, data[2])
     elif data[1] == "start":
         await query.answer()
-        if start != int(data[3]):
-            globals()["start"] = int(data[3])
-            await update_buttons(message, data[2])
+        if data[2] == "key":
+            offset_idx = 4
+            key = f"key {data[3]}"
+        else:
+            offset_idx = 3
+            key = data[2]
+        if start != int(data[offset_idx]):
+            globals()["start"] = int(data[offset_idx])
+            await update_buttons(message, key)
 
 
 @new_task

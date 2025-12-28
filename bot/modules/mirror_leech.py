@@ -840,7 +840,9 @@ class Mirror(TaskListener):
         # 2. If reply has media + caption with valid URL -> use caption URL
         # 3. If reply has media + caption without URL -> ignore caption, download media
         reply_to = self.message.reply_to_message
-
+        if not reply_to and self.message.reply_to_message_id:
+            reply_to = await self.client.get_messages(self.message.chat.id, self.message.reply_to_message_id)
+        
         if (
             not self.link
             and reply_to
@@ -860,18 +862,12 @@ class Mirror(TaskListener):
             # Extract first line from text/caption
             potential_link = reply_to.text.split("\n", 1)[0].strip()
             
-            # If there's media, only use caption if it contains a valid URL
-            if has_media:
-                # Check if caption contains valid URL (http/https/ftp/magnet)
-                if (
-                    potential_link.startswith(("http://", "https://", "ftp://", "magnet:"))
-                    or "://" in potential_link
-                ):
-                    self.link = potential_link
-                # Otherwise, ignore caption and let media download handler take over
-            else:
-                # No media, treat text as link
+            # Priority:
+            # If there's media, always ignore caption/text and let media download handler take over
+            # Only use text/caption as a link if THERE IS NO MEDIA
+            if not has_media:
                 self.link = potential_link
+            # else: self.link remains empty, which triggers media detection logic later
 
         if is_telegram_link(self.link):
             try:
@@ -917,6 +913,8 @@ class Mirror(TaskListener):
             return await delete_links(self.message)
 
         if reply_to:
+            LOGGER.info(f"DEBUG: reply_to detected. ID: {reply_to.id}")
+            LOGGER.info(f"DEBUG: Attributes - Doc: {bool(reply_to.document)}, Photo: {bool(reply_to.photo)}, Video: {bool(reply_to.video)}, Audio: {bool(reply_to.audio)}")
             file_ = (
                 reply_to.document
                 or reply_to.photo
@@ -928,7 +926,7 @@ class Mirror(TaskListener):
                 or reply_to.animation
                 or None
             )
-            LOGGER.info(f"DEBUG: reply_to found. file_ object: {file_ is not None}. Link: {self.link}")
+            LOGGER.info(f"DEBUG: Final file_ object: {file_ is not None}. Link: {self.link}")
 
             # Note: Caption/text extraction is handled earlier (line 836-869)
             # with smart URL detection. Don't duplicate that logic here.
@@ -974,6 +972,7 @@ class Mirror(TaskListener):
             or (is_telegram_link(self.link) and reply_to is None)
             or (
                 file_ is None
+                and self.link
                 and not is_url(self.link)
                 and not is_magnet(self.link)
                 and not await aiopath.exists(self.link)
