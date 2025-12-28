@@ -18,14 +18,19 @@ from .core.aeon_client import TgClient
 from .helper.telegram_helper.bot_commands import BotCommands
 
 COMMANDS = {
-    "MirrorCommand": "- Start mirroring",
-    "LeechCommand": "- Start leeching",
-    "JdMirrorCommand": "- Mirror using JDownloader",
+    "LeechCommand": "- Start leeching",    
+    "EncodeCommand": "- Encode a file",
+    "MergeCommand": "- Merge files",
+    "TeraboxCommand": "- Download from Terabox",
     "JdLeechCommand": "- Leech using JDownloader",
-    "NzbMirrorCommand": "- Mirror NZB files",
-    "NzbLeechCommand": "- Leech NZB files",
-    "YtdlCommand": "- Mirror link using yt-dlp",
     "YtdlLeechCommand": "- Leech link using yt-dlp",
+    "NzbLeechCommand": "- Leech NZB files", 
+    "MirrorCommand": "- Start mirroring",
+    "JdMirrorCommand": "- Mirror using JDownloader",
+    "NzbMirrorCommand": "- Mirror NZB files",
+
+    "YtdlCommand": "- Mirror link using yt-dlp",
+
     "CloneCommand": "- Copy file/folder to Drive",
     "MediaInfoCommand": "- Get media information",
     "SoxCommand": "- Get audio spectrum",
@@ -39,9 +44,6 @@ COMMANDS = {
     "CancelAllCommand": "- Cancel all your tasks",
     "HelpCommand": "- Get detailed help",
     "SetCommand": "- Set settings via arguments",
-    "EncodeCommand": "- Encode a file",
-    "MergeCommand": "- Merge files",
-
     "SpeedTest": "- Run a speedtest",
     "BotSetCommand": "- [ADMIN] Open Bot settings",
     "LogCommand": "- [ADMIN] View bot log",

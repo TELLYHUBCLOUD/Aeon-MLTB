@@ -225,6 +225,11 @@ def add_handlers():
             BotCommands.EncodeCommand,
             CustomFilters.authorized,
         ),
+        "terabox_handler": (
+            terabox_handler,
+            BotCommands.TeraboxCommand,
+            CustomFilters.authorized,
+        ),
         "merge": (
             merge,
             BotCommands.MergeCommand,

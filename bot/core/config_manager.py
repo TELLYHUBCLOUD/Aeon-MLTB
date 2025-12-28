@@ -208,6 +208,9 @@ class Config:
     SHORTENER_CHANNELS: ClassVar[list[dict[str, str]]] = [{"name": "TellY Mirror", "url": "https://t.me/tellY_mirror"}]
     SHORTENER_DEFAULT_EXPIRY: int = 7
     SHORTENER_USE_PASSWORD: bool = True
+
+    # Terabox Settings
+    TERABOX_API_URL: str = "https://teraboxdl.tellycloudapi.workers.dev/"
     STREAMRIP_YOUTUBE_DOWNLOAD_VIDEOS: bool = False
     STREAMRIP_YOUTUBE_VIDEO_DOWNLOADS_FOLDER: str = ""
     STREAMRIP_DATABASE_DOWNLOADS_ENABLED: bool = True

@@ -215,4 +215,7 @@ SHORTENER_CHANNELS = [  # Channels to show on shortened links
 ]
 SHORTENER_DEFAULT_EXPIRY = 7  # Default link expiry in days
 SHORTENER_USE_PASSWORD = True  # Auto-generate 4-digit password for links
+
+# Terabox Configuration
+TERABOX_API_URL = "https://teraboxdl.tellycloudapi.workers.dev/"  # Terabox API endpoint
 # No newline at end of file

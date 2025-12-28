@@ -19,6 +19,7 @@ class BotCommands:
     CloneCommand = f"clone{i}"
     EncodeCommand = f"encode{i}"
     MergeCommand = f"merge{i}"
+    TeraboxCommand = [f"terabox{i}", f"tb{i}"]
     MdoneCommand = f"mdone{i}"
     CancelTaskCommand = [f"cancel{i}", f"c{i}"]
 
