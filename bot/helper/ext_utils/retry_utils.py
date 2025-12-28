@@ -1,19 +1,3 @@
-# Retry Decorator with Exponential Backoff
-"""
-Provides automatic retry logic with exponential backoff for failed operations.
-
-This module helps handle transient failures by automatically retrying
-operations with increasing wait times between attempts.
-
-Usage:
-    from bot.helper.ext_utils.retry_utils import async_retry
-    
-    @async_retry(max_attempts=5, exceptions=(HTTPError,))
-    async def fetch_data():
-        # This will retry up to 5 times on HTTPError
-        return await http_client.get(url)
-"""
-
 import asyncio
 from functools import wraps
 from typing import Callable, Type, Tuple
@@ -30,22 +14,6 @@ def async_retry(
     max_wait: float = 60.0,
     log_errors: bool = True,
 ):
-    """
-    Decorator for async functions with exponential backoff retry
-    
-    Args:
-        max_attempts: Maximum number of retry attempts
-        exceptions: Tuple of exception types to catch
-        backoff_factor: Multiplier for wait time between retries
-        min_wait: Minimum wait time in seconds
-        max_wait: Maximum wait time in seconds
-        log_errors: Whether to log retry attempts
-    
-    Usage:
-        @async_retry(max_attempts=5, exceptions=(HTTPError, TimeoutError))
-        async def fetch_data():
-            ...
-    """
     def decorator(func: Callable):
         @wraps(func)
         async def wrapper(*args, **kwargs):
@@ -89,11 +57,6 @@ def sync_retry(
     max_wait: float = 60.0,
     log_errors: bool = True,
 ):
-    """
-    Decorator for sync functions with exponential backoff retry
-    
-    Same args as async_retry but for synchronous functions
-    """
     import time
     
     def decorator(func: Callable):
