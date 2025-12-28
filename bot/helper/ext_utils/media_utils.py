@@ -780,6 +780,8 @@ class FFMpeg:
         multi_streams = True
         self._total_time = duration = (await get_media_info(f_path))[0]
         base_name, extension = ospath.splitext(file_)
+        if not extension:
+            extension = ".mp4"
         split_size -= 3000000
         start_time = 0
         i = 1

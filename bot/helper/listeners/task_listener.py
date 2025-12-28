@@ -43,6 +43,7 @@ from bot.helper.ext_utils.template_processor import (
     extract_metadata_from_filename,
     process_template,
 )
+from bot.helper.ext_utils.media_utils import get_media_info
 from bot.helper.ext_utils.task_manager import check_running_tasks, start_from_queued
 from bot.helper.mirror_leech_utils.gdrive_utils.upload import GoogleDriveUpload
 from bot.helper.mirror_leech_utils.rclone_utils.transfer import RcloneTransferHelper
@@ -137,6 +138,16 @@ class TaskListener(TaskConfig):
 
             if not metadata.get("title"):
                 metadata["title"] = self.name
+
+            # Extract metadata from media tags keys (Artist, Title)
+            try:
+                _, artist, title = await get_media_info(f_path)
+                if artist:
+                    metadata["artist"] = artist
+                if title:
+                    metadata["title"] = title
+            except Exception as e:
+                LOGGER.error(f"Error extracting tags from media: {e}")
 
             new_name = await process_template(self.auto_rename_template, metadata)
             if not new_name:
