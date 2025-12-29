@@ -805,6 +805,7 @@ class Mirror(TaskListener):
         if len(self.bulk) == 0:
             from bot.helper.ext_utils.bulk_links import extract_bulk_links
             self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
+            LOGGER.info(f"Extracted {len(self.bulk)} bulk links")
             if len(self.bulk) > 1:
                 is_bulk = True
 
