@@ -801,13 +801,15 @@ class Mirror(TaskListener):
             )
             is_bulk = False
 
-        # Extract bulk links if not already populated
-        if len(self.bulk) == 0:
+
+        # Extract bulk links if not already populated and not explicitly set as bulk
+        if not is_bulk and len(self.bulk) == 0:
             from bot.helper.ext_utils.bulk_links import extract_bulk_links
             self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
             LOGGER.info(f"Extracted {len(self.bulk)} bulk links")
             if len(self.bulk) > 1:
                 is_bulk = True
+
 
         if not is_bulk:
             if self.multi > 0:
