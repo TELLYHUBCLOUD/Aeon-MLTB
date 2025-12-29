@@ -13,6 +13,7 @@ from bot.helper.aeon_utils.access_check import error_check
 from bot.helper.ext_utils.bot_utils import (
     COMMAND_USAGE,
     arg_parser,
+    get_standard_args,
     new_task,
     sync_to_async,
 )
@@ -310,9 +311,6 @@ class YtDlp(TaskListener):
 
 
             
-    async def get_tag(self, text: list):
-         await super().get_tag(text)
-
     async def new_event(self):
         text = self.message.text.split("\n")
         input_list = text[0].split(" ")
@@ -323,36 +321,7 @@ class YtDlp(TaskListener):
             error = await send_message(self.message, error_msg, error_button)
             return await auto_delete_message(error, time=300)
         
-        args = {
-            "-doc": False,
-            "-med": False,
-            "-s": False,
-            "-b": False,
-            "-z": False,
-            "-sv": False,
-            "-ss": False,
-            "-f": False,
-            "-fd": False,
-            "-fu": False,
-            "-hl": False,
-            "-bt": False,
-            "-ut": False,
-            "-i": 0,
-            "-sp": 0,
-            "link": "",
-            "-m": "",
-            "-opt": {},
-            "-n": "",
-            "-up": "",
-            "-rcf": "",
-            "-t": "",
-            "-ca": "",
-            "-cv": "",
-            "-ns": "",
-            "-md": "",
-            "-tl": "",
-            "-ff": set(),
-        }
+        args = get_standard_args()
 
         arg_parser(input_list[1:], args)
 

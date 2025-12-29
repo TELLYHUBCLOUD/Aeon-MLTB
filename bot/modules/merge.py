@@ -14,6 +14,7 @@ from bot.helper.aeon_utils.access_check import error_check
 from bot.helper.ext_utils.bot_utils import (
     COMMAND_USAGE,
     arg_parser,
+    get_standard_args,
     sync_to_async,
 )
 
@@ -65,14 +66,7 @@ class Merge(TaskListener):
             error = await send_message(self.message, error_msg, error_button)
             return await auto_delete_message(error, time=300)
 
-        args = {
-            "link": "",
-            "-i": 0,
-            "-n": "",
-            "-up": "",
-            "-rcf": "",
-            "-b": False,
-        }
+        args = get_standard_args()
 
         arg_parser(input_list[1:], args)
 

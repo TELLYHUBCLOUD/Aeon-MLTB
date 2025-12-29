@@ -10,6 +10,7 @@ from bot.helper.ext_utils.bot_utils import (
     COMMAND_USAGE,
     arg_parser,
     cmd_exec,
+    get_standard_args,
     sync_to_async,
 )
 from bot.core.config_manager import Config
@@ -61,10 +62,6 @@ class Clone(TaskListener):
         self.is_clone = True
         
             
-    async def get_tag(self, text: list): # Helper to make sure get_tag is available if missed inheritance
-         await super().get_tag(text) # Wait, it is in TaskListener/Config, should be fine.
-
-
     async def new_event(self):
         text = self.message.text.split("\n")
         input_list = text[0].split(" ")
@@ -73,15 +70,7 @@ class Clone(TaskListener):
             await delete_links(self.message)
             error = await send_message(self.message, error_msg, error_button)
             return await auto_delete_message(error, time=300)
-        args = {
-            "link": "",
-            "-i": 0,
-            "-b": False,
-            "-n": "",
-            "-up": "",
-            "-rcf": "",
-            "-sync": False,
-        }
+        args = get_standard_args()
 
         arg_parser(input_list[1:], args)
 
