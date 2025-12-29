@@ -787,9 +787,15 @@ class TaskConfig:
 
     async def init_bulk(self, input_list, bulk_start, bulk_end, obj):
         try:
-            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
+            # Only extract if bulk links not already populated
+            if len(self.bulk) == 0:
+                self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
+            
             if len(self.bulk) == 0:
                 raise ValueError("Bulk Empty!")
+            
+            LOGGER.info(f"[BULK] init_bulk starting with {len(self.bulk)} links")
+            
             b_msg = input_list[:1]
             self.options = input_list[1:]
             if "-b" in self.options:
