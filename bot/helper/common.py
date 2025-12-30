@@ -738,7 +738,7 @@ class TaskConfig:
             msgts = " ".join(msg)
             if self.multi > 2:
                 msgts += f"\nCancel Multi: <code>/stop {self.multi_tag}</code>"
-            nextmsg = await send_message(self.message, msgts)
+            nextmsg = await send_message(nextmsg, msgts)
         else:
             msg = [s.strip() for s in input_list]
             if "-i" in msg:
@@ -747,6 +747,10 @@ class TaskConfig:
             else:
                 msg.append("-i")
                 msg.append(f"{self.multi - 1}")
+            
+            # Clean link from options for multi-instance
+            if self.link and self.link in msg:
+                msg.remove(self.link)
             
             # Use reply_to_message_id if available to keep the chain
             reply_id = self.message.reply_to_message_id or self.message.id
@@ -797,13 +801,14 @@ class TaskConfig:
             LOGGER.info(f"[BULK] init_bulk starting with {len(self.bulk)} links")
             
             b_msg = input_list[:1]
-            self.options = input_list[1:]
-            if "-b" in self.options:
-                index = self.options.index("-b")
-                del self.options[index]
+            options_list = [x for x in input_list[1:] if x != self.link]
+            if "-b" in options_list:
+                index = options_list.index("-b")
+                del options_list[index]
                 if bulk_start or bulk_end:
-                    del self.options[index + 1]
-            self.options = " ".join(self.options)
+                    with contextlib.suppress(Exception):
+                        del options_list[index] # del start:end
+            self.options = " ".join(options_list)
 
             if self.multi > 0:
                 self.bulk = self.bulk[:self.multi]
