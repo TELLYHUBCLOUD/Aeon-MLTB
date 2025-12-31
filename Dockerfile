@@ -3,13 +3,15 @@ FROM 5hojib/aeon:latest
 WORKDIR /usr/src/app
 RUN chmod 777 /usr/src/app
 
-# Install mega-cmd
+# Install mega-cmd (updated method)
 RUN apt-get update && \
-    apt-get install -y wget && \
-    wget https://mega.nz/linux/repo/Debian_11/amd64/megacmd-Debian_11_amd64.deb && \
-    apt-get install -y ./megacmd-Debian_11_amd64.deb && \
-    rm megacmd-Debian_11_amd64.deb && \
-    apt-get clean
+    apt-get install -y wget gnupg && \
+    wget -qO - https://mega.nz/linux/repo/Debian_12/Release.key | apt-key add - && \
+    echo "deb https://mega.nz/linux/repo/Debian_12/ ./" > /etc/apt/sources.list.d/megasync.list && \
+    apt-get update && \
+    apt-get install -y megacmd && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN uv venv
 COPY requirements.txt .
