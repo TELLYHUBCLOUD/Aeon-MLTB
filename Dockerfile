@@ -3,11 +3,12 @@ FROM 5hojib/aeon:latest
 WORKDIR /usr/src/app
 RUN chmod 777 /usr/src/app
 
-# Install mega-cmd (updated method)
+# Install mega-cmd (modern GPG method)
 RUN apt-get update && \
-    apt-get install -y wget gnupg && \
-    wget -qO - https://mega.nz/linux/repo/Debian_12/Release.key | apt-key add - && \
-    echo "deb https://mega.nz/linux/repo/Debian_12/ ./" > /etc/apt/sources.list.d/megasync.list && \
+    apt-get install -y wget gnupg ca-certificates && \
+    mkdir -p /usr/share/keyrings && \
+    wget -qO /usr/share/keyrings/mega-archive-keyring.gpg https://mega.nz/linux/repo/Debian_12/Release.key && \
+    echo "deb [signed-by=/usr/share/keyrings/mega-archive-keyring.gpg] https://mega.nz/linux/repo/Debian_12/ ./" > /etc/apt/sources.list.d/megasync.list && \
     apt-get update && \
     apt-get install -y megacmd && \
     apt-get clean && \
