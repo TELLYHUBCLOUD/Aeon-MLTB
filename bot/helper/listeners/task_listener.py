@@ -74,6 +74,12 @@ class TaskListener(TaskConfig):
     def __init__(self):
         super().__init__()
 
+    def _ensure_user_dict(self):
+        if not hasattr(self, "user_dict") or self.user_dict is None:
+            from bot import user_data
+            user_id = self.message.from_user.id if self.message.from_user else ""
+            self.user_dict = user_data.get(user_id, {})
+
     async def clean(self):
         try:
             if st := intervals["status"]:

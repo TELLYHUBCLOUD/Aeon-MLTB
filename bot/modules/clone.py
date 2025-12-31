@@ -66,6 +66,9 @@ class Clone(TaskListener):
 
 
     async def new_event(self):
+        # Ensure user_dict is never None to prevent AttributeError
+        self._ensure_user_dict()
+
         text = self.message.text.split("\n")
         input_list = text[0].split(" ")
         error_msg, error_button = await error_check(self.message)

@@ -278,6 +278,7 @@ def arg_parser(items, arg_base):
         "-swap-audio",
         "-swap-video",
         "-swap-subtitle",
+        "-mt",
     }
 
     while i < total:
