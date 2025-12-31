@@ -112,12 +112,6 @@ class Mirror(TaskListener):
         self.is_md_leech = is_md_leech
         self.is_enc = is_enc
 
-    def _ensure_user_dict(self):
-        if not hasattr(self, "user_dict") or self.user_dict is None:
-            from bot import user_data
-            user_id = self.message.from_user.id if self.message.from_user else ""
-            self.user_dict = user_data.get(user_id, {})
-
     async def new_event(self):
         # Ensure user_dict is never None to prevent AttributeError
         self._ensure_user_dict()
