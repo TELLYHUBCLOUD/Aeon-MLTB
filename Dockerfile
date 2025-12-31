@@ -3,11 +3,11 @@ FROM 5hojib/aeon:latest
 WORKDIR /usr/src/app
 RUN chmod 777 /usr/src/app
 
-# Install mega-cmd (modern GPG method)
+# Install mega-cmd (convert ASCII key to binary GPG format)
 RUN apt-get update && \
     apt-get install -y wget gnupg ca-certificates && \
     mkdir -p /usr/share/keyrings && \
-    wget -qO /usr/share/keyrings/mega-archive-keyring.gpg https://mega.nz/linux/repo/Debian_12/Release.key && \
+    wget -qO - https://mega.nz/linux/repo/Debian_12/Release.key | gpg --dearmor -o /usr/share/keyrings/mega-archive-keyring.gpg && \
     echo "deb [signed-by=/usr/share/keyrings/mega-archive-keyring.gpg] https://mega.nz/linux/repo/Debian_12/ ./" > /etc/apt/sources.list.d/megasync.list && \
     apt-get update && \
     apt-get install -y megacmd && \
