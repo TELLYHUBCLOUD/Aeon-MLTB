@@ -9,13 +9,11 @@ from bot.helper.ext_utils.help_messages import (
     OSINT_HELP_DICT,
     PHISH_HELP_DICT,
     SHORTNER_HELP_DICT,
-    STREAMRIP_HELP_DICT,
     TOOL_HELP_DICT,
     TRACE_HELP_DICT,
     VT_HELP_DICT,
     WOT_HELP_DICT,
     YT_HELP_DICT,
-    ZOTIFY_HELP_DICT,
     help_string,
 )
 from bot.helper.telegram_helper.button_build import ButtonMaker
@@ -118,18 +116,7 @@ async def arg_usage(_, query):
                 COMMAND_USAGE["phishcheck"][0],
                 COMMAND_USAGE["phishcheck"][1],
             )
-        elif data[2] == "sr":
-            await edit_message(
-                message,
-                COMMAND_USAGE["streamrip"][0],
-                COMMAND_USAGE["streamrip"][1],
-            )
-        elif data[2] == "z":
-            await edit_message(
-                message,
-                COMMAND_USAGE["zotify"][0],
-                COMMAND_USAGE["zotify"][1],
-            )
+
         elif data[2] == "gdl":
             await edit_message(
                 message,
@@ -207,18 +194,7 @@ async def arg_usage(_, query):
         buttons.data_button("Close", "help close")
         button = buttons.build_menu(2)
         await edit_message(message, PHISH_HELP_DICT[data[2]], button)
-    elif data[1] == "streamrip":
-        buttons = ButtonMaker()
-        buttons.data_button("Back", "help back sr")
-        buttons.data_button("Close", "help close")
-        button = buttons.build_menu(2)
-        await edit_message(message, STREAMRIP_HELP_DICT[data[2]], button)
-    elif data[1] == "zotify":
-        buttons = ButtonMaker()
-        buttons.data_button("Back", "help back z")
-        buttons.data_button("Close", "help close")
-        button = buttons.build_menu(2)
-        await edit_message(message, ZOTIFY_HELP_DICT[data[2]], button)
+
     elif data[1] == "gdl":
         buttons = ButtonMaker()
         buttons.data_button("Back", "help back gdl")
