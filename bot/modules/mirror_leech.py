@@ -1175,19 +1175,7 @@ class Mirror(TaskListener):
 
 
 async def mirror(client, message):
-    from bot.helper.ext_utils.bulk_links import extract_bulk_links
-
-    bulk = (
-        await extract_bulk_links(message, "0", "0")
-        if Config.BULK_ENABLED
-        else []
-    )
-    if len(bulk) > 1:
-        await Mirror(client, message).init_bulk(
-            message.text.split("\n")[0].split(), 0, 0, Mirror
-        )
-    else:
-        bot_loop.create_task(Mirror(client, message).new_event())
+    bot_loop.create_task(Mirror(client, message).new_event())
 
 
 async def leech(client, message):
@@ -1195,19 +1183,7 @@ async def leech(client, message):
         return await send_message(
             message, "❌ Leech is disabled by the administrator."
         )
-    from bot.helper.ext_utils.bulk_links import extract_bulk_links
-
-    bulk = (
-        await extract_bulk_links(message, "0", "0")
-        if Config.BULK_ENABLED
-        else []
-    )
-    if len(bulk) > 1:
-        await Mirror(client, message, is_leech=True).init_bulk(
-            message.text.split("\n")[0].split(), 0, 0, Mirror
-        )
-    else:
-        bot_loop.create_task(Mirror(client, message, is_leech=True).new_event())
+    bot_loop.create_task(Mirror(client, message, is_leech=True).new_event())
 
 
 async def jd_mirror(client, message):
@@ -1215,19 +1191,7 @@ async def jd_mirror(client, message):
         return await send_message(
             message, "❌ JDownloader is disabled by the administrator."
         )
-    from bot.helper.ext_utils.bulk_links import extract_bulk_links
-
-    bulk = (
-        await extract_bulk_links(message, "0", "0")
-        if Config.BULK_ENABLED
-        else []
-    )
-    if len(bulk) > 1:
-        await Mirror(client, message, is_jd=True).init_bulk(
-            message.text.split("\n")[0].split(), 0, 0, Mirror
-        )
-    else:
-        bot_loop.create_task(Mirror(client, message, is_jd=True).new_event())
+    bot_loop.create_task(Mirror(client, message, is_jd=True).new_event())
 
 
 async def nzb_mirror(client, message):
@@ -1235,19 +1199,7 @@ async def nzb_mirror(client, message):
         return await send_message(
             message, "❌ NZB is disabled by the administrator."
         )
-    from bot.helper.ext_utils.bulk_links import extract_bulk_links
-
-    bulk = (
-        await extract_bulk_links(message, "0", "0")
-        if Config.BULK_ENABLED
-        else []
-    )
-    if len(bulk) > 1:
-        await Mirror(client, message, is_nzb=True).init_bulk(
-            message.text.split("\n")[0].split(), 0, 0, Mirror
-        )
-    else:
-        bot_loop.create_task(Mirror(client, message, is_nzb=True).new_event())
+    bot_loop.create_task(Mirror(client, message, is_nzb=True).new_event())
 
 
 async def jd_leech(client, message):
@@ -1259,21 +1211,9 @@ async def jd_leech(client, message):
         return await send_message(
             message, "❌ Leech is disabled by the administrator."
         )
-    from bot.helper.ext_utils.bulk_links import extract_bulk_links
-
-    bulk = (
-        await extract_bulk_links(message, "0", "0")
-        if Config.BULK_ENABLED
-        else []
+    bot_loop.create_task(
+        Mirror(client, message, is_leech=True, is_jd=True).new_event()
     )
-    if len(bulk) > 1:
-        await Mirror(client, message, is_leech=True, is_jd=True).init_bulk(
-            message.text.split("\n")[0].split(), 0, 0, Mirror
-        )
-    else:
-        bot_loop.create_task(
-            Mirror(client, message, is_leech=True, is_jd=True).new_event()
-        )
 
 
 async def nzb_leech(client, message):
@@ -1285,21 +1225,9 @@ async def nzb_leech(client, message):
         return await send_message(
             message, "❌ Leech is disabled by the administrator."
         )
-    from bot.helper.ext_utils.bulk_links import extract_bulk_links
-
-    bulk = (
-        await extract_bulk_links(message, "0", "0")
-        if Config.BULK_ENABLED
-        else []
+    bot_loop.create_task(
+        Mirror(client, message, is_leech=True, is_nzb=True).new_event()
     )
-    if len(bulk) > 1:
-        await Mirror(client, message, is_leech=True, is_nzb=True).init_bulk(
-            message.text.split("\n")[0].split(), 0, 0, Mirror
-        )
-    else:
-        bot_loop.create_task(
-            Mirror(client, message, is_leech=True, is_nzb=True).new_event()
-        )
 
 
 async def md_leech_node(client, message):
@@ -1307,21 +1235,9 @@ async def md_leech_node(client, message):
         return await send_message(
             message, "❌ Leech is disabled by the administrator."
         )
-    from bot.helper.ext_utils.bulk_links import extract_bulk_links
-
-    bulk = (
-        await extract_bulk_links(message, "0", "0")
-        if Config.BULK_ENABLED
-        else []
+    bot_loop.create_task(
+        Mirror(client, message, is_leech=True, is_md_leech=True).new_event()
     )
-    if len(bulk) > 1:
-        await Mirror(client, message, is_leech=True, is_md_leech=True).init_bulk(
-            message.text.split("\n")[0].split(), 0, 0, Mirror
-        )
-    else:
-        bot_loop.create_task(
-            Mirror(client, message, is_leech=True, is_md_leech=True).new_event()
-        )
 
 
 
