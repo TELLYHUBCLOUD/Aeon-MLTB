@@ -139,12 +139,10 @@ formatter = CustomFormatter(
 file_handler = FileHandler("log.txt")
 file_handler.setFormatter(formatter)
 file_handler.addFilter(SuppressUnclosedSessionFilter())
-file_handler.addFilter(SuppressZotifyNoiseFilter())  # Add Zotify noise filter
 
 stream_handler = StreamHandler()
 stream_handler.setFormatter(formatter)
 stream_handler.addFilter(SuppressUnclosedSessionFilter())
-stream_handler.addFilter(SuppressZotifyNoiseFilter())  # Add Zotify noise filter
 
 basicConfig(handlers=[file_handler, stream_handler], level=INFO)
 
