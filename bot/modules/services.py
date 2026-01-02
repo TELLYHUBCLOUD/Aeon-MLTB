@@ -51,20 +51,6 @@ async def start(client, message):
         from bot.modules.media_search import handle_media_get_command
 
         await handle_media_get_command(client, message)
-    elif len(message.command) > 1 and message.command[1].startswith("streamrip_"):
-        # Handle streamrip inline search start command
-        from bot.helper.mirror_leech_utils.streamrip_utils.search_handler import (
-            handle_streamrip_start_command,
-        )
-
-        await handle_streamrip_start_command(client, message)
-    elif len(message.command) > 1 and message.command[1].startswith("zotify_"):
-        # Handle zotify inline search start command
-        from bot.helper.mirror_leech_utils.zotify_utils.search_handler import (
-            handle_zotify_start_command,
-        )
-
-        await handle_zotify_start_command(client, message)
     elif len(message.command) > 1 and message.command[1] != "start":
         userid = message.from_user.id
         if len(message.command[1]) == 36:

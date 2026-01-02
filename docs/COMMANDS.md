@@ -7,15 +7,11 @@ jdmirror - or /jm Mirror using jdownloader
 nzbmirror - or /nm Mirror using sabnzbd
 ytdl - or /y Mirror yt-dlp supported links
 gdlmirror - or /gm Mirror using gallery-dl
-streamripmirror - or /srmirror or /srm Mirror music from streaming platforms
-zotifymirror - or /zmirror or /zm Mirror music from Spotify
 leech - or /l Upload to telegram
 jdleech - or /jl Leech using jdownloader
 nzbleech - or /nl Leech using sabnzbd
 ytdlleech - or /yl Leech yt-dlp supported links
 gdlleech - or /gl Leech using gallery-dl
-streamripleech - or /srleech or /srl Leech music from streaming platforms
-zotifyleech - or /zleech or /zl Leech music from Spotify
 clone - Copy file/folder to Drive
 mediainfo - or /mi Check mediainfo
 count - Count file/folder from GDrive
@@ -63,8 +59,6 @@ shortner - Shorten URLs with Bitly API and generate QR codes
 virustotal - Scan files or URLs for viruses using VirusTotal
 phishcheck - Check domains and emails for phishing/security threats
 wot - Check website, domain, and IP reputation using WOT and AbuseIPDB
-streamripsearch - or /srsearch or /srs Search music across platforms
-zotifysearch - or /zsearch or /zs Search music on Spotify
 megasearch - or /mgs Search files on MEGA
 encode - or /enc Encode files
 decode - or /dec Decode files

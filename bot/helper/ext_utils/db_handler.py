@@ -340,11 +340,15 @@ class DbManager:
             )
 
     async def get_private_files(self):
-        """Get list of available private files from database and filesystem"""
+        """Get list of all private files and their status"""
         if self._return:
             return {}
 
         try:
+            # Check if database is configured
+            if not Config.DATABASE_URL:
+                return {}
+
             # Get files from database
             db_files = await self.db.settings.files.find_one({"_id": TgClient.ID})
             if not db_files:
@@ -362,8 +366,6 @@ class DbManager:
                 "cookies.txt",
                 ".netrc",
                 "shorteners.txt",
-                "streamrip_config.toml",
-                "zotify_credentials.json",
             ]
 
             available_files = {}
@@ -418,8 +420,6 @@ class DbManager:
                 "cookies.txt",
                 ".netrc",
                 "shorteners.txt",
-                "streamrip_config.toml",
-                "zotify_credentials.json",
             ]
 
             synced_count = 0
@@ -478,8 +478,6 @@ class DbManager:
                 "cookies.txt",
                 ".netrc",
                 "shorteners.txt",
-                "streamrip_config.toml",
-                "zotify_credentials.json",
             ]
 
             synced_count = 0

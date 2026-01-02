@@ -1,6 +1,5 @@
 """
 Gallery-dl quality selector
-Following the pattern of streamrip_utils/quality_selector.py and zotify_utils/quality_selector.py
 """
 
 import asyncio

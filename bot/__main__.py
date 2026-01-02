@@ -77,12 +77,6 @@ COMMANDS = {
     "YtdlLeechCommand": "- Leech through yt-dlp supported link",
     "GdlCommand": "- Mirror gallery-dl supported link",
     "GdlLeechCommand": "- Leech through gallery-dl supported link",
-    "StreamripMirrorCommand": "- Mirror music from streaming platforms",
-    "StreamripLeechCommand": "- Leech music from streaming platforms",
-    "StreamripSearchCommand": "- Search music across platforms",
-    "ZotifyMirrorCommand": "- Mirror music from Spotify",
-    "ZotifyLeechCommand": "- Leech music from Spotify",
-    "ZotifySearchCommand": "- Search music on Spotify",
     "CloneCommand": "- Copy file/folder to Drive",
     "MegaSearchCommand": "- Search MEGA drive for files/folders",
     "MediaInfoCommand": "- Get mediainfo",
@@ -228,13 +222,6 @@ async def main():
         TgClient.start_bot(), TgClient.start_user(), TgClient.start_helper_bots()
     )
 
-    # Load Zotify credentials from database after bot clients are started
-    from .core.startup import load_zotify_credentials_from_db
-
-    try:
-        await load_zotify_credentials_from_db()
-    except Exception as e:
-        LOGGER.error(f"Failed to restore Zotify credentials: {e}")
 
     await gather(load_configurations(), update_variables())
     from .core.torrent_manager import TorrentManager
@@ -349,15 +336,6 @@ async def cleanup():
     """Clean up resources before shutdown"""
     LOGGER.info("Performing cleanup before shutdown...")
 
-    # Cleanup streamrip sessions to prevent unclosed session warnings
-    try:
-        from .helper.mirror_leech_utils.streamrip_utils.search_handler import (
-            cleanup_all_streamrip_sessions,
-        )
-
-        await cleanup_all_streamrip_sessions()
-    except Exception as e:
-        LOGGER.error(f"Error during streamrip cleanup: {e}")
 
     # Streaming functionality is integrated with wserver - no separate cleanup needed
     LOGGER.info("Streaming functionality cleanup handled by wserver")

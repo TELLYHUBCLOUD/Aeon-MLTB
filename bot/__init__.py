@@ -79,38 +79,6 @@ class SuppressUnclosedSessionFilter(Filter):
         return "The server sent an unknown constructor" not in record.getMessage()
 
 
-class SuppressZotifyNoiseFilter(Filter):
-    """Filter to suppress specific Zotify/librespot noise logs"""
-
-    def filter(self, record: LogRecord) -> bool:
-        message = record.getMessage()
-
-        # Suppress specific librespot core logs
-        if "Received license_version:" in message:
-            return False
-        if "Received country_code:" in message:
-            return False
-        if "Skipping 1f" in message:
-            return False
-        if "Skipping 69" in message:
-            return False
-        if "Session.Receiver started" in message:
-            return False
-
-        # Suppress metadata-related logs from external libraries
-        if "Metadata settings - All:" in message:
-            return False
-        if "Video metadata - Title:" in message:
-            return False
-        if "Audio metadata - Title:" in message:
-            return False
-        if "Subtitle metadata - Title:" in message:
-            return False
-        if "Using metadata-all from command line:" in message:
-            return False
-        if "Applying metadata to video file:" in message:
-            return False
-
         return "Skipping unknown command cmd:" not in message
 
 

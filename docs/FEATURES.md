@@ -113,19 +113,6 @@
 - Sudo controls for user feeds.
 - Fully button-based command execution.
 
-## Streamrip Integration
-
-- Download high-quality music from streaming platforms (Qobuz, Tidal, Deezer, SoundCloud).
-- Support for Hi-Res FLAC up to 24-bit/192kHz (Qobuz) and MQA/Hi-Res (Tidal).
-- Comprehensive search functionality across all supported platforms.
-- Batch download support for albums, playlists, and individual tracks.
-- Quality selection with platform-specific options.
-- Media tools integration for post-processing.
-- Inline search with real-time results and download buttons.
-- Service-specific authentication and credential management.
-- Custom naming and metadata handling.
-- Support for zip compression and custom upload destinations.
-
 ## Media Tools
 
 - Comprehensive media processing pipeline with multiple tools.

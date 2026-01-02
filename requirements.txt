@@ -69,5 +69,3 @@ vt-py>=0.17.5
 xattr
 yt-dlp[default,curl-cffi]
 git+https://github.com/cinemagoer/cinemagoer
-git+https://github.com/shabbirmahmud/streamrip.git@dev
-git+https://github.com/DraftKinner/zotify.git@dev

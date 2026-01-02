@@ -31,10 +31,6 @@ from .help_messages import (
     MIRROR_HELP_DICT,
     NSFW_HELP_DICT,
     PHISH_HELP_DICT,
-    STREAMRIP_HELP_DICT,
-    VT_HELP_DICT,
-    YT_HELP_DICT,
-    ZOTIFY_HELP_DICT,
 )
 from .telegraph_helper import telegraph
 
@@ -139,8 +135,6 @@ def create_help_buttons():
     _build_command_usage(VT_HELP_DICT, "virustotal")
     _build_command_usage(PHISH_HELP_DICT, "phishcheck")
     _build_command_usage(NSFW_HELP_DICT, "nsfw")
-    _build_command_usage(STREAMRIP_HELP_DICT, "streamrip")
-    _build_command_usage(ZOTIFY_HELP_DICT, "zotify")
     _build_command_usage(GALLERY_DL_HELP_DICT, "gdl")
     _build_command_usage(FORWARD_HELP_DICT, "forward")
 
@@ -1354,12 +1348,6 @@ def is_flag_enabled(flag_name):
     if clean_flag == "d":
         # If torrent operations are disabled, the seed flag should be disabled too
         return Config.TORRENT_ENABLED
-
-    # Check for streamrip-related flags
-    streamrip_flags = ["q", "quality", "c", "codec"]
-    if clean_flag in streamrip_flags:
-        # If streamrip is disabled, these flags should be disabled too
-        return Config.STREAMRIP_ENABLED
 
     # Map flags to their corresponding media tools
     flag_to_tool_map = {

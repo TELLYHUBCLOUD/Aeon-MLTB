@@ -65,12 +65,6 @@ class BotCommands:
     VirusTotalCommand = f"virustotal{i}"
     PhishCheckCommand = f"phishcheck{i}"
     WotCommand = f"wot{i}"
-    StreamripMirrorCommand = [f"streamripmirror{i}", f"srmirror{i}", f"srm{i}"]
-    StreamripLeechCommand = [f"streamripleech{i}", f"srleech{i}", f"srl{i}"]
-    StreamripSearchCommand = [f"streamripsearch{i}", f"srsearch{i}", f"srs{i}"]
-    ZotifyMirrorCommand = [f"zotifymirror{i}", f"zmirror{i}", f"zm{i}"]
-    ZotifyLeechCommand = [f"zotifyleech{i}", f"zleech{i}", f"zl{i}"]
-    ZotifySearchCommand = [f"zotifysearch{i}", f"zsearch{i}", f"zs{i}"]
     MegaSearchCommand = [f"megasearch{i}", f"mgs{i}"]
     MdLeechCommand = [f"mdleech{i}", f"mdl{i}"]
     # Encoding/Decoding Commands

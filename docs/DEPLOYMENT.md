@@ -264,7 +264,7 @@ ren config_sample.py config.py  # Windows
    - `TELEGRAM_HASH` - Get from [my.telegram.org](https://my.telegram.org)
    - `DATABASE_URL` - MongoDB connection string
    - Other optional configurations as needed
-   - You can also add your pvt files in the like `token.pickle`, `shorteners.txt`, `cookies.txt`, `accounts.zip`, `rclone.conf`, `list_drives.txt`, `cookies.txt`, `.netrc`, `shorteners.txt`, `streamrip_config.toml`, `zotify_credentials.json` in the root directory of the deploy_extended branch but make sure your repo is private in that case.
+   - You can also add your pvt files in the like `token.pickle`, `shorteners.txt`, `cookies.txt`, `accounts.zip`, `rclone.conf`, `list_drives.txt`, `cookies.txt`, `.netrc`, `shorteners.txt` in the root directory of the deploy_extended branch but make sure your repo is private in that case.
 
 #### 3. Commit Changes
 

@@ -46,17 +46,9 @@ from bot.helper.mirror_leech_utils.download_utils.qbit_download import add_qb_to
 from bot.helper.mirror_leech_utils.download_utils.rclone_download import (
     add_rclone_download,
 )
-from bot.helper.mirror_leech_utils.download_utils.streamrip_download import (
-    add_streamrip_download,
-)
 from bot.helper.mirror_leech_utils.download_utils.telegram_download import (
     TelegramDownloadHelper,
 )
-from bot.helper.mirror_leech_utils.download_utils.zotify_download import (
-    add_zotify_download,
-)
-from bot.helper.mirror_leech_utils.streamrip_utils.url_parser import is_streamrip_url
-from bot.helper.mirror_leech_utils.zotify_utils.url_parser import is_zotify_url
 from bot.helper.telegram_helper.message_utils import (
     auto_delete_message,
     delete_links,
@@ -1137,13 +1129,6 @@ class Mirror(TaskListener):
         elif is_mega_link(self.link):
             # MEGA downloads - megaclone functionality removed, use /mirror mega-link instead
             create_task(add_mega_download(self, path))
-        elif Config.STREAMRIP_ENABLED and await is_streamrip_url(self.link):
-            # Handle streamrip downloads with quality selection
-            await self._handle_streamrip_download()
-
-        elif Config.ZOTIFY_ENABLED and await is_zotify_url(self.link):
-            # Handle zotify downloads
-            create_task(add_zotify_download(self, self.link))
         else:
             ussr = args["-au"]
             pssw = args["-ap"]
@@ -1158,47 +1143,7 @@ class Mirror(TaskListener):
         await delete_links(self.message)
         return None
 
-    async def _handle_streamrip_download(self):
-        """Handle streamrip downloads with quality selection"""
-        from bot.helper.mirror_leech_utils.streamrip_utils.quality_selector import (
-            show_quality_selector,
-        )
-        from bot.helper.mirror_leech_utils.streamrip_utils.url_parser import (
-            parse_streamrip_url,
-        )
 
-        try:
-            # Parse URL to get platform and media info
-            parsed = await parse_streamrip_url(self.link)
-            if not parsed:
-                await self.on_download_error("❌ Failed to parse streamrip URL!")
-                return
-
-            platform, media_type, _ = parsed
-
-            # Set platform and media_type attributes for quality selector
-            self.platform = platform
-            self.media_type = media_type
-
-            # Show quality selector
-            selection = await show_quality_selector(self, platform, media_type)
-
-            if not selection:
-                # User cancelled or timeout
-                await self.remove_from_same_dir()
-                return
-
-            quality = selection["quality"]
-            codec = selection["codec"]
-
-            # Start streamrip download with selected quality and codec
-            create_task(
-                add_streamrip_download(self, self.link, quality, codec, False)
-            )
-
-        except Exception as e:
-            LOGGER.error(f"Error in streamrip download handling: {e}")
-            await self.on_download_error(f"❌ Streamrip download error: {e}")
 
 
 async def mirror(client, message):

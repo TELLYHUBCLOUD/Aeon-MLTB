@@ -114,45 +114,6 @@ async def update_nzb_options():
     nzb_options.update(no)
 
 
-async def load_zotify_credentials_from_db():
-    """Load Zotify credentials from database and recreate credentials file"""
-    try:
-        from bot import LOGGER
-        from bot.helper.mirror_leech_utils.zotify_utils.zotify_config import (
-            zotify_config,
-        )
-
-        # Check if database is available
-        if database.db is None:
-            return
-
-        # Look for any user with Zotify credentials (prioritize owner)
-        owner_id = getattr(Config, "OWNER_ID", None)
-        user_with_creds = None
-
-        if owner_id and owner_id != 0:
-            # Check owner first
-            owner_data = await database.db.users.find_one({"_id": owner_id})
-            if owner_data and "ZOTIFY_CREDENTIALS" in owner_data:
-                user_with_creds = owner_data
-
-        # If owner doesn't have credentials, check other users
-        if not user_with_creds:
-            user_data = await database.db.users.find_one(
-                {"ZOTIFY_CREDENTIALS": {"$exists": True}}
-            )
-            if user_data:
-                user_with_creds = user_data
-
-        # If we found credentials, recreate the file
-        if user_with_creds and "ZOTIFY_CREDENTIALS" in user_with_creds:
-            credentials = user_with_creds["ZOTIFY_CREDENTIALS"]
-            success = zotify_config.save_credentials_to_file(credentials)
-            if not success:
-                LOGGER.error("Failed to restore Zotify credentials from database")
-
-    except Exception as e:
-        LOGGER.error(f"Error loading Zotify credentials from database: {e}")
 
 
 async def load_settings():
@@ -411,12 +372,6 @@ async def load_settings():
         async with aiopen(f"sabnzbd/{file_}", "wb+") as f:
             await f.write(value)
 
-    # Load Zotify credentials from database if available (MOVED OUTSIDE USER CHECK)
-    try:
-        await load_zotify_credentials_from_db()
-    except Exception as e:
-        LOGGER.error(f"Failed to restore Zotify credentials: {e}")
-
     # Check if there are any users in the database
     user_count = await database.db.users.count_documents({})
     LOGGER.info(f"Found {user_count} users in database during startup")
@@ -482,16 +437,6 @@ async def load_settings():
     from bot.helper.ext_utils.bot_utils import ensure_authorized_users
 
     await ensure_authorized_users()
-
-    # Force update streamrip config after settings are loaded
-    try:
-        from bot.helper.mirror_leech_utils.streamrip_utils.streamrip_config import (
-            force_streamrip_config_update,
-        )
-
-        await force_streamrip_config_update()
-    except Exception as e:
-        LOGGER.error(f"Failed to update streamrip config after settings load: {e}")
 
     if await database.db.rss[BOT_ID].find_one():
         rows = database.db.rss[BOT_ID].find({})

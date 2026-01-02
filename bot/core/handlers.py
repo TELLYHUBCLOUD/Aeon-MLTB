@@ -514,60 +514,6 @@ def add_handlers():
         # Add NSFW handlers to command_filters
         command_filters.update(nsfw_handlers)
 
-    # Add streamrip handlers if streamrip is enabled
-    if Config.STREAMRIP_ENABLED:
-        from bot.modules.streamrip import (
-            streamrip_leech,
-            streamrip_mirror,
-            streamrip_search,
-        )
-
-        streamrip_handlers = {
-            "streamrip_mirror": (
-                streamrip_mirror,
-                BotCommands.StreamripMirrorCommand,
-                CustomFilters.authorized,
-            ),
-            "streamrip_leech": (
-                streamrip_leech,
-                BotCommands.StreamripLeechCommand,
-                CustomFilters.authorized,
-            ),
-            "streamrip_search": (
-                streamrip_search,
-                BotCommands.StreamripSearchCommand,
-                CustomFilters.authorized,
-            ),
-        }
-
-        # Add streamrip handlers to command_filters
-        command_filters.update(streamrip_handlers)
-
-    # Add zotify handlers if zotify is enabled
-    if Config.ZOTIFY_ENABLED:
-        from bot.modules.zotify import zotify_leech, zotify_mirror, zotify_search
-
-        zotify_handlers = {
-            "zotify_mirror": (
-                zotify_mirror,
-                BotCommands.ZotifyMirrorCommand,
-                CustomFilters.authorized,
-            ),
-            "zotify_leech": (
-                zotify_leech,
-                BotCommands.ZotifyLeechCommand,
-                CustomFilters.authorized,
-            ),
-            "zotify_search": (
-                zotify_search,
-                BotCommands.ZotifySearchCommand,
-                CustomFilters.authorized,
-            ),
-        }
-
-        # Add zotify handlers to command_filters
-        command_filters.update(zotify_handlers)
-
     # Add MEGA search handler if MEGA search is enabled
     if Config.MEGA_ENABLED and Config.MEGA_SEARCH_ENABLED:
         from bot.modules.mega_search import mega_search_command
@@ -697,22 +643,6 @@ def add_handlers():
         from bot.modules.virustotal import vt_callback_handler
 
         public_regex_filters["^vt_"] = vt_callback_handler
-
-    # Add Zotify quality selector callback handler if enabled
-    if Config.ZOTIFY_ENABLED:
-        from bot.helper.mirror_leech_utils.zotify_utils.quality_selector import (
-            ZotifyQualitySelector,
-            get_active_zotify_quality_selector,
-        )
-
-        async def handle_zotify_quality_callback(client, query):
-            """Handle Zotify quality selector callbacks"""
-            user_id = query.from_user.id
-            selector = get_active_zotify_quality_selector(user_id)
-            if selector:
-                await ZotifyQualitySelector._handle_callback(client, query, selector)
-
-        public_regex_filters["^zq"] = handle_zotify_quality_callback
 
     # Add MEGA callback handlers if enabled
     if Config.MEGA_ENABLED:
