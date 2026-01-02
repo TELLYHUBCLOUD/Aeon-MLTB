@@ -31,6 +31,8 @@ from .help_messages import (
     MIRROR_HELP_DICT,
     NSFW_HELP_DICT,
     PHISH_HELP_DICT,
+    VT_HELP_DICT,
+    YT_HELP_DICT,
 )
 from .telegraph_helper import telegraph
 
