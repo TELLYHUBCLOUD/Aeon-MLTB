@@ -2934,14 +2934,7 @@ download_commands = f"""
 /{BotCommands.JdLeechCommand[0]} or /{BotCommands.JdLeechCommand[1]}: Start leeching using JDownloader.
 /{BotCommands.NzbLeechCommand[0]} or /{BotCommands.NzbLeechCommand[1]}: Start leeching using Sabnzbd.
 /{BotCommands.YtdlLeechCommand[0]} or /{BotCommands.YtdlLeechCommand[1]}: Leech yt-dlp supported link.
-/{BotCommands.StreamripMirrorCommand[0]} or /{BotCommands.StreamripMirrorCommand[1]}: Mirror music from streaming platforms (Qobuz, Tidal, Deezer, SoundCloud).
-/{BotCommands.StreamripLeechCommand[0]} or /{BotCommands.StreamripLeechCommand[1]}: Leech music from streaming platforms to Telegram.
-/{BotCommands.StreamripSearchCommand[0]} or /{BotCommands.StreamripSearchCommand[1]}: Search for music across streaming platforms.
-/{BotCommands.ZotifyMirrorCommand[0]} or /{BotCommands.ZotifyMirrorCommand[1]}: Mirror music from Spotify using Zotify. Supports URLs, search queries, and special downloads (liked-tracks, followed-artists, saved-playlists, liked-episodes).
-/{BotCommands.ZotifyLeechCommand[0]} or /{BotCommands.ZotifyLeechCommand[1]}: Leech music from Spotify to Telegram using Zotify. Supports URLs, search queries, and special downloads.
-/{BotCommands.ZotifySearchCommand[0]} or /{BotCommands.ZotifySearchCommand[1]}: Search for music on Spotify using Zotify.
 /{BotCommands.CloneCommand} [drive_url]: Copy file/folder to Google Drive.
-
 /{BotCommands.MegaSearchCommand[0]} or /{BotCommands.MegaSearchCommand[1]} [query]: Search through MEGA drive for files and folders.
 """
 
