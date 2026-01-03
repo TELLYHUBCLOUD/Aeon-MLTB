@@ -289,6 +289,60 @@ Add to Playlist ID: <code>{yt_add_to_playlist_id}</code>"""
         buttons.data_button("Back", f"userset {user_id} youtube")
         buttons.data_button("Close", f"userset {user_id} close")
         text = f"<u>Set Default YouTube Folder Upload Mode for {name}</u>"
+    elif stype == "watermark":
+        buttons.data_button("Watermark Text", f"userset {user_id} menu WATERMARK_KEY")
+        buttons.data_button("Font Size", f"userset {user_id} menu WATERMARK_SIZE")
+        buttons.data_button("Font Color", f"userset {user_id} menu WATERMARK_COLOR")
+        buttons.data_button(
+            "Position", f"userset {user_id} menu WATERMARK_POSITION"
+        )
+        buttons.data_button(
+            "Font Path", f"userset {user_id} menu WATERMARK_FONT_PATH"
+        )
+        buttons.data_button("Back", f"userset {user_id} back")
+        buttons.data_button("Close", f"userset {user_id} close")
+
+        if user_dict.get("WATERMARK_KEY", False):
+            wm_text = user_dict["WATERMARK_KEY"]
+        elif Config.WATERMARK_KEY:
+            wm_text = Config.WATERMARK_KEY
+        else:
+            wm_text = "None"
+
+        if user_dict.get("WATERMARK_SIZE", False):
+            wm_size = user_dict["WATERMARK_SIZE"]
+        elif Config.WATERMARK_SIZE:
+            wm_size = Config.WATERMARK_SIZE
+        else:
+            wm_size = "20"
+
+        if user_dict.get("WATERMARK_COLOR", False):
+            wm_color = user_dict["WATERMARK_COLOR"]
+        elif Config.WATERMARK_COLOR:
+            wm_color = Config.WATERMARK_COLOR
+        else:
+            wm_color = "white"
+
+        if user_dict.get("WATERMARK_POSITION", False):
+            wm_pos = user_dict["WATERMARK_POSITION"]
+        elif Config.WATERMARK_POSITION:
+            wm_pos = Config.WATERMARK_POSITION
+        else:
+            wm_pos = "x=10:y=10"
+
+        if user_dict.get("WATERMARK_FONT_PATH", False):
+            wm_font = user_dict["WATERMARK_FONT_PATH"]
+        elif Config.WATERMARK_FONT_PATH:
+            wm_font = Config.WATERMARK_FONT_PATH
+        else:
+            wm_font = "default.otf"
+
+        text = f"""<u>Watermark Settings for {name}</u>
+Text: <code>{wm_text}</code>
+Size: <code>{wm_size}</code>
+Color: <code>{wm_color}</code>
+Position: <code>{wm_pos}</code>
+Font: <code>{wm_font}</code>"""
     else:
         buttons.data_button("Leech", f"userset {user_id} leech")
         buttons.data_button("Rclone", f"userset {user_id} rclone")
@@ -371,7 +425,7 @@ Add to Playlist ID: <code>{yt_add_to_playlist_id}</code>"""
         else:
             ffc = "None"
 
-        buttons.data_button("Watermark", f"userset {user_id} menu WATERMARK_KEY")
+        buttons.data_button("Watermark", f"userset {user_id} watermark")
         if user_dict.get("WATERMARK_KEY", False):
             wmt = user_dict["WATERMARK_KEY"]
         elif "WATERMARK_KEY" not in user_dict and Config.WATERMARK_KEY:
@@ -674,7 +728,7 @@ async def edit_user_settings(client, query):
         await query.answer("Not Yours!", show_alert=True)
     elif data[2] == "setevent":
         await query.answer()
-    elif data[2] in ["leech", "gdrive", "rclone", "gofile", "youtube"]:
+    elif data[2] in ["leech", "gdrive", "rclone", "gofile", "youtube", "watermark"]:
         await query.answer()
         await update_user_settings(query, data[2])
     elif data[2] == "menu":

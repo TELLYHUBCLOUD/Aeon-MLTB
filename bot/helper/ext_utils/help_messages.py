@@ -379,7 +379,11 @@ PASSWORD_ERROR_MESSAGE = """
 
 user_settings_text = {
     "METADATA_KEY": "Send your text for change mkv medias metadata (title only). Timeout: 60 sec",
-    "WATERMARK_KEY": "Send your text which will added as watermark in all mkv videos left upper corner. Timeout: 60 sec",
+    "WATERMARK_KEY": "Send your text which will added as watermark in all mkv videos. Timeout: 60 sec",
+    "WATERMARK_SIZE": "Send your watermark text font size. Timeout: 60 sec",
+    "WATERMARK_COLOR": "Send your watermark text font color. Timeout: 60 sec",
+    "WATERMARK_POSITION": "Send your watermark position (FFmpeg syntax, e.g., x=10:y=10). Timeout: 60 sec",
+    "WATERMARK_FONT_PATH": "Send your watermark font path. Timeout: 60 sec",
     "USER_SESSION": "Send your pyrogram user session string for download from private telegram chat. Timeout: 60 sec",
     "USER_DUMP": "Send your channel or group id where you want to store your leeched files. Bot must have permission to send message in your chat. Timeout: 60 sec",
     "LEECH_FILENAME_CAPTION": "Send leech filename caption. Timeout: 60 sec",
