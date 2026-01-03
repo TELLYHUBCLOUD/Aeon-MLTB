@@ -18,6 +18,13 @@ from bot.helper.ext_utils.status_utils import get_readable_time
 # key: user_id, value: bool (Proceed or Cancel)
 direct_task_results = {}
 
+def register_pending_task_user(user_id):
+    """
+    Register a user as pending for media tools selection.
+    Use direct_task_results for temporary storage to handle race conditions.
+    """
+    direct_task_results[user_id] = False
+
 class MediaToolsSelection:
     def __init__(self, client, message, listener):
         self.client = client
@@ -87,6 +94,8 @@ class MediaToolsSelection:
                 await delete_message(self._reply_to)
         
         if self.is_cancelled:
+            if self.user_id in direct_task_results:
+                del direct_task_results[self.user_id]
             return False
 
         # Apply flags back to listener
@@ -98,6 +107,9 @@ class MediaToolsSelection:
         # If toggled on, it uses default keys from listener logic if not already set.
         if not self.watermark: self.listener.watermark = ""
         if not self.metadata: self.listener.metadata = ""
+
+        # Store result
+        direct_task_results[self.user_id] = True
         
         return True
 
