@@ -34,7 +34,7 @@ from tenacity import (
 from bot.core.aeon_client import TgClient
 from bot.core.config_manager import Config
 from bot.helper.aeon_utils.caption_gen import generate_caption
-from bot.helper.ext_utils.bot_utils import clean_target, sync_to_async
+from bot.helper.ext_utils.bot_utils import clean_target_name, sync_to_async
 from bot.helper.ext_utils.files_utils import (
     get_base_name,
     is_archive,
@@ -163,7 +163,7 @@ class TelegramUploader:
         if not self._lcaption and not self._lprefix:
             cap_mono = f"<code>{file_}</code>"
         if self._listener.name_sub:
-            cap_mono = clean_target(cap_mono, self._listener.name_sub)
+            cap_mono = clean_target_name(cap_mono, self._listener.name_sub)
         if len(file_) > 60:
             if is_archive(file_):
                 name = get_base_name(file_)

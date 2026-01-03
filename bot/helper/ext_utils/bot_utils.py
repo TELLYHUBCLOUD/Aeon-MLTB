@@ -1,4 +1,5 @@
 import contextlib
+from contextlib import suppress
 from asyncio import (
     create_subprocess_exec,
     create_subprocess_shell,
@@ -284,7 +285,7 @@ def update_user_ldata(id_, key, value):
     user_data[id_][key] = value
 
 
-def clean_target(target, substitutions):
+def clean_target_name(target, substitutions):
     """
     Applies a list of regex substitutions to a target string.
 
