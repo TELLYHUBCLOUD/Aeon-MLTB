@@ -1,5 +1,4 @@
 import contextlib
-from contextlib import suppress
 from asyncio import (
     create_subprocess_exec,
     create_subprocess_shell,

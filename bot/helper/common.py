@@ -223,20 +223,16 @@ class TaskConfig:
             )
         )
         self.watermark_size = (
-            self.user_dict.get("WATERMARK_SIZE")
-            or Config.WATERMARK_SIZE
+            self.user_dict.get("WATERMARK_SIZE") or Config.WATERMARK_SIZE
         )
         self.watermark_color = (
-            self.user_dict.get("WATERMARK_COLOR")
-            or Config.WATERMARK_COLOR
+            self.user_dict.get("WATERMARK_COLOR") or Config.WATERMARK_COLOR
         )
         self.watermark_position = (
-            self.user_dict.get("WATERMARK_POSITION")
-            or Config.WATERMARK_POSITION
+            self.user_dict.get("WATERMARK_POSITION") or Config.WATERMARK_POSITION
         )
         self.watermark_font_path = (
-            self.user_dict.get("WATERMARK_FONT_PATH")
-            or Config.WATERMARK_FONT_PATH
+            self.user_dict.get("WATERMARK_FONT_PATH") or Config.WATERMARK_FONT_PATH
         )
         if self.name_sub:
             self.name_sub = [x.split("/") for x in self.name_sub.split(" | ")]
@@ -699,14 +695,18 @@ class TaskConfig:
             msgts = list(msg)
             # Use shlex.join if available, otherwise fallback (Python 3.8+)
             try:
-                msgts = split(msgts[0])  # Re-split just in case if needed? No input_list is already split
+                msgts = split(
+                    msgts[0]
+                )  # Re-split just in case if needed? No input_list is already split
                 # Wait, input_list is a list of args.
                 # msg is a list of args.
                 # To reconstruct command string properly quoted:
                 from shlex import join
+
                 msgts = join(msg)
             except ImportError:
                 from shlex import quote
+
                 msgts = " ".join(quote(arg) for arg in msg)
 
             if self.multi > 2:
@@ -749,17 +749,21 @@ class TaskConfig:
 
             try:
                 from shlex import join
+
                 self.options = join(self.options)
             except ImportError:
                 from shlex import quote
+
                 self.options = " ".join(quote(arg) for arg in self.options)
 
             b_msg.append(f"{self.bulk[0]} -i {len(self.bulk)} {self.options}")
             try:
                 from shlex import join
+
                 msg = join(b_msg)
             except ImportError:
                 from shlex import quote
+
                 msg = " ".join(quote(arg) for arg in b_msg)
 
             if len(self.bulk) > 2:

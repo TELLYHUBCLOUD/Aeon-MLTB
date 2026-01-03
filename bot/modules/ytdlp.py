@@ -306,7 +306,7 @@ class YtDlp(TaskListener):
         except ValueError as e:
             LOGGER.error(f"shlex.split error: {e}")
             await send_message(self.message, f"Error: {e}")
-            return
+            return None
         qual = ""
         error_msg, error_button = await error_check(self.message)
         if error_msg:
