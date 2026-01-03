@@ -290,12 +290,12 @@ Add to Playlist ID: <code>{yt_add_to_playlist_id}</code>"""
         buttons.data_button("Close", f"userset {user_id} close")
         text = f"<u>Set Default YouTube Folder Upload Mode for {name}</u>"
     elif stype == "watermark":
-        buttons.data_button("Watermark Text", f"userset {user_id} menu WATERMARK_KEY")
+        buttons.data_button(
+            "Watermark Text", f"userset {user_id} menu WATERMARK_KEY"
+        )
         buttons.data_button("Font Size", f"userset {user_id} menu WATERMARK_SIZE")
         buttons.data_button("Font Color", f"userset {user_id} menu WATERMARK_COLOR")
-        buttons.data_button(
-            "Position", f"userset {user_id} menu WATERMARK_POSITION"
-        )
+        buttons.data_button("Position", f"userset {user_id} menu WATERMARK_POSITION")
         buttons.data_button(
             "Font Path", f"userset {user_id} menu WATERMARK_FONT_PATH"
         )
