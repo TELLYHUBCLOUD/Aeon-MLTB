@@ -1,4 +1,5 @@
 # ruff: noqa: RUF006
+import shlex
 from asyncio import create_task
 from base64 import b64encode
 from re import match as re_match
@@ -81,7 +82,7 @@ class Mirror(TaskListener):
 
     async def new_event(self):
         text = self.message.text.split("\n")
-        input_list = text[0].split(" ")
+        input_list = shlex.split(text[0])
         error_msg, error_button = await error_check(self.message)
         if error_msg:
             await delete_links(self.message)

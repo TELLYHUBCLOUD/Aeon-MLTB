@@ -1,4 +1,5 @@
 import contextlib
+from contextlib import suppress
 from asyncio import (
     create_subprocess_exec,
     create_subprocess_shell,
@@ -169,6 +170,7 @@ def arg_parser(items, arg_base):
         "-bt",
     }
 
+    link_items = []
     while i < total:
         part = items[i]
         if part in arg_base:
@@ -205,6 +207,8 @@ def arg_parser(items, arg_base):
                         ) or not check.startswith("["):
                             break
                     sub_list.append(items[j])
+                    if part != "-ff":
+                        break
                 if sub_list:
                     value = " ".join(sub_list)
                     if part == "-ff":
@@ -216,11 +220,11 @@ def arg_parser(items, arg_base):
                     else:
                         arg_base[part] = value
                     i += len(sub_list)
+        else:
+            link_items.append(part)
         i += 1
-    if "link" in arg_base:
-        link_items = items[:arg_start] if arg_start != -1 else items
-        if link_items:
-            arg_base["link"] = " ".join(link_items)
+    if "link" in arg_base and link_items:
+        arg_base["link"] = " ".join(link_items)
 
 
 def get_size_bytes(size):

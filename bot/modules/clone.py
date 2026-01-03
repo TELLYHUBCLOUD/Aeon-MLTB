@@ -1,3 +1,4 @@
+import shlex
 from asyncio import gather
 from json import loads
 from secrets import token_hex
@@ -62,7 +63,7 @@ class Clone(TaskListener):
 
     async def new_event(self):
         text = self.message.text.split("\n")
-        input_list = text[0].split(" ")
+        input_list = shlex.split(text[0])
         error_msg, error_button = await error_check(self.message)
         if error_msg:
             await delete_links(self.message)

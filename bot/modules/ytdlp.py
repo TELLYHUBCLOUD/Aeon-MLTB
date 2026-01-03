@@ -1,3 +1,4 @@
+import shlex
 from asyncio import Event, create_task, wait_for
 from functools import partial
 from time import time
@@ -300,7 +301,7 @@ class YtDlp(TaskListener):
 
     async def new_event(self):
         text = self.message.text.split("\n")
-        input_list = text[0].split(" ")
+        input_list = shlex.split(text[0])
         qual = ""
         error_msg, error_button = await error_check(self.message)
         if error_msg:
