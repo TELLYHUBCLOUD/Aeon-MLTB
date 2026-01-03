@@ -104,13 +104,13 @@ if DATABASE_URL:
         log_error(f"Database ERROR: {e}")
 
 UPSTREAM_REPO = (
-    config_file.get("UPSTREAM_REPO", "https://github.com/TELLYHUBCLOUD/Aeon-MLTB")
+    config_file.get("UPSTREAM_REPO", "")
     or os.getenv("UPSTREAM_REPO", "")
     or ""
 )
 
 UPSTREAM_BRANCH = (
-    config_file.get("UPSTREAM_BRANCH", "argsx")
+    config_file.get("UPSTREAM_BRANCH", "")
     or os.getenv("UPSTREAM_BRANCH", "")
     or ""
 )
