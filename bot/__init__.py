@@ -22,7 +22,6 @@ from logging import (
 from time import time
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
-from uvloop import install
 
 from sabnzbdapi import SabnzbdClient
 

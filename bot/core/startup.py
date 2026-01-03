@@ -426,9 +426,14 @@ async def check_resume_tasks():
             user_id = task.get("user_id")
             message = MockMessage(text, chat_id, user_id)
             
-            if any(text.startswith(f"/{x}") for x in BotCommands.CloneCommand if isinstance(BotCommands.CloneCommand, list)):
+            # Handle CloneCommand (can be string or list)
+            clone_cmds = BotCommands.CloneCommand if isinstance(BotCommands.CloneCommand, list) else [BotCommands.CloneCommand]
+            # Handle EncodeCommand (can be string or list)
+            encode_cmds = BotCommands.EncodeCommand if isinstance(BotCommands.EncodeCommand, list) else [BotCommands.EncodeCommand]
+            
+            if any(text.startswith(f"/{x}") for x in clone_cmds):
                 await Clone(TgClient.bot, message).new_event()
-            elif any(text.startswith(f"/{x}") for x in BotCommands.EncodeCommand if isinstance(BotCommands.EncodeCommand, list)) or text.startswith(f"/{BotCommands.EncodeCommand}"):
+            elif any(text.startswith(f"/{x}") for x in encode_cmds):
                 await Encode(TgClient.bot, message).new_event()
             elif any(text.startswith(f"/{x}") for x in BotCommands.LeechCommand) or \
                  any(text.startswith(f"/{x}") for x in BotCommands.MirrorCommand) or \
