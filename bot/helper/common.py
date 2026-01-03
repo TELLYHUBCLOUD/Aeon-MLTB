@@ -4891,8 +4891,14 @@ class TaskConfig:
                             cmds.append(parts)
 
                 elif isinstance(item, list):
-                    # If it's already a list, use it directly
+                    # If it's a sub-list with a single string containing spaces, split it
+                    if len(item) == 1 and isinstance(item[0], str) and " " in item[0]:
+                        try:
+                            item = shlex.split(item[0])
+                        except Exception as e:
+                            LOGGER.warning(f"Error splitting FFmpeg command sub-list: {e}")
                     cmds.append(item)
+
                 else:
                     # For other types, convert to string and try to parse
                     LOGGER.warning(

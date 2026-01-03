@@ -750,7 +750,15 @@ class Mirror(TaskListener):
                             ]
                         elif all(isinstance(item, list) for item in evaluated_cmds):
                             # List of command lists
-                            self.ffmpeg_cmds = evaluated_cmds
+                            self.ffmpeg_cmds = []
+                            for item in evaluated_cmds:
+                                if len(item) == 1 and isinstance(item[0], str) and " " in item[0]:
+                                    import shlex
+
+                                    self.ffmpeg_cmds.append(shlex.split(item[0]))
+                                else:
+                                    self.ffmpeg_cmds.append(item)
+
                         else:
                             # Mixed list - try to handle each item appropriately
                             self.ffmpeg_cmds = []
