@@ -82,7 +82,12 @@ class Mirror(TaskListener):
 
     async def new_event(self):
         text = self.message.text.split("\n")
-        input_list = shlex.split(text[0])
+        try:
+            input_list = shlex.split(text[0])
+        except ValueError as e:
+            LOGGER.error(f"shlex.split error: {e}")
+            await send_message(self.message, f"Error: {e}")
+            return
         error_msg, error_button = await error_check(self.message)
         if error_msg:
             await delete_links(self.message)
@@ -283,9 +288,22 @@ class Mirror(TaskListener):
         if isinstance(reply_to, list):
             self.bulk = reply_to
             b_msg = input_list[:1]
-            self.options = " ".join(input_list[1:])
+            try:
+                from shlex import join
+                self.options = join(input_list[1:])
+            except ImportError:
+                from shlex import quote
+                self.options = " ".join(quote(arg) for arg in input_list[1:])
             b_msg.append(f"{self.bulk[0]} -i {len(self.bulk)} {self.options}")
-            nextmsg = await send_message(self.message, " ".join(b_msg))
+
+            try:
+                from shlex import join
+                msg = join(b_msg)
+            except ImportError:
+                from shlex import quote
+                msg = " ".join(quote(arg) for arg in b_msg)
+
+            nextmsg = await send_message(self.message, msg)
             nextmsg = await self.client.get_messages(
                 chat_id=self.message.chat.id,
                 message_ids=nextmsg.id,

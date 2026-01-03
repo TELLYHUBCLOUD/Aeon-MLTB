@@ -63,7 +63,12 @@ class Clone(TaskListener):
 
     async def new_event(self):
         text = self.message.text.split("\n")
-        input_list = shlex.split(text[0])
+        try:
+            input_list = shlex.split(text[0])
+        except ValueError as e:
+            LOGGER.error(f"shlex.split error: {e}")
+            await send_message(self.message, f"Error: {e}")
+            return
         error_msg, error_button = await error_check(self.message)
         if error_msg:
             await delete_links(self.message)
