@@ -157,7 +157,11 @@ async def get_buttons(key=None, edit_type=None):
             )
         msg = f"╭🛠 <b>All Variables</b>\n┊<b>Page:</b> {int(start / 10)}\n╰<b>State:</b> {state}"
     elif key.startswith("key"):
-        category = key.split()[1]
+        parts = key.split()
+        if len(parts) < 2:
+            # Fallback to conf menu if category is missing
+            return await get_buttons("conf")
+        category = parts[1]
         keys = CATEGORIES[category]
         for k in keys[start : 10 + start]:
             buttons.data_button(k, f"botset botvar {k} {category}")
