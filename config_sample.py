@@ -39,6 +39,10 @@ PAID_CHANNEL_LINK = ""  # Invite link for the paid channel
 SET_COMMANDS = True  # Register bot commands with BotFather on startup
 METADATA_KEY = ""  # Key for tagging/fetching metadata
 WATERMARK_KEY = ""  # Key for watermarking files
+WATERMARK_SIZE = 20  # Font size for watermark
+WATERMARK_COLOR = "white"  # Font color for watermark
+WATERMARK_POSITION = "x=10:y=10"  # Position for watermark
+WATERMARK_FONT_PATH = "default.otf"  # Font path for watermark
 LOG_CHAT_ID = 0  # Chat ID for sending leech logs
 LEECH_FILENAME_CAPTION = ""  # Template caption for leeched files
 HYDRA_IP = ""  # IP of NZBHydra2 instance

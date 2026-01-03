@@ -90,6 +90,10 @@ class TaskConfig:
         self.name_sub = ""
         self.metadata = ""
         self.watermark = ""
+        self.watermark_size = 20
+        self.watermark_color = "white"
+        self.watermark_position = "x=10:y=10"
+        self.watermark_font_path = "default.otf"
         self.thumbnail_layout = ""
         self.folder_name = ""
         self.split_size = 0
@@ -212,6 +216,22 @@ class TaskConfig:
             or (
                 Config.WATERMARK_KEY if "WATERMARK_KEY" not in self.user_dict else ""
             )
+        )
+        self.watermark_size = (
+            self.user_dict.get("WATERMARK_SIZE")
+            or Config.WATERMARK_SIZE
+        )
+        self.watermark_color = (
+            self.user_dict.get("WATERMARK_COLOR")
+            or Config.WATERMARK_COLOR
+        )
+        self.watermark_position = (
+            self.user_dict.get("WATERMARK_POSITION")
+            or Config.WATERMARK_POSITION
+        )
+        self.watermark_font_path = (
+            self.user_dict.get("WATERMARK_FONT_PATH")
+            or Config.WATERMARK_FONT_PATH
         )
         if self.name_sub:
             self.name_sub = [x.split("/") for x in self.name_sub.split(" | ")]
@@ -1405,7 +1425,14 @@ class TaskConfig:
         checked = False
         if self.is_file:
             if is_mkv(dl_path):
-                cmd, temp_file = await get_watermark_cmd(dl_path, key)
+                cmd, temp_file = await get_watermark_cmd(
+                    dl_path,
+                    key,
+                    self.watermark_size,
+                    self.watermark_color,
+                    self.watermark_position,
+                    self.watermark_font_path,
+                )
                 if cmd:
                     if not checked:
                         checked = True
@@ -1437,7 +1464,14 @@ class TaskConfig:
                         cpu_eater_lock.release()
                         return ""
                     if is_mkv(file_path):
-                        cmd, temp_file = await get_watermark_cmd(file_path, key)
+                        cmd, temp_file = await get_watermark_cmd(
+                            file_path,
+                            key,
+                            self.watermark_size,
+                            self.watermark_color,
+                            self.watermark_position,
+                            self.watermark_font_path,
+                        )
                         if cmd:
                             if not checked:
                                 checked = True

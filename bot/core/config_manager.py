@@ -70,6 +70,10 @@ class Config:
     # Aeon-MLTB Specific / Custom Features
     METADATA_KEY: str = ""
     WATERMARK_KEY: str = ""
+    WATERMARK_SIZE: int = 20
+    WATERMARK_COLOR: str = "white"
+    WATERMARK_POSITION: str = "x=10:y=10"
+    WATERMARK_FONT_PATH: str = "default.otf"
     SET_COMMANDS: bool = True
     TOKEN_TIMEOUT: int = 0
     PAID_CHANNEL_ID: int = 0

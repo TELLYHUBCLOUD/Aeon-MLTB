@@ -43,19 +43,29 @@ async def get_streams(file):
 
 
 # TODO Lots of work need
-async def get_watermark_cmd(file, key):
+async def get_watermark_cmd(
+    file,
+    key,
+    size=20,
+    color="white",
+    position="x=10:y=10",
+    font_path="default.otf",
+):
     """
     Generates an FFmpeg (xtra) command to add a text watermark to a video file.
 
     Args:
         file: Path to the input video file.
         key: The text string to use as the watermark.
+        size: Font size of the watermark.
+        color: Font color of the watermark.
+        position: Position of the watermark (FFmpeg syntax).
+        font_path: Path to the font file.
 
     Returns:
         A tuple containing the command list and the temporary output file path.
     """
     temp_file = f"{file}.temp.mkv"
-    font_path = "default.otf"
 
     cmd = [
         "xtra",
@@ -67,7 +77,7 @@ async def get_watermark_cmd(file, key):
         "-i",
         file,
         "-vf",
-        f"drawtext=text='{key}':fontfile={font_path}:fontsize=20:fontcolor=white:x=10:y=10",
+        f"drawtext=text='{key}':fontfile={font_path}:fontsize={size}:fontcolor={color}:{position}",
         "-threads",
         f"{max(1, cpu_no // 2)}",
         temp_file,
