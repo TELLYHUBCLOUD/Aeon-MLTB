@@ -33,7 +33,12 @@ from bot.helper.aeon_utils.command_gen import (
     get_watermark_cmd,
 )
 
-from .ext_utils.bot_utils import get_size_bytes, new_task, sync_to_async
+from .ext_utils.bot_utils import (
+    clean_target,
+    get_size_bytes,
+    new_task,
+    sync_to_async,
+)
 from .ext_utils.bulk_links import extract_bulk_links
 from .ext_utils.files_utils import (
     SevenZ,
@@ -218,16 +223,20 @@ class TaskConfig:
             )
         )
         self.watermark_size = (
-            self.user_dict.get("WATERMARK_SIZE") or Config.WATERMARK_SIZE
+            self.user_dict.get("WATERMARK_SIZE")
+            or Config.WATERMARK_SIZE
         )
         self.watermark_color = (
-            self.user_dict.get("WATERMARK_COLOR") or Config.WATERMARK_COLOR
+            self.user_dict.get("WATERMARK_COLOR")
+            or Config.WATERMARK_COLOR
         )
         self.watermark_position = (
-            self.user_dict.get("WATERMARK_POSITION") or Config.WATERMARK_POSITION
+            self.user_dict.get("WATERMARK_POSITION")
+            or Config.WATERMARK_POSITION
         )
         self.watermark_font_path = (
-            self.user_dict.get("WATERMARK_FONT_PATH") or Config.WATERMARK_FONT_PATH
+            self.user_dict.get("WATERMARK_FONT_PATH")
+            or Config.WATERMARK_FONT_PATH
         )
         if self.name_sub:
             self.name_sub = [x.split("/") for x in self.name_sub.split(" | ")]
@@ -690,18 +699,14 @@ class TaskConfig:
             msgts = list(msg)
             # Use shlex.join if available, otherwise fallback (Python 3.8+)
             try:
-                msgts = split(
-                    msgts[0]
-                )  # Re-split just in case if needed? No input_list is already split
+                msgts = split(msgts[0])  # Re-split just in case if needed? No input_list is already split
                 # Wait, input_list is a list of args.
                 # msg is a list of args.
                 # To reconstruct command string properly quoted:
                 from shlex import join
-
                 msgts = join(msg)
             except ImportError:
                 from shlex import quote
-
                 msgts = " ".join(quote(arg) for arg in msg)
 
             if self.multi > 2:
@@ -744,21 +749,17 @@ class TaskConfig:
 
             try:
                 from shlex import join
-
                 self.options = join(self.options)
             except ImportError:
                 from shlex import quote
-
                 self.options = " ".join(quote(arg) for arg in self.options)
 
             b_msg.append(f"{self.bulk[0]} -i {len(self.bulk)} {self.options}")
             try:
                 from shlex import join
-
                 msg = join(b_msg)
             except ImportError:
                 from shlex import quote
-
                 msg = " ".join(quote(arg) for arg in b_msg)
 
             if len(self.bulk) > 2:
@@ -1021,42 +1022,20 @@ class TaskConfig:
 
     async def substitute(self, dl_path):
         """Performs name substitution on downloaded files/folders based on task settings."""
+        if not self.name_sub:
+            return dl_path
 
         def perform_substitution(name, substitutions):
-            for substitution in substitutions:
-                sen = False
-                pattern = substitution[0]
-                if len(substitution) > 1:
-                    if len(substitution) > 2:
-                        sen = substitution[2] == "s"
-                        res = substitution[1]
-                    elif len(substitution[1]) == 0:
-                        res = " "
-                    else:
-                        res = substitution[1]
-                else:
-                    res = ""
-                try:
-                    name = sub(
-                        rf"{pattern}",
-                        res,
-                        name,
-                        flags=IGNORECASE if sen else 0,
-                    )
-                except Exception as e:
-                    LOGGER.error(
-                        f"Substitute Error: pattern: {pattern} res: {res}. Error: {e}",
-                    )
-                    return False
-                if len(name.encode()) > 255:
-                    LOGGER.error(f"Substitute: {name} is too long")
-                    return False
+            name = clean_target(name, substitutions)
+            if len(name.encode()) > 255:
+                LOGGER.error(f"Substitute: {name} is too long")
+                return False
             return name
 
         if self.is_file:
             up_dir, name = dl_path.rsplit("/", 1)
             new_name = perform_substitution(name, self.name_sub)
-            if not new_name:
+            if not new_name or new_name == name:
                 return dl_path
             new_path = ospath.join(up_dir, new_name)
             with contextlib.suppress(Exception):
@@ -1066,7 +1045,7 @@ class TaskConfig:
             for file_ in files:
                 f_path = ospath.join(dirpath, file_)
                 new_name = perform_substitution(file_, self.name_sub)
-                if not new_name:
+                if not new_name or new_name == file_:
                     continue
                 with contextlib.suppress(Exception):
                     await move(f_path, ospath.join(dirpath, new_name))

@@ -1,4 +1,5 @@
 import contextlib
+from contextlib import suppress
 from asyncio import (
     create_subprocess_exec,
     create_subprocess_shell,
@@ -11,7 +12,7 @@ from functools import partial, wraps
 
 from httpx import AsyncClient
 
-from bot import bot_loop, user_data
+from bot import LOGGER, bot_loop, user_data
 from bot.core.config_manager import Config
 from bot.helper.telegram_helper.button_build import ButtonMaker
 
@@ -282,6 +283,54 @@ def update_user_ldata(id_, key, value):
     """
     user_data.setdefault(id_, {})
     user_data[id_][key] = value
+
+
+def clean_target(target, substitutions):
+    """
+    Applies a list of regex substitutions to a target string.
+
+    Args:
+        target: The string to clean.
+        substitutions: A list of tuples/lists in format [pattern, replacement, flags].
+                       - [pattern]: Remove pattern.
+                       - [pattern, replacement]: Replace pattern with replacement.
+                       - [pattern, replacement, 's']: Case-insensitive replacement (if 's').
+
+    Returns:
+        The cleaned string.
+    """
+    if not substitutions:
+        return target
+
+    for substitution in substitutions:
+        if not substitution:
+            continue
+
+        pattern = substitution[0]
+        replacement = ""
+        is_ignore_case = False
+
+        if len(substitution) > 1:
+            if len(substitution) > 2:
+                is_ignore_case = substitution[2] == "s"
+                replacement = substitution[1]
+            elif len(substitution[1]) == 0:
+                replacement = " "
+            else:
+                replacement = substitution[1]
+
+        try:
+            target = sub(
+                rf"{pattern}",
+                replacement,
+                target,
+                flags=IGNORECASE if is_ignore_case else 0,
+            )
+        except Exception as e:
+            LOGGER.error(
+                f"Substitute Error: pattern: {pattern} replacement: {replacement}. Error: {e}",
+            )
+    return target
 
 
 async def cmd_exec(cmd, shell=False):
