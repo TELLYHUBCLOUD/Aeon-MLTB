@@ -15,7 +15,7 @@ from time import time
 
 import aiofiles
 import fitz  # PyMuPDF
-from aioshutil import move, rmtree
+from aioshutil import rmtree
 from PIL import Image
 
 from bot import DOWNLOAD_DIR, LOGGER, cpu_no
@@ -881,7 +881,7 @@ async def take_ss(video_file, ss_nb) -> bool:
         for i in range(ss_nb):
             output = f"{dirpath}/SS.{name}_{i:02}.png"
             cmd = [
-                Config.FFMPEG_BINARY,
+                "xtra",
                 "-hide_banner",
                 "-loglevel",
                 "error",
@@ -1021,7 +1021,7 @@ async def get_audio_thumbnail(audio_file):
 
     # Simple approach - try to extract embedded album art without audio processing
     cmd = [
-        Config.FFMPEG_BINARY,
+        "xtra",
         "-hide_banner",
         "-loglevel",
         "error",
@@ -1035,7 +1035,7 @@ async def get_audio_thumbnail(audio_file):
     ]
 
     try:
-        _, _err, code = await wait_for(cmd_exec(cmd), timeout=30)
+        _, err, code = await wait_for(cmd_exec(cmd), timeout=30)
         if code == 0 and await aiopath.exists(output):
             output_size = await aiopath.getsize(output)
             if output_size > 0:
@@ -1411,7 +1411,7 @@ async def extract_track(
 
             # Build FFmpeg command
             cmd = [
-                Config.FFMPEG_BINARY,
+                "xtra",
                 "-hide_banner",
                 "-loglevel",
                 "error",
@@ -1476,7 +1476,7 @@ async def extract_track(
             )
 
             try:
-                _stdout, stderr, code = await cmd_exec(cmd)
+                stdout, stderr, code = await cmd_exec(cmd)
                 if (
                     code == 0
                     and await aiopath.exists(output_file)
@@ -1525,7 +1525,7 @@ async def extract_track(
                             else:
                                 # Extract WebVTT from container
                                 alt_cmd = [
-                                    Config.FFMPEG_BINARY,  # Use configured binary for WebVTT
+                                    "xtra",  # Use xtra for WebVTT
                                     "-hide_banner",
                                     "-loglevel",
                                     "error",
@@ -1566,7 +1566,7 @@ async def extract_track(
                             )
 
                             alt_cmd = [
-                                Config.FFMPEG_BINARY,  # Use configured binary directly
+                                "xtra",  # Use xtra directly
                                 "-hide_banner",
                                 "-loglevel",
                                 "error",
@@ -1580,7 +1580,7 @@ async def extract_track(
                                 alt_output_file,
                             ]
 
-                            _alt_stdout, alt_stderr, alt_code = await cmd_exec(
+                            alt_stdout, alt_stderr, alt_code = await cmd_exec(
                                 alt_cmd
                             )
                             if (
@@ -1773,7 +1773,7 @@ async def remove_track(
 
         # Build FFmpeg command
         cmd = [
-            Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+            "xtra",  # Using xtra instead of ffmpeg
             "-hide_banner",
             "-loglevel",
             "error",
@@ -1861,7 +1861,7 @@ async def remove_track(
         LOGGER.info(f"Command: {' '.join(cmd)}")
 
         # Execute the command
-        _stdout, stderr, code = await cmd_exec(cmd)
+        stdout, stderr, code = await cmd_exec(cmd)
 
         if code == 0 and await aiopath.exists(output_path):
             file_size = await aiopath.getsize(output_path)
@@ -1945,7 +1945,7 @@ async def remove_all_tracks(
 
         # Build FFmpeg command
         cmd = [
-            Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+            "xtra",  # Using xtra instead of ffmpeg
             "-hide_banner",
             "-loglevel",
             "error",
@@ -2017,7 +2017,7 @@ async def remove_all_tracks(
         LOGGER.info(f"Command: {' '.join(cmd)}")
 
         # Execute the command
-        _stdout, stderr, code = await cmd_exec(cmd)
+        stdout, stderr, code = await cmd_exec(cmd)
 
         if code == 0 and await aiopath.exists(output_path):
             file_size = await aiopath.getsize(output_path)
@@ -2046,7 +2046,7 @@ async def proceed_remove(
     audio_index: int | None = None,
     subtitle_index: int | None = None,
     attachment_index: int | None = None,
-    ffmpeg_path: str = Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+    ffmpeg_path: str = "xtra",  # Using xtra instead of ffmpeg
     delete_original: bool = False,
     # Parameters for multiple indices
     video_indices: list[int] | None = None,
@@ -2227,7 +2227,7 @@ async def proceed_extract(
     subtitle_index: int | None = None,
     attachment_index: int | None = None,
     maintain_quality: bool = True,
-    ffmpeg_path: str = Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+    ffmpeg_path: str = "xtra",  # Using xtra instead of ffmpeg
     delete_original: bool = False,
     # Parameters for multiple indices
     video_indices: list[int] | None = None,
@@ -4009,7 +4009,7 @@ async def remove_tracks(
         return []
 
     # Determine FFmpeg path
-    ffmpeg_path = Config.FFMPEG_BINARY  # Use configured binary alias for FFmpeg
+    ffmpeg_path = "xtra"  # Use xtra alias for FFmpeg
 
     # Create output filename
     base_name = os.path.splitext(os.path.basename(file_path))[0]
@@ -4235,7 +4235,7 @@ async def get_video_thumbnail(video_file, duration):
 
     # Memory-efficient approach - extract small thumbnail from middle of video
     cmd = [
-        Config.FFMPEG_BINARY,
+        "xtra",
         "-hide_banner",
         "-loglevel",
         "error",
@@ -4291,7 +4291,7 @@ async def get_multiple_frames_thumbnail(video_file, layout, keep_screenshots):
     await makedirs(output_dir, exist_ok=True)
     output = ospath.join(output_dir, f"{time()}.jpg")
     cmd = [
-        Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+        "xtra",  # Using xtra instead of ffmpeg
         "-hide_banner",
         "-loglevel",
         "error",
@@ -5189,8 +5189,8 @@ class FFMpeg:
         """
         self.clear()
         self._total_time = (await get_media_info(f_path))[0]
-        base_name, _ext = ospath.splitext(f_path)
-        _dir, base_name = base_name.rsplit("/", 1)
+        base_name, ext = ospath.splitext(f_path)
+        dir, base_name = base_name.rsplit("/", 1)
 
         # Check if ffmpeg is a list of commands to run sequentially
         if isinstance(ffmpeg, list) and ffmpeg:
@@ -5462,9 +5462,9 @@ class FFMpeg:
             ffmpeg.remove("-del")
             delete_files = True
 
-        # Replace 'ffmpeg' with Config.FFMPEG_BINARY as the command name
-        if ffmpeg and ffmpeg[0] == Config.FFMPEG_BINARY:
-            ffmpeg[0] = Config.FFMPEG_BINARY
+        # Replace 'ffmpeg' with 'xtra' as the command name
+        if ffmpeg and ffmpeg[0] == "xtra":
+            ffmpeg[0] = "xtra"
 
         # Determine the media type of the input file
         media_type = await get_media_type_for_watermark(f_path)
@@ -5627,7 +5627,7 @@ class FFMpeg:
                             try:
                                 # Use ffprobe to check for audio streams
                                 process = await create_subprocess_exec(
-                                    Config.FFMPEG_BINARY,
+                                    "xtra",
                                     "-v",
                                     "error",
                                     "-select_streams",
@@ -6861,9 +6861,9 @@ class FFMpeg:
             ffmpeg.remove("-del")
             delete_files = True
 
-        # Replace 'ffmpeg' with Config.FFMPEG_BINARY as the command name
-        if ffmpeg and ffmpeg[0] == Config.FFMPEG_BINARY:
-            ffmpeg[0] = Config.FFMPEG_BINARY
+        # Replace 'ffmpeg' with 'xtra' as the command name
+        if ffmpeg and ffmpeg[0] == "xtra":
+            ffmpeg[0] = "xtra"
 
         # Execute the command
         self._listener.subproc = await create_subprocess_exec(
@@ -7000,7 +7000,7 @@ class FFMpeg:
         if ext == "webm":
             # Base command
             cmd = [
-                Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+                "xtra",  # Using xtra instead of ffmpeg
                 "-hide_banner",
                 "-loglevel",
                 "error",
@@ -7056,7 +7056,7 @@ class FFMpeg:
             if ext == "mp4":
                 # Base command
                 cmd = [
-                    Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+                    "xtra",  # Using xtra instead of ffmpeg
                     "-hide_banner",
                     "-loglevel",
                     "error",
@@ -7110,7 +7110,7 @@ class FFMpeg:
                 # For MKV, we can include subtitles
                 # Base command
                 cmd = [
-                    Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+                    "xtra",  # Using xtra instead of ffmpeg
                     "-hide_banner",
                     "-loglevel",
                     "error",
@@ -7223,7 +7223,7 @@ class FFMpeg:
         elif retry:
             # Base command
             cmd = [
-                Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+                "xtra",  # Using xtra instead of ffmpeg
                 "-hide_banner",
                 "-loglevel",
                 "error",
@@ -7338,7 +7338,7 @@ class FFMpeg:
         elif has_custom_codec or has_custom_crf or has_custom_preset:
             # Base command
             cmd = [
-                Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+                "xtra",  # Using xtra instead of ffmpeg
                 "-hide_banner",
                 "-loglevel",
                 "error",
@@ -7438,7 +7438,7 @@ class FFMpeg:
         else:
             # Use simple copy for all streams
             cmd = [
-                Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+                "xtra",  # Using xtra instead of ffmpeg
                 "-hide_banner",
                 "-loglevel",
                 "error",
@@ -7585,7 +7585,7 @@ class FFMpeg:
         if ext == "webm" and not second_retry:
             LOGGER.info(f"Using VP9 codec for WebM conversion: {video_file}")
             cmd = [
-                Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+                "xtra",  # Using xtra instead of ffmpeg
                 "-hide_banner",
                 "-loglevel",
                 "error",
@@ -7660,7 +7660,7 @@ class FFMpeg:
         if second_retry and ext == "webm":
             LOGGER.info(f"VP9 codec failed for {video_file}, trying with VP8")
             cmd = [
-                Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+                "xtra",  # Using xtra instead of ffmpeg
                 "-hide_banner",
                 "-loglevel",
                 "error",
@@ -7831,7 +7831,7 @@ class FFMpeg:
         if retry:
             # If we're retrying, use the codec with more options
             cmd = [
-                Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+                "xtra",  # Using xtra instead of ffmpeg
                 "-hide_banner",
                 "-loglevel",
                 "error",
@@ -7849,7 +7849,7 @@ class FFMpeg:
         else:
             # First try with simple copy (faster if format is compatible)
             cmd = [
-                Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+                "xtra",  # Using xtra instead of ffmpeg
                 "-hide_banner",
                 "-loglevel",
                 "error",
@@ -7974,7 +7974,7 @@ class FFMpeg:
             if ext == "srt":
                 # Convert to SRT format
                 cmd = [
-                    Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+                    "xtra",  # Using xtra instead of ffmpeg
                     "-hide_banner",
                     "-loglevel",
                     "error",
@@ -8003,7 +8003,7 @@ class FFMpeg:
             elif ext == "vtt":
                 # Convert to WebVTT format
                 cmd = [
-                    Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+                    "xtra",  # Using xtra instead of ffmpeg
                     "-hide_banner",
                     "-loglevel",
                     "error",
@@ -8032,7 +8032,7 @@ class FFMpeg:
             elif ext in {"ass", "ssa"}:
                 # Convert to ASS/SSA format
                 cmd = [
-                    Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+                    "xtra",  # Using xtra instead of ffmpeg
                     "-hide_banner",
                     "-loglevel",
                     "error",
@@ -8061,7 +8061,7 @@ class FFMpeg:
             else:
                 # Default conversion
                 cmd = [
-                    Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+                    "xtra",  # Using xtra instead of ffmpeg
                     "-hide_banner",
                     "-loglevel",
                     "error",
@@ -8088,7 +8088,7 @@ class FFMpeg:
         else:
             # For unknown subtitle formats, use a generic approach
             cmd = [
-                Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+                "xtra",  # Using xtra instead of ffmpeg
                 "-hide_banner",
                 "-loglevel",
                 "error",
@@ -8479,7 +8479,7 @@ class FFMpeg:
         filter_complex += f"concat=n={len(segments)}:v=1:a=1[vout][aout]"
 
         cmd = [
-            Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+            "xtra",  # Using xtra instead of ffmpeg
             "-hide_banner",
             "-loglevel",
             "error",
@@ -8628,7 +8628,7 @@ class FFMpeg:
 
                 # Use duration parameter instead of file size for equal splits
                 cmd = [
-                    Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+                    "xtra",  # Using xtra instead of ffmpeg
                     "-hide_banner",
                     "-loglevel",
                     "error",
@@ -8731,7 +8731,7 @@ class FFMpeg:
         while i <= parts or start_time < duration - 4:
             out_path = f_path.replace(file_, f"{base_name}.part{i:03}{extension}")
             cmd = [
-                Config.FFMPEG_BINARY,  # Using configured binary instead of ffmpeg
+                "xtra",  # Using xtra instead of ffmpeg
                 "-hide_banner",
                 "-loglevel",
                 "error",
@@ -8899,7 +8899,7 @@ async def apply_document_metadata(file_path, title=None, author=None, comment=No
 
         # Get media information if it's a media file
         try:
-            duration, _artist, title = await get_media_info(file_path)
+            duration, artist, title = await get_media_info(file_path)
             if duration and duration > 0:
                 hours = duration // 3600
                 minutes = (duration % 3600) // 60
@@ -10057,87 +10057,3 @@ async def get_pdf_info(pdf_path):
     except Exception as e:
         LOGGER.error(f"Error getting PDF info for {pdf_path}: {e}")
         return None
-
-
-async def process_md_leech(file_path):
-    """
-    Process file for MDLeech command:
-    1. Keep only Hindi audio.
-    2. Remove all subtitles.
-    3. Compress video with crf 28 preset fast.
-    """
-    LOGGER.info(f"Processing MDLeech for: {file_path}")
-
-    if not await aiopath.exists(file_path):
-        return file_path
-
-    # Get streams info
-    streams = await get_streams(file_path)
-    if not streams:
-        LOGGER.error(f"MDLeech: Could not probe file: {file_path}")
-        return file_path
-
-    audio_maps = []
-    has_hindi = False
-
-    # Check for Hindi audio
-    for stream in streams:
-        if stream.get("codec_type") == "audio":
-            tags = stream.get("tags", {})
-            lang = tags.get("language", "").lower()
-
-            # Common Hindi codes
-            if any(code in lang for code in ["hin", "hi", "hca", "hnd", "ind"]):
-                audio_maps.append(f"-map 0:{stream['index']}")
-                has_hindi = True
-
-    # Construct ffmpeg command
-    out_path = f"{file_path}.temp.mkv"
-
-    # Use xtra (ffmpeg wrapper) as seen in other functions
-    cmd = [
-        Config.FFMPEG_BINARY,
-        "-i",
-        file_path,
-        "-map",
-        "0:v",  # Map all video streams
-    ]
-
-    if has_hindi:
-        for m in audio_maps:
-            cmd.extend(m.split())
-        cmd.extend(["-c:a", "copy"])
-    else:
-        LOGGER.warning(
-            f"MDLeech: No Hindi audio found in {file_path}. Processing without audio."
-        )
-        # No audio mapped
-
-    # Remove subtitles (-sn), Compress video
-    cmd.extend(
-        ["-sn", "-c:v", "libx265", "-crf", "28", "-preset", "fast", "-y", out_path]
-    )
-
-    LOGGER.info(f"MDLeech command: {' '.join(cmd)}")
-
-    try:
-        _stdout, stderr, code = await cmd_exec(cmd)
-        if code != 0:
-            LOGGER.error(f"MDLeech ffmpeg failed: {stderr}")
-            if await aiopath.exists(out_path):
-                await remove(out_path)
-            return file_path
-
-        # Success - replace original
-        if await aiopath.exists(out_path):
-            await remove(file_path)
-            await move(out_path, file_path)
-            LOGGER.info(f"MDLeech processing complete: {file_path}")
-            return file_path
-
-    except Exception as e:
-        LOGGER.error(f"MDLeech Error: {e}")
-        if await aiopath.exists(out_path):
-            await remove(out_path)
-
-    return file_path

@@ -156,7 +156,6 @@ class Config:
 
     EXCLUDED_EXTENSIONS: str = ""
     FFMPEG_CMDS: ClassVar[dict[str, list[str]]] = {}
-    FFMPEG_BINARY: str = "ffmpeg"
     FILELION_API: str = ""
     GDRIVE_ID: str = ""
 

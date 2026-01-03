@@ -369,7 +369,7 @@ class Mirror(TaskListener):
                 from bot.modules.users_settings import get_ddl_setting
 
                 user_id = self.message.from_user.id
-                _default_server, _ = get_ddl_setting(user_id, "DDL_SERVER", "gofile")
+                default_serve, _ = get_ddl_setting(user_id, "DDL_SERVER", "gofile")
 
         self.rc_flags = args["-rcf"]
         self.link = args["link"]

@@ -4949,7 +4949,7 @@ class TaskConfig:
 
                 # Create the base command
                 cmd = [
-                    Config.FFMPEG_BINARY,
+                    "xtra",
                     "-hide_banner",
                     "-loglevel",
                     "error",
@@ -4980,7 +4980,7 @@ class TaskConfig:
                             ffmpeg_parts.insert(-1, "input.mp4")
                             cmd[2] = f"{ulimit_part} && {' '.join(ffmpeg_parts)}"
                         else:
-                            # No ulimit, just the ffmpeg command
+                            # No ulimit, just the xtra command
                             ffmpeg_parts = cmd[2].split()
                             ffmpeg_parts.insert(-1, "-i")
                             ffmpeg_parts.insert(-1, "input.mp4")
@@ -7089,7 +7089,7 @@ class TaskConfig:
 
         # Build FFmpeg command
         ffmpeg_cmd = [
-            Config.FFMPEG_BINARY,  # Using the renamed binary for FFmpeg
+            "xtra",  # Using the renamed binary for FFmpeg
             "-hide_banner",
             "-loglevel",
             "error",
@@ -7154,15 +7154,20 @@ class TaskConfig:
             self.is_cancelled = False
 
         try:
-            # Check if Config.FFMPEG_BINARY exists
+            # Check if xtra binary exists
             import shutil
 
-            ffmpeg_binary_path = shutil.which(Config.FFMPEG_BINARY)
-            if not ffmpeg_binary_path:
-                LOGGER.error(f"{Config.FFMPEG_BINARY} binary not found in PATH")
-                return dl_path
-            else:
-                ffmpeg_cmd[0] = ffmpeg_binary_path # Ensure the command uses the found path
+            xtra_path = shutil.which("xtra")
+            if not xtra_path:
+                LOGGER.error("xtra binary not found in PATH")
+                # Try to find xtra
+                ffmpeg_path = shutil.which("xtra")
+                if ffmpeg_path:
+                    # Use xtra command
+                    ffmpeg_cmd[0] = "xtra"  # Use xtra as fallback
+                else:
+                    LOGGER.error("xtra binary not found in PATH")
+                    return dl_path
 
             # Create subprocess with pipes
             from asyncio.subprocess import PIPE, create_subprocess_exec
@@ -7231,14 +7236,16 @@ class TaskConfig:
         repaired_path = f"{ospath.splitext(dl_path)[0]}_repaired{file_ext}"
 
         try:
-            # Check if Config.FFMPEG_BINARY is available
+            # Check if xtra is available
             import shutil
 
-            # Try to find Config.FFMPEG_BINARY
-            ffmpeg_path = shutil.which(Config.FFMPEG_BINARY)
+            # Try to find xtra
+            ffmpeg_path = shutil.which("xtra")
+            if not ffmpeg_path and shutil.which("xtra"):
+                ffmpeg_path = shutil.which("xtra")
 
             if not ffmpeg_path:
-                LOGGER.error(f"{Config.FFMPEG_BINARY} not found, cannot repair video")
+                LOGGER.error("Neither ffmpeg nor xtra found, cannot repair video")
                 return dl_path
 
             # Try different repair methods
@@ -7362,10 +7369,10 @@ class TaskConfig:
 
             # Try to find ffprobe
             ffprobe_path = shutil.which("ffprobe")
-            if not ffprobe_path and shutil.which(Config.FFMPEG_BINARY):
-                # Use ffprobe from the same directory as Config.FFMPEG_BINARY
-                ffmpeg_dir = os.path.dirname(shutil.which(Config.FFMPEG_BINARY))
-                ffprobe_path = os.path.join(ffmpeg_dir, "ffprobe")
+            if not ffprobe_path and shutil.which("xtra"):
+                # Use ffprobe from the same directory as xtra
+                xtra_dir = os.path.dirname(shutil.which("xtra"))
+                ffprobe_path = os.path.join(xtra_dir, "ffprobe")
                 if not os.path.exists(ffprobe_path):
                     ffprobe_path = None
 
@@ -7476,13 +7483,13 @@ class TaskConfig:
 
         # Validate the audio file using ffprobe
         try:
-            # Check if Config.FFMPEG_BINARY binary exists
+            # Check if xtra binary exists
             import shutil
             import subprocess
 
-            ffmpeg_binary_path = shutil.which(Config.FFMPEG_BINARY)
+            xtra_path = shutil.which("xtra")
             ffprobe_cmd = [
-                "ffprobe",  # Keep as ffprobe, not Config.FFMPEG_BINARY
+                "ffprobe",  # Keep as ffprobe, not xtra
                 "-v",
                 "error",
                 "-show_entries",
@@ -7492,10 +7499,10 @@ class TaskConfig:
                 dl_path,
             ]
 
-            if ffmpeg_binary_path:
-                # Use ffprobe from the same directory as Config.FFMPEG_BINARY
-                ffmpeg_dir = os.path.dirname(ffmpeg_binary_path)
-                ffprobe_path = os.path.join(ffmpeg_dir, "ffprobe")
+            if xtra_path:
+                # Use ffprobe from the same directory as xtra
+                xtra_dir = os.path.dirname(xtra_path)
+                ffprobe_path = os.path.join(xtra_dir, "ffprobe")
                 if os.path.exists(ffprobe_path):
                     ffprobe_cmd[0] = ffprobe_path
 
@@ -7603,7 +7610,7 @@ class TaskConfig:
 
         # Build FFmpeg command
         ffmpeg_cmd = [
-            Config.FFMPEG_BINARY,  # Using the renamed binary for FFmpeg
+            "xtra",  # Using the renamed binary for FFmpeg
             "-hide_banner",
             "-loglevel",
             "error",
@@ -7755,15 +7762,21 @@ class TaskConfig:
             self.is_cancelled = False
 
         try:
-            # Check if Config.FFMPEG_BINARY binary exists
+            # Check if xtra binary exists
             import shutil
 
-            ffmpeg_binary_path = shutil.which(Config.FFMPEG_BINARY)
-            if not ffmpeg_binary_path:
-                LOGGER.error(f"{Config.FFMPEG_BINARY} binary not found in PATH")
-                return dl_path
-            else:
-                ffmpeg_cmd[0] = ffmpeg_binary_path # Ensure the command uses the found path
+            xtra_path = shutil.which("xtra")
+            if not xtra_path:
+                LOGGER.error("xtra binary not found in PATH")
+                # Try to find xtra
+                ffmpeg_path = shutil.which("xtra")
+                if ffmpeg_path:
+                    LOGGER.info(f"Using xtra: {ffmpeg_path}")
+                    # Use xtra command
+                    ffmpeg_cmd[0] = "xtra"  # Use xtra as fallback
+                else:
+                    LOGGER.error("xtra binary not found in PATH")
+                    return dl_path
 
             # Create subprocess with pipes
             from asyncio.subprocess import PIPE, create_subprocess_exec
@@ -7987,9 +8000,9 @@ class TaskConfig:
                 return dl_path
 
             # For other image formats, use ffprobe
-            ffmpeg_binary_path = shutil.which(Config.FFMPEG_BINARY)
+            xtra_path = shutil.which("xtra")
             ffprobe_cmd = [
-                "ffprobe",  # Keep as ffprobe, not Config.FFMPEG_BINARY
+                "ffprobe",  # Keep as ffprobe, not xtra
                 "-v",
                 "error",
                 "-select_streams",
@@ -8001,10 +8014,10 @@ class TaskConfig:
                 dl_path,
             ]
 
-            if ffmpeg_binary_path:
-                # Use ffprobe from the same directory as Config.FFMPEG_BINARY
-                ffmpeg_dir = os.path.dirname(ffmpeg_binary_path)
-                ffprobe_path = os.path.join(ffmpeg_dir, "ffprobe")
+            if xtra_path:
+                # Use ffprobe from the same directory as xtra
+                xtra_dir = os.path.dirname(xtra_path)
+                ffprobe_path = os.path.join(xtra_dir, "ffprobe")
                 if os.path.exists(ffprobe_path):
                     ffprobe_cmd[0] = ffprobe_path
 
@@ -8119,7 +8132,7 @@ class TaskConfig:
 
         # Build FFmpeg command
         ffmpeg_cmd = [
-            Config.FFMPEG_BINARY,  # Using the renamed binary for FFmpeg
+            "xtra",  # Using the renamed binary for FFmpeg
             "-hide_banner",
             "-loglevel",
             "error",
@@ -8240,15 +8253,21 @@ class TaskConfig:
             self.is_cancelled = False
 
         try:
-            # Check if Config.FFMPEG_BINARY binary exists
+            # Check if xtra binary exists
             import shutil
 
-            ffmpeg_binary_path = shutil.which(Config.FFMPEG_BINARY)
-            if not ffmpeg_binary_path:
-                LOGGER.error(f"{Config.FFMPEG_BINARY} binary not found in PATH")
-                return dl_path
-            else:
-                ffmpeg_cmd[0] = ffmpeg_binary_path # Ensure the command uses the found path
+            xtra_path = shutil.which("xtra")
+            if not xtra_path:
+                LOGGER.error("xtra binary not found in PATH")
+                # Try to find xtra
+                ffmpeg_path = shutil.which("xtra")
+                if ffmpeg_path:
+                    LOGGER.info(f"Using xtra: {ffmpeg_path}")
+                    # Use xtra command
+                    ffmpeg_cmd[0] = "xtra"  # Use xtra as fallback
+                else:
+                    LOGGER.error("xtra binary not found in PATH")
+                    return dl_path
 
             # Create subprocess with pipes
             from asyncio.subprocess import PIPE, create_subprocess_exec
@@ -8651,7 +8670,7 @@ class TaskConfig:
 
         # Build FFmpeg command
         ffmpeg_cmd = [
-            Config.FFMPEG_BINARY,  # Using the renamed binary for FFmpeg
+            "xtra",  # Using the renamed binary for FFmpeg
             "-hide_banner",
             "-loglevel",
             "error",
@@ -8667,15 +8686,21 @@ class TaskConfig:
             out_path,
         ]
 
-        # Check if Config.FFMPEG_BINARY binary exists
+        # Check if xtra binary exists
         import shutil
 
-        ffmpeg_binary_path = shutil.which(Config.FFMPEG_BINARY)
-        if not ffmpeg_binary_path:
-            LOGGER.error(f"{Config.FFMPEG_BINARY} binary not found in PATH")
-            return dl_path
-        else:
-            ffmpeg_cmd[0] = ffmpeg_binary_path # Ensure the command uses the found path
+        xtra_path = shutil.which("xtra")
+        if not xtra_path:
+            LOGGER.error("xtra binary not found in PATH")
+            # Try to find xtra
+            ffmpeg_path = shutil.which("xtra")
+            if ffmpeg_path:
+                LOGGER.info(f"Using xtra: {ffmpeg_path}")
+                # Use xtra command
+                ffmpeg_cmd[0] = "xtra"  # Use xtra as fallback
+            else:
+                LOGGER.error("xtra binary not found in PATH")
+                return dl_path
 
         try:
             # Create subprocess with pipes
@@ -8929,7 +8954,7 @@ class TaskConfig:
 
                 # Build FFmpeg command
                 ffmpeg_cmd = [
-                    Config.FFMPEG_BINARY,  # Using the renamed binary for FFmpeg
+                    "xtra",  # Using the renamed binary for FFmpeg
                     "-hide_banner",
                     "-loglevel",
                     "error",
@@ -10951,7 +10976,7 @@ class TaskConfig:
                 # Use a simpler concat command with minimal options
                 # Always preserve all tracks in the fallback approach
                 cmd = [
-                    Config.FFMPEG_BINARY,
+                    "xtra",
                     "-hide_banner",
                     "-loglevel",
                     "error",
@@ -11565,7 +11590,7 @@ class TaskConfig:
                 self.extract_subtitle_index,
                 self.extract_attachment_index,
                 maintain_quality,
-                Config.FFMPEG_BINARY,
+                "xtra",
                 self.extract_delete_original,
                 # Pass the indices lists as well
                 video_indices=self.extract_video_indices,
@@ -11695,7 +11720,7 @@ class TaskConfig:
                         self.extract_subtitle_index,
                         self.extract_attachment_index,
                         maintain_quality,
-                        Config.FFMPEG_BINARY,
+                        "xtra",
                         self.extract_delete_original,
                         # Pass the indices lists as well
                         video_indices=self.extract_video_indices,
@@ -12331,7 +12356,7 @@ class TaskConfig:
                             continue
 
                         # Generate add command for this file
-                        cmd, _temp_file = await get_add_cmd(
+                        cmd, temp_file = await get_add_cmd(
                             file_path=file_path,
                             add_video=self.add_video_enabled,
                             add_audio=self.add_audio_enabled,
@@ -13068,7 +13093,7 @@ class TaskConfig:
 
             # Generate palette from the MP4
             palette_cmd = [
-                Config.FFMPEG_BINARY,
+                "xtra",
                 "-hide_banner",
                 "-loglevel",
                 "error",
@@ -13090,7 +13115,7 @@ class TaskConfig:
 
             # Use the palette to convert MP4 to high-quality GIF
             gif_cmd = [
-                Config.FFMPEG_BINARY,
+                "xtra",
                 "-hide_banner",
                 "-loglevel",
                 "error",

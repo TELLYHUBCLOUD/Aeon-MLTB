@@ -836,16 +836,16 @@ async def health_check():
         # Get stream utilities
         (
             StreamClientManager,
-            _ByteStreamer,
-            _ParallelByteStreamer,
-            _ParallelDownloader,
-            _RawByteStreamer,
-            _create_raw_streamer,
-            _get_hash,
-            _get_fname,
-            _validate_stream_request,
-            _get_mime_type,
-            _is_streamable_file,
+            ByteStreamer,
+            ParallelByteStreamer,
+            ParallelDownloader,
+            RawByteStreamer,
+            create_raw_streamer,
+            get_hash,
+            get_fname,
+            validate_stream_request,
+            get_mime_type,
+            is_streamable_file,
         ) = get_stream_utils()
 
         # Check if File2Link is enabled

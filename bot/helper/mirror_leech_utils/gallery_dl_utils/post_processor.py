@@ -344,7 +344,7 @@ class GalleryDLPostProcessor:
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
-            _stdout, stderr = await process.communicate()
+            stdout, stderr = await process.communicate()
 
             if process.returncode != 0:
                 LOGGER.warning(f"Hook command failed: {stderr.decode()}")

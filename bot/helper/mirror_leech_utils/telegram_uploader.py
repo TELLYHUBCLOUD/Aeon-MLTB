@@ -1761,7 +1761,7 @@ class TelegramUploader:
 
                             await asyncio.sleep(0.5)  # Small delay
                             (
-                                _duration_retry,
+                                duration_retry,
                                 artist_retry,
                                 title_retry,
                             ) = await get_media_info(self._up_path)
