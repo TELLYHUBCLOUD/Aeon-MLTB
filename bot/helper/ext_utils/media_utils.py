@@ -5303,6 +5303,21 @@ class FFMpeg:
         # Process a single command
         return await self._process_ffmpeg_cmd(ffmpeg, f_path, user_provided_files)
 
+    async def run_ffmpeg_cmd(self, ffmpeg, f_path, output_path=None, user_provided_files=None):
+        """Backward compatibility wrapper for _process_ffmpeg_cmd.
+
+        Args:
+            ffmpeg: The FFmpeg command to run
+            f_path: The input file path
+            output_path: Optional output path (not used by _process_ffmpeg_cmd which finds output in cmd)
+            user_provided_files: Dictionary of user-provided file paths
+
+        Returns:
+            bool: True if the command succeeded, False otherwise
+        """
+        # _process_ffmpeg_cmd returns a boolean for single commands
+        return await self._process_ffmpeg_cmd(ffmpeg, f_path, user_provided_files)
+
     async def _process_ffmpeg_cmd(self, ffmpeg, f_path, user_provided_files=None):
         """Process a single FFmpeg command"""
         base_name, ext = ospath.splitext(f_path)

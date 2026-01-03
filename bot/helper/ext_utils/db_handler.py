@@ -70,7 +70,7 @@ class DbManager:
                 except Exception:
                     # Connection is bad, close it
                     try:
-                        await self._conn.close()
+                        self._conn.close()
                     except Exception as e:
                         LOGGER.error(f"Error closing previous DB connection: {e}")
 
@@ -184,7 +184,7 @@ class DbManager:
 
         if self._conn is not None:
             try:
-                await self._conn.close()
+                self._conn.close()
                 LOGGER.info("Database connection closed successfully")
             except Exception as e:
                 # Don't log as error if it's already closed
