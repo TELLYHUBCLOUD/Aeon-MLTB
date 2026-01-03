@@ -2,6 +2,7 @@
 from asyncio import create_task
 from base64 import b64encode
 from re import match as re_match
+import shlex
 
 from bot import DOWNLOAD_DIR, LOGGER, bot_loop, task_dict_lock
 from bot.core.aeon_client import TgClient

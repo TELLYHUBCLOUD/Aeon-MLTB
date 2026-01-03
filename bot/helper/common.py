@@ -5162,7 +5162,7 @@ class TaskConfig:
 
                     # Execute the command with user-provided files
                     res = await ffmpeg.ffmpeg_cmds(
-                        cmd, file_path, user_provided_files
+                        [cmd], file_path, user_provided_files
                     )
 
                     # Resource manager removed

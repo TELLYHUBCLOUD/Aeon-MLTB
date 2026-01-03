@@ -6622,6 +6622,7 @@ class FFMpeg:
             LOGGER.error(f"Error getting original file size: {e}")
 
         # Execute the command
+        LOGGER.info(f"Executing FFmpeg command: {' '.join(str(x) for x in ffmpeg)}")
         self._listener.subproc = await create_subprocess_exec(
             *ffmpeg,
             stdout=PIPE,
