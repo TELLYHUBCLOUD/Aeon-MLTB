@@ -701,7 +701,18 @@ class Mirror(TaskListener):
                     ):
                         # If it's a key in the config, get the command from the config
                         if Config.FFMPEG_CMDS and args["-ff"] in Config.FFMPEG_CMDS:
-                            self.ffmpeg_cmds = [Config.FFMPEG_CMDS[args["-ff"]]]
+                            preset_cmd = Config.FFMPEG_CMDS[args["-ff"]]
+                            if (
+                                isinstance(preset_cmd, list)
+                                and len(preset_cmd) == 1
+                                and isinstance(preset_cmd[0], str)
+                                and " " in preset_cmd[0]
+                            ):
+                                import shlex
+
+                                self.ffmpeg_cmds = [shlex.split(preset_cmd[0])]
+                            else:
+                                self.ffmpeg_cmds = [preset_cmd]
                             LOGGER.info(
                                 f"Using FFmpeg command key from owner config: {self.ffmpeg_cmds}"
                             )
@@ -709,9 +720,18 @@ class Mirror(TaskListener):
                             self.user_dict.get("FFMPEG_CMDS")
                             and args["-ff"] in self.user_dict["FFMPEG_CMDS"]
                         ):
-                            self.ffmpeg_cmds = [
-                                self.user_dict["FFMPEG_CMDS"][args["-ff"]]
-                            ]
+                            preset_cmd = self.user_dict["FFMPEG_CMDS"][args["-ff"]]
+                            if (
+                                isinstance(preset_cmd, list)
+                                and len(preset_cmd) == 1
+                                and isinstance(preset_cmd[0], str)
+                                and " " in preset_cmd[0]
+                            ):
+                                import shlex
+
+                                self.ffmpeg_cmds = [shlex.split(preset_cmd[0])]
+                            else:
+                                self.ffmpeg_cmds = [preset_cmd]
                             LOGGER.info(
                                 f"Using FFmpeg command key from user config: {self.ffmpeg_cmds}"
                             )

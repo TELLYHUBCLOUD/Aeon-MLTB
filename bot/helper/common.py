@@ -4838,6 +4838,8 @@ class TaskConfig:
             ):
                 # Remove the quotes
                 self.ffmpeg_cmds[0] = self.ffmpeg_cmds[0][1:-1]
+        
+        LOGGER.info(f"Proceeding with FFmpeg cmds: {self.ffmpeg_cmds}")
 
         # Process each FFmpeg command with error handling
         for item in self.ffmpeg_cmds:
@@ -4891,12 +4893,24 @@ class TaskConfig:
                             cmds.append(parts)
 
                 elif isinstance(item, list):
-                    # If it's a sub-list with a single string containing spaces, split it
-                    if len(item) == 1 and isinstance(item[0], str) and " " in item[0]:
-                        try:
-                            item = shlex.split(item[0])
-                        except Exception as e:
-                            LOGGER.warning(f"Error splitting FFmpeg command sub-list: {e}")
+                    # Handle multiple nested list formats robustly
+                    # format: [['-i mltb.video ...']] or ['-i mltb.video ...']
+                    if len(item) == 1:
+                        if isinstance(item[0], str) and " " in item[0]:
+                            try:
+                                item = shlex.split(item[0])
+                            except Exception:
+                                item = item[0].split()
+                        elif isinstance(item[0], list):
+                            # Recursively handle one more level of nesting
+                            sub_item = item[0]
+                            if len(sub_item) == 1 and isinstance(sub_item[0], str) and " " in sub_item[0]:
+                                try:
+                                    item = shlex.split(sub_item[0])
+                                except Exception:
+                                    item = sub_item[0].split()
+                            else:
+                                item = sub_item
                     cmds.append(item)
 
                 else:
@@ -4940,6 +4954,7 @@ class TaskConfig:
             return dl_path
         try:
             ffmpeg = FFMpeg(self)
+            LOGGER.info(f"FFmpeg processing loop started with {len(cmds)} commands. Root path: {dl_path}")
             for ffmpeg_cmd in cmds:
                 # Skip empty commands
                 if not ffmpeg_cmd:
@@ -5185,6 +5200,7 @@ class TaskConfig:
                             if self.is_cancelled:
                                 return False
                             f_path = ospath.join(dirpath, file_)
+                            LOGGER.info(f"Checking file for FFmpeg processing: {f_path}")
                             is_video, is_audio, _ = await get_document_type(f_path)
                             if (not is_video and not is_audio) or (
                                 is_video and ext == "audio"
