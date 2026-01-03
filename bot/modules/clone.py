@@ -66,6 +66,19 @@ class Clone(TaskListener):
 
 
     async def new_event(self):
+        # Check if message text exists before trying to split it
+        if (
+            not self.message
+            or not hasattr(self.message, "text")
+            or self.message.text is None
+        ):
+            LOGGER.error(
+                "Message text is None or message doesn't have text attribute"
+            )
+            error_msg = "Invalid message format. Please make sure your message contains text."
+            error = await send_message(self.message, error_msg)
+            return await auto_delete_message(error, time=300)
+
         text = self.message.text.split("\n")
         input_list = text[0].split(" ")
         error_msg, error_button = await error_check(self.message)

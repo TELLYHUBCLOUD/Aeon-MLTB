@@ -1174,7 +1174,19 @@ class Mirror(TaskListener):
         await add_streamrip_download(self, path)
 
 
-async def mirror(client, message):
+async def handle_mirror_command(client, message, **kwargs):
+    """
+    Handles mirror/leech commands by checking config and initializing the Mirror task.
+    Reduces code duplication across multiple command handlers.
+    """
+    # Check for disabled features
+    if kwargs.get('is_leech') and not Config.LEECH_ENABLED:
+        return await send_message(message, "❌ Leech is disabled by the administrator.")
+    if kwargs.get('is_jd') and not Config.JD_ENABLED:
+        return await send_message(message, "❌ JDownloader is disabled by the administrator.")
+    if kwargs.get('is_nzb') and not Config.NZB_ENABLED:
+        return await send_message(message, "❌ NZB is disabled by the administrator.")
+
     from bot.helper.ext_utils.bulk_links import extract_bulk_links
 
     bulk = (
@@ -1182,146 +1194,41 @@ async def mirror(client, message):
         if Config.BULK_ENABLED
         else []
     )
+
     if len(bulk) > 1:
-        await Mirror(client, message).init_bulk(
+        await Mirror(client, message, **kwargs).init_bulk(
             message.text.split("\n")[0].split(), 0, 0, Mirror
         )
     else:
-        bot_loop.create_task(Mirror(client, message).new_event())
+        bot_loop.create_task(Mirror(client, message, **kwargs).new_event())
+
+
+async def mirror(client, message):
+    await handle_mirror_command(client, message)
 
 
 async def leech(client, message):
-    if not Config.LEECH_ENABLED:
-        return await send_message(
-            message, "❌ Leech is disabled by the administrator."
-        )
-    from bot.helper.ext_utils.bulk_links import extract_bulk_links
-
-    bulk = (
-        await extract_bulk_links(message, "0", "0")
-        if Config.BULK_ENABLED
-        else []
-    )
-    if len(bulk) > 1:
-        await Mirror(client, message, is_leech=True).init_bulk(
-            message.text.split("\n")[0].split(), 0, 0, Mirror
-        )
-    else:
-        bot_loop.create_task(Mirror(client, message, is_leech=True).new_event())
+    await handle_mirror_command(client, message, is_leech=True)
 
 
 async def jd_mirror(client, message):
-    if not Config.JD_ENABLED:
-        return await send_message(
-            message, "❌ JDownloader is disabled by the administrator."
-        )
-    from bot.helper.ext_utils.bulk_links import extract_bulk_links
-
-    bulk = (
-        await extract_bulk_links(message, "0", "0")
-        if Config.BULK_ENABLED
-        else []
-    )
-    if len(bulk) > 1:
-        await Mirror(client, message, is_jd=True).init_bulk(
-            message.text.split("\n")[0].split(), 0, 0, Mirror
-        )
-    else:
-        bot_loop.create_task(Mirror(client, message, is_jd=True).new_event())
+    await handle_mirror_command(client, message, is_jd=True)
 
 
 async def nzb_mirror(client, message):
-    if not Config.NZB_ENABLED:
-        return await send_message(
-            message, "❌ NZB is disabled by the administrator."
-        )
-    from bot.helper.ext_utils.bulk_links import extract_bulk_links
-
-    bulk = (
-        await extract_bulk_links(message, "0", "0")
-        if Config.BULK_ENABLED
-        else []
-    )
-    if len(bulk) > 1:
-        await Mirror(client, message, is_nzb=True).init_bulk(
-            message.text.split("\n")[0].split(), 0, 0, Mirror
-        )
-    else:
-        bot_loop.create_task(Mirror(client, message, is_nzb=True).new_event())
+    await handle_mirror_command(client, message, is_nzb=True)
 
 
 async def jd_leech(client, message):
-    if not Config.JD_ENABLED:
-        return await send_message(
-            message, "❌ JDownloader is disabled by the administrator."
-        )
-    if not Config.LEECH_ENABLED:
-        return await send_message(
-            message, "❌ Leech is disabled by the administrator."
-        )
-    from bot.helper.ext_utils.bulk_links import extract_bulk_links
-
-    bulk = (
-        await extract_bulk_links(message, "0", "0")
-        if Config.BULK_ENABLED
-        else []
-    )
-    if len(bulk) > 1:
-        await Mirror(client, message, is_leech=True, is_jd=True).init_bulk(
-            message.text.split("\n")[0].split(), 0, 0, Mirror
-        )
-    else:
-        bot_loop.create_task(
-            Mirror(client, message, is_leech=True, is_jd=True).new_event()
-        )
+    await handle_mirror_command(client, message, is_leech=True, is_jd=True)
 
 
 async def nzb_leech(client, message):
-    if not Config.NZB_ENABLED:
-        return await send_message(
-            message, "❌ NZB is disabled by the administrator."
-        )
-    if not Config.LEECH_ENABLED:
-        return await send_message(
-            message, "❌ Leech is disabled by the administrator."
-        )
-    from bot.helper.ext_utils.bulk_links import extract_bulk_links
-
-    bulk = (
-        await extract_bulk_links(message, "0", "0")
-        if Config.BULK_ENABLED
-        else []
-    )
-    if len(bulk) > 1:
-        await Mirror(client, message, is_leech=True, is_nzb=True).init_bulk(
-            message.text.split("\n")[0].split(), 0, 0, Mirror
-        )
-    else:
-        bot_loop.create_task(
-            Mirror(client, message, is_leech=True, is_nzb=True).new_event()
-        )
+    await handle_mirror_command(client, message, is_leech=True, is_nzb=True)
 
 
 async def md_leech_node(client, message):
-    if not Config.LEECH_ENABLED:
-        return await send_message(
-            message, "❌ Leech is disabled by the administrator."
-        )
-    from bot.helper.ext_utils.bulk_links import extract_bulk_links
-
-    bulk = (
-        await extract_bulk_links(message, "0", "0")
-        if Config.BULK_ENABLED
-        else []
-    )
-    if len(bulk) > 1:
-        await Mirror(client, message, is_leech=True, is_md_leech=True).init_bulk(
-            message.text.split("\n")[0].split(), 0, 0, Mirror
-        )
-    else:
-        bot_loop.create_task(
-            Mirror(client, message, is_leech=True, is_md_leech=True).new_event()
-        )
+    await handle_mirror_command(client, message, is_leech=True, is_md_leech=True)
 
 
 
