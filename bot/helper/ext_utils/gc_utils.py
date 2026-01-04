@@ -16,15 +16,3 @@ async def smart_garbage_collection():
         LOGGER.error(f"Error in garbage collection: {e}")
 
 
-def music_download_cleanup():
-    """
-    Perform aggressive garbage collection after music downloads.
-    Music downloads (Streamrip, Zotify) create many small objects for tracks,
-    metadata, and temporary files that need to be cleaned up aggressively.
-    """
-    try:
-        # Force all generations to be collected
-        collected = gc.collect(2)  # Generation 2 = oldest objects
-        LOGGER.info(f"Music download cleanup freed {collected} objects")
-    except Exception as e:
-        LOGGER.error(f"Error in music download cleanup: {e}")

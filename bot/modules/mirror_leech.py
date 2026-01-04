@@ -52,14 +52,6 @@ from bot.helper.mirror_leech_utils.download_utils.telegram_download import (
 )
 from bot.helper.ext_utils.exceptions import DirectDownloadLinkException
 from bot.helper.ext_utils.limit_checker import limit_checker
-from bot.helper.mirror_leech_utils.download_utils.streamrip_download import (
-    add_streamrip_download,
-)
-from bot.helper.mirror_leech_utils.download_utils.zotify_download import (
-    add_zotify_download,
-)
-from bot.helper.mirror_leech_utils.streamrip_utils.url_parser import is_streamrip_url
-from bot.helper.mirror_leech_utils.zotify_utils.url_parser import is_zotify_url
 from bot.helper.telegram_helper.message_utils import (
     auto_delete_message,
     delete_links,
@@ -952,9 +944,6 @@ class Mirror(TaskListener):
                 and not is_gdrive_id(self.link)
                 and not is_gdrive_link(self.link)
                 and not is_mega_link(self.link)
-                and not (
-                    Config.STREAMRIP_ENABLED and await is_streamrip_url(self.link)
-                )
             )
         ):
             x = await send_message(
@@ -1026,10 +1015,6 @@ class Mirror(TaskListener):
             and not is_gdrive_link(self.link)
             and not is_gdrive_id(self.link)
             and not is_rclone_path(self.link)
-            and not (
-                Config.STREAMRIP_ENABLED and await is_streamrip_url(self.link)
-            )
-            and not (Config.ZOTIFY_ENABLED and await is_zotify_url(self.link))
             and not await aiopath.exists(self.link)
             and not file_
         ):
@@ -1105,10 +1090,6 @@ class Mirror(TaskListener):
             and not is_rclone_path(self.link)
             and not is_gdrive_id(self.link)
             and not is_mega_link(self.link)
-            and not (
-                Config.STREAMRIP_ENABLED and await is_streamrip_url(self.link)
-            )
-            and not (Config.ZOTIFY_ENABLED and await is_zotify_url(self.link))
             and file_ is None
         ):
             await self.on_download_error(
@@ -1150,28 +1131,12 @@ class Mirror(TaskListener):
             await add_rclone_download(self, path)
         elif is_gdrive_link(self.link) or is_gdrive_id(self.link):
             await add_gd_download(self, path)
-        elif Config.STREAMRIP_ENABLED and await is_streamrip_url(self.link):
-            await self._handle_streamrip_download(path)
-        elif Config.ZOTIFY_ENABLED and await is_zotify_url(self.link):
-            await add_zotify_download(self, path)
         else:
             await add_direct_download(self, path)
 
         await delete_links(self.message)
         return None
 
-    async def _handle_streamrip_download(self, path):
-        """
-        Handles Streamrip download requests, including quality selection.
-        """
-        # For music downloads, we might want to offer quality selection
-        # Streamrip URLs often refer to albums, playlists, or tracks
-        from bot.helper.mirror_leech_utils.download_utils.streamrip_download import (
-            add_streamrip_download,
-        )
-
-        # Basic integration - can be expanded with a quality selector if needed
-        await add_streamrip_download(self, path)
 
 
 async def mirror(client, message):

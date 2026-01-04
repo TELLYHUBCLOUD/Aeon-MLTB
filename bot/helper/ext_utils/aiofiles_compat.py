@@ -1,6 +1,5 @@
 """
-Compatibility layer for aiofiles to handle different versions
-Supports both aiofiles 0.7 (for streamrip) and newer versions (for other features)
+Compatibility layer for aiofiles to handle different versions.
 """
 
 import asyncio
