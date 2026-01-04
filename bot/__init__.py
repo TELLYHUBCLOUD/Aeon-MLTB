@@ -69,9 +69,11 @@ basicConfig(handlers=[file_handler, stream_handler], level=INFO)
 
 LOGGER = getLogger(__name__)
 
-cpu_no = os.cpu_count()
+cpu_no = 8
+threads = 4
+cores = "0,1,2,3"
 
-DOWNLOAD_DIR = "/usr/src/app/downloads/"
+DOWNLOAD_DIR = "/app/downloads/"
 intervals = {
     "status": {},
     "qb": "",
@@ -93,6 +95,7 @@ nzb_jobs = {}
 rss_dict = {}
 auth_chats = {}
 excluded_extensions = ["aria2", "!qB"]
+included_extensions = []
 drives_names = []
 drives_ids = []
 index_urls = []

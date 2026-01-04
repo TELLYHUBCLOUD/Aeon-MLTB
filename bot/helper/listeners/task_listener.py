@@ -35,6 +35,7 @@ from bot.helper.ext_utils.files_utils import (
     get_path_size,
     join_files,
     remove_excluded_files,
+    remove_non_included_files,
 )
 from bot.helper.ext_utils.links_utils import is_gdrive_id
 from bot.helper.ext_utils.status_utils import get_readable_file_size
@@ -46,10 +47,12 @@ from bot.helper.ext_utils.template_processor import (
 from bot.helper.ext_utils.media_utils import get_media_info
 from bot.helper.ext_utils.task_manager import check_running_tasks, start_from_queued
 from bot.helper.mirror_leech_utils.gdrive_utils.upload import GoogleDriveUpload
+from bot.helper.mirror_leech_utils.gofile_utils.upload import GoFileUpload
 from bot.helper.mirror_leech_utils.rclone_utils.transfer import RcloneTransferHelper
 from bot.helper.mirror_leech_utils.status_utils.gdrive_status import (
     GoogleDriveStatus,
 )
+from bot.helper.mirror_leech_utils.status_utils.gofile_status import GoFileStatus
 from bot.helper.mirror_leech_utils.status_utils.queue_status import QueueStatus
 from bot.helper.mirror_leech_utils.status_utils.rclone_status import RcloneStatus
 from bot.helper.mirror_leech_utils.status_utils.telegram_status import TelegramStatus
@@ -274,10 +277,14 @@ class TaskListener(TaskConfig):
         else:
             up_dir = self.dir
             up_path = dl_path
-        await remove_excluded_files(
-            self.up_dir or self.dir,
-            self.excluded_extensions,
-        )
+        if not self.included_extensions:
+            await remove_excluded_files(
+                self.up_dir or self.dir, self.excluded_extensions
+            )
+        else:
+            await remove_non_included_files(
+                self.up_dir or self.dir, self.included_extensions
+            )
         if not Config.QUEUE_ALL:
             async with queue_dict_lock:
                 if self.mid in non_queued_dl:
@@ -295,7 +302,10 @@ class TaskListener(TaskConfig):
             self.name = up_path.replace(f"{up_dir}/", "").split("/", 1)[0]
             self.size = await get_path_size(up_dir)
             self.clear()
-            await remove_excluded_files(up_dir, self.excluded_extensions)
+            if not self.included_extensions:
+                await remove_excluded_files(up_dir, self.excluded_extensions)
+            else:
+                await remove_non_included_files(up_dir, self.included_extensions)
 
         if self.watermark:
             up_path = await self.proceed_watermark(
@@ -495,6 +505,12 @@ class TaskListener(TaskConfig):
                 sync_to_async(yt.upload),
             )
             del yt
+        elif self.up_dest == "gofile":
+            LOGGER.info(f"GoFile Upload Name: {self.name}")
+            gofile = GoFileUpload(self, up_path)
+            async with task_dict_lock:
+                task_dict[self.mid] = GoFileStatus(self, gofile, gid, "up")
+            await gofile.upload()
         elif is_gdrive_id(self.up_dest):
             LOGGER.info(f"Uploading to Google Drive: {self.name}")
             drive = GoogleDriveUpload(self, up_path)
@@ -764,12 +780,10 @@ class TaskListener(TaskConfig):
                     elif Config.INDEX_URL:
                         INDEX_URL = Config.INDEX_URL
                     if INDEX_URL:
-                        share_url = f"{INDEX_URL}/findpath?id={dir_id}"
+                        share_url = f"{INDEX_URL}findpath?id={dir_id}"
                         buttons.url_button("Index Link", share_url)
                         if mime_type.startswith(("image", "video", "audio")):
-                            share_urls = (
-                                f"{INDEX_URL}/findpath?id={dir_id}&view=true"
-                            )
+                            share_urls = f"{INDEX_URL}findpath?id={dir_id}&view=true"
                             buttons.url_button("🌐 View Link", share_urls)
                 button = buttons.build_menu(2)
             else:

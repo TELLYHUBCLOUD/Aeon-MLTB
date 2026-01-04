@@ -11,9 +11,15 @@ from aiofiles.os import path as aiopath
 from pyrogram.filters import create
 from pyrogram.handlers import MessageHandler
 
-from bot import auth_chats, excluded_extensions, sudo_users, user_data
-from bot.core.aeon_client import TgClient
-from bot.core.config_manager import Config
+from bot import (
+    auth_chats,
+    excluded_extensions,
+    included_extensions,
+    sudo_users,
+    user_data,
+)
+from .config_manager import Config
+from .telegram_manager import TgClient
 from bot.helper.ext_utils.bot_utils import (
     get_size_bytes,
     new_task,
@@ -378,7 +384,25 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("💬 Caption", f"userset {user_id} menu LEECH_FILENAME_CAPTION")
         buttons.data_button("📝 Cap Replace", f"userset {user_id} menu AUTO_CAPTION_REPLACE")
         buttons.data_button("🧹 Cap Remove", f"userset {user_id} menu AUTO_CAPTION_REMOVE")
-        buttons.data_button("✏️ Substitute", f"userset {user_id} menu NAME_SUBSTITUTE")
+        buttons.data_button(
+            "Included Extensions", f"userset {user_id} menu INCLUDED_EXTENSIONS"
+        )
+        if user_dict.get("INCLUDED_EXTENSIONS", False):
+            inc_ex = user_dict["INCLUDED_EXTENSIONS"]
+        elif "INCLUDED_EXTENSIONS" not in user_dict:
+            inc_ex = included_extensions
+        else:
+            inc_ex = "None"
+        if user_dict.get("NAME_SUBSTITUTE", False) or (
+            "NAME_SUBSTITUTE" not in user_dict and Config.NAME_SUBSTITUTE
+        ):
+            ns_msg = "Added"
+        else:
+            ns_msg = "None"
+        buttons.data_button(
+            "✏️ Substitute",
+            f"userset {user_id} menu NAME_SUBSTITUTE",
+        )
         buttons.data_button("🔡 Leech Font", f"userset {user_id} menu LEECH_CAPTION_FONT")
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
@@ -396,7 +420,7 @@ async def get_user_settings(from_user, stype="main"):
         lcap = user_dict.get("LEECH_FILENAME_CAPTION", Config.LEECH_FILENAME_CAPTION or "None")
         ac_rep = user_dict.get("AUTO_CAPTION_REPLACE", Config.AUTO_CAPTION_REPLACE or "None")
         ac_rem = user_dict.get("AUTO_CAPTION_REMOVE", Config.AUTO_CAPTION_REMOVE or "None")
-        ns_msg = "✅ Added" if user_dict.get("NAME_SUBSTITUTE", Config.NAME_SUBSTITUTE) else "❌ None"
+        # ns_msg is calculated above now
         lfont = user_dict.get("LEECH_CAPTION_FONT", Config.LEECH_CAPTION_FONT or "None")
 
         text = f"""<blockquote>
@@ -462,13 +486,37 @@ async def get_user_settings(from_user, stype="main"):
         ex_ex = user_dict.get("EXCLUDED_EXTENSIONS", excluded_extensions or "None")
         ytopt = user_dict.get("YT_DLP_OPTIONS", Config.YT_DLP_OPTIONS or "None")
 
+        if user_dict.get("NAME_SUBSTITUTE", False) or (
+            "NAME_SUBSTITUTE" not in user_dict and Config.NAME_SUBSTITUTE
+        ):
+            ns_msg = "✅ Added"
+        else:
+            ns_msg = "❌ None"
+
+        if user_dict.get("LEECH_FILENAME_PREFIX", False) or (
+            "LEECH_FILENAME_PREFIX" not in user_dict and Config.LEECH_FILENAME_PREFIX
+        ):
+            np_msg = "✅ Added"
+        else:
+            np_msg = "❌ None"
+
+        if user_dict.get("INCLUDED_EXTENSIONS", False):
+            inc_ex = user_dict["INCLUDED_EXTENSIONS"]
+        elif "INCLUDED_EXTENSIONS" not in user_dict:
+            inc_ex = included_extensions
+        else:
+            inc_ex = "None"
+
         text = f"""<blockquote>
 ╭⚙️ <b>Settings</b>
 ┊📦 <b>Package:</b> <code>{du}</code>
 ┊🚀 <b>Auto Leech:</b> <code>{aleech}</code>
 ┊🔑 <b>Token:</b> <code>{tr} Config</code>
+┊✏️ <b>Name Substitute:</b> <code>{ns_msg}</code>
+┊📝 <b>Name Prefix:</b> <code>{np_msg}</code>
 ┊📤 <b>Paths:</b> <code>{up_paths}</code>
 ┊🚫 <b>Excl Ext:</b> <code>{ex_ex}</code>
+┊✅ <b>Incl Ext:</b> <code>{inc_ex}</code>
 ╰⬇️ <b>YT-DLP:</b> <code>{ytopt}</code>
 </blockquote>"""
 
@@ -519,7 +567,7 @@ async def add_one(_, message, option):
     if value.startswith("{") and value.endswith("}"):
         try:
             value = eval(value)
-            if user_dict[option]:
+            if user_dict.get(option): # Use .get() to safely check if option exists and is not None
                 user_dict[option].update(value)
             else:
                 update_user_ldata(user_id, option, value)
@@ -558,6 +606,12 @@ async def set_option(_, message, option):
     elif option == "EXCLUDED_EXTENSIONS":
         fx = value.split()
         value = ["aria2", "!qB"]
+        for x in fx:
+            x = x.lstrip(".")
+            value.append(x.strip().lower())
+    elif option == "INCLUDED_EXTENSIONS":
+        fx = value.split()
+        value = []
         for x in fx:
             x = x.lstrip(".")
             value.append(x.strip().lower())
@@ -602,7 +656,7 @@ async def get_menu(option, message, user_id):
     elif user_dict.get(option):
         if option == "THUMBNAIL":
             buttons.data_button("👁️ View", f"userset {user_id} view {option}")
-        elif option in ["YT_DLP_OPTIONS", "UPLOAD_PATHS"]:
+        elif option in ["YT_DLP_OPTIONS", "UPLOAD_PATHS", "INCLUDED_EXTENSIONS", "EXCLUDED_EXTENSIONS"]:
             buttons.data_button("➕ Add one", f"userset {user_id} addone {option}")
             buttons.data_button("➖ Remove one", f"userset {user_id} rmone {option}")
     if option in leech_options:

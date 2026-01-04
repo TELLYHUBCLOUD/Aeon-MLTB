@@ -273,18 +273,20 @@ class YoutubeDLHelper:
             for key in [
                 "writedescription",
                 "writeinfojson",
-                "writeannotations",
-                "writedesktoplink",
-                "writewebloclink",
                 "writeurllink",
                 "writesubtitles",
                 "writeautomaticsub",
+                "writethumbnail",
+                "keep_thumb",
             ]
         ):
             self.opts["outtmpl"] = {
                 "default": f"{path}/{base_name}/{self._listener.name}",
                 "thumbnail": f"{path}/yt-dlp-thumb/{base_name}.%(ext)s",
             }
+            if "writethumbnail" in options:
+                self.opts["writethumbnail"] = True
+                self.opts["keep_thumb"] = True
         else:
             self.opts["outtmpl"] = {
                 "default": f"{path}/{self._listener.name}",

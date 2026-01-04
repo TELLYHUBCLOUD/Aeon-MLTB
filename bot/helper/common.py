@@ -17,16 +17,18 @@ from pyrogram.enums import ChatAction
 from bot import (
     DOWNLOAD_DIR,
     LOGGER,
+    cores,
     cpu_eater_lock,
     excluded_extensions,
+    included_extensions,
     intervals,
     multi_tags,
     task_dict,
     task_dict_lock,
     user_data,
 )
-from bot.core.aeon_client import TgClient
-from bot.core.config_manager import Config
+from .config_manager import Config
+from .telegram_manager import TgClient
 from bot.helper.aeon_utils.command_gen import (
     get_embed_thumb_cmd,
     get_metadata_cmd,
@@ -133,12 +135,14 @@ class TaskConfig:
         self.is_file = False
         self.bot_trans = False
         self.user_trans = False
+        self.is_rss = False
         self.progress = True
         self.ffmpeg_cmds = None
         self.chat_thread_id = None
         self.subproc = None
         self.thumb = None
         self.excluded_extensions = []
+        self.included_extensions = []
         self.files_to_proceed = []
         self.auto_rename = False
         self.auto_rename_template = ""
@@ -289,6 +293,11 @@ class TaskConfig:
             excluded_extensions
             if "EXCLUDED_EXTENSIONS" not in self.user_dict
             else ["aria2", "!qB"]
+        )
+        self.included_extensions = self.user_dict.get("INCLUDED_EXTENSIONS") or (
+            included_extensions
+            if "INCLUDED_EXTENSIONS" not in self.user_dict
+            else []
         )
         if not self.rc_flags:
             if self.user_dict.get("RCLONE_FLAGS"):
@@ -521,21 +530,36 @@ class TaskConfig:
                     except Exception:
                         chat = None
                     if chat is None:
+                        LOGGER.warning(
+                            "Account of user session can't find the the destination chat!"
+                        )
                         self.user_transmission = False
                         self.hybrid_leech = False
-                    else:
-                        uploader_id = TgClient.user.me.id
-                        if chat.type.name not in ["SUPERGROUP", "CHANNEL", "GROUP"]:
+                    elif chat.type.name not in [
+                        "SUPERGROUP",
+                        "CHANNEL",
+                        "GROUP",
+                        "FORUM",
+                    ]:
+                        self.user_transmission = False
+                        self.hybrid_leech = False
+                    elif chat.is_admin:
+                        member = await chat.get_member(TgClient.user.me.id)
+                        if (
+                            not member.privileges.can_manage_chat
+                            or not member.privileges.can_delete_messages
+                        ):
                             self.user_transmission = False
                             self.hybrid_leech = False
-                        else:
-                            member = await chat.get_member(uploader_id)
-                            if (
-                                not member.privileges.can_manage_chat
-                                or not member.privileges.can_delete_messages
-                            ):
-                                self.user_transmission = False
-                                self.hybrid_leech = False
+                            LOGGER.warning(
+                                "Enable manage chat and delete messages to account of the user session from administration settings!"
+                            )
+                    else:
+                        LOGGER.warning(
+                            "Promote the account of the user session to admin in the chat to get the benefit of user transmission!"
+                        )
+                        self.user_transmission = False
+                        self.hybrid_leech = False
 
                 if not self.user_transmission or self.hybrid_leech:
                     try:
@@ -549,7 +573,16 @@ class TaskConfig:
                             raise ValueError("Chat not found!")
                     else:
                         uploader_id = self.client.me.id
-                        if chat.type.name in ["SUPERGROUP", "CHANNEL", "GROUP"]:
+                        if chat.type.name in [
+                            "SUPERGROUP",
+                            "CHANNEL",
+                            "GROUP",
+                            "FORUM",
+                        ]:
+                            if not chat.is_admin:
+                                raise ValueError(
+                                    "Bot is not admin in the destination chat!"
+                                )
                             member = await chat.get_member(uploader_id)
                             if (
                                 not member.privileges.can_manage_chat
@@ -557,7 +590,7 @@ class TaskConfig:
                             ):
                                 if not self.user_transmission:
                                     raise ValueError(
-                                        "You don't have enough privileges in this chat!",
+                                        "You don't have enough privileges in this chat! Enable manage chat and delete messages for this bot!"
                                     )
                                 self.hybrid_leech = False
                         else:
@@ -693,6 +726,7 @@ class TaskConfig:
 
     async def get_tag(self, text: list):
         if len(text) > 1 and text[1].startswith("Tag: "):
+            self.is_rss = True
             user_info = text[1].split("Tag: ")
             if len(user_info) >= 3:
                 id_ = user_info[-1]
@@ -933,6 +967,9 @@ class TaskConfig:
             for ffmpeg_cmd in cmds:
                 self.proceed_count = 0
                 cmd = [
+                    "taskset",
+                    "-c",
+                    f"{cores}",
                     "xtra",
                     "-hide_banner",
                     "-loglevel",

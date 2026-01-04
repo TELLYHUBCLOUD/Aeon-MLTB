@@ -1,6 +1,7 @@
 from asyncio import Lock
 
 from pyrogram import Client, enums
+from pyrogram.types import LinkPreviewOptions
 
 from bot import LOGGER
 
@@ -26,38 +27,42 @@ class TgClient:
             Config.TELEGRAM_HASH,
             proxy=Config.TG_PROXY,
             bot_token=Config.BOT_TOKEN,
-            workdir="/usr/src/app",
+            workdir="/app",
             parse_mode=enums.ParseMode.HTML,
-            sleep_threshold=60,
-            #    max_concurrent_transmissions=100,
+            max_concurrent_transmissions=100,
+            max_message_cache_size=15000,
+            max_topic_cache_size=15000,
+            sleep_threshold=0,
+            link_preview_options=LinkPreviewOptions(is_disabled=True),
         )
         await cls.bot.start()
         cls.NAME = cls.bot.me.username
+        await cls.start_user()
+        cls.IS_PREMIUM_USER = cls.bot.me.is_premium
+        LOGGER.info("Bot Started")
 
     @classmethod
     async def start_user(cls):
         if Config.USER_SESSION_STRING:
-            LOGGER.info("Creating client from USER_SESSION_STRING")
-            try:
+            if cls.user is None:
                 cls.user = Client(
-                    "user",
+                    "User",
                     Config.TELEGRAM_API,
                     Config.TELEGRAM_HASH,
                     proxy=Config.TG_PROXY,
                     session_string=Config.USER_SESSION_STRING,
+                    workdir="/app",
                     parse_mode=enums.ParseMode.HTML,
                     no_updates=True,
                     max_concurrent_transmissions=100,
-                    sleep_threshold=60,
+                    max_message_cache_size=15000,
+                    max_topic_cache_size=15000,
+                    link_preview_options=LinkPreviewOptions(is_disabled=True),
                 )
                 await cls.user.start()
                 cls.IS_PREMIUM_USER = cls.user.me.is_premium
                 if cls.IS_PREMIUM_USER:
                     cls.MAX_SPLIT_SIZE = 4194304000
-            except Exception as e:
-                LOGGER.error(f"Failed to start client from USER_SESSION_STRING. {e}")
-                cls.IS_PREMIUM_USER = False
-                cls.user = None
 
     @classmethod
     async def stop(cls):
