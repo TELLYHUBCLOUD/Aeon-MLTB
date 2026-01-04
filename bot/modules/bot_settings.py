@@ -155,7 +155,6 @@ async def get_buttons(key=None, edit_type=None):
     elif key.startswith("key"):
         parts = key.split()
         if len(parts) < 2:
-            # Fallback to conf menu if category is missing
             return await get_buttons("conf")
         category = parts[1]
         keys = CATEGORIES[category]
@@ -709,11 +708,17 @@ async def edit_bot_settings(client, query):
     elif data[1] == "edit":
         await query.answer()
         globals()["state"] = "edit"
-        await update_buttons(message, data[2])
+        key = data[2]
+        if key == "key" and len(data) > 3:
+            key = f"key {data[3]}"
+        await update_buttons(message, key)
     elif data[1] == "view":
         await query.answer()
         globals()["state"] = "view"
-        await update_buttons(message, data[2])
+        key = data[2]
+        if key == "key" and len(data) > 3:
+            key = f"key {data[3]}"
+        await update_buttons(message, key)
     elif data[1] == "start":
         await query.answer()
         if data[2] == "key":
