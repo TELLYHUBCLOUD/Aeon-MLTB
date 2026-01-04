@@ -104,15 +104,15 @@ if DATABASE_URL:
         log_error(f"Database ERROR: {e}")
 
 UPSTREAM_REPO = (
-    config_file.get("UPSTREAM_REPO", "")
-    or os.getenv("UPSTREAM_REPO", "")
-    or ""
+    config_file.get("UPSTREAM_REPO", "https://github.com/TELLYHUBCLOUD/Aeon-MLTB")
+    or os.getenv("UPSTREAM_REPO", "https://github.com/TELLYHUBCLOUD/Aeon-MLTB")
+    or "https://github.com/TELLYHUBCLOUD/Aeon-MLTB"
 )
 
 UPSTREAM_BRANCH = (
-    config_file.get("UPSTREAM_BRANCH", "")
-    or os.getenv("UPSTREAM_BRANCH", "")
-    or ""
+    config_file.get("UPSTREAM_BRANCH", "enc")
+    or os.getenv("UPSTREAM_BRANCH", "enc")
+    or "enc"
 )
 
 if UPSTREAM_REPO:
@@ -140,4 +140,3 @@ if UPSTREAM_REPO:
         log_error(
             "Something went wrong while updating, check UPSTREAM_REPO if valid or not!",
         )
-        exit(1)
