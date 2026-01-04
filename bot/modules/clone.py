@@ -363,9 +363,4 @@ class Clone(TaskListener):
 
 
 async def clone_node(client, message):
-    from bot.helper.ext_utils.bulk_links import extract_bulk_links
-    bulk = await extract_bulk_links(message, "0", "0")
-    if len(bulk) > 1:
-        await Clone(client, message).init_bulk(message.text.split("\n")[0].split(), 0, 0, Clone)
-    else:
-        bot_loop.create_task(Clone(client, message).new_event())
+    bot_loop.create_task(Clone(client, message).new_event())

@@ -67,7 +67,6 @@ from bot.helper.telegram_helper.message_utils import (
     send_message,
 )
 from bot.modules.media_tools import show_media_tools_for_task
-from bot.modules.clone import Clone
 
 class Mirror(TaskListener):
     def __init__(
@@ -293,7 +292,6 @@ class Mirror(TaskListener):
         # Parse arguments from the command
         arg_parser(input_list[1:], args)
 
-        # Check if media tools flags are enabled
         from bot.helper.ext_utils.bot_utils import is_flag_enabled
 
         # Disable flags that depend on disabled media tools
@@ -419,8 +417,6 @@ class Mirror(TaskListener):
         self.link = self.auto_link or args["link"]
         self.compress = args["-z"]
         # Enable compression if -z flag is set and archive flags are enabled
-        from bot.helper.ext_utils.bot_utils import is_flag_enabled
-
         if self.compress and is_flag_enabled("-z"):
             self.compression_enabled = True
         self.extract = args["-e"]
@@ -1155,7 +1151,16 @@ class Mirror(TaskListener):
         elif Config.ZOTIFY_ENABLED and await is_zotify_url(self.link):
             await add_zotify_download(self, path)
         else:
-            await add_direct_download(self, path)
+            ussr = args["-au"]
+            pssw = args["-ap"]
+            if ussr or pssw:
+                auth = f"{ussr}:{pssw}"
+                headers.extend(
+                    [
+                        f"authorization: Basic {b64encode(auth.encode()).decode('ascii')}"
+                    ]
+                )
+            await add_aria2_download(self, path, headers, ratio, seed_time)
 
         await delete_links(self.message)
         return None
@@ -1187,20 +1192,7 @@ async def handle_mirror_command(client, message, **kwargs):
     if kwargs.get('is_nzb') and not Config.NZB_ENABLED:
         return await send_message(message, "❌ NZB is disabled by the administrator.")
 
-    from bot.helper.ext_utils.bulk_links import extract_bulk_links
-
-    bulk = (
-        await extract_bulk_links(message, "0", "0")
-        if Config.BULK_ENABLED
-        else []
-    )
-
-    if len(bulk) > 1:
-        await Mirror(client, message, **kwargs).init_bulk(
-            message.text.split("\n")[0].split(), 0, 0, Mirror
-        )
-    else:
-        bot_loop.create_task(Mirror(client, message, **kwargs).new_event())
+    bot_loop.create_task(Mirror(client, message, **kwargs).new_event())
 
 
 async def mirror(client, message):
