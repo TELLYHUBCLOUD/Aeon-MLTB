@@ -21,7 +21,7 @@ from bot.helper.telegram_helper.message_utils import (
 @new_task
 async def cancel(_, message):
     user_id = message.from_user.id if message.from_user else message.sender_chat.id
-    msg = message.text.split()
+    msg = message.text.split("_", maxsplit=1)
     await delete_message(message)
     if len(msg) > 1:
         gid = msg[1]
@@ -38,6 +38,7 @@ async def cancel(_, message):
             return
         task = await get_task_by_gid(gid)
         if task is None:
+            await delete_message(message)
             return
     elif reply_to_id := message.reply_to_message_id:
         async with task_dict_lock:

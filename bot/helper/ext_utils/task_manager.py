@@ -62,32 +62,26 @@ async def check_running_tasks(listener, state="dl"):
     async with queue_dict_lock:
         if state == "up" and listener.mid in non_queued_dl:
             non_queued_dl.remove(listener.mid)
-        
-        dl_count = len(non_queued_dl)
-        up_count = len(non_queued_up)
         if (
             (all_limit or state_limit)
             and not listener.force_run
             and not (listener.force_upload and state == "up")
             and not (listener.force_download and state == "dl")
         ):
-            # dl_count = len(non_queued_dl) # Removed as initialized above
-            # up_count = len(non_queued_up) # Removed as initialized above
+            dl_count = len(non_queued_dl)
+            up_count = len(non_queued_up)
             t_count = dl_count if state == "dl" else up_count
             is_over_limit = (
                 all_limit
-                and all_limit <= (len(non_queued_dl) + len(non_queued_up))
-            ) or (state_limit and state_limit <= t_count)
-
+                and dl_count + up_count >= all_limit
+                and (not state_limit or t_count >= state_limit)
+            ) or (state_limit and t_count >= state_limit)
             if is_over_limit:
-                LOGGER.info(f"Task Blocked: AllLimit={all_limit}, StateLimit={state_limit}, DL={dl_count}, UP={up_count}")
                 event = Event()
                 if state == "dl":
                     queued_dl[listener.mid] = event
                 else:
                     queued_up[listener.mid] = event
-        
-        LOGGER.info(f"Task Check: All={all_limit}, State={state_limit}, DL={dl_count}, UP={up_count}, Blocked={is_over_limit}")
         if not is_over_limit:
             if state == "up":
                 non_queued_up.add(listener.mid)
