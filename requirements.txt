@@ -40,6 +40,3 @@ uvloop
 xattr
 yt-dlp[default,curl-cffi]
 urllib3
-tqdm
-toml
-
