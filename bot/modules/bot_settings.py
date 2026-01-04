@@ -157,6 +157,8 @@ async def get_buttons(key=None, edit_type=None):
         if len(parts) < 2:
             return await get_buttons("conf")
         category = parts[1]
+        if category not in CATEGORIES:
+            return await get_buttons("conf")
         keys = CATEGORIES[category]
         for k in keys[start : 10 + start]:
             buttons.data_button(k, f"botset botvar {k} {category}")
