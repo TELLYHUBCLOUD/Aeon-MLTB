@@ -326,10 +326,14 @@ async def load_configurations():
     )
     await process.wait()
     from truelink import TrueLinkResolver
-
-    from bot.helper.mirror_leech_utils.download_utils.insta_resolver import (
-        InstagramResolver,
+    from bot.helper.mirror_leech_utils.download_utils.direct_link_generator import (
+        instagram,
     )
+
+    class InstagramResolver:
+        @staticmethod
+        def resolve(url):
+            return instagram(url)
 
     _ = TrueLinkResolver()
     TrueLinkResolver.register_resolver("instagram.com", InstagramResolver)

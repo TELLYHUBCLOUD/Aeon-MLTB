@@ -18,8 +18,8 @@ from bot import (
     sudo_users,
     user_data,
 )
-from .config_manager import Config
-from .telegram_manager import TgClient
+from bot.core.config_manager import Config
+from bot.core.telegram_manager import TgClient
 from bot.helper.ext_utils.bot_utils import (
     get_size_bytes,
     new_task,
