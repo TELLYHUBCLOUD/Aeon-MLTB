@@ -27,8 +27,8 @@ from bot import (
     task_dict_lock,
     user_data,
 )
-from .config_manager import Config
-from .telegram_manager import TgClient
+from bot.core.config_manager import Config
+from bot.core.telegram_manager import TgClient
 from bot.helper.aeon_utils.command_gen import (
     get_embed_thumb_cmd,
     get_metadata_cmd,
