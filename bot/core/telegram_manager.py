@@ -1,7 +1,11 @@
 from asyncio import Lock
 
 from pyrogram import Client, enums
-from pyrogram.types import LinkPreviewOptions
+try:
+    from pyrogram.types import LinkPreviewOptions
+except ImportError:
+    LinkPreviewOptions = None
+
 
 from bot import LOGGER
 
@@ -21,20 +25,22 @@ class TgClient:
     async def start_bot(cls):
         LOGGER.info("Creating client from BOT_TOKEN")
         cls.ID = Config.BOT_TOKEN.split(":", 1)[0]
-        cls.bot = Client(
-            cls.ID,
-            Config.TELEGRAM_API,
-            Config.TELEGRAM_HASH,
-            proxy=Config.TG_PROXY,
-            bot_token=Config.BOT_TOKEN,
-            workdir="/app",
-            parse_mode=enums.ParseMode.HTML,
-            max_concurrent_transmissions=100,
-            max_message_cache_size=15000,
-            max_topic_cache_size=15000,
-            sleep_threshold=0,
-            link_preview_options=LinkPreviewOptions(is_disabled=True),
-        )
+        kwargs = {
+            "name": cls.ID,
+            "api_id": Config.TELEGRAM_API,
+            "api_hash": Config.TELEGRAM_HASH,
+            "proxy": Config.TG_PROXY,
+            "bot_token": Config.BOT_TOKEN,
+            "workdir": "/app",
+            "parse_mode": enums.ParseMode.HTML,
+            "max_concurrent_transmissions": 100,
+            "max_message_cache_size": 15000,
+            "max_topic_cache_size": 15000,
+            "sleep_threshold": 0,
+        }
+        if LinkPreviewOptions:
+            kwargs["link_preview_options"] = LinkPreviewOptions(is_disabled=True)
+        cls.bot = Client(**kwargs)
         await cls.bot.start()
         cls.NAME = cls.bot.me.username
         await cls.start_user()
@@ -45,20 +51,22 @@ class TgClient:
     async def start_user(cls):
         if Config.USER_SESSION_STRING:
             if cls.user is None:
-                cls.user = Client(
-                    "User",
-                    Config.TELEGRAM_API,
-                    Config.TELEGRAM_HASH,
-                    proxy=Config.TG_PROXY,
-                    session_string=Config.USER_SESSION_STRING,
-                    workdir="/app",
-                    parse_mode=enums.ParseMode.HTML,
-                    no_updates=True,
-                    max_concurrent_transmissions=100,
-                    max_message_cache_size=15000,
-                    max_topic_cache_size=15000,
-                    link_preview_options=LinkPreviewOptions(is_disabled=True),
-                )
+                kwargs = {
+                    "name": "User",
+                    "api_id": Config.TELEGRAM_API,
+                    "api_hash": Config.TELEGRAM_HASH,
+                    "proxy": Config.TG_PROXY,
+                    "session_string": Config.USER_SESSION_STRING,
+                    "workdir": "/app",
+                    "parse_mode": enums.ParseMode.HTML,
+                    "no_updates": True,
+                    "max_concurrent_transmissions": 100,
+                    "max_message_cache_size": 15000,
+                    "max_topic_cache_size": 15000,
+                }
+                if LinkPreviewOptions:
+                    kwargs["link_preview_options"] = LinkPreviewOptions(is_disabled=True)
+                cls.user = Client(**kwargs)
                 await cls.user.start()
                 cls.IS_PREMIUM_USER = cls.user.me.is_premium
                 if cls.IS_PREMIUM_USER:
