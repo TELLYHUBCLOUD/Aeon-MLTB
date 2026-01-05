@@ -381,3 +381,34 @@ async def load_configurations():
 
     if not await aiopath.exists("accounts"):
         Config.USE_SERVICE_ACCOUNTS = False
+
+
+async def check_resume_tasks():
+    if not Config.DATABASE_URL or not Config.AUTO_RESUME:
+        return
+    if (
+        database.db is not None
+        and (
+            resume_tasks := await database.db.settings.config.find_one(
+                {"_id": TgClient.ID},
+                {"_id": 0, "resume_tasks": 1},
+            )
+        )
+        and (tasks := resume_tasks.get("resume_tasks"))
+    ):
+        for task in tasks:
+            chat_id = task.get("chat_id")
+            text = task.get("text")
+            # We use the user session to re-send the message so the bot can process it as a new command.
+            if TgClient.user:
+                try:
+                    await TgClient.user.send_message(chat_id, text)
+                except Exception as e:
+                    LOGGER.error(f"Failed to resume task: {e}")
+            else:
+                LOGGER.warning("User session not available; cannot resume task.")
+
+        await database.db.settings.config.update_one(
+            {"_id": TgClient.ID},
+            {"$unset": {"resume_tasks": ""}},
+        )
