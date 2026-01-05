@@ -14,7 +14,6 @@ from bot.helper.ext_utils.bot_utils import (
 )
 from bot.core.config_manager import Config
 from bot.core.telegram_manager import TgClient
-from bot.helper.common import MirrorListener
 from bot.helper.ext_utils.status_utils import get_readable_file_size
 from bot.helper.ext_utils.links_utils import (
     is_gdrive_id,
