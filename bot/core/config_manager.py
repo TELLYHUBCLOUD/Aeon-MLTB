@@ -320,6 +320,9 @@ class SystemEnv:
                     logger.warning(f"Env override failed for '{key}': {e}")
         
         # Fallback for API_ID and API_HASH
+        logger.info(f"Checking environment variables. TELEGRAM_API found: {bool(os.getenv('TELEGRAM_API'))}, API_ID found: {bool(os.getenv('API_ID'))}")
+        logger.info(f"Checking environment variables. TELEGRAM_HASH found: {bool(os.getenv('TELEGRAM_HASH'))}, API_HASH found: {bool(os.getenv('API_HASH'))}")
+
         if not Config.TELEGRAM_API:
             if api_id := os.getenv("API_ID"):
                 try:
