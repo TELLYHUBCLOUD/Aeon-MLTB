@@ -318,3 +318,18 @@ class SystemEnv:
                     Config.set(key, env_value)
                 except Exception as e:
                     logger.warning(f"Env override failed for '{key}': {e}")
+        
+        # Fallback for API_ID and API_HASH
+        if not Config.TELEGRAM_API:
+            if api_id := os.getenv("API_ID"):
+                try:
+                    Config.set("TELEGRAM_API", api_id)
+                except Exception as e:
+                    logger.warning(f"Failed to set TELEGRAM_API from API_ID: {e}")
+        
+        if not Config.TELEGRAM_HASH:
+            if api_hash := os.getenv("API_HASH"):
+                try:
+                    Config.set("TELEGRAM_HASH", api_hash)
+                except Exception as e:
+                    logger.warning(f"Failed to set TELEGRAM_HASH from API_HASH: {e}")

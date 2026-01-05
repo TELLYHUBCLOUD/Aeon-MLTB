@@ -26,6 +26,10 @@ class TgClient:
     async def start_bot(cls):
         LOGGER.info("Creating client from BOT_TOKEN")
         cls.ID = Config.BOT_TOKEN.split(":", 1)[0]
+        if not Config.TELEGRAM_API or not Config.TELEGRAM_HASH:
+            LOGGER.error("TELEGRAM_API or TELEGRAM_HASH is missing. Bot cannot start.")
+            return
+
         kwargs = {
             "name": cls.ID,
             "api_id": Config.TELEGRAM_API,
