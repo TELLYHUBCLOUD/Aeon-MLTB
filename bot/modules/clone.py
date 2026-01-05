@@ -19,6 +19,9 @@ from bot.helper.ext_utils.links_utils import (
     is_gdrive_id,
     is_gdrive_link,
     is_rclone_path,
+)
+from bot.helper.ext_utils.bulk_links import (
+    extract_bulk_links,
     get_links_from_message,
 )
 from bot.helper.ext_utils.task_manager import stop_duplicate_check

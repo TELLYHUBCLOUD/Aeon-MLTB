@@ -27,7 +27,6 @@ from bot.helper.ext_utils.bot_utils import (
     new_task,
 )
 from bot.helper.ext_utils.links_utils import (
-    get_links_from_message,
     is_gdrive_id,
     is_gdrive_link,
     is_magnet,
@@ -36,6 +35,7 @@ from bot.helper.ext_utils.links_utils import (
     is_telegram_link,
     is_url,
 )
+from bot.helper.ext_utils.bulk_links import get_links_from_message
 from bot.helper.listeners.task_listener import TaskListener
 from bot.helper.mirror_leech_utils.download_utils.aria2_download import (
     add_aria2_download,
