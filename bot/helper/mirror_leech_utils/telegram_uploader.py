@@ -37,7 +37,7 @@ from tenacity import (
 )
 
 from bot import LOGGER, intervals
-from bot.core.telegram_manager import TgClient
+from bot.core.aeon_client import TgClient
 from bot.core.config_manager import Config
 from bot.helper.aeon_utils.caption_gen import generate_caption
 from bot.helper.aeon_utils.text_utils import (

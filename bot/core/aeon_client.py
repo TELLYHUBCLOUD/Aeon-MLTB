@@ -1,8 +1,9 @@
-import os
 from asyncio import Lock
+
 from pyrogram import Client, enums
-from pyrogram.types import LinkPreviewOptions
+
 from bot import LOGGER
+
 from .config_manager import Config
 
 
@@ -19,22 +20,17 @@ class TgClient:
     async def start_bot(cls):
         LOGGER.info("Creating client from BOT_TOKEN")
         cls.ID = Config.BOT_TOKEN.split(":", 1)[0]
-        if not Config.TELEGRAM_API or not Config.TELEGRAM_HASH:
-            LOGGER.error("TELEGRAM_API or TELEGRAM_HASH is missing. Bot cannot start.")
-            raise SystemExit
-        kwargs = {
-            "name": cls.ID,
-            "api_id": Config.TELEGRAM_API,
-            "api_hash": Config.TELEGRAM_HASH,
-            "proxy": Config.TG_PROXY,
-            "bot_token": Config.BOT_TOKEN,
-            "workdir": os.getcwd(),
-            "parse_mode": enums.ParseMode.HTML,
-            "sleep_threshold": 0,
-        }
-        if LinkPreviewOptions:
-            kwargs["link_preview_options"] = LinkPreviewOptions(is_disabled=True)
-        cls.bot = Client(**kwargs)
+        cls.bot = Client(
+            cls.ID,
+            Config.TELEGRAM_API,
+            Config.TELEGRAM_HASH,
+            proxy=Config.TG_PROXY,
+            bot_token=Config.BOT_TOKEN,
+            workdir="/usr/src/app",
+            parse_mode=enums.ParseMode.HTML,
+            sleep_threshold=60,
+            #    max_concurrent_transmissions=100,
+        )
         await cls.bot.start()
         cls.NAME = cls.bot.me.username
 

@@ -9,13 +9,12 @@ from .core.config_manager import Config, SystemEnv
 LOGGER.info("Loading config...")
 Config.load()
 SystemEnv.load()
+
 from .core.startup import load_settings
 
-SystemEnv.load()
 bot_loop.run_until_complete(load_settings())
-SystemEnv.load()
 
-from .core.telegram_manager import TgClient
+from .core.aeon_client import TgClient
 from .helper.telegram_helper.bot_commands import BotCommands
 
 COMMANDS = {

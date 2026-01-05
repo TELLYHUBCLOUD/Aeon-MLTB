@@ -10,7 +10,7 @@ from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.filters import CustomFilters
 from bot.modules import *
 
-from .telegram_manager import TgClient
+from .aeon_client import TgClient
 
 
 def add_handlers():

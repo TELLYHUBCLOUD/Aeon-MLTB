@@ -35,7 +35,6 @@ from bot.helper.ext_utils.files_utils import (
     get_path_size,
     join_files,
     remove_excluded_files,
-    remove_non_included_files,
 )
 from bot.helper.ext_utils.links_utils import is_gdrive_id
 from bot.helper.ext_utils.status_utils import get_readable_file_size
@@ -47,12 +46,10 @@ from bot.helper.ext_utils.template_processor import (
 from bot.helper.ext_utils.media_utils import get_media_info
 from bot.helper.ext_utils.task_manager import check_running_tasks, start_from_queued
 from bot.helper.mirror_leech_utils.gdrive_utils.upload import GoogleDriveUpload
-from bot.helper.mirror_leech_utils.gofile_utils.upload import GoFileUpload
 from bot.helper.mirror_leech_utils.rclone_utils.transfer import RcloneTransferHelper
 from bot.helper.mirror_leech_utils.status_utils.gdrive_status import (
     GoogleDriveStatus,
 )
-from bot.helper.mirror_leech_utils.status_utils.hoster_status import HosterStatus
 from bot.helper.mirror_leech_utils.status_utils.queue_status import QueueStatus
 from bot.helper.mirror_leech_utils.status_utils.rclone_status import RcloneStatus
 from bot.helper.mirror_leech_utils.status_utils.telegram_status import TelegramStatus
@@ -62,6 +59,7 @@ from bot.helper.mirror_leech_utils.youtube_utils.youtube_upload import YouTubeUp
 from bot.helper.mirror_leech_utils.gofile_utils.upload import GoFileUpload
 from bot.helper.mirror_leech_utils.uphoster_utils.buzzheavier_utils.upload import BuzzHeavierUpload
 from bot.helper.mirror_leech_utils.uphoster_utils.pixeldrain_utils.upload import PixelDrainUpload
+from bot.helper.mirror_leech_utils.status_utils.lulu_status import LuluStatus
 from bot.helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.telegram_helper.message_utils import (
     auto_delete_message,
@@ -276,14 +274,10 @@ class TaskListener(TaskConfig):
         else:
             up_dir = self.dir
             up_path = dl_path
-        if not self.included_extensions:
-            await remove_excluded_files(
-                self.up_dir or self.dir, self.excluded_extensions
-            )
-        else:
-            await remove_non_included_files(
-                self.up_dir or self.dir, self.included_extensions
-            )
+        await remove_excluded_files(
+            self.up_dir or self.dir,
+            self.excluded_extensions,
+        )
         if not Config.QUEUE_ALL:
             async with queue_dict_lock:
                 if self.mid in non_queued_dl:
@@ -301,10 +295,7 @@ class TaskListener(TaskConfig):
             self.name = up_path.replace(f"{up_dir}/", "").split("/", 1)[0]
             self.size = await get_path_size(up_dir)
             self.clear()
-            if not self.included_extensions:
-                await remove_excluded_files(up_dir, self.excluded_extensions)
-            else:
-                await remove_non_included_files(up_dir, self.included_extensions)
+            await remove_excluded_files(up_dir, self.excluded_extensions)
 
         if self.watermark:
             up_path = await self.proceed_watermark(
@@ -504,12 +495,6 @@ class TaskListener(TaskConfig):
                 sync_to_async(yt.upload),
             )
             del yt
-        elif self.up_dest == "gofile":
-            LOGGER.info(f"GoFile Upload Name: {self.name}")
-            gofile = GoFileUpload(self, up_path)
-            async with task_dict_lock:
-                task_dict[self.mid] = HosterStatus(self, gofile, "up")
-            await gofile.upload()
         elif is_gdrive_id(self.up_dest):
             LOGGER.info(f"Uploading to Google Drive: {self.name}")
             drive = GoogleDriveUpload(self, up_path)
@@ -779,10 +764,12 @@ class TaskListener(TaskConfig):
                     elif Config.INDEX_URL:
                         INDEX_URL = Config.INDEX_URL
                     if INDEX_URL:
-                        share_url = f"{INDEX_URL}findpath?id={dir_id}"
+                        share_url = f"{INDEX_URL}/findpath?id={dir_id}"
                         buttons.url_button("Index Link", share_url)
                         if mime_type.startswith(("image", "video", "audio")):
-                            share_urls = f"{INDEX_URL}findpath?id={dir_id}&view=true"
+                            share_urls = (
+                                f"{INDEX_URL}/findpath?id={dir_id}&view=true"
+                            )
                             buttons.url_button("🌐 View Link", share_urls)
                 button = buttons.build_menu(2)
             else:
@@ -988,7 +975,8 @@ class TaskListener(TaskConfig):
         LOGGER.info(f"Uploading to LuluStream: {self.name}")
         
         async with task_dict_lock:
-            task_dict[self.mid] = HosterStatus(self, lulu, "Up")
+            from bot.helper.mirror_leech_utils.status_utils.lulu_status import LuluStatus
+            task_dict[self.mid] = LuluStatus(self, lulu, "Up")
         await update_status_message(self.message.chat.id)
 
         self.subproc = lulu
@@ -1023,8 +1011,9 @@ class TaskListener(TaskConfig):
     async def proceed_gofile(self, up_path):
         gofile = GoFileUpload(self, up_path)
         async with task_dict_lock:
-            task_dict[self.mid] = HosterStatus(self, gofile, "Up")
-            # Reusing HosterStatus since it's compatible with any object having speed/processed_bytes properties
+            from bot.helper.mirror_leech_utils.status_utils.lulu_status import LuluStatus
+            task_dict[self.mid] = LuluStatus(self, gofile, "Up")
+            # Reusing LuluStatus since it's compatible with any object having speed/processed_bytes properties
             # Although we should ideally rename it or use a more generic status class.
         await update_status_message(self.message.chat.id)
         await gofile.upload()
@@ -1032,13 +1021,15 @@ class TaskListener(TaskConfig):
     async def proceed_buzzheavier(self, up_path):
         buzz = BuzzHeavierUpload(self, up_path)
         async with task_dict_lock:
-            task_dict[self.mid] = HosterStatus(self, buzz, "Up")
+            from bot.helper.mirror_leech_utils.status_utils.lulu_status import LuluStatus
+            task_dict[self.mid] = LuluStatus(self, buzz, "Up")
         await update_status_message(self.message.chat.id)
         await buzz.upload()
 
     async def proceed_pixeldrain(self, up_path):
         pix = PixelDrainUpload(self, up_path)
         async with task_dict_lock:
-            task_dict[self.mid] = HosterStatus(self, pix, "Up")
+            from bot.helper.mirror_leech_utils.status_utils.lulu_status import LuluStatus
+            task_dict[self.mid] = LuluStatus(self, pix, "Up")
         await update_status_message(self.message.chat.id)
         await pix.upload()

@@ -42,10 +42,6 @@ async def bot_stats(_, message):
     total, used, free, disk = disk_usage("/")
     swap = swap_memory()
     memory = virtual_memory()
-    per_cpu = cpu_percent(interval=1, percpu=True)
-    per_cpu_str = " | ".join(
-        [f"CPU{i + 1}: {round(p)}%" for i, p in enumerate(per_cpu)]
-    )
     stats = f"""<blockquote expandable>
 ╭📊 <b>Bot Statistics</b>
 ┊
@@ -59,8 +55,7 @@ async def bot_stats(_, message):
 ┊📤 <b>Upload:</b> {get_readable_file_size(net_io_counters().bytes_sent)}
 ┊📥 <b>Download:</b> {get_readable_file_size(net_io_counters().bytes_recv)}
 ┊
-┊⚙️ <b>CPU:</b> {cpu_percent(interval=1)}%
-┊<b>CPU Cores:</b> {per_cpu_str}
+┊⚙️ <b>CPU:</b> {cpu_percent(interval=0.5)}%
 ┊🧠 <b>RAM:</b> {memory.percent}%
 ┊💿 <b>DISK:</b> {disk}%
 ┊🔢 <b>Physical Cores:</b> {cpu_count(logical=False)}

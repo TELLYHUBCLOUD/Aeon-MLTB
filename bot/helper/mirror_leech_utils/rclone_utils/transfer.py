@@ -495,17 +495,16 @@ class RcloneTransferHelper:
             "1",
             "-M",
         ]
-        if self._listener.included_extensions:
-            for ext in self._listener.included_extensions:
-                cmd.extend(["--include", f"*.{ext}"])
-        elif self._listener.excluded_extensions:
-            for ext in self._listener.excluded_extensions:
-                cmd.extend(["--exclude", f"*.{ext}"])
+        if self._rclone_select:
+            cmd.extend(("--files-from", self._listener.link))
+        else:
+            cmd.extend(("--exclude", ext))
         if rcflags := self._listener.rc_flags:
             rcflags = rcflags.split("|")
             for flag in rcflags:
                 if ":" in flag:
                     key, value = map(str.strip, flag.split(":", 1))
+                    cmd.extend((key, value))
                 elif len(flag) > 0:
                     cmd.append(flag.strip())
         return cmd

@@ -8,17 +8,9 @@ from truelink import TrueLinkResolver
 from truelink.exceptions import TrueLinkException
 from truelink.types import FolderResult, LinkResult
 
-from bot import (
-    DOWNLOAD_DIR,
-    LOGGER,
-    included_extensions,
-    multi_tags,
-    task_dict,
-    task_dict_lock,
-    user_data,
-)
+from bot import DOWNLOAD_DIR, LOGGER, bot_loop, task_dict_lock, user_data
+from bot.core.aeon_client import TgClient
 from bot.core.config_manager import Config
-from bot.core.telegram_manager import TgClient
 from bot.helper.aeon_utils.access_check import error_check
 from bot.helper.ext_utils.bot_utils import (
     COMMAND_USAGE,
@@ -35,7 +27,6 @@ from bot.helper.ext_utils.links_utils import (
     is_telegram_link,
     is_url,
 )
-from bot.helper.ext_utils.bulk_links import get_links_from_message
 from bot.helper.listeners.task_listener import TaskListener
 from bot.helper.mirror_leech_utils.download_utils.aria2_download import (
     add_aria2_download,
@@ -916,8 +907,73 @@ class Mirror(TaskListener):
                     self.link = await reply_to.download()
                     file_ = None
                 else:
+                    # Media detected, ignore all links in caption as per user request
                     self.link = ""
+            elif not self.link and reply_to.text:
+                # Only extract links from plain text messages (no media)
+                potential_link = reply_to.text.split("\n", 1)[0].strip()
+                if is_url(potential_link) or is_magnet(potential_link) or is_telegram_link(potential_link):
+                    self.link = potential_link
 
+        if is_telegram_link(self.link):
+            try:
+                reply_to, session = await get_tg_link_message(self.link, user_id)
+            except Exception as e:
+                error_msg = f"ERROR: {e!s}" if e else "ERROR: Failed to process Telegram link"
+                x = await send_message(self.message, error_msg)
+                await self.remove_from_same_dir()
+                await delete_links(self.message)
+                return await auto_delete_message(x, time=300)
+
+        if isinstance(reply_to, list):
+            self.bulk = reply_to
+            b_msg = input_list[:1]
+            self.options = " ".join(input_list[1:])
+            b_msg.append(f"{self.bulk[0]} -i {len(self.bulk)} {self.options}")
+            nextmsg = await send_message(self.message, " ".join(b_msg))
+            nextmsg = await self.client.get_messages(chat_id=self.message.chat.id, message_ids=nextmsg.id)
+            if self.message.from_user:
+                nextmsg.from_user = self.user
+            else:
+                nextmsg.sender_chat = self.user
+            await Mirror(
+                self.client,
+                nextmsg,
+                self.is_qbit,
+                self.is_leech,
+                self.is_jd,
+                self.is_nzb,
+                self.same_dir,
+                self.bulk,
+                self.multi_tag,
+                self.options,
+            ).new_event()
+            return await delete_links(self.message)
+
+        if reply_to:
+            file_ = (
+                reply_to.document
+                or reply_to.photo
+                or reply_to.video
+                or reply_to.audio
+                or reply_to.voice
+                or reply_to.video_note
+                or reply_to.sticker
+                or reply_to.animation
+                or None
+            )
+
+            if file_ is None:
+                if reply_text := reply_to.text:
+                    self.link = reply_text.split("\n", 1)[0].strip()
+                else:
+                    reply_to = None
+            elif reply_to.document and (
+                file_.mime_type == "application/x-bittorrent"
+                or file_.file_name.endswith((".torrent", ".dlc", ".nzb"))
+            ):
+                self.link = await reply_to.download()
+                file_ = None
         try:
             if (
                 self.link
@@ -925,6 +981,7 @@ class Mirror(TaskListener):
             ) or (
                 file_ and file_.file_name and file_.file_name.endswith(".torrent")
             ):
+                # Check if torrent operations are enabled
                 if not Config.TORRENT_ENABLED:
                     await self.on_download_error(
                         "❌ Torrent operations are disabled by the administrator."

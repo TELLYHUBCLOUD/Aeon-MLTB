@@ -1,6 +1,6 @@
 from bot.helper.ext_utils.status_utils import MirrorStatus, get_readable_file_size, get_readable_time
 
-class HosterStatus:
+class LuluStatus:
     def __init__(self, listener, obj, status):
         self.listener = listener
         self._obj = obj

@@ -13,16 +13,11 @@ from bot.helper.ext_utils.bot_utils import (
     sync_to_async,
 )
 from bot.core.config_manager import Config
-from bot.core.telegram_manager import TgClient
 from bot.helper.ext_utils.status_utils import get_readable_file_size
 from bot.helper.ext_utils.links_utils import (
     is_gdrive_id,
     is_gdrive_link,
     is_rclone_path,
-)
-from bot.helper.ext_utils.bulk_links import (
-    extract_bulk_links,
-    get_links_from_message,
 )
 from bot.helper.ext_utils.task_manager import stop_duplicate_check
 from bot.helper.listeners.task_listener import TaskListener
@@ -127,14 +122,14 @@ class Clone(TaskListener):
             await self.init_bulk(input_list, bulk_start, bulk_end, Clone)
             return None
 
-        if not self.link and not is_bulk:
-            if self.message.reply_to_message and self.message.reply_to_message.text:
-                links_dict = get_links_from_message(self.message.reply_to_message.text)
-                if links_dict:
-                    self.link = links_dict[0]["link"]
-                    if not self.options:
-                        self.options = links_dict[0]["args"]
-        if not self.link and not is_bulk:
+        await self.get_tag(text)
+
+        if not self.link and (reply_to := self.message.reply_to_message):
+            self.link = reply_to.text.split("\n", 1)[0].strip()
+
+        await self.run_multi(input_list, Clone)
+
+        if len(self.link) == 0:
             await send_message(
                 self.message,
                 COMMAND_USAGE["clone"][0],

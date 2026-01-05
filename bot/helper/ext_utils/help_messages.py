@@ -1,4 +1,4 @@
-from bot.core.telegram_manager import TgClient
+from bot.core.aeon_client import TgClient
 from bot.helper.telegram_helper.bot_commands import BotCommands
 
 nsfw_keywords = [
@@ -251,7 +251,7 @@ ffmpeg_cmds = """<blockquote expandable>╭ℹ️ <b>FFmpeg Commands</b>: -ff
 ┊Examples: <code>["-i mltb.mkv -c copy -c:s srt mltb.mkv", "-i mltb.video -c copy -c:s srt mltb", "-i mltb.m4a -c:a libmp3lame -q:a 2 mltb.mp3", "-i mltb.audio -c:a libmp3lame -q:a 2 mltb.mp3", "-i mltb -map 0:a -c copy mltb.mka -map 0:s -c copy mltb.srt", "-i mltb -i tg://openmessage?user_id=5272663208&message_id=322801 -filter_complex 'overlay=W-w-10:H-h-10' -c:a copy mltb"]</code>
 ┊Here I will explain how to use mltb.* which is reference to files you want to work on.
 ┊1. First cmd: the input is mltb.mkv so this cmd will work only on mkv videos and the output is mltb.mkv also so all outputs is mkv. -del will delete the original media after complete run of the cmd.
-┊2. Second cmd: the input is mltb.video so this cmd will work on all videos and the output is only mltb so the extension is same as input files.
+┊2. Second cmd: the input is mltb.video so this cmd will work on all videos and the output is only mltb so the extenstion is same as input files.
 ┊3. Third cmd: the input in mltb.m4a so this cmd will work only on m4a audios and the output is mltb.mp3 so the output extension is mp3.
 ┊4. Fourth cmd: the input is mltb.audio so this cmd will work on all audios and the output is mltb.mp3 so the output extension is mp3.
 ╰5. Fifth cmd: You can add telegram link for small size input like photo to set watermark</blockquote>"""
