@@ -1,3 +1,4 @@
+import os
 from asyncio import Lock
 
 from pyrogram import Client, enums
@@ -31,11 +32,8 @@ class TgClient:
             "api_hash": Config.TELEGRAM_HASH,
             "proxy": Config.TG_PROXY,
             "bot_token": Config.BOT_TOKEN,
-            "workdir": "/app",
+            "workdir": os.getcwd(),
             "parse_mode": enums.ParseMode.HTML,
-            "max_concurrent_transmissions": 100,
-            "max_message_cache_size": 15000,
-            "max_topic_cache_size": 15000,
             "sleep_threshold": 0,
         }
         if LinkPreviewOptions:
@@ -57,12 +55,9 @@ class TgClient:
                     "api_hash": Config.TELEGRAM_HASH,
                     "proxy": Config.TG_PROXY,
                     "session_string": Config.USER_SESSION_STRING,
-                    "workdir": "/app",
+                    "workdir": os.getcwd(),
                     "parse_mode": enums.ParseMode.HTML,
                     "no_updates": True,
-                    "max_concurrent_transmissions": 100,
-                    "max_message_cache_size": 15000,
-                    "max_topic_cache_size": 15000,
                 }
                 if LinkPreviewOptions:
                     kwargs["link_preview_options"] = LinkPreviewOptions(is_disabled=True)
