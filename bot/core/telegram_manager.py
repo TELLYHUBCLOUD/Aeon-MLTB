@@ -33,9 +33,6 @@ class TgClient:
             "bot_token": Config.BOT_TOKEN,
             "workdir": "/app",
             "parse_mode": enums.ParseMode.HTML,
-            "max_concurrent_transmissions": 100,
-            "max_message_cache_size": 15000,
-            "max_topic_cache_size": 15000,
             "sleep_threshold": 0,
         }
         if LinkPreviewOptions:
@@ -60,9 +57,6 @@ class TgClient:
                     "workdir": "/app",
                     "parse_mode": enums.ParseMode.HTML,
                     "no_updates": True,
-                    "max_concurrent_transmissions": 100,
-                    "max_message_cache_size": 15000,
-                    "max_topic_cache_size": 15000,
                 }
                 if LinkPreviewOptions:
                     kwargs["link_preview_options"] = LinkPreviewOptions(is_disabled=True)
