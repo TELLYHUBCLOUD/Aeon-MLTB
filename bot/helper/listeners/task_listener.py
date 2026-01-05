@@ -52,7 +52,7 @@ from bot.helper.mirror_leech_utils.rclone_utils.transfer import RcloneTransferHe
 from bot.helper.mirror_leech_utils.status_utils.gdrive_status import (
     GoogleDriveStatus,
 )
-from bot.helper.mirror_leech_utils.status_utils.gofile_status import GoFileStatus
+from bot.helper.mirror_leech_utils.status_utils.hoster_status import HosterStatus
 from bot.helper.mirror_leech_utils.status_utils.queue_status import QueueStatus
 from bot.helper.mirror_leech_utils.status_utils.rclone_status import RcloneStatus
 from bot.helper.mirror_leech_utils.status_utils.telegram_status import TelegramStatus
@@ -62,7 +62,6 @@ from bot.helper.mirror_leech_utils.youtube_utils.youtube_upload import YouTubeUp
 from bot.helper.mirror_leech_utils.gofile_utils.upload import GoFileUpload
 from bot.helper.mirror_leech_utils.uphoster_utils.buzzheavier_utils.upload import BuzzHeavierUpload
 from bot.helper.mirror_leech_utils.uphoster_utils.pixeldrain_utils.upload import PixelDrainUpload
-from bot.helper.mirror_leech_utils.status_utils.lulu_status import LuluStatus
 from bot.helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.telegram_helper.message_utils import (
     auto_delete_message,
@@ -509,7 +508,7 @@ class TaskListener(TaskConfig):
             LOGGER.info(f"GoFile Upload Name: {self.name}")
             gofile = GoFileUpload(self, up_path)
             async with task_dict_lock:
-                task_dict[self.mid] = GoFileStatus(self, gofile, gid, "up")
+                task_dict[self.mid] = HosterStatus(self, gofile, "up")
             await gofile.upload()
         elif is_gdrive_id(self.up_dest):
             LOGGER.info(f"Uploading to Google Drive: {self.name}")
@@ -989,8 +988,7 @@ class TaskListener(TaskConfig):
         LOGGER.info(f"Uploading to LuluStream: {self.name}")
         
         async with task_dict_lock:
-            from bot.helper.mirror_leech_utils.status_utils.lulu_status import LuluStatus
-            task_dict[self.mid] = LuluStatus(self, lulu, "Up")
+            task_dict[self.mid] = HosterStatus(self, lulu, "Up")
         await update_status_message(self.message.chat.id)
 
         self.subproc = lulu
@@ -1025,9 +1023,8 @@ class TaskListener(TaskConfig):
     async def proceed_gofile(self, up_path):
         gofile = GoFileUpload(self, up_path)
         async with task_dict_lock:
-            from bot.helper.mirror_leech_utils.status_utils.lulu_status import LuluStatus
-            task_dict[self.mid] = LuluStatus(self, gofile, "Up")
-            # Reusing LuluStatus since it's compatible with any object having speed/processed_bytes properties
+            task_dict[self.mid] = HosterStatus(self, gofile, "Up")
+            # Reusing HosterStatus since it's compatible with any object having speed/processed_bytes properties
             # Although we should ideally rename it or use a more generic status class.
         await update_status_message(self.message.chat.id)
         await gofile.upload()
@@ -1035,15 +1032,13 @@ class TaskListener(TaskConfig):
     async def proceed_buzzheavier(self, up_path):
         buzz = BuzzHeavierUpload(self, up_path)
         async with task_dict_lock:
-            from bot.helper.mirror_leech_utils.status_utils.lulu_status import LuluStatus
-            task_dict[self.mid] = LuluStatus(self, buzz, "Up")
+            task_dict[self.mid] = HosterStatus(self, buzz, "Up")
         await update_status_message(self.message.chat.id)
         await buzz.upload()
 
     async def proceed_pixeldrain(self, up_path):
         pix = PixelDrainUpload(self, up_path)
         async with task_dict_lock:
-            from bot.helper.mirror_leech_utils.status_utils.lulu_status import LuluStatus
-            task_dict[self.mid] = LuluStatus(self, pix, "Up")
+            task_dict[self.mid] = HosterStatus(self, pix, "Up")
         await update_status_message(self.message.chat.id)
         await pix.upload()
