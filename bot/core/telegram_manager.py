@@ -1,12 +1,6 @@
-import os
 from asyncio import Lock
 
 from pyrogram import Client, enums
-try:
-    from pyrogram.types import LinkPreviewOptions
-except ImportError:
-    LinkPreviewOptions = None
-
 
 from bot import LOGGER
 
@@ -26,10 +20,6 @@ class TgClient:
     async def start_bot(cls):
         LOGGER.info("Creating client from BOT_TOKEN")
         cls.ID = Config.BOT_TOKEN.split(":", 1)[0]
-        if not Config.TELEGRAM_API or not Config.TELEGRAM_HASH:
-            LOGGER.error("TELEGRAM_API or TELEGRAM_HASH is missing. Bot cannot start.")
-            return
-
         kwargs = {
             "name": cls.ID,
             "api_id": Config.TELEGRAM_API,
@@ -45,31 +35,31 @@ class TgClient:
         cls.bot = Client(**kwargs)
         await cls.bot.start()
         cls.NAME = cls.bot.me.username
-        await cls.start_user()
-        cls.IS_PREMIUM_USER = cls.bot.me.is_premium
-        LOGGER.info("Bot Started")
 
     @classmethod
     async def start_user(cls):
         if Config.USER_SESSION_STRING:
-            if cls.user is None:
-                kwargs = {
-                    "name": "User",
-                    "api_id": Config.TELEGRAM_API,
-                    "api_hash": Config.TELEGRAM_HASH,
-                    "proxy": Config.TG_PROXY,
-                    "session_string": Config.USER_SESSION_STRING,
-                    "workdir": os.getcwd(),
-                    "parse_mode": enums.ParseMode.HTML,
-                    "no_updates": True,
-                }
-                if LinkPreviewOptions:
-                    kwargs["link_preview_options"] = LinkPreviewOptions(is_disabled=True)
-                cls.user = Client(**kwargs)
+            LOGGER.info("Creating client from USER_SESSION_STRING")
+            try:
+                cls.user = Client(
+                    "user",
+                    Config.TELEGRAM_API,
+                    Config.TELEGRAM_HASH,
+                    proxy=Config.TG_PROXY,
+                    session_string=Config.USER_SESSION_STRING,
+                    parse_mode=enums.ParseMode.HTML,
+                    no_updates=True,
+                    max_concurrent_transmissions=100,
+                    sleep_threshold=60,
+                )
                 await cls.user.start()
                 cls.IS_PREMIUM_USER = cls.user.me.is_premium
                 if cls.IS_PREMIUM_USER:
                     cls.MAX_SPLIT_SIZE = 4194304000
+            except Exception as e:
+                LOGGER.error(f"Failed to start client from USER_SESSION_STRING. {e}")
+                cls.IS_PREMIUM_USER = False
+                cls.user = None
 
     @classmethod
     async def stop(cls):
