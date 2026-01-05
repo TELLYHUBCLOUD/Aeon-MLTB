@@ -1,6 +1,7 @@
 import os
 from asyncio import Lock
 from pyrogram import Client, enums
+from pyrogram.types import LinkPreviewOptions
 from bot import LOGGER
 from .config_manager import Config
 
@@ -20,7 +21,7 @@ class TgClient:
         cls.ID = Config.BOT_TOKEN.split(":", 1)[0]
         if not Config.TELEGRAM_API or not Config.TELEGRAM_HASH:
             LOGGER.error("TELEGRAM_API or TELEGRAM_HASH is missing. Bot cannot start.")
-            return
+            raise SystemExit
         kwargs = {
             "name": cls.ID,
             "api_id": Config.TELEGRAM_API,
