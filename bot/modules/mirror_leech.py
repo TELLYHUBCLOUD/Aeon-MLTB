@@ -79,7 +79,6 @@ class Mirror(TaskListener):
         is_jd=False,
         is_nzb=False,
         is_md_leech=False,
-        is_enc=False,
         same_dir=None,
         bulk=None,
         multi_tag=None,
@@ -110,7 +109,6 @@ class Mirror(TaskListener):
         self.is_jd = is_jd
         self.is_nzb = is_nzb
         self.is_md_leech = is_md_leech
-        self.is_enc = is_enc
 
     def _ensure_user_dict(self):
         if not hasattr(self, "user_dict") or self.user_dict is None:

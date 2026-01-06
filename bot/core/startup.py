@@ -396,7 +396,6 @@ async def check_resume_tasks():
 
         from bot.modules.mirror_leech import Mirror
         from bot.modules.clone import Clone
-        from bot.modules.encode import Encode
         from bot.helper.telegram_helper.bot_commands import BotCommands
 
         class MockChat:
@@ -428,8 +427,6 @@ async def check_resume_tasks():
             
             if any(text.startswith(f"/{x}") for x in BotCommands.CloneCommand if isinstance(BotCommands.CloneCommand, list)):
                 await Clone(TgClient.bot, message).new_event()
-            elif any(text.startswith(f"/{x}") for x in BotCommands.EncodeCommand if isinstance(BotCommands.EncodeCommand, list)) or text.startswith(f"/{BotCommands.EncodeCommand}"):
-                await Encode(TgClient.bot, message).new_event()
             elif any(text.startswith(f"/{x}") for x in BotCommands.LeechCommand) or \
                  any(text.startswith(f"/{x}") for x in BotCommands.MirrorCommand) or \
                  any(text.startswith(f"/{x}") for x in BotCommands.JdMirrorCommand) or \

@@ -220,11 +220,6 @@ def add_handlers():
             BotCommands.SoxCommand,
             CustomFilters.authorized,
         ),
-        "encode": (
-            encode,
-            BotCommands.EncodeCommand,
-            CustomFilters.authorized,
-        ),
         "terabox_handler": (
             terabox_handler,
             BotCommands.TeraboxCommand,
@@ -303,9 +298,3 @@ def add_handlers():
         ),
     )
 
-    TgClient.bot.add_handler(
-        MessageHandler(
-            auto_leech_handler,
-            filters=regex(r"https?://|magnet:") & CustomFilters.authorized,
-        ),
-    )
