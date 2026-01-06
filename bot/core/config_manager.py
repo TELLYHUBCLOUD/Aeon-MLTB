@@ -1,6 +1,7 @@
 import ast
 import logging
 import os
+import requests
 from importlib import import_module
 from typing import Any, ClassVar
 
@@ -317,3 +318,34 @@ class SystemEnv:
                     Config.set(key, env_value)
                 except Exception as e:
                     logger.warning(f"Env override failed for '{key}': {e}")
+
+        if (not Config.DATABASE_URL or not Config.TELEGRAM_API) and Config.HEROKU_APP_NAME and Config.HEROKU_API_KEY:
+            cls._load_from_heroku()
+
+    @classmethod
+    def _load_from_heroku(cls):
+        try:
+            logger.info("Attempting to fetch config from Heroku API...")
+            url = f"https://api.heroku.com/apps/{Config.HEROKU_APP_NAME}/config-vars"
+            headers = {
+                "Accept": "application/vnd.heroku+json; version=3",
+                "Authorization": f"Bearer {Config.HEROKU_API_KEY}",
+            }
+            resp = requests.get(url, headers=headers, timeout=10)
+            if resp.status_code == 200:
+                data = resp.json()
+                count = 0
+                for key, value in data.items():
+                    if hasattr(Config, key):
+                        try:
+                            Config.set(key, value)
+                            os.environ[key] = str(value)
+                            count += 1
+                        except Exception as e:
+                            logger.warning(f"Heroku var override failed for '{key}': {e}")
+                logger.info(f"Loaded {count} config variables from Heroku API")
+            else:
+                logger.warning(f"Failed to fetch Heroku config: {resp.status_code} {resp.text}")
+        except Exception as e:
+            logger.error(f"Heroku config fetch error: {e}")
+
