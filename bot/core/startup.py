@@ -368,3 +368,77 @@ async def load_configurations():
 
     if not await aiopath.exists("accounts"):
         Config.USE_SERVICE_ACCOUNTS = False
+
+
+async def check_resume_tasks():
+    """Checks for interrupted tasks in the database and resumes them."""
+    if not database.db:
+        return
+
+    if await database.db.settings.config.count_documents({"_id": TgClient.ID, "resume_tasks": {"$exists": True}}) == 0:
+        return
+
+    config = await database.db.settings.config.find_one({"_id": TgClient.ID})
+    resume_tasks = config.get("resume_tasks", [])
+
+    from types import SimpleNamespace
+    from bot.modules import (
+        clone_node,
+        jd_leech,
+        jd_mirror,
+        leech,
+        mirror,
+        nzb_leech,
+        nzb_mirror,
+        terabox_handler,
+        ytdl,
+        ytdl_leech,
+    )
+
+    for task_data in resume_tasks:
+        try:
+            chat_id = task_data["chat_id"]
+            user_id = task_data["user_id"]
+            text = task_data["text"]
+
+            mock_user = SimpleNamespace(id=user_id, is_bot=False)
+            mock_chat = SimpleNamespace(id=chat_id, type="supergroup")
+            mock_message = SimpleNamespace(
+                id=0,
+                chat=mock_chat,
+                from_user=mock_user,
+                text=text,
+                reply_to_message=None,
+                link="",
+                reply=lambda *args, **kwargs: None,
+            )
+
+            cmd = text.split()[0].lstrip("/").split("@")[0]
+
+            handlers = {
+                "mirror": mirror,
+                "leech": leech,
+                "ytdl": ytdl,
+                "ytdl_leech": ytdl_leech,
+                "jd_mirror": jd_mirror,
+                "jd_leech": jd_leech,
+                "nzb_mirror": nzb_mirror,
+                "nzb_leech": nzb_leech,
+                "clone": clone_node,
+                "terabox": terabox_handler,
+            }
+
+            if func := handlers.get(cmd):
+                # Use create_task to run concurrently and avoid blocking
+                from bot import bot_loop
+                bot_loop.create_task(func(TgClient.bot, mock_message))
+            else:
+                LOGGER.warning(f"Resuming task failed: Unknown command {cmd}")
+
+        except Exception as e:
+            LOGGER.error(f"Failed to resume task: {e}")
+
+    await database.db.settings.config.update_one(
+        {"_id": TgClient.ID},
+        {"$unset": {"resume_tasks": ""}}
+    )
