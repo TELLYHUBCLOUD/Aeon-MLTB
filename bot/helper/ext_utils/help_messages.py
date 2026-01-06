@@ -425,19 +425,6 @@ user_settings_text = {
     "SUBTITLE_METADATA": "<blockquote expandable>╭ℹ️ <b>Info</b>\n╰Send the subtitle metadata text. Timeout: 60 sec</blockquote>",
 }
 
-encode_help_main = """<blockquote expandable>╭ℹ️ <b>Encode Help</b>
-┊<b>Send link along with command line or </b>
-┊
-┊<code>/encode link</code>
-┊
-┊<b>By replying to link/file</b>:
-┊
-┊<code>/encode -q 1080p|720p|480p -an -sn</code>
-┊
-┊<b>NOTE:</b>
-┊1. Default quality is 1080p if not specified.
-╰2. You can use -an to remove audio and -sn to remove subtitles.</blockquote>"""
-
 merge_help_main = """<blockquote expandable>╭ℹ️ <b>Merge Help</b>
 ┊<b>Send multiple links/files to merge them into one video.</b>
 ┊
@@ -458,16 +445,6 @@ merge_help_main = """<blockquote expandable>╭ℹ️ <b>Merge Help</b>
 
 
 
-
-ENCODE_HELP_DICT = {
-    "main": encode_help_main,
-    "quality": qual,
-    "ffmpeg": ffmpeg_cmds,
-    "upload": upload,
-    "new_name": new_name,
-    "thumbnail": thumb,
-    "split_size": split_size,
-}
 
 MERGE_HELP_DICT = {
     "main": merge_help_main,
@@ -512,7 +489,6 @@ help_string = f"""<blockquote expandable>╭ℹ️ <b>Help Guide</b>
 ┊/{BotCommands.JdLeechCommand[0]} or /{BotCommands.JdLeechCommand[1]}: Start leeching using JDownloader.
 ┊/{BotCommands.NzbLeechCommand[0]} or /{BotCommands.NzbLeechCommand[1]}: Start leeching using Sabnzbd.
 ┊/{BotCommands.YtdlLeechCommand[0]} or /{BotCommands.YtdlLeechCommand[1]}: Leech yt-dlp supported link.
-┊/{BotCommands.EncodeCommand} [link]: Re-encode media (-q 1080p|720p|480p -an -sn).
 ┊/{BotCommands.MergeCommand} [link]: Merge video files.
 ┊/{BotCommands.CloneCommand} [drive_url]: Copy file/folder to Google Drive.
 ┊/{BotCommands.CountCommand} [drive_url]: Count file/folder of Google Drive.

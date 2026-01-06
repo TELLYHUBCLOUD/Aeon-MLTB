@@ -17,7 +17,6 @@ class BotCommands:
     YtdlLeechCommand = [f"ytdlleech{i}", f"yl{i}"]
     
     CloneCommand = f"clone{i}"
-    EncodeCommand = f"encode{i}"
     MergeCommand = f"merge{i}"
     TeraboxCommand = [f"terabox{i}", f"tb{i}"]
     MdoneCommand = f"mdone{i}"

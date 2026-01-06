@@ -44,7 +44,6 @@ automation_options = [
     "AUTO_LEECH_CMD",
     "AUTO_MIRROR",
     "AUTO_MIRROR_CMD",
-    "AUTO_ENCODE",
     "AUTO_RESUME",
     "AUTO_COMPRESS_CMD",
 ]
@@ -342,7 +341,6 @@ async def get_user_settings(from_user, stype="main"):
     elif stype == "automation":
         buttons.data_button("🚀 Auto Leech", f"userset {user_id} tog AUTO_LEECH {'f' if user_dict.get('AUTO_LEECH') else 't'}")
         buttons.data_button("🚀 Auto Mirror", f"userset {user_id} tog AUTO_MIRROR {'f' if user_dict.get('AUTO_MIRROR') else 't'}")
-        buttons.data_button("🚀 Auto Encode", f"userset {user_id} tog AUTO_ENCODE {'f' if user_dict.get('AUTO_ENCODE') else 't'}")
         buttons.data_button("🚀 Auto Resume", f"userset {user_id} tog AUTO_RESUME {'f' if user_dict.get('AUTO_RESUME') else 't'}")
         buttons.data_button("🎬 Leech Cmd", f"userset {user_id} menu AUTO_LEECH_CMD")
         buttons.data_button("🎬 Mirror Cmd", f"userset {user_id} menu AUTO_MIRROR_CMD")
@@ -351,7 +349,6 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("❌ Close", f"userset {user_id} close")
         aleech = "✅ Enabled" if user_dict.get("AUTO_LEECH") else "❌ Disabled"
         amirror = "✅ Enabled" if user_dict.get("AUTO_MIRROR") else "❌ Disabled"
-        aencode = "✅ Enabled" if user_dict.get("AUTO_ENCODE") else "❌ Disabled"
         aresume = "✅ Enabled" if user_dict.get("AUTO_RESUME") else "❌ Disabled"
         aleech_cmd = user_dict.get("AUTO_LEECH_CMD") or "None"
         amirror_cmd = user_dict.get("AUTO_MIRROR_CMD") or "None"
@@ -362,7 +359,6 @@ async def get_user_settings(from_user, stype="main"):
 ┊🎬 <b>Leech Cmd:</b> <code>{escape(aleech_cmd)}</code>
 ┊🚀 <b>Auto Mirror:</b> <code>{amirror}</code>
 ┊🎬 <b>Mirror Cmd:</b> <code>{escape(amirror_cmd)}</code>
-┊🚀 <b>Auto Encode:</b> <code>{aencode}</code>
 ┊🚀 <b>Auto Resume:</b> <code>{aresume}</code>
 ╰🎬 <b>Compress Cmd:</b> <code>{escape(ac_cmd)}</code>
 </blockquote>"""
