@@ -319,6 +319,23 @@ class SystemEnv:
                 except Exception as e:
                     logger.warning(f"Env override failed for '{key}': {e}")
 
+        # Fallbacks for common alternative names
+        if not Config.TELEGRAM_API:
+            if api_id := (os.getenv("API_ID") or os.getenv("APP_ID")):
+                try:
+                    Config.set("TELEGRAM_API", api_id)
+                    logger.info(f"Using fallback value for TELEGRAM_API from environment variable")
+                except Exception as e:
+                    logger.warning(f"Fallback for TELEGRAM_API failed: {e}")
+        
+        if not Config.TELEGRAM_HASH:
+            if api_hash := (os.getenv("API_HASH") or os.getenv("APP_HASH")):
+                try:
+                    Config.set("TELEGRAM_HASH", api_hash)
+                    logger.info(f"Using fallback value for TELEGRAM_HASH from environment variable")
+                except Exception as e:
+                    logger.warning(f"Fallback for TELEGRAM_HASH failed: {e}")
+
         if (not Config.DATABASE_URL or not Config.TELEGRAM_API) and Config.HEROKU_APP_NAME and Config.HEROKU_API_KEY:
             cls._load_from_heroku()
 

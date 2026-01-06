@@ -31,6 +31,11 @@ class TgClient:
             sleep_threshold=60,
             #    max_concurrent_transmissions=100,
         )
+        if not Config.TELEGRAM_API or not Config.TELEGRAM_HASH:
+            LOGGER.error("TELEGRAM_API or TELEGRAM_HASH is missing! Please set them in your config or environment variables.")
+            import sys
+            sys.exit(1)
+            
         await cls.bot.start()
         cls.NAME = cls.bot.me.username
 
