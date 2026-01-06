@@ -25,8 +25,9 @@ def filter_links(links_list: list, bulk_start: int, bulk_end: int) -> list:
 
 def get_links_from_message(text: str) -> list:
     """
-    Extracts links from a string, assuming one link per line.
-    Empty lines are ignored.
+    Extracts valid links from a string, assuming one link per line or separated by spaces.
+    Empty lines and lines starting with / (commands) are ignored.
+    Only valid URLs, magnets, and Telegram links are returned.
 
     Args:
         text: The string containing links.
@@ -34,8 +35,20 @@ def get_links_from_message(text: str) -> list:
     Returns:
         A list of extracted links.
     """
+    from bot.helper.ext_utils.links_utils import is_url, is_magnet, is_telegram_link
+    
     links_list = text.split("\n")
-    return [item.strip() for item in links_list if len(item) != 0]
+    valid_links = []
+    for line in links_list:
+        line = line.strip()
+        if not line or line.startswith("/"):
+            continue
+        # Split by space in case multiple links are on one line (though Usually it's one per line for bulk)
+        parts = line.split()
+        for part in parts:
+            if is_url(part) or is_magnet(part) or is_telegram_link(part):
+                valid_links.append(part)
+    return valid_links
 
 
 async def get_links_from_file(message) -> list:
@@ -61,7 +74,7 @@ async def get_links_from_file(message) -> list:
 async def extract_bulk_links(message, bulk_start: str, bulk_end: str) -> list:
     """
     Extracts bulk links from a Pyrogram message.
-    Links can be in the replied-to message's text or an attached text file.
+    Links can be in the replied-to message, an attached text file, or the message itself.
     The extracted links are then filtered based on start and end indices.
 
     Args:
@@ -72,12 +85,49 @@ async def extract_bulk_links(message, bulk_start: str, bulk_end: str) -> list:
     Returns:
         A list of filtered links.
     """
+    from bot import LOGGER
+    
     bulk_start = int(bulk_start)
     bulk_end = int(bulk_end)
     links_list = []
+    
+    LOGGER.info(f"[BULK] Starting extraction - bulk_start={bulk_start}, bulk_end={bulk_end}")
+    
     if reply_to := message.reply_to_message:
+        LOGGER.info(f"[BULK] Found reply_to_message")
         if (file_ := reply_to.document) and (file_.mime_type == "text/plain"):
+            LOGGER.info(f"[BULK] Extracting from text file")
             links_list = await get_links_from_file(reply_to)
-        elif text := reply_to.text:
+        elif text := (reply_to.text or reply_to.caption):
+            LOGGER.info(f"[BULK] Extracting from replied text/caption, length={len(text)}")
+            # If it's a media message (caption), only extract links if no other media is present
+            if reply_to.text or not any(
+                [
+                    reply_to.photo,
+                    reply_to.video,
+                    reply_to.audio,
+                    reply_to.document,
+                    reply_to.voice,
+                    reply_to.video_note,
+                    reply_to.animation,
+                ]
+            ):
+                links_list = get_links_from_message(text)
+                LOGGER.info(f"[BULK] Extracted {len(links_list)} links from reply")
+            else:
+                LOGGER.info(f"[BULK] Skipped - reply has media attached")
+        else:
+            LOGGER.info(f"[BULK] Reply has no text or caption")
+    else:
+        LOGGER.info(f"[BULK] No reply_to_message, checking current message")
+        text = message.text or message.caption
+        if text and "\n" in text:
+            LOGGER.info(f"[BULK] Extracting from current message, length={len(text)}")
             links_list = get_links_from_message(text)
-    return filter_links(links_list, bulk_start, bulk_end) if links_list else links_list
+        else:
+            LOGGER.info(f"[BULK] Current message has no multiline text")
+    
+    LOGGER.info(f"[BULK] Total links before filter: {len(links_list)}")
+    result = filter_links(links_list, bulk_start, bulk_end) if links_list else []
+    LOGGER.info(f"[BULK] Final links after filter: {len(result)}")
+    return result

@@ -75,7 +75,8 @@ class TorrentManager:
             download: A dictionary containing download information from Aria2c.
         """
         if download.get("status", "") in ["active", "paused", "waiting"]:
-            await cls.aria2.forceRemove(download.get("gid", ""))
+            with contextlib.suppress(Exception):
+                await cls.aria2.forceRemove(download.get("gid", ""))
         else:
             with contextlib.suppress(Exception):
                 await cls.aria2.removeDownloadResult(download.get("gid", ""))
@@ -173,11 +174,17 @@ def aria2_name(download_info):
     if download_info.get("files"):
         if download_info["files"][0]["path"].startswith("[METADATA]"):
             return download_info["files"][0]["path"]
-        file_path = download_info["files"][0]["path"]
         dir_path = download_info["dir"]
-        if file_path.startswith(dir_path):
-            return Path(file_path[len(dir_path) + 1 :]).parts[0]
-        return ""
+        first_file_path = download_info["files"][0]["path"]
+        if first_file_path.startswith(dir_path):
+            first_root = Path(first_file_path[len(dir_path) + 1 :]).parts[0]
+            if len(download_info["files"]) == 1:
+                return first_root
+            for file_info in download_info["files"][1:]:
+                file_path = file_info["path"]
+                if not file_path.startswith(dir_path) or Path(file_path[len(dir_path) + 1 :]).parts[0] != first_root:
+                    return ""
+            return first_root
     return ""
 
 

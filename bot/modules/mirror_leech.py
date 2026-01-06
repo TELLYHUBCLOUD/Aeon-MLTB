@@ -408,7 +408,7 @@ class Mirror(TaskListener):
                 _default_server, _ = get_ddl_setting(user_id, "DDL_SERVER", "gofile")
 
         self.rc_flags = args["-rcf"]
-        self.link = args["link"] or self.auto_link
+        self.link = self.auto_link or args["link"]
         self.compress = args["-z"]
         # Enable compression if -z flag is set and archive flags are enabled
         from bot.helper.ext_utils.bot_utils import is_flag_enabled
@@ -546,40 +546,6 @@ class Mirror(TaskListener):
         self.compress_document = args["-comp-document"]
         self.compress_subtitle = args["-comp-subtitle"]
         self.compress_archive = args["-comp-archive"]
-
-        self.yt_privacy = None
-        self.yt_mode = None
-        self.yt_tags = None
-        self.yt_category = None
-        self.yt_description = None
-
-        if self.up_dest and self.up_dest.startswith("yt:"):
-            self.raw_up_dest = "yt"
-            parts = self.up_dest.split(":", 6)[1:]
-
-            if len(parts) > 0 and parts[0]:
-                self.yt_privacy = parts[0]
-            if len(parts) > 1 and parts[1]:
-                mode_candidate = parts[1]
-                if mode_candidate in [
-                    "playlist",
-                    "individual",
-                    "playlist_and_individual",
-                ]:
-                    self.yt_mode = mode_candidate
-                elif mode_candidate:
-                    LOGGER.warning(
-                        f"Invalid YouTube upload mode in -up: {mode_candidate}. Ignoring mode override."
-                    )
-            if len(parts) > 2 and parts[2]:
-                self.yt_tags = parts[2]
-            if len(parts) > 3 and parts[3]:
-                self.yt_category = parts[3]
-            if len(parts) > 4 and parts[4]:
-                self.yt_description = parts[4]
-            if len(parts) > 5 and parts[5]:
-                self.yt_playlist_id = parts[5]
-
 
         # Enable compression if any specific compression flag is set
         if (
@@ -936,44 +902,18 @@ class Mirror(TaskListener):
                 nextmsg.from_user = self.user
             else:
                 nextmsg.sender_chat = self.user
-            await Mirror(
-                self.client,
-                nextmsg,
-                self.is_qbit,
-                self.is_leech,
-                self.is_jd,
-                self.is_nzb,
-                self.same_dir,
-                self.bulk,
-                self.multi_tag,
-                self.options,
-            ).new_event()
+            await Mirror(self.client, nextmsg, self.is_qbit, self.is_leech, self.is_jd, self.is_nzb, self.same_dir, self.bulk, self.multi_tag, self.options).new_event()
             return await delete_links(self.message)
 
-        if reply_to:
-            file_ = (
-                reply_to.document
-                or reply_to.photo
-                or reply_to.video
-                or reply_to.audio
-                or reply_to.voice
-                or reply_to.video_note
-                or reply_to.sticker
-                or reply_to.animation
-                or None
-            )
+        if (
+            file_
+            and self.link
+            and not self.link.startswith(("http://", "https://", "magnet:", "ftp://"))
+        ):
+            if not self.name:
+                self.name = self.link
+            self.link = ""
 
-            if file_ is None:
-                if reply_text := reply_to.text:
-                    self.link = reply_text.split("\n", 1)[0].strip()
-                else:
-                    reply_to = None
-            elif reply_to.document and (
-                file_.mime_type == "application/x-bittorrent"
-                or file_.file_name.endswith((".torrent", ".dlc", ".nzb"))
-            ):
-                self.link = await reply_to.download()
-                file_ = None
         try:
             if (
                 self.link
@@ -1066,18 +1006,17 @@ class Mirror(TaskListener):
                 await self.remove_from_same_dir()
                 await delete_links(self.message)
                 return None
+
         if (
             not self.is_jd
-            and not self.is_qbit
             and not self.is_nzb
-            and not is_magnet(self.link)
+            and not self.is_qbit
             and not is_mega_link(self.link)
-            and not is_rclone_path(self.link)
             and not is_gdrive_link(self.link)
             and not is_gdrive_id(self.link)
-            and not self.link.endswith(".torrent")
+            and not is_rclone_path(self.link)
             and not await aiopath.exists(self.link)
-            and file_ is None
+            and not file_
         ):
             content_type = await get_content_type(self.link)
             if content_type and "x-bittorrent" in content_type:
@@ -1086,46 +1025,30 @@ class Mirror(TaskListener):
                 r"text/html|text/plain",
                 content_type,
             ):
-                resolver = TrueLinkResolver()
+                # Attempt TrueLink resolution first (if library is properly installed)
                 try:
-                    if resolver.is_supported(self.link):
-                        result = await resolver.resolve(self.link)
-                        if result:
-                            if isinstance(result, LinkResult):
-                                self.link = result.url
-                                if not self.name:
-                                    self.name = result.filename
-                                if result.headers:
-                                    headers = [
-                                        f"{k}: {v}" for k, v in result.headers.items()
-                                    ]
-                            elif isinstance(result, FolderResult):
-                                # Handle folder result and exit early
-                                await add_direct_download(self, path)
-                                await delete_links(self.message)
-                                return None
-                            else:
-                                self.link = result
-                except TrueLinkException as e:
-                    x = await send_message(self.message, e)
-                    await self.remove_from_same_dir()
-                    await delete_links(self.message)
-                    return await auto_delete_message(x, time=300)
+                    resolver = TrueLinkResolver()
+                    # Try different possible method names
+                    if hasattr(resolver, 'resolve'):
+                        res = await resolver.resolve(self.link)
+                    elif hasattr(resolver, 'get_direct_link'):
+                        res = await resolver.get_direct_link(self.link)
+                    elif hasattr(resolver, 'resolve_link'):
+                        res = await resolver.resolve_link(self.link)
+                    else:
+                        raise AttributeError("TrueLinkResolver has no known resolution method")
+                    
+                    if res and hasattr(res, 'url'):
+                        self.link = res.url
+                    elif isinstance(res, str):
+                        self.link = res
                 except Exception as e:
-                    LOGGER.error(f"Unexpected exception in resolver: {e}")
-                    x = await send_message(
-                        self.message, "An unexpected error occurred."
-                    )
-                    await self.remove_from_same_dir()
-                    await delete_links(self.message)
-                    return await auto_delete_message(x, time=300)
+                    # Non-critical: TrueLink is optional, continue with fallback
+                    LOGGER.debug(f"TrueLink resolution skipped: {e}")
 
                 # Fallback to direct_link_generator with improved error handling
-                # Only if resolver didn't handle it and link has proper protocol
-                if not resolver.is_supported(self.link) and (
-                    (self.link and ("://" in self.link or self.link.startswith("magnet:"))) 
-                    or is_magnet(self.link)
-                ):
+                # REQUIRE protocol or magnet
+                if (self.link and ("://" in self.link or self.link.startswith("magnet:"))) or is_magnet(self.link):
                     try:
                         from bot.helper.ext_utils.bot_utils import sync_to_async
                         res = await sync_to_async(direct_link_generator, self.link)
@@ -1185,7 +1108,7 @@ class Mirror(TaskListener):
                 await delete_links(self.message)
                 return None
 
-        # Route to appropriate download handler based on link/file type
+        # Start the appropriate downloader
         if file_ is not None:
             create_task(
                 TelegramDownloadHelper(self).add_download(
@@ -1194,12 +1117,14 @@ class Mirror(TaskListener):
                     session,
                 ),
             )
+            await delete_links(self.message)
+            return None
         elif self.is_jd:
             await add_jd_download(self, path)
-        elif self.is_qbit:
-            await add_qb_torrent(self, path, ratio, seed_time)
         elif self.is_nzb:
             await add_nzb(self, path)
+        elif self.is_qbit:
+            await add_qb_torrent(self, path, ratio, seed_time)
         elif is_mega_link(self.link):
             await add_mega_download(self, path)
         elif is_rclone_path(self.link):
@@ -1207,18 +1132,12 @@ class Mirror(TaskListener):
         elif is_gdrive_link(self.link) or is_gdrive_id(self.link):
             await add_gd_download(self, path)
         else:
-            # Direct download with optional authentication
-            ussr = args.get("-au")
-            pssw = args.get("-ap")
-            if ussr or pssw:
-                auth = f"{ussr}:{pssw}"
-                headers.extend([
-                    f"authorization: Basic {b64encode(auth.encode()).decode('ascii')}"
-                ])
-            await add_aria2_download(self, path, headers, ratio, seed_time)
+            await add_direct_download(self, path)
 
         await delete_links(self.message)
         return None
+
+
 
 async def mirror(client, message):
     bot_loop.create_task(Mirror(client, message).new_event())

@@ -122,7 +122,9 @@ def is_archive_split(file: str) -> bool:
 async def clean_target(path: str):
     """Removes the file or directory at the given path."""
     if await aiopath.exists(path):
-        LOGGER.info(f"Cleaning target: {path}")
+        mid = path.rsplit("/", 1)[-1]
+        mid_log = f"[{mid}] " if mid.isdigit() else ""
+        LOGGER.info(f"{mid_log}Cleaning target: {path}")
         try:
             if await aiopath.isdir(path):
                 await aiormtree(path, ignore_errors=True)
@@ -135,7 +137,9 @@ async def clean_target(path: str):
 async def clean_download(path: str):
     """Removes the downloaded file or directory at the given path."""
     if await aiopath.exists(path):
-        LOGGER.info(f"Cleaning download: {path}")
+        mid = path.rsplit("/", 1)[-1]
+        mid_log = f"[{mid}] " if mid.isdigit() else ""
+        LOGGER.info(f"{mid_log}Cleaning download: {path}")
         try:
             await aiormtree(path, ignore_errors=True)
         except Exception as e:
@@ -328,6 +332,14 @@ class SevenZ:
             except Exception:
                 break
             line = line.decode().strip()
+            if "%" in line:
+                perc = line.split("%", 1)[0]
+                if perc.isdigit():
+                    self._percentage = f"{perc}%"
+                    self._processed_bytes = (int(perc) / 100) * self._listener.subsize
+                else:
+                    self._percentage = "0%"
+                    continue
             if match := re_search(pattern, line):
                 self._listener.subsize = int(match[1] or match[2])
             await sleep(0.05)
