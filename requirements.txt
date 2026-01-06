@@ -8,8 +8,7 @@ aioqbt
 cloudscraper
 dnspython
 ElectroCrypto
-#kurigram
-pyrofork==2.2.11
+kurigram
 motor
 fastapi
 feedparser
@@ -23,7 +22,6 @@ langcodes
 lxml
 natsort
 pillow
-pycountry
 psutil
 pymongo
 pyshorteners
@@ -38,5 +36,6 @@ tenacity
 uvicorn
 uvloop
 xattr
-yt-dlp[default,curl-cffi]
+pycountry
 urllib3
+yt-dlp[default,curl-cffi]
