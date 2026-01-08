@@ -20,7 +20,7 @@ from bot.helper.ext_utils.bot_utils import (
 from bot.helper.ext_utils.bulk_links import extract_bulk_links
 from bot.helper.ext_utils.links_utils import is_url, is_telegram_link
 from bot.helper.ext_utils.media_utils import FFMpeg, get_media_info, get_codec_info
-from bot.helper.listeners.task_listener import TaskListener
+from bot.modules.task_base import TaskBase
 from bot.helper.mirror_leech_utils.download_utils.aria2_download import (
     add_aria2_download,
 )
@@ -37,17 +37,14 @@ from bot.helper.telegram_helper.message_utils import (
 )
 
 
-class Merge(TaskListener):
+class Merge(TaskBase):
     def __init__(self, client, message, **kwargs):
         self.message = message
         self.client = client
-        super().__init__()
+        super().__init__(client, message, **kwargs)
         self.is_leech = True
         self.is_merge = True
-        self.bulk = []
-        self.multi = 0
-        self.options = ""
-        self.same_dir = {}
+        # bulk, multi, options init in TaskBase
         self.same_dir = {}
         self.multi_tag = ""
         self.inputs = []
@@ -57,41 +54,38 @@ class Merge(TaskListener):
         self.name_subfix = ""
 
     async def new_event(self):
-        text = self.message.text.split("\n")
-        input_list = text[0].split(" ")
+        input_list = await self.parse_args()
+        if not input_list:
+             error_msg = "Invalid message format. Please make sure your message contains text."
+             error = await send_message(self.message, error_msg)
+             return await auto_delete_message(error, time=300)
+
         error_msg, error_button = await error_check(self.message)
         if error_msg:
             await delete_links(self.message)
             error = await send_message(self.message, error_msg, error_button)
             return await auto_delete_message(error, time=300)
 
-        args = {
-            "link": "",
-            "-i": 0,
-            "-n": "",
-            "-up": "",
-            "-rcf": "",
-            "-b": False,
-        }
-
-        arg_parser(input_list[1:], args)
-
+        args = self.args
         self.link = args["link"]
-        self.name = ""
+        self.name = "" # Name logic differs in Merge
         self.output_name = args["-n"]
         self.up_dest = args["-up"]
         self.rc_flags = args["-rcf"]
-        self.multi = args["-i"]
-        is_bulk = args["-b"]
+
+        is_bulk = self.is_bulk
         bulk_start = 0
         bulk_end = 0
 
-        if not isinstance(is_bulk, bool):
-            dargs = is_bulk.split(":")
+        # Handle string based bulk args if present
+        if isinstance(args["-b"], str):
+            dargs = str(args["-b"]).split(":")
             bulk_start = int(dargs[0]) if dargs[0] else 0
             if len(dargs) == 2:
                 bulk_end = int(dargs[1]) if dargs[1] else 0
             is_bulk = True
+        else:
+            is_bulk = bool(args["-b"])
 
         if not is_bulk:
             from bot.helper.ext_utils.bulk_links import extract_bulk_links
@@ -104,6 +98,8 @@ class Merge(TaskListener):
             return
 
         # Parse Inputs from text (Multiple links / Ranges)
+        text = self.message.text.split("\n") # Re-read for multiple lines
+
         for line in text:
              line = line.strip()
              if not line: continue
