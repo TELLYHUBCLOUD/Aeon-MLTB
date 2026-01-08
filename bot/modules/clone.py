@@ -19,8 +19,8 @@ from bot.helper.ext_utils.links_utils import (
     is_gdrive_link,
     is_rclone_path,
 )
+from bot.modules.task_base import TaskBase
 from bot.helper.ext_utils.task_manager import stop_duplicate_check
-from bot.helper.listeners.task_listener import TaskListener
 from bot.helper.mirror_leech_utils.gdrive_utils.clone import GoogleDriveClone
 from bot.helper.mirror_leech_utils.gdrive_utils.count import GoogleDriveCount
 from bot.helper.mirror_leech_utils.rclone_utils.transfer import RcloneTransferHelper
@@ -37,88 +37,54 @@ from bot.helper.telegram_helper.message_utils import (
 )
 
 
-class Clone(TaskListener):
+class Clone(TaskBase):
     def __init__(
         self,
         client,
         message,
-        bulk=None,
-        multi_tag=None,
-        options="",
-        auto_link=None,
-        auto_ff=None,
         **kwargs,
     ):
-        if bulk is None:
-            bulk = []
         self.message = message
         self.client = client
-        self.multi_tag = multi_tag
-        self.options = options
-        self.same_dir = {}
-        self.bulk = bulk
-        super().__init__()
+        super().__init__(client, message, **kwargs)
         self.is_clone = True
         
-            
-    async def get_tag(self, text: list): # Helper to make sure get_tag is available if missed inheritance
-         await super().get_tag(text) # Wait, it is in TaskListener/Config, should be fine.
-
+    async def get_tag(self, text: list):
+         await super().get_tag(text)
 
     async def new_event(self):
-        # Check if message text exists before trying to split it
-        if (
-            not self.message
-            or not hasattr(self.message, "text")
-            or self.message.text is None
-        ):
-            LOGGER.error(
-                "Message text is None or message doesn't have text attribute"
-            )
-            error_msg = "Invalid message format. Please make sure your message contains text."
-            error = await send_message(self.message, error_msg)
-            return await auto_delete_message(error, time=300)
+        input_list = await self.parse_args()
+        if not input_list:
+             error_msg = "Invalid message format. Please make sure your message contains text."
+             error = await send_message(self.message, error_msg)
+             return await auto_delete_message(error, time=300)
 
-        text = self.message.text.split("\n")
-        input_list = text[0].split(" ")
         error_msg, error_button = await error_check(self.message)
         if error_msg:
             await delete_links(self.message)
             error = await send_message(self.message, error_msg, error_button)
             return await auto_delete_message(error, time=300)
-        args = {
-            "link": "",
-            "-i": 0,
-            "-b": False,
-            "-n": "",
-            "-up": "",
-            "-rcf": "",
-            "-sync": False,
-        }
 
-        arg_parser(input_list[1:], args)
-
-        try:
-            self.multi = int(args["-i"])
-        except Exception:
-            self.multi = 0
-
-        self.up_dest = args["-up"]
-        self.rc_flags = args["-rcf"]
+        args = self.args
         self.link = args["link"]
         self.name = args["-n"]
-
-        is_bulk = args["-b"]
+        self.up_dest = args["-up"]
+        self.rc_flags = args["-rcf"]
         sync = args["-sync"]
+
+        is_bulk = self.is_bulk
         bulk_start = 0
         bulk_end = 0
 
-        if not isinstance(is_bulk, bool):
-            dargs = is_bulk.split(":")
+        # Handle string based bulk args if present
+        if isinstance(args["-b"], str):
+            dargs = str(args["-b"]).split(":")
             bulk_start = int(dargs[0]) if dargs[0] else 0
             if len(dargs) == 2:
                 bulk_end = int(dargs[1]) if dargs[1] else 0
             is_bulk = True
+        else:
+            is_bulk = bool(args["-b"])
 
         if not is_bulk:
             from bot.helper.ext_utils.bulk_links import extract_bulk_links
@@ -130,6 +96,8 @@ class Clone(TaskListener):
             await self.init_bulk(input_list, bulk_start, bulk_end, Clone)
             return None
 
+        # Re-read text for tag extraction if needed (or just pass split list)
+        text = self.message.text.split("\n")
         await self.get_tag(text)
 
         if not self.link and (reply_to := self.message.reply_to_message):
