@@ -57,6 +57,7 @@ class Clone(TaskListener):
         self.options = options
         self.same_dir = {}
         self.bulk = bulk
+        self.auto_link = auto_link
         super().__init__()
         self.is_clone = True
         
@@ -96,6 +97,11 @@ class Clone(TaskListener):
             "-sync": False,
         }
 
+        # Auto Link Injection
+        if self.auto_link:
+            if not any(x.startswith("http") or "magnet" in x for x in input_list):
+                input_list.append(self.auto_link)
+
         arg_parser(input_list[1:], args)
 
         try:
@@ -105,7 +111,7 @@ class Clone(TaskListener):
 
         self.up_dest = args["-up"]
         self.rc_flags = args["-rcf"]
-        self.link = args["link"]
+        self.link = self.auto_link or args["link"]
         self.name = args["-n"]
 
         is_bulk = args["-b"]
