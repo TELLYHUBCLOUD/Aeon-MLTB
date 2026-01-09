@@ -13,7 +13,7 @@ from pyrogram.filters import regex, user
 from secrets import token_hex
 from aioshutil import move, rmtree
 
-from bot import LOGGER, bot_loop, task_dict, task_dict_lock, multi_tags, intervals
+from bot import LOGGER, bot_loop, task_dict, task_dict_lock, multi_tags, intervals, user_data
 from bot.core.aeon_client import TgClient
 from bot.helper.aeon_utils.access_check import error_check
 from bot.helper.ext_utils.bot_utils import (
@@ -213,7 +213,23 @@ class EncodeSelection:
 
 
 class Encode(TaskListener):
-    def __init__(self, client, message, **kwargs):
+    def __init__(
+        self,
+        client,
+        message,
+        is_qbit=False,
+        is_leech=True,
+        auto_link=None,
+        same_dir=None,
+        bulk=None,
+        multi_tag=None,
+        options="",
+        **kwargs
+    ):
+        if same_dir is None:
+            same_dir = {}
+        if bulk is None:
+            bulk = []
         self.message = message
         self.client = client
         self.quality = ""
@@ -222,16 +238,24 @@ class Encode(TaskListener):
         self.audio_map = {}
         self.sub_map = {}
         self.has_metadata_selection = False
+        self.auto_link = auto_link
+        self.same_dir = same_dir
+        self.bulk = bulk
+        self.multi_tag = multi_tag
+        self.options = options
         super().__init__()
         self.is_leech = True
-
-        self.bulk = []
+        self.is_qbit = is_qbit
         self.multi = 0
-        self.options = ""
-        self.same_dir = {}
-        self.multi_tag = ""
+
+    def _ensure_user_dict(self):
+        if not hasattr(self, "user_dict") or self.user_dict is None:
+            user_id = self.message.from_user.id if self.message.from_user else ""
+            self.user_dict = user_data.get(user_id, {})
 
     async def new_event(self):
+        self._ensure_user_dict()
+
         text = self.message.text.split("\n")
         input_list = text[0].split(" ")
         error_msg, error_button = await error_check(self.message)
@@ -252,33 +276,14 @@ class Encode(TaskListener):
             "-b": False,
         }
 
+        # Auto Link Injection
+        if self.auto_link:
+            if not any(x.startswith("http") or "magnet" in x for x in input_list):
+                input_list.append(self.auto_link)
+
         arg_parser(input_list[1:], args)
 
-        self.link = args["link"]
-        self.multi = args["-i"]
-        is_bulk = args["-b"]
-        bulk_start = 0
-        bulk_end = 0
-
-        if not isinstance(is_bulk, bool):
-            dargs = is_bulk.split(":")
-            bulk_start = int(dargs[0]) if dargs[0] else 0
-            if len(dargs) == 2:
-                bulk_end = int(dargs[1]) if dargs[1] else 0
-            is_bulk = True
-
-        if not is_bulk:
-            from bot.helper.ext_utils.bulk_links import extract_bulk_links
-            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
-            if len(self.bulk) > 1:
-                is_bulk = True
-
-        if is_bulk:
-            await self.init_bulk(input_list, bulk_start, bulk_end, Encode)
-            return
-
-        await self.run_multi(input_list, Encode)
-
+        self.link = self.auto_link or args["link"]
         self.name = args["-n"]
         self.up_dest = args["-up"]
         self.rc_flags = args["-rcf"]
@@ -296,6 +301,12 @@ class Encode(TaskListener):
             if len(dargs) == 2:
                 bulk_end = int(dargs[1]) if dargs[1] else 0
             is_bulk = True
+
+        if not is_bulk:
+            from bot.helper.ext_utils.bulk_links import extract_bulk_links
+            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
+            if len(self.bulk) > 1:
+                is_bulk = True
 
         if is_bulk:
             await self.init_bulk(input_list, bulk_start, bulk_end, Encode)
@@ -328,7 +339,7 @@ class Encode(TaskListener):
         if len(all_links) > 1:
                 args["link"] = all_links[0]
                 for other_link in all_links[1:]:
-                    new_text = f"/leech {other_link} " + " ".join(input_list[1:])
+                    new_text = f"/encode {other_link} " + " ".join(input_list[1:])
                     new_msg = await self.client.get_messages(self.message.chat.id, self.message.id)
                     new_msg.text = new_text
                     bot_loop.create_task(Encode(self.client, new_msg).new_event())
@@ -347,32 +358,27 @@ class Encode(TaskListener):
                 if isinstance(reply_to, list):
                     # Multi Bulk from TG Link
                     self.bulk = reply_to
-                    # We need to process this bulk using init_bulk logic OR spawn tasks
-                    # existing init_bulk expects self.bulk to be set.
-                    # But init_bulk is for text/file inputs.
-                    # Let's just spawn for each item in list?
-                    # Or treat first as self.link?
-                    self.link = reply_to[0]
-                    # Spawn others
-                    for msg in reply_to[1:]:
-                         bot_loop.create_task(Encode(self.client, msg).new_event()) # THIS MIGHT FAIL if msg is Message object not event?
-                         # Encode expects client, message.
-                         # If we pass msg as message, safe? Yes.
-                    # BUT 'msg' is the media message. It doesn't have the command text.
-                    # This requires more complex bulk handling.
-                    # Leech uses Mirror(..., bulk=reply_to).
-                    # Encode has run_multi logic.
-                    # Let's simplify: process first, loop others.
-                    self.link = reply_to[0]
-                    for msg in reply_to[1:]:
-                        # We need to construct a task for this message.
-                        # Since it's already a message object, we can just instantiate Encode with it?
-                        # No, Encode relies on self.message.text options.
-                        # We should clone the options.
-                        # For simplicity, let's just use recursive loop with new_event if possible?
-                        # Or just ignore bulk link expansion for now and handle SINGLE recursive link?
-                        # The user wants "like leech". Leech spawns new Mirror instance with bulk list.
-                        pass
+                    b_msg = input_list[:1]
+                    self.options = " ".join(input_list[1:])
+                    # Handle bulk properly
+                    b_msg.append(f"{self.bulk[0]} -i {len(self.bulk)} {self.options}")
+                    nextmsg = await send_message(self.message, " ".join(b_msg))
+                    nextmsg = await self.client.get_messages(chat_id=self.message.chat.id, message_ids=nextmsg.id)
+                    if self.message.from_user:
+                        nextmsg.from_user = self.message.from_user
+                    else:
+                        nextmsg.sender_chat = self.message.sender_chat
+                    await Encode(
+                        self.client,
+                        nextmsg,
+                        is_qbit=self.is_qbit,
+                        is_leech=self.is_leech,
+                        same_dir=self.same_dir,
+                        bulk=self.bulk,
+                        multi_tag=self.multi_tag,
+                        options=self.options
+                    ).new_event()
+                    return await delete_links(self.message)
                 elif reply_to:
                     self.link = reply_to
             except Exception as e:
