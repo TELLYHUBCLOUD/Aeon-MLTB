@@ -255,7 +255,13 @@ class Encode(TaskListener):
         arg_parser(input_list[1:], args)
 
         self.link = args["link"]
-        self.multi = args["-i"]
+        self.name = args["-n"]
+        self.up_dest = args["-up"]
+        self.rc_flags = args["-rcf"]
+        self.quality = args["-q"]
+        self.remove_audio = args["-an"]
+        self.remove_subs = args["-sn"]
+        self.multi = int(args["-i"])
         is_bulk = args["-b"]
         bulk_start = 0
         bulk_end = 0
@@ -277,63 +283,10 @@ class Encode(TaskListener):
             await self.init_bulk(input_list, bulk_start, bulk_end, Encode)
             return
 
-        await self.run_multi(input_list, Encode)
-
-        self.name = args["-n"]
-        self.up_dest = args["-up"]
-        self.rc_flags = args["-rcf"]
-        self.quality = args["-q"]
-        self.remove_audio = args["-an"]
-        self.remove_subs = args["-sn"]
-        self.multi = int(args["-i"])
-        is_bulk = args["-b"]
-        bulk_start = 0
-        bulk_end = 0
-
-        if not isinstance(is_bulk, bool):
-            dargs = is_bulk.split(":")
-            bulk_start = int(dargs[0]) if dargs[0] else 0
-            if len(dargs) == 2:
-                bulk_end = int(dargs[1]) if dargs[1] else 0
-            is_bulk = True
-
-        if is_bulk:
-            await self.init_bulk(input_list, bulk_start, bulk_end, Encode)
-            return
-
         if len(self.bulk) != 0:
             del self.bulk[0]
 
         await self.run_multi(input_list, Encode)
-
-        # MULTI-LINK / RANGE CHECK
-        all_links = []
-        for line in text:
-            line = line.strip()
-            if not line: continue
-            # Check TG Range
-            if isinstance(line, str) and is_telegram_link(line):
-                match = re_search(r"(https?://t\.me/(?:c/)?(?:[\w\d]+)/)(\d+)-(\d+)", line)
-                if match:
-                    base = match.group(1)
-                    start = int(match.group(2))
-                    end = int(match.group(3))
-                    if start <= end:
-                        for i in range(start, end + 1):
-                            all_links.append(f"{base}{i}")
-                    continue
-            if is_url(line) or (isinstance(line, str) and is_telegram_link(line)):
-                all_links.append(line)
-        
-        if len(all_links) > 1:
-                args["link"] = all_links[0]
-                for other_link in all_links[1:]:
-                    new_text = f"/leech {other_link} " + " ".join(input_list[1:])
-                    new_msg = await self.client.get_messages(self.message.chat.id, self.message.id)
-                    new_msg.text = new_text
-                    bot_loop.create_task(Encode(self.client, new_msg).new_event())
-                
-                self.link = all_links[0]
 
         if not self.link and (reply_to := self.message.reply_to_message):
             if reply_to.document or reply_to.video or reply_to.audio:

@@ -1,3 +1,4 @@
+from re import search as re_search
 from aiofiles import open as aiopen
 from aiofiles.os import remove
 
@@ -43,6 +44,18 @@ def get_links_from_message(text: str) -> list:
         line = line.strip()
         if not line or line.startswith("/"):
             continue
+
+        if is_telegram_link(line):
+            match = re_search(r"(https?://t\.me/(?:c/)?(?:[\w\d]+)/)(\d+)-(\d+)", line)
+            if match:
+                base = match.group(1)
+                start = int(match.group(2))
+                end = int(match.group(3))
+                if start <= end:
+                    for i in range(start, end + 1):
+                        valid_links.append(f"{base}{i}")
+                continue
+
         # Split by space in case multiple links are on one line (though Usually it's one per line for bulk)
         parts = line.split()
         for part in parts:

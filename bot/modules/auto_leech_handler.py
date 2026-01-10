@@ -43,16 +43,12 @@ async def auto_leech_handler(client, message):
         # Encode implementation requires different handling usually
         # But based on request, we trigger /encode
         cmd = "encode"
+        message.text = f"/{cmd} {text}"
         # Encode command usually needs more args, but simplistic handling here:
         await Encode(
             client,
             message,
-        ).new_event() 
-        # Note: Encode class needs to be imported and might differ in instantiation
-        # Let's verify Encode class usage in a bit. 
-        # For now, assuming standard TaskListener pattern if applicable or simple command injection
-        # Actually message.text modification is needed for standard listeners usually
-        message.text = f"/{cmd} {text}"
+        ).new_event()
     elif is_mirror:
         cmd = user_dict.get("AUTO_MIRROR_CMD") or Config.AUTO_MIRROR_CMD or "mirror"
         message.text = f"/{cmd} {text}"
