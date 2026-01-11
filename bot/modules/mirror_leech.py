@@ -67,7 +67,6 @@ from bot.helper.telegram_helper.message_utils import (
     send_message,
 )
 from bot.modules.media_tools import show_media_tools_for_task
-from bot.modules.clone import Clone
 
 class Mirror(TaskListener):
     def __init__(

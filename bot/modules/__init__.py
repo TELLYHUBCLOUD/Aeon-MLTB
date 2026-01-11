@@ -11,7 +11,6 @@ from .gd_count import count_node
 from .gd_delete import delete_file
 from .gd_search import gdrive_search, select_type
 from .help import arg_usage, bot_help
-from .help import arg_usage, bot_help
 from .mediainfo import mediainfo
 from .merge import merge, merge_done, merge_session_handler
 from .auto_leech_handler import auto_leech_handler
@@ -39,8 +38,6 @@ from .stats import bot_stats, get_packages_version
 from .status import status_pages, task_status
 from .terabox import terabox_handler
 from .users_settings import (
-    edit_user_settings,
-    get_users_settings,
     edit_user_settings,
     get_users_settings,
     send_user_settings,
