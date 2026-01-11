@@ -1,5 +1,5 @@
 # ruff: noqa: RUF006
-from asyncio import create_task, sleep
+from asyncio import create_task
 from base64 import b64encode
 from re import match as re_match
 
@@ -67,7 +67,6 @@ from bot.helper.telegram_helper.message_utils import (
     send_message,
 )
 from bot.modules.media_tools import show_media_tools_for_task
-from bot.modules.clone import Clone
 
 class Mirror(TaskListener):
     def __init__(
@@ -1229,6 +1228,4 @@ async def nzb_leech(client, message):
 
 async def md_leech_node(client, message):
     await handle_mirror_command(client, message, is_leech=True, is_md_leech=True)
-
-
 
