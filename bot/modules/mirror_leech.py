@@ -276,6 +276,9 @@ class Mirror(TaskListener):
             "-lulu": False,
             "-buz": False,
             "-pix": False,
+            "-q": "",
+            "-an": False,
+            "-sn": False,
         }
 
         # AUTO LEECH + AUTO COMPRESS CMD

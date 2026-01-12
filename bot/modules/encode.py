@@ -1,21 +1,19 @@
 from asyncio import create_task, Event, wait_for, sleep
-from os import path as ospath, walk
+from os import path as ospath, walk, makedirs
 from time import time
 from functools import partial
 import json
 
 from aiofiles.os import path as aiopath
-from aiofiles.os import remove, listdir
-from bot.helper.ext_utils.files_utils import get_path_size
+from aiofiles.os import remove, listdir, remove as aioremove
+from aiofiles import open as aiopen
+from aioshutil import move, rmtree
 from pyrogram.handlers import CallbackQueryHandler
 from pyrogram.filters import regex, user
+from re import search as re_search
 
-from secrets import token_hex
-from aioshutil import move, rmtree
-
-from bot import LOGGER, bot_loop, task_dict, task_dict_lock, multi_tags, intervals
+from bot import LOGGER, bot_loop, task_dict, task_dict_lock
 from bot.core.aeon_client import TgClient
-from bot.helper.aeon_utils.access_check import error_check
 from bot.helper.ext_utils.bot_utils import (
     COMMAND_USAGE,
     arg_parser,
@@ -23,16 +21,9 @@ from bot.helper.ext_utils.bot_utils import (
     cmd_exec,
     sync_to_async,
 )
-from bot.helper.ext_utils.bulk_links import extract_bulk_links
-from bot.helper.ext_utils.media_utils import FFMpeg, get_remote_media_info
-from bot.helper.ext_utils.status_utils import get_readable_file_size, get_readable_time
-from bot.helper.listeners.task_listener import TaskListener
-from bot.helper.mirror_leech_utils.download_utils.aria2_download import (
-    add_aria2_download,
-)
-from bot.helper.mirror_leech_utils.download_utils.direct_downloader import (
-    add_direct_download,
-)
+from bot.helper.ext_utils.files_utils import get_path_size
+from bot.helper.ext_utils.media_utils import FFMpeg, get_remote_media_info, get_streams
+from bot.helper.ext_utils.status_utils import get_readable_time
 from bot.helper.mirror_leech_utils.status_utils.ffmpeg_status import FFmpegStatus
 from bot.helper.telegram_helper.message_utils import (
     auto_delete_message,
@@ -44,9 +35,9 @@ from bot.helper.telegram_helper.message_utils import (
     get_tg_link_message,
 )
 from bot.helper.ext_utils.links_utils import is_url, is_telegram_link
-from re import search as re_search
 from bot.helper.telegram_helper.button_build import ButtonMaker
-from bot.helper.ext_utils.bot_utils import new_task, cmd_exec
+from bot.modules.mirror_leech import Mirror
+from bot import DOWNLOAD_DIR
 
 
 @new_task
@@ -212,203 +203,65 @@ class EncodeSelection:
         await edit_message(self._reply_to, "Select Quality", markup)
 
 
-class Encode(TaskListener):
+class Encode(Mirror):
     def __init__(self, client, message, **kwargs):
-        self.message = message
-        self.client = client
+        super().__init__(client, message, is_enc=True, is_leech=True, **kwargs)
         self.quality = ""
         self.remove_audio = False
         self.remove_subs = False
         self.audio_map = {}
         self.sub_map = {}
         self.has_metadata_selection = False
-        super().__init__()
-        self.is_leech = True
+        self.rc_flags = ""
 
-        self.bulk = []
-        self.multi = 0
-        self.options = ""
-        self.same_dir = {}
-        self.multi_tag = ""
-
-    async def new_event(self):
+    async def before_start(self):
+        # Parse Encode specific arguments that Mirror might miss or doesn't handle specifically
         text = self.message.text.split("\n")
         input_list = text[0].split(" ")
-        error_msg, error_button = await error_check(self.message)
-        if error_msg:
-            await delete_links(self.message)
-            error = await send_message(self.message, error_msg, error_button)
-            return await auto_delete_message(error, time=300)
 
         args = {
-            "link": "",
-            "-i": 0,
-            "-n": "",
-            "-up": "",
-            "-rcf": "",
             "-q": "",
             "-an": False,
             "-sn": False,
-            "-b": False,
+            "-rcf": "",
         }
 
         arg_parser(input_list[1:], args)
 
-        self.link = args["link"]
-        self.multi = args["-i"]
-        is_bulk = args["-b"]
-        bulk_start = 0
-        bulk_end = 0
-
-        if not isinstance(is_bulk, bool):
-            dargs = is_bulk.split(":")
-            bulk_start = int(dargs[0]) if dargs[0] else 0
-            if len(dargs) == 2:
-                bulk_end = int(dargs[1]) if dargs[1] else 0
-            is_bulk = True
-
-        if not is_bulk:
-            from bot.helper.ext_utils.bulk_links import extract_bulk_links
-            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
-            if len(self.bulk) > 1:
-                is_bulk = True
-
-        if is_bulk:
-            await self.init_bulk(input_list, bulk_start, bulk_end, Encode)
-            return
-
-        await self.run_multi(input_list, Encode)
-
-        self.name = args["-n"]
-        self.up_dest = args["-up"]
-        self.rc_flags = args["-rcf"]
         self.quality = args["-q"]
         self.remove_audio = args["-an"]
         self.remove_subs = args["-sn"]
-        self.multi = int(args["-i"])
-        is_bulk = args["-b"]
-        bulk_start = 0
-        bulk_end = 0
+        self.rc_flags = args["-rcf"]
 
-        if not isinstance(is_bulk, bool):
-            dargs = is_bulk.split(":")
-            bulk_start = int(dargs[0]) if dargs[0] else 0
-            if len(dargs) == 2:
-                bulk_end = int(dargs[1]) if dargs[1] else 0
-            is_bulk = True
-
-        if is_bulk:
-            await self.init_bulk(input_list, bulk_start, bulk_end, Encode)
-            return
-
-        if len(self.bulk) != 0:
-            del self.bulk[0]
-
-        await self.run_multi(input_list, Encode)
-
-        # MULTI-LINK / RANGE CHECK
-        all_links = []
-        for line in text:
-            line = line.strip()
-            if not line: continue
-            # Check TG Range
-            if isinstance(line, str) and is_telegram_link(line):
-                match = re_search(r"(https?://t\.me/(?:c/)?(?:[\w\d]+)/)(\d+)-(\d+)", line)
-                if match:
-                    base = match.group(1)
-                    start = int(match.group(2))
-                    end = int(match.group(3))
-                    if start <= end:
-                        for i in range(start, end + 1):
-                            all_links.append(f"{base}{i}")
-                    continue
-            if is_url(line) or (isinstance(line, str) and is_telegram_link(line)):
-                all_links.append(line)
-        
-        if len(all_links) > 1:
-                args["link"] = all_links[0]
-                for other_link in all_links[1:]:
-                    new_text = f"/leech {other_link} " + " ".join(input_list[1:])
-                    new_msg = await self.client.get_messages(self.message.chat.id, self.message.id)
-                    new_msg.text = new_text
-                    bot_loop.create_task(Encode(self.client, new_msg).new_event())
-                
-                self.link = all_links[0]
-
-        if not self.link and (reply_to := self.message.reply_to_message):
-            if reply_to.document or reply_to.video or reply_to.audio:
-                self.link = reply_to
-            elif reply_to.text:
-                self.link = reply_to.text.split("\n", 1)[0].strip()
-
-        if isinstance(self.link, str) and is_telegram_link(self.link):
-            try:
-                reply_to, session = await get_tg_link_message(self.link, self.message.from_user.id)
-                if isinstance(reply_to, list):
-                    # Multi Bulk from TG Link
-                    self.bulk = reply_to
-                    # We need to process this bulk using init_bulk logic OR spawn tasks
-                    # existing init_bulk expects self.bulk to be set.
-                    # But init_bulk is for text/file inputs.
-                    # Let's just spawn for each item in list?
-                    # Or treat first as self.link?
-                    self.link = reply_to[0]
-                    # Spawn others
-                    for msg in reply_to[1:]:
-                         bot_loop.create_task(Encode(self.client, msg).new_event()) # THIS MIGHT FAIL if msg is Message object not event?
-                         # Encode expects client, message.
-                         # If we pass msg as message, safe? Yes.
-                    # BUT 'msg' is the media message. It doesn't have the command text.
-                    # This requires more complex bulk handling.
-                    # Leech uses Mirror(..., bulk=reply_to).
-                    # Encode has run_multi logic.
-                    # Let's simplify: process first, loop others.
-                    self.link = reply_to[0]
-                    for msg in reply_to[1:]:
-                        # We need to construct a task for this message.
-                        # Since it's already a message object, we can just instantiate Encode with it?
-                        # No, Encode relies on self.message.text options.
-                        # We should clone the options.
-                        # For simplicity, let's just use recursive loop with new_event if possible?
-                        # Or just ignore bulk link expansion for now and handle SINGLE recursive link?
-                        # The user wants "like leech". Leech spawns new Mirror instance with bulk list.
-                        pass
-                elif reply_to:
-                    self.link = reply_to
-            except Exception as e:
-                await send_message(self.message, f"ERROR: {e}")
-                return
-
-        if not self.link:
-             await send_message(
-                self.message,
-                COMMAND_USAGE["encode"][0],
-                COMMAND_USAGE["encode"][1],
-            )
-             return
-
-        LOGGER.info(f"Encode Request: Link: {self.link}")
-
-        await self.get_tag(text) 
-        
         # === PRE-DOWNLOAD METADATA STEP ===
         streams = []
         is_remote_successful = False
         
-        if (isinstance(self.link, str) and is_url(self.link)) or hasattr(self.link, "document") or hasattr(self.link, "video") or hasattr(self.link, "audio"):
+        # Determine the link or file source. Mirror sets self.link, but if it's a file reply, it might be empty string or path
+        # Mirror logic for link resolution happens BEFORE before_start() in new_event
+        # So self.link should be set, or we handle file reply.
+
+        target_link = self.link
+        reply_to = self.message.reply_to_message
+
+        # If Mirror set self.link to a path (e.g. from local file check), handle that?
+        # But for Encode we usually want to fetch metadata first.
+
+        # If it's a telegram file reply, Mirror might have set self.link to "" but set 'file_' internally.
+        # But 'file_' is a local var in new_event.
+        # However, we can re-check reply_to.
+
+        if (isinstance(target_link, str) and is_url(target_link)) or \
+           (reply_to and (reply_to.document or reply_to.video or reply_to.audio)):
+
             wait_msg = await send_message(self.message, "⏳ Fetching Metadata...")
-            if isinstance(self.link, str) and is_url(self.link):
-                streams = await get_remote_media_info(self.link)
-            else:
+
+            if isinstance(target_link, str) and is_url(target_link):
+                streams = await get_remote_media_info(target_link)
+            elif reply_to:
                 # Telegram media (Message object)
-                media = self.link.document or self.link.video or self.link.audio
+                media = reply_to.document or reply_to.video or reply_to.audio
                 if media:
-                    from os import makedirs
-                    from bot import DOWNLOAD_DIR
-                    from bot.helper.ext_utils.media_utils import get_streams
-                    from aiofiles import open as aiopen
-                    from aiofiles.os import remove as aioremove
-                    
                     path = f"{DOWNLOAD_DIR}Metadata/"
                     if not await aiopath.isdir(path):
                         await sync_to_async(makedirs, path, exist_ok=True)
@@ -449,8 +302,7 @@ class Encode(TaskListener):
         qual, map1, map2 = await selector.get_selection()
 
         if qual is None: # Cancelled
-            await send_message(self.message, "Task Cancelled.")
-            return
+            raise Exception("Task Cancelled")
 
         # Store Selection
         if streams:
@@ -464,35 +316,8 @@ class Encode(TaskListener):
             self.remove_subs = map2
             self.has_metadata_selection = False
 
-        try:
-             await self.before_start()
-        except Exception as e:
-            await send_message(self.message, e)
-            return
+        await super().before_start()
 
-        await self._proceed_to_download()
-
-    async def _proceed_to_download(self):
-        from bot.helper.mirror_leech_utils.download_utils.telegram_download import (
-            TelegramDownloadHelper,
-        )
-        
-        path = f"{self.dir}/"
-        
-        if hasattr(self.link, "download"):
-             # Telegram file
-            create_task(
-                TelegramDownloadHelper(self).add_download(
-                    self.message.reply_to_message,
-                    path,
-                    self.client,
-                ),
-            )
-        elif is_url(self.link):
-             create_task(add_aria2_download(self, path, [], None, None))
-        else:
-             await send_message(self.message, "Invalid input for encode.")
-             return
              
     async def on_download_complete(self):
         # Walk to find the largest video file
@@ -664,9 +489,5 @@ class Encode(TaskListener):
 
 
 async def encode(client, message):
-    from bot.helper.ext_utils.bulk_links import extract_bulk_links
-    bulk = await extract_bulk_links(message, "0", "0")
-    if len(bulk) > 1:
-        await Encode(client, message).init_bulk(message.text.split("\n")[0].split(), 0, 0, Encode)
-    else:
-        bot_loop.create_task(Encode(client, message).new_event())
+    from bot.modules.mirror_leech import handle_mirror_command
+    await handle_mirror_command(client, message, is_enc=True, is_leech=True)
