@@ -1,6 +1,7 @@
 from aiofiles import open as aiopen
 from aiofiles.os import remove
-
+from re import search as re_search
+from bot.helper.ext_utils.links_utils import is_telegram_link
 
 def filter_links(links_list: list, bulk_start: int, bulk_end: int) -> list:
     """
@@ -43,6 +44,19 @@ def get_links_from_message(text: str) -> list:
         line = line.strip()
         if not line or line.startswith("/"):
             continue
+
+        # Check TG Range first (one per line usually)
+        if is_telegram_link(line):
+            match = re_search(r"(https?://t\.me/(?:c/)?(?:[\w\d]+)/)(\d+)-(\d+)", line)
+            if match:
+                base = match.group(1)
+                start = int(match.group(2))
+                end = int(match.group(3))
+                if start <= end:
+                    for i in range(start, end + 1):
+                        valid_links.append(f"{base}{i}")
+                continue
+
         # Split by space in case multiple links are on one line (though Usually it's one per line for bulk)
         parts = line.split()
         for part in parts:
@@ -66,7 +80,23 @@ async def get_links_from_file(message) -> list:
     text_file_dir = await message.download()
     async with aiopen(text_file_dir, "r+") as f:
         lines = await f.readlines()
-        links_list.extend(line.strip() for line in lines if len(line) != 0)
+        for line in lines:
+            line = line.strip()
+            if not line: continue
+
+            # Check TG Range
+            if is_telegram_link(line):
+                match = re_search(r"(https?://t\.me/(?:c/)?(?:[\w\d]+)/)(\d+)-(\d+)", line)
+                if match:
+                    base = match.group(1)
+                    start = int(match.group(2))
+                    end = int(match.group(3))
+                    if start <= end:
+                        for i in range(start, end + 1):
+                            links_list.append(f"{base}{i}")
+                    continue
+            links_list.append(line)
+
     await remove(text_file_dir)
     return links_list
 
