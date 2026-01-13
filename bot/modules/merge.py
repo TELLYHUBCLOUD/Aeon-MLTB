@@ -15,9 +15,9 @@ from bot.helper.ext_utils.bot_utils import (
     COMMAND_USAGE,
     arg_parser,
     sync_to_async,
+    task_init_helper,
 )
 
-from bot.helper.ext_utils.bulk_links import extract_bulk_links
 from bot.helper.ext_utils.links_utils import is_url, is_telegram_link
 from bot.helper.ext_utils.media_utils import FFMpeg, get_media_info, get_codec_info
 from bot.helper.listeners.task_listener import TaskListener
@@ -44,12 +44,11 @@ class Merge(TaskListener):
         super().__init__()
         self.is_leech = True
         self.is_merge = True
-        self.bulk = []
-        self.multi = 0
-        self.options = ""
-        self.same_dir = {}
-        self.same_dir = {}
-        self.multi_tag = ""
+        self.bulk = kwargs.get("bulk", [])
+        self.multi = kwargs.get("multi", 0)
+        self.options = kwargs.get("options", "")
+        self.same_dir = kwargs.get("same_dir", {})
+        self.multi_tag = kwargs.get("multi_tag", "")
         self.inputs = []
         self.total_batch_files = 0
         self.current_batch_files = 0
@@ -57,53 +56,27 @@ class Merge(TaskListener):
         self.name_subfix = ""
 
     async def new_event(self):
-        text = self.message.text.split("\n")
-        input_list = text[0].split(" ")
-        error_msg, error_button = await error_check(self.message)
-        if error_msg:
-            await delete_links(self.message)
-            error = await send_message(self.message, error_msg, error_button)
-            return await auto_delete_message(error, time=300)
+        args, input_list, is_bulk, bulk_links = await task_init_helper(self.message, self.client)
+        if args is None:
+            return
 
-        args = {
-            "link": "",
-            "-i": 0,
-            "-n": "",
-            "-up": "",
-            "-rcf": "",
-            "-b": False,
-        }
-
-        arg_parser(input_list[1:], args)
-
+        self.bulk = bulk_links
         self.link = args["link"]
         self.name = ""
         self.output_name = args["-n"]
         self.up_dest = args["-up"]
         self.rc_flags = args["-rcf"]
         self.multi = args["-i"]
-        is_bulk = args["-b"]
-        bulk_start = 0
-        bulk_end = 0
-
-        if not isinstance(is_bulk, bool):
-            dargs = is_bulk.split(":")
-            bulk_start = int(dargs[0]) if dargs[0] else 0
-            if len(dargs) == 2:
-                bulk_end = int(dargs[1]) if dargs[1] else 0
-            is_bulk = True
-
-        if not is_bulk:
-            from bot.helper.ext_utils.bulk_links import extract_bulk_links
-            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
-            if len(self.bulk) > 1:
-                is_bulk = True
 
         if is_bulk:
-            await self.init_bulk(input_list, bulk_start, bulk_end, Merge)
+            await self.init_bulk(input_list, 0, 0, Merge)
             return
 
         # Parse Inputs from text (Multiple links / Ranges)
+        # task_init_helper already splits lines for basic command parsing, but Merge iterates ALL lines for links
+        # Merge supports mixed inputs in one message?
+        text = self.message.text.split("\n")
+
         for line in text:
              line = line.strip()
              if not line: continue
@@ -128,6 +101,8 @@ class Merge(TaskListener):
                 self.inputs.append(reply_to)
 
         if not self.inputs and self.link:
+             # If self.link was populated by task_init_helper (first link found)
+             # but we want to handle ranges here specifically for inputs list
              if is_telegram_link(self.link):
                  match = re.search(r"(https?://t\.me/(?:c/)?(?:[\w\d]+)/)(\d+)-(\d+)", self.link)
                  if match:
@@ -413,11 +388,6 @@ class Merge(TaskListener):
             total_duration += duration
         
         res = await ffmpeg.metadata_watermark_cmds(cmd, output_file, total_duration) 
-        # Note: metadata_watermark_cmds uses get_media_info on "f_path" argument to set total_time.
-        # But output_file doesn't exist yet!
-        # This might cause FFMpegStatus to have 0 total time / progress issues.
-        # But we can't get total time of concat input easily without probing all files.
-        # We can sum up duration of inputs?
         
         if res:
              # Cleanup inputs
