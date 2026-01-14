@@ -12,6 +12,7 @@ from bot import DOWNLOAD_DIR, LOGGER, bot_loop, task_dict_lock, user_data
 from bot.core.aeon_client import TgClient
 from bot.core.config_manager import Config
 from bot.helper.aeon_utils.access_check import error_check
+from bot.helper.ext_utils.task_utils import task_init_helper
 from bot.helper.ext_utils.bot_utils import (
     COMMAND_USAGE,
     arg_parser,
@@ -121,28 +122,8 @@ class Mirror(TaskListener):
     async def new_event(self):
         # Ensure user_dict is never None to prevent AttributeError
         self._ensure_user_dict()
-
-        # Check if message text exists before trying to split it
-        if (
-            not self.message
-            or not hasattr(self.message, "text")
-            or self.message.text is None
-        ):
-            LOGGER.error(
-                "Message text is None or message doesn't have text attribute"
-            )
-            error_msg = "Invalid message format. Please make sure your message contains text."
-            error = await send_message(self.message, error_msg)
-            return await auto_delete_message(error, time=300)
-
-        text = self.message.text.split("\n")
-        input_list = text[0].split(" ")
-        error_msg, error_button = await error_check(self.message)
-        if error_msg:
-            await delete_links(self.message)
-            error = await send_message(self.message, error_msg, error_button)
-            return await auto_delete_message(error, time=300)
         user_id = self.user_id
+
         args = {
             "-doc": False,
             "-med": False,
@@ -281,17 +262,25 @@ class Mirror(TaskListener):
         # AUTO LEECH + AUTO COMPRESS CMD
         if self.auto_link:
             # Inject link if not present (Auto Leech)
-            if not any(x.startswith("http") or "magnet" in x for x in input_list):
-                input_list.append(self.auto_link)
+            # We need to inject this BEFORE task_init_helper, so we need to manually modify message text?
+            # Or just append to input_list? task_init_helper parses text.
+            # self.message.text might need to be modified.
+            text_split = self.message.text.split()
+            if not any(x.startswith("http") or "magnet" in x for x in text_split):
+                self.message.text += f" {self.auto_link}"
 
         # Check if user provided -ff
-        user_ff = any(item.strip() == "-ff" for item in input_list)
-        if not user_ff and self.auto_ff:
-            # Append auto FFmpeg args
-            input_list.extend(self.auto_ff.split())
+        if self.auto_ff:
+            text_split = self.message.text.split()
+            user_ff = any(item.strip() == "-ff" for item in text_split)
+            if not user_ff:
+                self.message.text += f" {self.auto_ff}"
 
-        # Parse arguments from the command
-        arg_parser(input_list[1:], args)
+        start = await task_init_helper(self, args)
+        if not start:
+            return
+
+        input_list, text = start
 
         # Check if media tools flags are enabled
         from bot.helper.ext_utils.bot_utils import is_flag_enabled
@@ -618,10 +607,7 @@ class Mirror(TaskListener):
         headers = args["-h"]
         if headers:
             headers = headers.split("|")
-        is_bulk = args["-b"]
 
-        bulk_start = 0
-        bulk_end = 0
         ratio = None
         seed_time = None
         reply_to = None
@@ -787,62 +773,33 @@ class Mirror(TaskListener):
                 seed_time = dargs[1] or None
             self.seed = True
 
-        if not isinstance(is_bulk, bool):
-            dargs = is_bulk.split(":")
-            bulk_start = int(dargs[0]) if dargs[0] else 0
-            if len(dargs) == 2:
-                bulk_end = int(dargs[1]) if dargs[1] else 0
-            is_bulk = True
-
-        # Check if bulk operations are enabled in the configuration
-        if is_bulk and not Config.BULK_ENABLED:
-            await send_message(
-                self.message, "❌ Bulk operations are disabled by the administrator."
-            )
-            is_bulk = False
-
-
-        # Extract bulk links if not already populated and not explicitly set as bulk
-        if not is_bulk and len(self.bulk) == 0:
-            from bot.helper.ext_utils.bulk_links import extract_bulk_links
-            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
-            LOGGER.info(f"Extracted {len(self.bulk)} bulk links")
-            if len(self.bulk) > 1:
-                is_bulk = True
-
-
-        if not is_bulk:
-            if self.multi > 0:
-                if self.folder_name:
-                    async with task_dict_lock:
-                        if self.folder_name in self.same_dir:
-                            self.same_dir[self.folder_name]["tasks"].add(self.mid)
-                            for fd_name in self.same_dir:
-                                if fd_name != self.folder_name:
-                                    self.same_dir[fd_name]["total"] -= 1
-                        elif self.same_dir:
-                            self.same_dir[self.folder_name] = {
+        if self.multi > 0:
+            if self.folder_name:
+                async with task_dict_lock:
+                    if self.folder_name in self.same_dir:
+                        self.same_dir[self.folder_name]["tasks"].add(self.mid)
+                        for fd_name in self.same_dir:
+                            if fd_name != self.folder_name:
+                                self.same_dir[fd_name]["total"] -= 1
+                    elif self.same_dir:
+                        self.same_dir[self.folder_name] = {
+                            "total": self.multi,
+                            "tasks": {self.mid},
+                        }
+                        for fd_name in self.same_dir:
+                            if fd_name != self.folder_name:
+                                self.same_dir[fd_name]["total"] -= 1
+                    else:
+                        self.same_dir = {
+                            self.folder_name: {
                                 "total": self.multi,
                                 "tasks": {self.mid},
-                            }
-                            for fd_name in self.same_dir:
-                                if fd_name != self.folder_name:
-                                    self.same_dir[fd_name]["total"] -= 1
-                        else:
-                            self.same_dir = {
-                                self.folder_name: {
-                                    "total": self.multi,
-                                    "tasks": {self.mid},
-                                },
-                            }
-                elif self.same_dir:
-                    async with task_dict_lock:
-                        for fd_name in self.same_dir:
-                            self.same_dir[fd_name]["total"] -= 1
-        else:
-            await self.init_bulk(input_list, bulk_start, bulk_end, Mirror)
-            return None
-
+                            },
+                        }
+            elif self.same_dir:
+                async with task_dict_lock:
+                    for fd_name in self.same_dir:
+                        self.same_dir[fd_name]["total"] -= 1
         if len(self.bulk) != 0:
             del self.bulk[0]
 
