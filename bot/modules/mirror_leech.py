@@ -18,6 +18,7 @@ from bot.helper.ext_utils.bot_utils import (
     get_content_type,
     new_task,
 )
+from bot.helper.ext_utils.task_utils import task_init_helper
 from bot.helper.ext_utils.links_utils import (
     is_gdrive_id,
     is_gdrive_link,
@@ -122,26 +123,10 @@ class Mirror(TaskListener):
         # Ensure user_dict is never None to prevent AttributeError
         self._ensure_user_dict()
 
-        # Check if message text exists before trying to split it
-        if (
-            not self.message
-            or not hasattr(self.message, "text")
-            or self.message.text is None
-        ):
-            LOGGER.error(
-                "Message text is None or message doesn't have text attribute"
-            )
-            error_msg = "Invalid message format. Please make sure your message contains text."
-            error = await send_message(self.message, error_msg)
-            return await auto_delete_message(error, time=300)
+        text, input_list = await task_init_helper(self.message)
+        if not text:
+            return
 
-        text = self.message.text.split("\n")
-        input_list = text[0].split(" ")
-        error_msg, error_button = await error_check(self.message)
-        if error_msg:
-            await delete_links(self.message)
-            error = await send_message(self.message, error_msg, error_button)
-            return await auto_delete_message(error, time=300)
         user_id = self.user_id
         args = {
             "-doc": False,
