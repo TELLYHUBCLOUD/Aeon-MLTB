@@ -1,6 +1,20 @@
+from re import search as re_search
 from aiofiles import open as aiopen
 from aiofiles.os import remove
+from bot.helper.ext_utils.links_utils import is_url, is_magnet, is_telegram_link
 
+def expand_telegram_range(link: str) -> list:
+    """
+    Expands a Telegram link range (e.g., https://t.me/channel/10-20) into a list of individual links.
+    """
+    match = re_search(r"(https?://t\.me/(?:c/)?(?:[\w\d]+)/)(\d+)-(\d+)", link)
+    if match:
+        base = match.group(1)
+        start = int(match.group(2))
+        end = int(match.group(3))
+        if start <= end:
+            return [f"{base}{i}" for i in range(start, end + 1)]
+    return [link]
 
 def filter_links(links_list: list, bulk_start: int, bulk_end: int) -> list:
     """
@@ -28,6 +42,7 @@ def get_links_from_message(text: str) -> list:
     Extracts valid links from a string, assuming one link per line or separated by spaces.
     Empty lines and lines starting with / (commands) are ignored.
     Only valid URLs, magnets, and Telegram links are returned.
+    Handles Telegram link ranges.
 
     Args:
         text: The string containing links.
@@ -35,7 +50,6 @@ def get_links_from_message(text: str) -> list:
     Returns:
         A list of extracted links.
     """
-    from bot.helper.ext_utils.links_utils import is_url, is_magnet, is_telegram_link
     
     links_list = text.split("\n")
     valid_links = []
@@ -43,10 +57,14 @@ def get_links_from_message(text: str) -> list:
         line = line.strip()
         if not line or line.startswith("/"):
             continue
-        # Split by space in case multiple links are on one line (though Usually it's one per line for bulk)
+        # Split by space in case multiple links are on one line
         parts = line.split()
         for part in parts:
-            if is_url(part) or is_magnet(part) or is_telegram_link(part):
+            if is_telegram_link(part):
+                 # Attempt range expansion
+                 expanded = expand_telegram_range(part)
+                 valid_links.extend(expanded)
+            elif is_url(part) or is_magnet(part):
                 valid_links.append(part)
     return valid_links
 
@@ -66,7 +84,14 @@ async def get_links_from_file(message) -> list:
     text_file_dir = await message.download()
     async with aiopen(text_file_dir, "r+") as f:
         lines = await f.readlines()
-        links_list.extend(line.strip() for line in lines if len(line) != 0)
+        for line in lines:
+            line = line.strip()
+            if len(line) != 0:
+                 if is_telegram_link(line):
+                     links_list.extend(expand_telegram_range(line))
+                 else:
+                     links_list.append(line)
+
     await remove(text_file_dir)
     return links_list
 
