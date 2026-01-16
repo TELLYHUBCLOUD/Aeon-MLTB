@@ -16,6 +16,7 @@ from aioshutil import move, rmtree
 from bot import LOGGER, bot_loop, task_dict, task_dict_lock, multi_tags, intervals
 from bot.core.aeon_client import TgClient
 from bot.helper.aeon_utils.access_check import error_check
+from bot.helper.ext_utils.task_utils import task_init_helper
 from bot.helper.ext_utils.bot_utils import (
     COMMAND_USAGE,
     arg_parser,
@@ -232,70 +233,20 @@ class Encode(TaskListener):
         self.multi_tag = ""
 
     async def new_event(self):
-        text = self.message.text.split("\n")
-        input_list = text[0].split(" ")
-        error_msg, error_button = await error_check(self.message)
-        if error_msg:
-            await delete_links(self.message)
-            error = await send_message(self.message, error_msg, error_button)
-            return await auto_delete_message(error, time=300)
-
-        args = {
-            "link": "",
-            "-i": 0,
-            "-n": "",
-            "-up": "",
-            "-rcf": "",
-            "-q": "",
-            "-an": False,
-            "-sn": False,
-            "-b": False,
-        }
-
-        arg_parser(input_list[1:], args)
-
-        self.link = args["link"]
-        self.multi = args["-i"]
-        is_bulk = args["-b"]
-        bulk_start = 0
-        bulk_end = 0
-
-        if not isinstance(is_bulk, bool):
-            dargs = is_bulk.split(":")
-            bulk_start = int(dargs[0]) if dargs[0] else 0
-            if len(dargs) == 2:
-                bulk_end = int(dargs[1]) if dargs[1] else 0
-            is_bulk = True
-
-        if not is_bulk:
-            from bot.helper.ext_utils.bulk_links import extract_bulk_links
-            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
-            if len(self.bulk) > 1:
-                is_bulk = True
-
-        if is_bulk:
-            await self.init_bulk(input_list, bulk_start, bulk_end, Encode)
+        init_result = await task_init_helper(self.message)
+        if init_result is None:
             return
 
-        await self.run_multi(input_list, Encode)
+        args, self.bulk, self.multi, input_list, is_bulk, bulk_start, bulk_end = init_result
+        text = self.message.text.split("\n")
 
+        self.link = args["link"]
         self.name = args["-n"]
         self.up_dest = args["-up"]
         self.rc_flags = args["-rcf"]
         self.quality = args["-q"]
         self.remove_audio = args["-an"]
         self.remove_subs = args["-sn"]
-        self.multi = int(args["-i"])
-        is_bulk = args["-b"]
-        bulk_start = 0
-        bulk_end = 0
-
-        if not isinstance(is_bulk, bool):
-            dargs = is_bulk.split(":")
-            bulk_start = int(dargs[0]) if dargs[0] else 0
-            if len(dargs) == 2:
-                bulk_end = int(dargs[1]) if dargs[1] else 0
-            is_bulk = True
 
         if is_bulk:
             await self.init_bulk(input_list, bulk_start, bulk_end, Encode)
@@ -306,34 +257,49 @@ class Encode(TaskListener):
 
         await self.run_multi(input_list, Encode)
 
-        # MULTI-LINK / RANGE CHECK
-        all_links = []
-        for line in text:
-            line = line.strip()
-            if not line: continue
-            # Check TG Range
-            if isinstance(line, str) and is_telegram_link(line):
-                match = re_search(r"(https?://t\.me/(?:c/)?(?:[\w\d]+)/)(\d+)-(\d+)", line)
-                if match:
-                    base = match.group(1)
-                    start = int(match.group(2))
-                    end = int(match.group(3))
-                    if start <= end:
-                        for i in range(start, end + 1):
-                            all_links.append(f"{base}{i}")
-                    continue
-            if is_url(line) or (isinstance(line, str) and is_telegram_link(line)):
-                all_links.append(line)
-        
-        if len(all_links) > 1:
-                args["link"] = all_links[0]
-                for other_link in all_links[1:]:
-                    new_text = f"/leech {other_link} " + " ".join(input_list[1:])
-                    new_msg = await self.client.get_messages(self.message.chat.id, self.message.id)
-                    new_msg.text = new_text
-                    bot_loop.create_task(Encode(self.client, new_msg).new_event())
-                
-                self.link = all_links[0]
+        # MULTI-LINK CHECK (Range expansion is now handled in extract_bulk_links for -b, but single line manual might need it)
+        # However, task_init_helper handles bulk extraction if multi-line or -b is present.
+        # If user sends /encode link1 link2 ... that is usually single line separated by space, handled by arg_parser as invalid or only first link.
+        # But if user sends /encode https://t.me/xxx/10-20 (without -b), task_init_helper sees it as "link".
+        # We need to check if self.link has a range.
+
+        if self.link and is_telegram_link(self.link):
+             from bot.helper.ext_utils.bulk_links import expand_telegram_range
+             expanded = expand_telegram_range(self.link)
+             if len(expanded) > 1:
+                  self.link = expanded[0]
+                  for other_link in expanded[1:]:
+                        # We use /encode here because it's an encode task
+                        new_text = f"/encode {other_link} " + " ".join(input_list[1:])
+                        # This logic is a bit flawed because input_list includes the original link if it was positional.
+                        # arg_parser consumes positional args into 'link'.
+                        # We should reconstruct command properly.
+                        # Better approach: Just set self.link to first, and spawn tasks for others.
+                        # But spawning tasks requires a Message object.
+
+                        # Clone message
+                        new_msg = await self.client.get_messages(self.message.chat.id, self.message.id)
+                        # Replace text to just have this link and flags
+                        # If flags were used, they are in input_list.
+                        # We need to remove the original link from input_list and put the new one.
+                        # It is complicated to reliably replace the link in the string without regex.
+                        # But typically usage: /encode link -flags
+                        # We can just construct: /encode other_link -flags...
+                        # We need to exclude the original link from flags.
+
+                        # Simplified:
+                        # If expanded, we assume it's a bulk task now.
+                        # But we are already past init_bulk check.
+
+                        # Let's just use the recursive new_event call with modified text is the standard way.
+                        # To do that, we need to construct the text.
+                        # The original text was " ".join(input_list).
+                        # We replace self.link (the range string) with other_link.
+                        original_range_string = args["link"] # The one parsed
+                        if original_range_string in text[0]:
+                             new_cmd = text[0].replace(original_range_string, other_link)
+                             new_msg.text = new_cmd
+                             bot_loop.create_task(Encode(self.client, new_msg).new_event())
 
         if not self.link and (reply_to := self.message.reply_to_message):
             if reply_to.document or reply_to.video or reply_to.audio:
