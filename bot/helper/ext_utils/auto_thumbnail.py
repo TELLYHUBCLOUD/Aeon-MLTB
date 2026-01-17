@@ -58,7 +58,7 @@ class AutoThumbnailHelper:
             if user_id:
                 from bot import user_data
                 user_dict = user_data.get(user_id, {})
-                style = user_dict.get("AUTO_THUMBNAIL_STYLE", Config.AUTO_THUMBNAIL_STYLE)
+                style = user_dict.get("AUTO_THUMBNAIL_STYLE", getattr(Config, "AUTO_THUMBNAIL_STYLE", "poster"))
             else:
                 style = getattr(Config, "AUTO_THUMBNAIL_STYLE", "poster")
 
@@ -1030,8 +1030,13 @@ class AutoThumbnailHelper:
 
             if result:
                 # Check for backdrop if requested
-                if style == "backdrop" and result.get("backdrop_path"):
-                    return TMDBHelper.get_poster_url(result["backdrop_path"], "w1280")
+                if style == "backdrop":
+                    backdrop_path = result.get("backdrop_path")
+                    if backdrop_path:
+                        LOGGER.info(f"Found backdrop for '{title}': {backdrop_path}")
+                        return TMDBHelper.get_backdrop_url(backdrop_path, "w1280")
+                    else:
+                        LOGGER.info(f"Backdrop requested for '{title}' but not found. Falling back to poster.")
                 
                 # Fallback to poster if backdrop requested but not found, or if poster requested
                 if result.get("poster_path"):

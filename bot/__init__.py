@@ -1,8 +1,10 @@
 # ruff: noqa: E402
 # Fix IDE issues by adding type annotations and import comments
-from uvloop import install  # type: ignore
-
-install()
+try:
+    from uvloop import install  # type: ignore
+    install()
+except ImportError:
+    pass
 
 import os
 import subprocess
