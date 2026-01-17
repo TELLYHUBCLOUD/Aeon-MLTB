@@ -25,6 +25,7 @@ cloudscraper
 cryptography>=41.0.0
 codext>=1.15.6
 chardet
+cachetools
 dnspython
 duckduckgo-search
 fastapi
