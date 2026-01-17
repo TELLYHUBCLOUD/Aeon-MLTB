@@ -1,5 +1,4 @@
 from .ad_broadcaster import init_ad_broadcaster
-from .ai import ask_ai
 from .bot_settings import edit_bot_settings, send_bot_settings
 from .broadcast import (
     broadcast,
@@ -77,7 +76,6 @@ from .mirror_leech import (
     nzb_mirror,
 )
 from .neko import neko_callback_handler, neko_command
-from .nsfw_management import nsfw_stats_command, nsfw_test_command
 from .nzb_search import hydra_search
 from .osint import osint_callback_handler, osint_command
 from .paste import paste_text
@@ -101,8 +99,6 @@ from .stats import bot_stats, get_packages_version
 from .status import status_pages, task_status
 from .tmdb import tmdb_callback_handler, tmdb_search_command
 from .tool_commands import tool_command
-from .trace_moe import trace_command
-from .truecaller import truecaller_lookup
 from .users_settings import (
     edit_user_settings,
     get_users_settings,
@@ -110,7 +106,6 @@ from .users_settings import (
 )
 from .virustotal import virustotal_scan
 from .whisper import whisper_callback, whisper_command
-from .wot import wot_command
 from .wrong_cmds import handle_no_suffix_commands, handle_qb_commands
 from .ytdlp import ytdl, ytdl_leech
 
@@ -119,7 +114,6 @@ __all__ = [
     "aeon_callback",
     "aioexecute",
     "arg_usage",
-    "ask_ai",
     "authorize",
     "auto_forward_handler",
     "ban_command",
@@ -233,13 +227,9 @@ __all__ = [
     "tmdb_search_command",
     "tool_command",
     "torrent_search",
-    "torrent_search_update",
-    "trace_command",
-    "truecaller_lookup",
     "unauthorize",
     "unban_command",
     "virustotal_scan",
-    "wot_command",
     "ytdl",
     "ytdl_leech",
 ]

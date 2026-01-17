@@ -98,8 +98,8 @@ COMMANDS = {
     "GenSessionCommand": "- Generate Pyrogram session string",
     "VirusTotalCommand": "- Scan files or URLs for viruses using VirusTotal",
     "PasteCommand": "- Paste text to katb.in website",
-    "ShortnerCommand": "- Shorten URLs with Bitly API and generate QR codes",
-    "QRCodeCommand": "- Generate QR codes from text or URLs with customizable options",
+    "ShortnerCommand": "- Shorten URLs with Bitly API",
+    "QRCodeCommand": "- Generate QR codes from text or URLs",
     # QuickInfo Commands
     "QuickInfoCommand": "- Get chat/user information with interactive buttons",
     "File2LinkCommand": "- Convert Telegram media files into direct streaming links",
