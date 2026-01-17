@@ -109,13 +109,13 @@ if DATABASE_URL:
 UPSTREAM_REPO = (
     config_file.get("UPSTREAM_REPO", "")
     or os.getenv("UPSTREAM_REPO", "")
-    or ""
+    or "https://github.com/TELLYHUBCLOUD/Aeon-MLTB"
 )
 
 UPSTREAM_BRANCH = (
     config_file.get("UPSTREAM_BRANCH", "")
     or os.getenv("UPSTREAM_BRANCH", "")
-    or ""
+    or "extendednew"
 )
 
 if UPSTREAM_REPO:
