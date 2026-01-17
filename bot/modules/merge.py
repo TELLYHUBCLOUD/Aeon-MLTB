@@ -57,91 +57,71 @@ class Merge(TaskListener):
         self.name_subfix = ""
 
     async def new_event(self):
-        text = self.message.text.split("\n")
-        input_list = text[0].split(" ")
-        error_msg, error_button = await error_check(self.message)
-        if error_msg:
-            await delete_links(self.message)
-            error = await send_message(self.message, error_msg, error_button)
-            return await auto_delete_message(error, time=300)
+        from bot.helper.ext_utils.task_utils import task_init_helper
+        init_data = await task_init_helper(self)
+        if not init_data:
+            return
 
-        args = {
-            "link": "",
-            "-i": 0,
-            "-n": "",
-            "-up": "",
-            "-rcf": "",
-            "-b": False,
-        }
+        self.link = init_data["link"]
+        args = init_data["args"]
+        input_list = init_data["input_list"]
+        is_bulk = init_data["is_bulk"]
+        self.bulk = init_data["bulk_links"]
+        self.multi = init_data["multi"]
+        bulk_start = init_data["bulk_start"]
+        bulk_end = init_data["bulk_end"]
 
-        arg_parser(input_list[1:], args)
-
-        self.link = args["link"]
+        # Merge specific
         self.name = ""
         self.output_name = args["-n"]
         self.up_dest = args["-up"]
         self.rc_flags = args["-rcf"]
-        self.multi = args["-i"]
-        is_bulk = args["-b"]
-        bulk_start = 0
-        bulk_end = 0
-
-        if not isinstance(is_bulk, bool):
-            dargs = is_bulk.split(":")
-            bulk_start = int(dargs[0]) if dargs[0] else 0
-            if len(dargs) == 2:
-                bulk_end = int(dargs[1]) if dargs[1] else 0
-            is_bulk = True
-
-        if not is_bulk:
-            from bot.helper.ext_utils.bulk_links import extract_bulk_links
-            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
-            if len(self.bulk) > 1:
-                is_bulk = True
 
         if is_bulk:
             await self.init_bulk(input_list, bulk_start, bulk_end, Merge)
             return
 
-        # Parse Inputs from text (Multiple links / Ranges)
-        for line in text:
-             line = line.strip()
-             if not line: continue
-             # Check for TG Range: link/11-20
-             if is_telegram_link(line):
-                 match = re.search(r"(https?://t\.me/(?:c/)?(?:[\w\d]+)/)(\d+)-(\d+)", line)
-                 if match:
-                     base = match.group(1)
-                     start = int(match.group(2))
-                     end = int(match.group(3))
-                     if start <= end:
-                         for i in range(start, end + 1):
-                             self.inputs.append(f"{base}{i}")
-                     continue
-             # Normal Link
-             if is_url(line) or hasattr(line, "download"): # Handle reply object later
-                 self.inputs.append(line)
-         
-        # If reply object and no text links
-        if not self.inputs and (reply_to := self.message.reply_to_message):
-             if reply_to.document or reply_to.video or reply_to.audio:
-                self.inputs.append(reply_to)
+        # Handle Merge Inputs
+        # 1. From Expanded Bulk Links (if any range expansion happened in task_init_helper)
+        if self.bulk:
+            for l in self.bulk:
+                self.inputs.append(l)
 
-        if not self.inputs and self.link:
-             if is_telegram_link(self.link):
-                 match = re.search(r"(https?://t\.me/(?:c/)?(?:[\w\d]+)/)(\d+)-(\d+)", self.link)
-                 if match:
-                     base = match.group(1)
-                     start = int(match.group(2))
-                     end = int(match.group(3))
-                     if start <= end:
-                         for i in range(start, end + 1):
-                             self.inputs.append(f"{base}{i}")
-                 else:
-                     self.inputs.append(self.link)
-             else:
-                 self.inputs.append(self.link)
+        # 2. From Message Text (if not already covered by bulk/link)
+        # task_init_helper already parsed bulk links from text and put them in self.bulk if they were ranges.
+        # But for Merge, we accept multiple separate links in one message without "bulk" mode enabled explicitly.
+        # task_init_helper returns is_bulk=True if >1 links found.
+        # If is_bulk is True, we called init_bulk above and returned.
+        # BUT Merge behaves differently: it wants to collect ALL inputs and merge them into ONE task (unless bulk mode is for creating multiple merge tasks?).
+        # Standard behaviour: /merge link1 link2 -> Merge link1 and link2.
+        # /merge -b ... -> Bulk Merge (multiple merge tasks?).
+        # If user passes multiple links, is_bulk becomes True in task_init_helper.
+
+        # We need to distinguish:
+        # Case A: /merge link1 link2 -> Single Merge Task with 2 inputs.
+        # Case B: /merge -b link1 link2 -> Bulk Merge? (Usually means iterate list and run task for each).
         
+        # If is_bulk is True from task_init_helper because of multiple links, but -b flag was NOT set...
+        # task_init_helper sets is_bulk=True if len(bulk_links) > 1 regardless of flag.
+
+        # If -b flag is NOT set, we should treat all links as inputs for a SINGLE merge task.
+        # So we should NOT return above if args["-b"] is False.
+
+        # Let's correct the logic above.
+
+        if args["-b"]: # Explicit bulk flag
+             await self.init_bulk(input_list, bulk_start, bulk_end, Merge)
+             return
+
+        # Implicit bulk (multiple links) -> Merge them all in one task
+        if self.bulk:
+             # self.bulk contains all found links
+             self.inputs.extend(self.bulk)
+
+        # Also check self.link if not in inputs (task_init_helper sets link to first one)
+        if self.link and self.link not in self.inputs:
+             self.inputs.append(self.link)
+
         # Remove duplicates while preserving order
         seen = set()
         unique_inputs = []
@@ -181,7 +161,7 @@ class Merge(TaskListener):
             await send_message(self.message, e)
             return
 
-        if len(self.inputs) == 1 and not is_bulk:
+        if len(self.inputs) == 1 and not args["-b"]:
              user_id = self.message.from_user.id
              session = MERGE_SESSIONS.get(user_id)
              

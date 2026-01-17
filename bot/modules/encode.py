@@ -232,152 +232,42 @@ class Encode(TaskListener):
         self.multi_tag = ""
 
     async def new_event(self):
-        text = self.message.text.split("\n")
-        input_list = text[0].split(" ")
-        error_msg, error_button = await error_check(self.message)
-        if error_msg:
-            await delete_links(self.message)
-            error = await send_message(self.message, error_msg, error_button)
-            return await auto_delete_message(error, time=300)
-
-        args = {
-            "link": "",
-            "-i": 0,
-            "-n": "",
-            "-up": "",
-            "-rcf": "",
-            "-q": "",
-            "-an": False,
-            "-sn": False,
-            "-b": False,
-        }
-
-        arg_parser(input_list[1:], args)
-
-        self.link = args["link"]
-        self.multi = args["-i"]
-        is_bulk = args["-b"]
-        bulk_start = 0
-        bulk_end = 0
-
-        if not isinstance(is_bulk, bool):
-            dargs = is_bulk.split(":")
-            bulk_start = int(dargs[0]) if dargs[0] else 0
-            if len(dargs) == 2:
-                bulk_end = int(dargs[1]) if dargs[1] else 0
-            is_bulk = True
-
-        if not is_bulk:
-            from bot.helper.ext_utils.bulk_links import extract_bulk_links
-            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
-            if len(self.bulk) > 1:
-                is_bulk = True
-
-        if is_bulk:
-            await self.init_bulk(input_list, bulk_start, bulk_end, Encode)
+        from bot.helper.ext_utils.task_utils import task_init_helper
+        init_data = await task_init_helper(self)
+        if not init_data:
             return
 
-        await self.run_multi(input_list, Encode)
+        self.link = init_data["link"]
+        args = init_data["args"]
+        input_list = init_data["input_list"]
+        is_bulk = init_data["is_bulk"]
+        self.bulk = init_data["bulk_links"]
+        self.multi = init_data["multi"]
+        bulk_start = init_data["bulk_start"]
+        bulk_end = init_data["bulk_end"]
 
+        # Encode specific
         self.name = args["-n"]
         self.up_dest = args["-up"]
         self.rc_flags = args["-rcf"]
         self.quality = args["-q"]
         self.remove_audio = args["-an"]
         self.remove_subs = args["-sn"]
-        self.multi = int(args["-i"])
-        is_bulk = args["-b"]
-        bulk_start = 0
-        bulk_end = 0
-
-        if not isinstance(is_bulk, bool):
-            dargs = is_bulk.split(":")
-            bulk_start = int(dargs[0]) if dargs[0] else 0
-            if len(dargs) == 2:
-                bulk_end = int(dargs[1]) if dargs[1] else 0
-            is_bulk = True
 
         if is_bulk:
             await self.init_bulk(input_list, bulk_start, bulk_end, Encode)
             return
 
-        if len(self.bulk) != 0:
-            del self.bulk[0]
-
         await self.run_multi(input_list, Encode)
 
-        # MULTI-LINK / RANGE CHECK
-        all_links = []
-        for line in text:
-            line = line.strip()
-            if not line: continue
-            # Check TG Range
-            if isinstance(line, str) and is_telegram_link(line):
-                match = re_search(r"(https?://t\.me/(?:c/)?(?:[\w\d]+)/)(\d+)-(\d+)", line)
-                if match:
-                    base = match.group(1)
-                    start = int(match.group(2))
-                    end = int(match.group(3))
-                    if start <= end:
-                        for i in range(start, end + 1):
-                            all_links.append(f"{base}{i}")
-                    continue
-            if is_url(line) or (isinstance(line, str) and is_telegram_link(line)):
-                all_links.append(line)
-        
-        if len(all_links) > 1:
-                args["link"] = all_links[0]
-                for other_link in all_links[1:]:
-                    new_text = f"/leech {other_link} " + " ".join(input_list[1:])
-                    new_msg = await self.client.get_messages(self.message.chat.id, self.message.id)
-                    new_msg.text = new_text
-                    bot_loop.create_task(Encode(self.client, new_msg).new_event())
-                
-                self.link = all_links[0]
+        # Legacy Multi-Link/Recursive link handling is now done by `extract_bulk_links` and `run_multi` via `task_init_helper`'s expanded links.
+        # But `Encode` had weird recursive logic for TG Ranges in `new_event`.
+        # `task_init_helper` handles range expansion into `bulk_links`.
+        # `run_multi` (inherited from TaskListener) handles iterating `self.bulk` and spawning new tasks.
+        # So we should be good!
 
-        if not self.link and (reply_to := self.message.reply_to_message):
-            if reply_to.document or reply_to.video or reply_to.audio:
-                self.link = reply_to
-            elif reply_to.text:
-                self.link = reply_to.text.split("\n", 1)[0].strip()
-
-        if isinstance(self.link, str) and is_telegram_link(self.link):
-            try:
-                reply_to, session = await get_tg_link_message(self.link, self.message.from_user.id)
-                if isinstance(reply_to, list):
-                    # Multi Bulk from TG Link
-                    self.bulk = reply_to
-                    # We need to process this bulk using init_bulk logic OR spawn tasks
-                    # existing init_bulk expects self.bulk to be set.
-                    # But init_bulk is for text/file inputs.
-                    # Let's just spawn for each item in list?
-                    # Or treat first as self.link?
-                    self.link = reply_to[0]
-                    # Spawn others
-                    for msg in reply_to[1:]:
-                         bot_loop.create_task(Encode(self.client, msg).new_event()) # THIS MIGHT FAIL if msg is Message object not event?
-                         # Encode expects client, message.
-                         # If we pass msg as message, safe? Yes.
-                    # BUT 'msg' is the media message. It doesn't have the command text.
-                    # This requires more complex bulk handling.
-                    # Leech uses Mirror(..., bulk=reply_to).
-                    # Encode has run_multi logic.
-                    # Let's simplify: process first, loop others.
-                    self.link = reply_to[0]
-                    for msg in reply_to[1:]:
-                        # We need to construct a task for this message.
-                        # Since it's already a message object, we can just instantiate Encode with it?
-                        # No, Encode relies on self.message.text options.
-                        # We should clone the options.
-                        # For simplicity, let's just use recursive loop with new_event if possible?
-                        # Or just ignore bulk link expansion for now and handle SINGLE recursive link?
-                        # The user wants "like leech". Leech spawns new Mirror instance with bulk list.
-                        pass
-                elif reply_to:
-                    self.link = reply_to
-            except Exception as e:
-                await send_message(self.message, f"ERROR: {e}")
-                return
+        # Fallback if link is still empty (e.g. Reply logic in `task_init_helper` failed or wasn't sufficient?)
+        # `task_init_helper` does reply check.
 
         if not self.link:
              await send_message(
@@ -389,7 +279,7 @@ class Encode(TaskListener):
 
         LOGGER.info(f"Encode Request: Link: {self.link}")
 
-        await self.get_tag(text) 
+        await self.get_tag(self.message.text.split("\n"))
         
         # === PRE-DOWNLOAD METADATA STEP ===
         streams = []
