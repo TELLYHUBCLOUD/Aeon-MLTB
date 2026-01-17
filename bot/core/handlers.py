@@ -18,7 +18,6 @@ from bot.modules import (  # Encoding/Decoding imports; index_command removed - 
     aeon_callback,
     aioexecute,
     arg_usage,
-    ask_ai,
     authorize,
     auto_forward_handler,
     ban_command,
@@ -119,14 +118,11 @@ from bot.modules import (  # Encoding/Decoding imports; index_command removed - 
     tool_command,
     torrent_search,
     torrent_search_update,
-    trace_command,
-    truecaller_lookup,
     unauthorize,
     unban_command,
     virustotal_scan,
     whisper_callback,
     whisper_command,
-    wot_command,
     ytdl,
     ytdl_leech,
 )
@@ -407,16 +403,6 @@ def add_handlers():
             CustomFilters.authorized,
         ),
         # user_settings entry removed - now handled by direct handler registration
-        "truecaller_lookup": (
-            truecaller_lookup,
-            BotCommands.TruecallerCommand,
-            CustomFilters.authorized,
-        ),
-        "ask_ai": (
-            ask_ai,
-            BotCommands.AskCommand,
-            CustomFilters.authorized,
-        ),
         "osint": (
             osint_command,
             BotCommands.OSINTCommand,
@@ -465,12 +451,6 @@ def add_handlers():
             BotCommands.ToolCommand,
             CustomFilters.authorized,
         ),
-        # Trace.moe commands
-        "trace": (
-            trace_command,
-            BotCommands.TraceCommand,
-            CustomFilters.authorized,
-        ),
         # Contact commands - available to all users
         "contact": (
             contact_command,
@@ -494,25 +474,6 @@ def add_handlers():
 
     # Index command handler removed - media indexing functionality disabled
 
-    # Add Enhanced NSFW Detection handlers if enabled
-    if Config.NSFW_DETECTION_ENABLED:
-        from bot.modules.nsfw_management import nsfw_stats_command, nsfw_test_command
-
-        nsfw_handlers = {
-            "nsfw_stats": (
-                nsfw_stats_command,
-                BotCommands.NSFWStatsCommand,
-                CustomFilters.authorized,
-            ),
-            "nsfw_test": (
-                nsfw_test_command,
-                BotCommands.NSFWTestCommand,
-                CustomFilters.authorized,
-            ),
-        }
-
-        # Add NSFW handlers to command_filters
-        command_filters.update(nsfw_handlers)
 
     # Add MEGA search handler if MEGA search is enabled
     if Config.MEGA_ENABLED and Config.MEGA_SEARCH_ENABLED:
@@ -551,16 +512,6 @@ def add_handlers():
         }
         command_filters.update(phishcheck_handlers)
 
-    # Add WOT handler if enabled
-    if Config.WOT_ENABLED:
-        wot_handlers = {
-            "wot": (
-                wot_command,
-                BotCommands.WotCommand,
-                CustomFilters.authorized,
-            ),
-        }
-        command_filters.update(wot_handlers)
 
     # Add encoding/decoding handlers if enabled
     if Config.ENCODING_ENABLED:
@@ -836,8 +787,6 @@ def add_handlers():
         "login",
         "mediasearch",
         "mds",
-        "truecaller",
-        "ask",
         "mediainfo",
         "mi",
         "spectrum",
@@ -872,9 +821,7 @@ def add_handlers():
     if Config.DECODING_ENABLED:
         base_commands.extend(["decode", "dec"])
 
-    # Add trace.moe command if enabled
-    if Config.TRACE_MOE_ENABLED:
-        base_commands.extend(["trace"])
+
 
     # Add phishcheck command if enabled
     if Config.PHISH_DIRECTORY_ENABLED:
@@ -1057,24 +1004,7 @@ def add_handlers():
 
     init_ad_broadcaster()
 
-    # Import and register weather module handlers
-    if Config.WEATHER_ENABLED:
-        try:
-            # Import weather module directly to avoid __init__.py issues
-            weather_module_path = os.path.join(
-                os.path.dirname(__file__), "..", "modules", "weather.py"
-            )
-            spec = importlib.util.spec_from_file_location(
-                "weather", weather_module_path
-            )
-            weather_module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(weather_module)
 
-            # Register weather handlers
-            weather_module.register_weather_handlers()
-            LOGGER.info("Weather module loaded successfully")
-        except Exception as e:
-            LOGGER.error(f"Failed to load weather module: {e}")
 
     # Add QuickInfo handlers for forwarded messages and shared entities
     TgClient.bot.add_handler(

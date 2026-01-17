@@ -86,10 +86,8 @@ MEDIA_STORE = False  # Enable media store link
 AD_BROADCASTER_ENABLED = (
     False  # Enable/disable automatic ad broadcasting from FSUB channels to users
 )
-AI_ENABLED = True  # Enable/disable AI functionality
 IMDB_ENABLED = True  # Enable/disable IMDB functionality
 TMDB_ENABLED = True  # Enable/disable TMDB functionality
-TRUECALLER_ENABLED = True  # Enable/disable Truecaller functionality
 MEDIA_SEARCH_ENABLED = True  # Enable/disable media search feature
 
 # Media Search Settings
@@ -383,12 +381,7 @@ PHISH_DIRECTORY_TIMEOUT = 30  # Phish Directory API timeout in seconds
 PHISH_DIRECTORY_API_KEY = (
     ""  # Phish Directory API key (optional, for authenticated endpoints)
 )
-# WOT (Web of Trust) API Settings
-WOT_API_URL = "https://scorecard.api.mywot.com"  # WOT API base URL
-WOT_ENABLED = True  # Enable/disable WOT functionality
-WOT_TIMEOUT = 30  # WOT API timeout in seconds
-WOT_API_KEY = ""  # WOT API key (required for API access)
-WOT_USER_ID = ""  # WOT User ID (required for API access)
+
 # AbuseIPDB API Settings
 ABUSEIPDB_API_URL = "https://api.abuseipdb.com/api/v2"  # AbuseIPDB API base URL
 ABUSEIPDB_ENABLED = True  # Enable/disable AbuseIPDB functionality
@@ -396,122 +389,16 @@ ABUSEIPDB_TIMEOUT = 30  # AbuseIPDB API timeout in seconds
 ABUSEIPDB_API_KEY = ""  # AbuseIPDB API key (required for API access)
 ABUSEIPDB_MAX_AGE_DAYS = 90  # Maximum age of reports to consider (1-365 days)
 
-# Weather Settings - OpenWeatherMap API
-WEATHER_ENABLED = True  # Enable/disable weather functionality
-OPENWEATHER_API_KEY = ""  # OpenWeatherMap API key
-WEATHER_PLACE = "London,UK"  # Default weather location
-AUTO_WEATHER = True  # Enable/disable automatic daily weather updates
-WEATHER_RISK_NOTIFICATIONS = (
-    True  # Enable/disable weather risk notifications to owner
-)
-WEATHER_UNITS = "metric"  # Units: standard, metric, imperial
-WEATHER_LANGUAGE = "en"  # Language code for weather descriptions
-WEATHER_UPDATE_TIME = "08:00"  # Time for daily weather updates (HH:MM format)
-WEATHER_TIMEZONE = "UTC"  # Timezone for weather updates
 
-# Advanced Weather Features
-WEATHER_SHOW_MAPS = True  # Enable/disable weather maps
-WEATHER_SHOW_AIR_QUALITY = True  # Enable/disable air quality data
-WEATHER_SHOW_FIRE_INDEX = (
-    False  # Enable/disable fire weather index (requires special access)
-)
-WEATHER_HISTORICAL_DAYS = 7  # Days of historical data to show (requires paid plan)
-WEATHER_FORECAST_DAYS = 5  # Days of forecast to show (max 5 for free plan)
-WEATHER_MAP_ZOOM = 10  # Default zoom level for weather maps
-WEATHER_IMAGE_QUALITY = "high"  # Image quality: low, medium, high
-WEATHER_CACHE_DURATION = 600  # Cache duration in seconds (10 minutes)
 
-# Weather Alert Settings
-WEATHER_ALERT_TEMPERATURE_HIGH = 35.0  # High temperature alert threshold (Celsius)
-WEATHER_ALERT_TEMPERATURE_LOW = -10.0  # Low temperature alert threshold (Celsius)
-WEATHER_ALERT_WIND_SPEED = 15.0  # High wind speed alert threshold (m/s)
-WEATHER_ALERT_VISIBILITY = 1000  # Low visibility alert threshold (meters)
-WEATHER_ALERT_AQI = 3  # Air quality alert threshold (1-5 scale)
-WEATHER_ALERT_FIRE_DANGER = 3  # Fire weather index alert threshold (0-5 scale)
+    WEATHER_DATA_VALIDATION: bool = True  # Validate weather data before displaying
+    WEATHER_METRIC_CONVERSION: bool = (
+        True  # Auto-convert units based on user location
+    )
 
-# Weather Map Settings
-WEATHER_MAP_LAYERS = [
-    "temp_new",  # Temperature
-    "precipitation_new",  # Precipitation
-    "pressure_new",  # Pressure
-    "wind_new",  # Wind
-    "clouds_new",  # Clouds
-]  # Available weather map layers
-WEATHER_MAP_OPACITY = 0.6  # Map layer opacity (0.0-1.0)
-WEATHER_USE_ADVANCED_MAPS = False  # Use Weather Maps 2.0 (requires paid plan)
-WEATHER_USE_HOURLY_MAPS = (
-    False  # Use Weather Maps 2.0 with 1-hour step (requires paid plan)
-)
 
-# Air Quality Settings
-WEATHER_AQI_FORECAST_DAYS = 4  # Days of air quality forecast (max 4)
-WEATHER_AQI_HISTORICAL_DAYS = 7  # Days of historical air quality data
-WEATHER_SHOW_POLLUTANTS = [
-    "co",
-    "no",
-    "no2",
-    "o3",
-    "so2",
-    "pm2_5",
-    "pm10",
-    "nh3",
-]  # Pollutants to display
 
-# Premium Features Settings
-WEATHER_HOURLY_FORECAST_HOURS = 96  # Hours of hourly forecast (max 96 for 4 days)
-WEATHER_STATISTICAL_DATA = (
-    False  # Enable statistical weather data (requires paid plan)
-)
-WEATHER_ROAD_RISK_API = False  # Enable road risk API (requires paid plan)
-WEATHER_SOLAR_IRRADIANCE = False  # Enable solar irradiance data (requires paid plan)
 
-# Enhanced NSFW Detection Settings
-NSFW_DETECTION_ENABLED = True  # Master toggle for NSFW detection
-NSFW_DETECTION_SENSITIVITY = (
-    "moderate"  # Detection sensitivity: strict, moderate, permissive
-)
-NSFW_KEYWORD_DETECTION = (
-    True  # Enable enhanced keyword detection with fuzzy matching
-)
-NSFW_VISUAL_DETECTION = (
-    False  # Enable AI-powered visual content analysis (requires API keys)
-)
-NSFW_AUDIO_DETECTION = False  # Enable audio content analysis (experimental)
-NSFW_FUZZY_MATCHING = True  # Enable fuzzy keyword matching for misspellings
-NSFW_LEETSPEAK_DETECTION = True  # Detect leetspeak variations (p0rn, s3x, etc.)
-NSFW_MULTI_LANGUAGE = True  # Enable multi-language keyword support
-NSFW_CONFIDENCE_THRESHOLD = 0.7  # Minimum confidence for NSFW detection (0.0-1.0)
-NSFW_CACHE_DURATION = 3600  # Cache detection results for 1 hour (seconds)
-NSFW_MAX_FILE_SIZE = 52428800  # Maximum file size for NSFW analysis (50MB)
-NSFW_VIDEO_ANALYSIS = True  # Enable video frame analysis
-NSFW_VIDEO_FRAME_COUNT = 5  # Number of frames to extract for analysis
-NSFW_FRAME_QUALITY = 2  # Frame extraction quality (1-5, higher = better quality)
-NSFW_AUDIO_ANALYSIS = True  # Enable audio content analysis
-NSFW_SUBTITLE_ANALYSIS = True  # Enable subtitle text analysis
-
-# NSFW Visual Analysis API Settings (choose one or more providers)
-NSFW_GOOGLE_VISION_API_KEY = ""  # Google Cloud Vision API key for content safety
-NSFW_AWS_ACCESS_KEY = ""  # AWS Rekognition access key
-NSFW_AWS_SECRET_KEY = ""  # AWS Rekognition secret key
-NSFW_AWS_REGION = "us-east-1"  # AWS region for Rekognition
-NSFW_AZURE_ENDPOINT = ""  # Azure Content Moderator endpoint URL
-NSFW_AZURE_KEY = ""  # Azure Content Moderator subscription key
-NSFW_OPENAI_API_KEY = ""  # OpenAI API key for GPT-4 Vision analysis
-
-# NSFW Text Analysis API Settings
-NSFW_PERSPECTIVE_API_KEY = ""  # Google Perspective API key for toxicity detection
-NSFW_OPENAI_MODERATION = False  # Use OpenAI moderation API for text analysis
-
-# NSFW Behavior and Logging Settings
-NSFW_LOG_DETECTIONS = True  # Log all NSFW detections for analysis and improvement
-NSFW_STORE_METADATA = True  # Store detection metadata in database for tracking
-NSFW_AUTO_DELETE = (
-    False  # Automatically delete detected NSFW content (use with caution)
-)
-NSFW_NOTIFY_ADMINS = (
-    True  # Send notifications to admins when NSFW content is detected
-)
-TRUECALLER_API_URL = ""  # Truecaller API URL for phone number lookup
 
 # Direct Link Generator Settings
 TERABOX_PROXY = "https://teradlrobot.cheemsbackup.workers.dev/"  # Terabox proxy URL for bypassing restrictions

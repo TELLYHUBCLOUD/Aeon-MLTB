@@ -100,8 +100,6 @@ COMMANDS = {
     "PasteCommand": "- Paste text to katb.in website",
     "ShortnerCommand": "- Shorten URLs with Bitly API and generate QR codes",
     "QRCodeCommand": "- Generate QR codes from text or URLs with customizable options",
-    "NSFWStatsCommand": "- Get NSFW detection statistics",
-    "NSFWTestCommand": "- Test NSFW detection on images",
     # QuickInfo Commands
     "QuickInfoCommand": "- Get chat/user information with interactive buttons",
     "File2LinkCommand": "- Convert Telegram media files into direct streaming links",
@@ -120,9 +118,6 @@ COMMANDS = {
     "NekoCommand": "- Get adorable cat images with voting system 🐱💕",
 }
 
-# Add AI command if enabled
-if Config.AI_ENABLED:
-    COMMANDS["AskCommand"] = "- Ask AI questions and get intelligent responses"
 
 # Add IMDB command if enabled
 if Config.IMDB_ENABLED:
@@ -132,9 +127,6 @@ if Config.IMDB_ENABLED:
 if Config.TMDB_ENABLED:
     COMMANDS["TMDBCommand"] = "- Search TMDB for movies, TV shows, and people"
 
-# Add Truecaller command if enabled
-if Config.TRUECALLER_ENABLED:
-    COMMANDS["TruecallerCommand"] = "- Lookup phone numbers using Truecaller"
 
 # Add encoding/decoding commands if enabled
 if Config.ENCODING_ENABLED:
@@ -143,30 +135,6 @@ if Config.ENCODING_ENABLED:
 if Config.DECODING_ENABLED:
     COMMANDS["DecodeCommand"] = "- Decode encoded text with auto-detection"
 
-# Add trace.moe command if enabled
-if Config.TRACE_MOE_ENABLED:
-    COMMANDS["TraceCommand"] = "- Identify anime from images, videos, or GIFs"
-
-# Add phishcheck command if enabled
-if Config.PHISH_DIRECTORY_ENABLED:
-    COMMANDS["PhishCheckCommand"] = (
-        "- Check domains and emails for phishing/security threats"
-    )
-
-# Add WOT command if enabled (includes AbuseIPDB integration)
-if Config.WOT_ENABLED or Config.ABUSEIPDB_ENABLED:
-    COMMANDS["WotCommand"] = (
-        "- Check website, domain, and IP reputation using WOT and AbuseIPDB"
-    )
-
-# Add OSINT command (sudo only)
-COMMANDS["OSINTCommand"] = "- Comprehensive OSINT intelligence suite (sudo only)"
-
-# Add Weather commands if enabled
-if Config.WEATHER_ENABLED:
-    COMMANDS["WeatherCommand"] = (
-        "- Get current weather with beautiful images and forecasts"
-    )
 
 # Setup Commands
 COMMAND_OBJECTS = [

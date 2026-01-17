@@ -134,10 +134,7 @@ from bot.helper.telegram_helper.message_utils import (
 
 from .rss import add_job
 
-# Import ai_manager for AI-related functionality
-ai_manager = None
-with contextlib.suppress(ImportError):
-    from bot.modules.ai import ai_manager
+# Import config_utils functions
 
 start = 0
 state = "view"
@@ -171,9 +168,6 @@ DEFAULT_VALUES = {
     "EQUAL_SPLITS": False,
     "AUTO_THUMBNAIL": False,
     "AUTO_THUMBNAIL_STYLE": "poster",
-    "AI_ENABLED": True,
-    "IMDB_ENABLED": True,
-    "TRUECALLER_ENABLED": True,
     "MEDIA_TOOLS_ENABLED": True,
     "BULK_ENABLED": True,
     "MULTI_LINK_ENABLED": True,
@@ -632,9 +626,6 @@ async def get_buttons(key=None, edit_type=None, page=0, user_id=None):
         # Always show Media Tools button, regardless of whether tools are enabled
         buttons.data_button("🎬 Media Tools", "botset mediatools")
 
-        # Only show AI Settings button if AI is enabled
-        if Config.AI_ENABLED:
-            buttons.data_button("🤖 AI Settings", "botset ai")
 
 
         # Only show Gallery-dl Settings button if Gallery-dl is enabled
@@ -733,8 +724,6 @@ async def get_buttons(key=None, edit_type=None, page=0, user_id=None):
                 buttons.data_button("Back", "botset mediatools_add")
             elif key.startswith("TASK_MONITOR_"):
                 buttons.data_button("⬅️ Back", "botset taskmonitor")
-            elif key.startswith(("MISTRAL_", "DEEPSEEK_")):
-                buttons.data_button("Back", "botset ai")
             elif key.startswith("MERGE_") and any(
                 x in key
                 for x in [
@@ -1394,11 +1383,6 @@ Send one of the following position options:
                     "• <code>5</code> - Slower updates (for high-traffic bots)\n\n"
                 )
                 msg += "<b>Note:</b> Minimum value is 2 seconds. Lower values may trigger Telegram rate limits.\n\n"
-            elif key == "TRUECALLER_API_URL":
-                msg += "<b>Truecaller API URL</b>\n\n"
-                msg += "Set the API URL for Truecaller phone number lookup.\n\n"
-                msg += "<b>Example:</b> <code>https://api.example.com/truecaller</code>\n\n"
-                msg += "<b>Note:</b> No default URL is provided. You must set your own API endpoint. The Truecaller module will not work until this is configured.\n\n"
             elif key == "DEBRID_LINK_API":
                 msg += "<b>Debrid Link API Key</b>\n\n"
                 msg += "Set your Debrid Link API key to enable premium link generation for 400+ supported file hosting sites.\n\n"

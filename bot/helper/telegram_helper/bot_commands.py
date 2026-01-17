@@ -58,13 +58,9 @@ class BotCommands:
     MediaToolsCommand = [f"mediatools{i}", f"mt{i}"]
     MediaToolsHelpCommand = [f"mthelp{i}", f"mth{i}"]
     GenSessionCommand = [f"gensession{i}", f"gs{i}"]
-    TruecallerCommand = f"truecaller{i}"
-    AskCommand = f"ask{i}"
     SoxCommand = [f"spectrum{i}", f"sox{i}"]
     PasteCommand = f"paste{i}"
-    VirusTotalCommand = f"virustotal{i}"
     PhishCheckCommand = f"phishcheck{i}"
-    WotCommand = f"wot{i}"
     MegaSearchCommand = [f"megasearch{i}", f"mgs{i}"]
     MdLeechCommand = [f"mdleech{i}", f"mdl{i}"]
     # Encoding/Decoding Commands
@@ -74,25 +70,18 @@ class BotCommands:
     QuickInfoCommand = [f"quickinfo{i}", f"qi{i}"]
     # Tool Commands
     ToolCommand = [f"tool{i}", f"t{i}"]
-    # Enhanced NSFW Detection Commands
-    NSFWStatsCommand = f"nsfwstats{i}"
-    NSFWTestCommand = f"nsfwtest{i}"
     # Scraping Commands
     ScrapCommand = f"scrap{i}"
     # File2Link Commands
     File2LinkCommand = [f"file2link{i}", f"f2l{i}"]
     # Cat API Commands
     NekoCommand = f"neko{i}"
-    # Trace.moe Commands
-    TraceCommand = f"trace{i}"
     # OSINT Commands
     OSINTCommand = f"osint{i}"
     # Contact Commands
     ContactCommand = f"contact{i}"
     BanCommand = f"ban{i}"
     UnbanCommand = f"unban{i}"
-    # Weather Commands
-    WeatherCommand = [f"weather{i}", f"w{i}"]
     # Link Shortener Commands
     ShortnerCommand = f"shortner{i}"
     # QR Code Commands

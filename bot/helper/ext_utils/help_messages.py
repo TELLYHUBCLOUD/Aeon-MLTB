@@ -134,39 +134,6 @@ These placeholders are automatically replaced with the actual file path.
 
 # Legacy nsfw_keywords removed - now using enhanced detection system in nsfw_detection.py
 
-# Enhanced NSFW Detection Help
-nsfw_detection_help = """
-🛡️ <b>Enhanced NSFW Detection System</b>
-
-The bot now features an advanced NSFW detection system with multiple layers of protection:
-
-<b>🔍 Detection Methods:</b>
-• <b>Enhanced Keywords:</b> Fuzzy matching, leetspeak detection, multi-language support
-• <b>AI Visual Analysis:</b> Computer vision APIs for image content and smart video frame extraction
-• <b>Audio Content Analysis:</b> Metadata extraction and text analysis from audio files
-• <b>Subtitle Text Analysis:</b> Full text extraction and analysis from subtitle files
-• <b>NLP Text Analysis:</b> Advanced text analysis using AI APIs
-• <b>Behavioral Tracking:</b> User behavior pattern analysis
-• <b>Confidence Scoring:</b> Probabilistic detection with adjustable thresholds
-
-<b>⚙️ Configuration Levels:</b>
-• <b>Strict:</b> Very sensitive, catches more content (threshold: 0.3)
-• <b>Moderate:</b> Balanced approach (threshold: 0.7) - Default
-• <b>Permissive:</b> Only obvious NSFW content (threshold: 0.9)
-
-<b>🎯 Features:</b>
-• Real-time content analysis
-• Caching for improved performance
-• Multi-provider API support
-• Detailed logging and statistics
-
-<b>📊 Available Commands:</b>
-• <code>/nsfwstats</code> - View detection statistics
-• <code>/nsfwtest [text]</code> - Test detection on content
-
-<b>🔧 Supported APIs:</b>
-• Google Cloud Vision API
-• OpenAI GPT-4 Vision
 • Google Perspective API
 • OpenAI Moderation API
 • AWS Rekognition (planned)
@@ -1078,35 +1045,7 @@ You can nest styles to any depth with any combination of styles!
 ffmpeg_cmds = ffmpeg_help
 
 
-ai_help = """<b>AI Chatbot</b>:
 
-Chat with AI models using the bot commands.
-
-<b>Available AI Models:</b>
-Use the /ask command with any of the following AI providers:
-- <b>Mistral AI</b>
-- <b>DeepSeek AI</b>
-
-<b>Usage:</b>
-/ask your question here
-
-<b>Configuration:</b>
-1. <b>Bot Owner</b>: Configure API Keys or API URLs and default AI provider in bot settings
-2. <b>Users</b>: Configure your own API Keys or API URLs and default AI provider in user settings
-
-<b>Features:</b>
-- Uses powerful language models
-- Supports both direct API access and custom API endpoints
-- User settings take priority over bot owner settings
-- Messages auto-delete after 5 minutes
-- Automatically selects the configured AI provider
-
-<b>Examples:</b>
-/ask What is the capital of France?
-/ask Write a short poem about nature
-/ask Explain how quantum computing works
-/ask Translate this text to Spanish: Hello world
-"""
 
 user_cookies_help = """<b>User Cookies</b>:
 
@@ -1190,9 +1129,7 @@ CLONE_HELP_DICT = {
     "Rclone": rclone_cl,
 }
 
-AI_HELP_DICT = {
-    "main": ai_help,
-}
+
 
 virustotal_help = """<b>VirusTotal Scanner</b>
 
@@ -1278,171 +1215,14 @@ PHISH_HELP_DICT = {
 }
 
 # WOT (Web of Trust) help content
-wot_help = f"""<b>🛡️ COMPREHENSIVE REPUTATION CHECKER</b>
 
-Check website, domain, and IP reputation using multiple security databases including Web of Trust (WOT) and AbuseIPDB.
 
-<blockquote>
-<b>🎯 Features:</b>
-• Website trustworthiness assessment (WOT: 0-100 scale)
-• IP abuse confidence scoring (AbuseIPDB: 0-100 scale)
-• Child safety ratings and threat categorization
-• Geographic and ISP information for IPs
-• Third-party blacklist detection
-• Community-driven reputation scores
-• Real-time safety status and risk assessment
-• Automatic domain-to-IP resolution for comprehensive analysis
-</blockquote></blockquote>
 
-<b>📝 Usage:</b>
-<code>/{BotCommands.WotCommand} &lt;website_url_or_domain_or_ip&gt;</code>
-<code>/{BotCommands.WotCommand} &lt;target1&gt; &lt;target2&gt; ...</code>
-<code>/{BotCommands.WotCommand} &lt;target1,target2,target3&gt;</code>
-
-<b>📋 Examples:</b>
-• <code>/{BotCommands.WotCommand} google.com</code> (domain reputation)
-• <code>/{BotCommands.WotCommand} https://example.com</code> (URL analysis)
-• <code>/{BotCommands.WotCommand} 8.8.8.8</code> (IP reputation)
-• <code>/{BotCommands.WotCommand} 2001:4860:4860::8888</code> (IPv6 support)
-• <code>/{BotCommands.WotCommand} 192.168.1.0/24</code> (network analysis)
-• <code>/{BotCommands.WotCommand} suspicious-site.com</code> (threat analysis)
-• <code>/{BotCommands.WotCommand} google.com 8.8.8.8</code> (multiple targets)
-• <code>/{BotCommands.WotCommand} site1.com,192.168.1.1,site2.com</code> (mixed types)
-• <code>/{BotCommands.WotCommand} ääkkönen.fi</code> (IDN support)
-
-<blockquote>
-<b>🔍 WOT Reputation Scale (Domains):</b>
-• 80-100: Excellent (🟢)
-• 60-79: Good (🟡)
-• 40-59: Unsatisfactory (🟠)
-• 20-39: Poor (🔴)
-• 0-19: Very Poor (⚫)
-</blockquote>
-
-<blockquote>
-<b>🚨 AbuseIPDB Confidence Scale (IPs):</b>
-• 75-100: Critical Risk (🚨) - Recommended for blocking
-• 50-74: High Risk (🔴) - Exercise extreme caution
-• 25-49: Medium Risk (🟠) - AbuseIPDB minimum threshold
-• 1-24: Low Risk (🟡) - Below threshold, minimal concern
-• 0: No Reports (🟢) - Clean record
-</blockquote>
-
-<blockquote>
-<b>⚠️ Important Notes:</b>
-• <b>Dual Analysis:</b> Automatically uses both WOT and AbuseIPDB when available
-• <b>Smart Resolution:</b> Domains are resolved to IPs for comprehensive analysis
-• <b>Network Analysis:</b> Supports CIDR notation for subnet analysis (e.g., 192.168.1.0/24)
-• Results are based on community ratings and third-party sources
-• Confidence threshold ≥ 10 required for reliable warnings (WOT standard)
-• AbuseIPDB minimum threshold: 25% (75%+ recommended for blocking)
-• Supports IPv4, IPv6, and Internationalized Domain Names (IDN) per RFC 3490
-• Can analyze up to 10 targets per request
-• Always exercise caution with high-risk targets
-• Reports are for informational purposes only
-• Service requires internet connection
-• <b>Authentication required:</b>
-  - WOT: Register at https://www.mywot.com/developers
-  - AbuseIPDB: Register at https://www.abuseipdb.com/api
-</blockquote>
-"""
-
-WOT_HELP_DICT = {
-    "main": wot_help,
-}
 
 # Trace.moe help content
-trace_moe_help = """<b>🔍 Trace.moe Anime Identification</b>
 
-Identify anime scenes from images, videos, or GIFs using the trace.moe API.
 
-<blockquote>
-<b>🎯 Features:</b>
-• Multi-language anime titles (Japanese, Romaji, English, Chinese)
-• Video preview of identified scenes
-• Support for images, videos, GIFs, and URLs
-• Works in both private chats and groups
-• Adult content filtering in groups
-• High accuracy anime scene matching
-</blockquote>
 
-<blockquote>
-<b>📱 Usage:</b>
-• Send <code>/trace</code> with an image, video, or GIF
-• Reply to media with <code>/trace</code>
-• Send image URLs directly in text messages
-• Maximum file size: 10MB (configurable)
-</blockquote>
-
-<blockquote>
-<b>📋 Sample Output:</b>
-🎌 <b>Anime Identified</b>
-
-📺 <b>Titles:</b>
-   🔸 <b>進撃の巨人</b>
-   ▫️ <i>Shingeki no Kyojin</i>
-   ▫️ <i>Attack on Titan</i>
-
-📁 <b>Source Info:</b>
-   📄 File: <code>attack_on_titan_s1_ep1.mkv</code>
-   ⏰ Time: <code>02:05</code>
-
-🎯 <b>Match Accuracy:</b>
-   🎯 <b>95.0%</b> (Excellent)
-
-<b>⚠️ Important:</b> Results below 90% similarity are usually incorrect according to trace.moe official guidelines.
-
-Plus a video preview showing the exact scene!
-</blockquote>
-
-<blockquote>
-<b>🎬 Supported Media:</b>
-• <b>Images:</b> JPG, PNG, WebP, BMP
-• <b>Videos:</b> MP4, MKV, AVI, MOV, WebM
-• <b>Animations:</b> GIF, animated WebP
-• <b>URLs:</b> Direct links to supported media
-</blockquote>
-
-<blockquote>
-<b>🛡️ Security Features:</b>
-• Authentication required (authorized users only)
-• Adult content blocked in groups
-• File size limits to prevent abuse
-• Temporary file cleanup after processing
-• Rate limiting with retry logic
-</blockquote>
-
-<blockquote>
-<b>⚙️ Configuration:</b>
-• <code>TRACE_MOE_ENABLED</code>: Enable/disable functionality
-• <code>TRACE_MOE_API_KEY</code>: Optional API key for higher quota
-• <code>TRACE_MOE_VIDEO_PREVIEW</code>: Enable/disable video previews
-• <code>TRACE_MOE_MAX_FILE_SIZE</code>: Maximum file size limit
-</blockquote>
-
-<blockquote>
-<b>❌ Common Issues:</b>
-• <b>"No supported media found":</b> Send an image, video, or GIF
-• <b>"File too large":</b> Reduce file size under 10MB
-• <b>"You are not authorized":</b> Ask admin for authorization
-• <b>"Rate limit exceeded":</b> Wait a few minutes and try again
-• <b>"No anime found":</b> Try a clearer screenshot or different frame
-</blockquote>
-
-<blockquote>
-<b>💡 Pro Tips:</b>
-• Use clear, unedited screenshots for best results
-• Avoid heavily compressed or watermarked images
-• Try different frames if one doesn't work
-• Recent anime (2000+) have higher accuracy
-• Opening/ending scenes often work well
-</blockquote>
-
-<b>Note:</b> Requires authorization to use. Only works with actual anime content, not fan art or heavily edited images."""
-
-TRACE_HELP_DICT = {
-    "main": trace_moe_help,
-}
 
 # OSINT Help
 osint_help = """<b>🔍 OSINT Intelligence Suite</b>
@@ -1558,9 +1338,7 @@ OSINT_HELP_DICT = {
     "main": osint_help,
 }
 
-NSFW_HELP_DICT = {
-    "main": nsfw_detection_help,
-}
+
 
 # Link Shortener Help
 shortner_help = """<b>🔗 Link Shortener with Multi-API Support</b>
@@ -2668,7 +2446,7 @@ media_tools_text = {
     # Convert Settings
     "CONVERT_ENABLED": "Enable or disable convert feature. Send 'true' to enable or 'false' to disable.\n\nExample: true - enable convert feature\nExample: false - disable convert feature\n\nPriority:\n1. Global (enabled) & User (disabled) -> Apply global\n2. User (enabled) & Global (disabled) -> Apply user\n3. Global (enabled) & User (enabled) -> Apply user\n4. Global (disabled) & User (disabled) -> Don't apply\n\nUse the Reset button to reset all convert settings to default.\n\nTimeout: 60 sec",
     "CONVERT_PRIORITY": "Set priority for convert processing. Lower number means higher priority.\n\nExample: 1 - highest priority\nExample: 10 - lower priority\n\nTimeout: 60 sec",
-    "CONVERT_DELETE_ORIGINAL": "Enable or disable deleting original files after conversion.\n\nExample: true - delete original files after conversion\nExample: false - keep original files\n\nThis can be overridden by using the -del flag in the command.\n\nTimeout: 60 sec",
+    "CONVERT_DELETE_ORIGINAL": "Enable or disable deleting original files after conversion.\n\nExample: true - delete original files after conversion\nExample: false - keep original files\n\nTimeout: 60 sec",
     # Video Convert Settings
     "CONVERT_VIDEO_ENABLED": "Enable or disable video conversion.\n\nExample: true - enable video conversion\nExample: false - disable video conversion\n\nTimeout: 60 sec",
     "CONVERT_VIDEO_FORMAT": "Set the output format for converted videos. Common formats: mp4, mkv, avi, webm.\n\nExample: mp4 - widely compatible format\nExample: mkv - container that supports almost all codecs\n\nTimeout: 60 sec",
@@ -2963,7 +2741,7 @@ search_commands = f"""
 /{BotCommands.IMDBCommand}: Search for movies or TV series info on IMDB.
 /{BotCommands.TMDBCommand}: Search for movies, TV shows, and people on TMDB.
 /{BotCommands.ScrapCommand} [url|help|domains]: Scrape movie info (title, qualities, sizes, magnet links) from 1tamilmv websites.
-/{BotCommands.TraceCommand}: Identify anime from images, videos, or GIFs using trace.moe API.
+
 
 """
 
@@ -2994,9 +2772,7 @@ security_commands = f"""
 /{BotCommands.GenSessionCommand[0]} or /{BotCommands.GenSessionCommand[1]}: Generate a Pyrogram session string securely.
 /{BotCommands.VirusTotalCommand}: Scan files or URLs for viruses using VirusTotal.
 /{BotCommands.PhishCheckCommand}: Check domains and emails for phishing/security threats.
-/{BotCommands.WotCommand}: Check website, domain, and IP reputation using WOT and AbuseIPDB.
-/{BotCommands.NSFWStatsCommand}: View NSFW detection statistics and system status.
-/{BotCommands.NSFWTestCommand}: Test NSFW detection on text or media content.
+
 /{BotCommands.ContactCommand}: Contact the bot owner (available to all users).
 /{BotCommands.BanCommand}: Ban a user from using the contact feature (Sudo only).
 /{BotCommands.UnbanCommand}: Unban a user from using the contact feature (Sudo only).
@@ -3015,22 +2791,18 @@ settings_commands = f"""
 """
 
 # AI & Special Features page
-special_commands = f"""
-<b>🤖 AI & Special Features</b>
+<b>🛠️ Special Features</b>
 
-/{BotCommands.AskCommand}: Chat with AI using the bot (Mistral or DeepSeek).
-/{BotCommands.TruecallerCommand}: Lookup phone numbers using Truecaller.
 /{BotCommands.OSINTCommand}: Comprehensive OSINT intelligence suite with phone, IP, email, user, and vehicle lookup capabilities (Sudo only).
 /{BotCommands.EncodeCommand[0]} or /{BotCommands.EncodeCommand[1]} [query]: Encode text using various encoding methods (Base64, Binary, Cryptography, etc.).
-/{BotCommands.DecodeCommand[0]} or /{BotCommands.DecodeCommand[1]} [query]: Decode text using various decoding methods.
-/{BotCommands.QuickInfoCommand[0]} or /{BotCommands.QuickInfoCommand[1]} [chat]: Get chat/user information with interactive buttons.
-/{BotCommands.File2LinkCommand}: Convert Telegram media files into direct streaming links with browser player support.
-/{BotCommands.WhisperCommand}: Send private whisper messages in group chats (reply to user or use -to flag for multiple targets).
-/{BotCommands.NekoCommand}: Get adorable cat images with voting system 🐱💕 (use /neko or /neko [number] for multiple cats).
-/{BotCommands.WeatherCommand[0]} or /{BotCommands.WeatherCommand[1]} [location]: Get comprehensive weather information with beautiful images, forecasts, air quality data, and interactive features.
-/{BotCommands.ShortnerCommand} [url] [alias]: Shorten URLs with Bitly API and generate professional QR codes with optional custom aliases.
-/{BotCommands.QRCodeCommand} [text/URL] [options]: Generate QR codes from text or URLs with customizable styles, colors, formats (PNG/JPEG/SVG), and error correction levels.
-"""
+ /{BotCommands.DecodeCommand[0]} or /{BotCommands.DecodeCommand[1]} [query]: Decode text using various decoding methods.
+ /{BotCommands.QuickInfoCommand[0]} or /{BotCommands.QuickInfoCommand[1]} [chat]: Get chat/user information with interactive buttons.
+ / {BotCommands.File2LinkCommand}: Convert Telegram media files into direct streaming links with browser player support.
+ /{BotCommands.WhisperCommand}: Send private whisper messages in group chats (reply to user or use -to flag for multiple targets).
+ /{BotCommands.NekoCommand}: Get adorable cat images with voting system 🐱💕 (use /neko or /neko [number] for multiple cats).
+ /{BotCommands.ShortnerCommand} [url] [alias]: Shorten URLs with Bitly API and generate professional QR codes with optional custom aliases.
+ /{BotCommands.QRCodeCommand} [text/URL] [options]: Generate QR codes from text or URLs with customizable styles, colors, formats (PNG/JPEG/SVG), and error correction levels.
+ """
 
 # System Commands page
 system_commands = f"""

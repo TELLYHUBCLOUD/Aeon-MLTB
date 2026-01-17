@@ -24,12 +24,10 @@ except ImportError:
     smart_garbage_collection = None
 
 from .help_messages import (
-    AI_HELP_DICT,
     CLONE_HELP_DICT,
     FORWARD_HELP_DICT,
     GALLERY_DL_HELP_DICT,
     MIRROR_HELP_DICT,
-    NSFW_HELP_DICT,
     PHISH_HELP_DICT,
     VT_HELP_DICT,
     YT_HELP_DICT,
@@ -133,10 +131,8 @@ def create_help_buttons():
     _build_command_usage(MIRROR_HELP_DICT, "mirror")
     _build_command_usage(YT_HELP_DICT, "yt")
     _build_command_usage(CLONE_HELP_DICT, "clone")
-    _build_command_usage(AI_HELP_DICT, "ai")
     _build_command_usage(VT_HELP_DICT, "virustotal")
     _build_command_usage(PHISH_HELP_DICT, "phishcheck")
-    _build_command_usage(NSFW_HELP_DICT, "nsfw")
     _build_command_usage(GALLERY_DL_HELP_DICT, "gdl")
     _build_command_usage(FORWARD_HELP_DICT, "forward")
 

@@ -932,8 +932,7 @@ class Config:
     )
     SHOW_CLOUD_LINK: bool = True  # Show cloud links in upload completion message
 
-    # Truecaller API Settings
-    TRUECALLER_API_URL: str = ""
+
 
     # Multi-link Settings
     MULTI_LINK_ENABLED: bool = True
@@ -985,101 +984,7 @@ class Config:
     # Archive Operation Settings
     ARCHIVE_FLAGS_ENABLED: bool = True
 
-    # AI Settings
-    AI_ENABLED: bool = True  # Master toggle for AI functionality
 
-    # Default AI Model (replaces separate provider and model configs)
-    DEFAULT_AI_MODEL: str = "gpt-4o-mini"  # Use most reliable model as default - All supported models: gpt-4o, gpt-4o-mini, gpt-4, gpt-3.5-turbo, o1-preview, o1-mini, claude-3.5-sonnet, claude-3-sonnet, claude-3-haiku, claude-3-opus, claude-2.1, gemini-1.5-pro, gemini-1.5-flash, gemini-2.0-flash-exp, mixtral-8x7b-32768, llama-3.1-70b-versatile, llama-3.1-8b-instant, llama2-70b-4096, vertex-gemini-1.5-pro, vertex-gemini-1.5-flash, vertex-claude-3-sonnet, vertex-claude-3-haiku, whisper-1, mistral, deepseek
-
-    # GPT/OpenAI Settings
-    OPENAI_API_KEY: str = ""
-    OPENAI_API_URL: str = "https://api.openai.com/v1/chat/completions"
-    OPENAI_MODELS: str = (
-        "gpt-3.5-turbo,gpt-4,gpt-4-turbo,gpt-4o,gpt-4o-mini,o1-preview,o1-mini"
-    )
-
-    # Claude/Anthropic Settings
-    ANTHROPIC_API_KEY: str = ""
-    ANTHROPIC_API_URL: str = "https://api.anthropic.com/v1/messages"
-    CLAUDE_MODELS: str = (
-        "claude-2.1,claude-3-haiku,claude-3-sonnet,claude-3.5-sonnet,claude-3-opus"
-    )
-
-    # Gemini/Google AI Settings
-    GOOGLE_AI_API_KEY: str = ""
-    GOOGLE_AI_API_URL: str = (
-        "https://generativelanguage.googleapis.com/v1beta/models"
-    )
-    GEMINI_MODELS: str = "gemini-1.5-pro,gemini-1.5-flash,gemini-2.0-flash-exp"
-
-    # Vertex AI Settings
-    VERTEX_PROJECT_ID: str = ""
-    VERTEX_LOCATION: str = "us-central1"
-    VERTEX_MODELS: str = (
-        "gemini-1.5-pro,gemini-1.5-flash,claude-3-sonnet,claude-3-haiku"
-    )
-
-    # Groq Settings
-    GROQ_API_KEY: str = ""
-    GROQ_API_URL: str = "https://api.groq.com/openai/v1/chat/completions"
-    GROQ_MODELS: str = "mixtral-8x7b-32768,llama2-70b-4096,llama-3.1-70b-versatile,llama-3.1-8b-instant"
-
-    # Legacy AI Settings (for backward compatibility)
-    MISTRAL_API_URL: str = ""
-    DEEPSEEK_API_URL: str = ""
-
-    # AI Feature Settings
-    AI_STREAMING_ENABLED: bool = False  # Enable streaming responses
-    AI_PLUGINS_ENABLED: bool = True  # Enable plugin system
-    AI_MULTIMODAL_ENABLED: bool = True  # Enable image/voice/document processing
-    AI_CONVERSATION_HISTORY: bool = True  # Enable conversation history
-    AI_MAX_HISTORY_LENGTH: int = 50  # Maximum conversation history length
-    AI_QUESTION_PREDICTION: bool = True  # Enable follow-up question generation
-    AI_GROUP_TOPIC_MODE: bool = True  # Enable topic-based conversations in groups
-    AI_INLINE_MODE_ENABLED: bool = True  # Enable inline mode support
-    AI_AUTO_LANGUAGE_DETECTION: bool = True  # Auto-detect user language
-    AI_DEFAULT_LANGUAGE: str = "en"  # Default language (en, zh, ru)
-    AI_CONVERSATION_MODE: str = "assistant"  # Default conversation mode
-    AI_LANGUAGE: str = "en"  # User's preferred AI language
-
-    # AI Plugin Settings
-    AI_WEB_SEARCH_ENABLED: bool = True  # Enable web search plugin
-    AI_URL_SUMMARIZATION_ENABLED: bool = True  # Enable URL summarization
-    AI_ARXIV_ENABLED: bool = True  # Enable ArXiv paper plugin
-    AI_CODE_INTERPRETER_ENABLED: bool = True  # Enable code execution
-    AI_IMAGE_GENERATION_ENABLED: bool = True  # Enable DALL-E image generation
-    AI_VOICE_TRANSCRIPTION_ENABLED: bool = True  # Enable Whisper voice transcription
-
-    # New ChatGPT-Telegram-Bot Features
-    AI_DOCUMENT_PROCESSING_ENABLED: bool = (
-        True  # Enable document processing (PDF, text)
-    )
-    AI_FOLLOW_UP_QUESTIONS_ENABLED: bool = (
-        True  # Enable automatic follow-up questions
-    )
-    AI_CONVERSATION_EXPORT_ENABLED: bool = True  # Enable conversation export
-    AI_TYPEWRITER_EFFECT_ENABLED: bool = (
-        True  # Enable typewriter effect for streaming
-    )
-    AI_CONTEXT_PRUNING_ENABLED: bool = True  # Enable intelligent context pruning
-
-    # AI Performance Settings
-    AI_MAX_TOKENS: int = 4096  # Maximum tokens per response
-    AI_TEMPERATURE: float = 0.7  # Response creativity (0.0-2.0)
-    AI_TIMEOUT: int = 60  # Request timeout in seconds
-    AI_MAX_CONCURRENT_REQUESTS: int = 10  # Max concurrent AI requests
-    AI_RATE_LIMIT_PER_USER: int = 50  # Max requests per user per hour
-
-    # AI Budget Settings
-    AI_DAILY_TOKEN_LIMIT: int = 0  # Daily token limit per user (0 = unlimited)
-    AI_MONTHLY_TOKEN_LIMIT: int = 0  # Monthly token limit per user (0 = unlimited)
-    AI_DAILY_COST_LIMIT: float = 0.0  # Daily cost limit per user (0.0 = unlimited)
-    AI_MONTHLY_COST_LIMIT: float = (
-        0.0  # Monthly cost limit per user (0.0 = unlimited)
-    )
-
-    # AI Model Grouping
-    AI_MODEL_GROUPS: str = "GPT:gpt-3.5-turbo,gpt-4,gpt-4o|Claude:claude-3-haiku,claude-3-sonnet|Gemini:gemini-1.5-pro,gemini-1.5-flash|Groq:mixtral-8x7b-32768,llama2-70b-4096|Others:mistral,deepseek"
 
     # Shortener Settings
     SHORTENER_MIN_TIME: int = 10  # Minimum time in seconds for shortener to process
@@ -1093,99 +998,7 @@ class Config:
     FILE2LINK_ALLOWED_TYPES: str = (
         "video,audio,document,photo,animation,voice,video_note"
     )
-    # Weather Settings - OpenWeatherMap API
-    WEATHER_ENABLED: bool = True  # Enable/disable weather functionality
-    OPENWEATHER_API_KEY: str = ""  # OpenWeatherMap API key
-    WEATHER_PLACE: str = "London,UK"  # Default weather location
-    AUTO_WEATHER: bool = True  # Enable/disable automatic daily weather updates
-    WEATHER_RISK_NOTIFICATIONS: bool = (
-        True  # Enable/disable weather risk notifications to owner
-    )
-    WEATHER_UNITS: str = "metric"  # Units: standard, metric, imperial
-    WEATHER_LANGUAGE: str = "en"  # Language code for weather descriptions
-    WEATHER_UPDATE_TIME: str = (
-        "08:00"  # Time for daily weather updates (HH:MM format)
-    )
-    WEATHER_TIMEZONE: str = "UTC"  # Timezone for weather updates
 
-    # Advanced Weather Features
-    WEATHER_SHOW_MAPS: bool = True  # Enable/disable weather maps
-    WEATHER_SHOW_AIR_QUALITY: bool = True  # Enable/disable air quality data
-    WEATHER_SHOW_FIRE_INDEX: bool = (
-        False  # Enable/disable fire weather index (requires special access)
-    )
-    WEATHER_HISTORICAL_DAYS: int = (
-        7  # Days of historical data to show (requires paid plan)
-    )
-    WEATHER_FORECAST_DAYS: int = 5  # Days of forecast to show (max 5 for free plan)
-    WEATHER_MAP_ZOOM: int = 10  # Default zoom level for weather maps
-    WEATHER_IMAGE_QUALITY: str = "high"  # Image quality: low, medium, high
-    WEATHER_CACHE_DURATION: int = 600  # Cache duration in seconds (10 minutes)
-
-    # Weather Alert Settings
-    WEATHER_ALERT_TEMPERATURE_HIGH: float = (
-        35.0  # High temperature alert threshold (Celsius)
-    )
-    WEATHER_ALERT_TEMPERATURE_LOW: float = (
-        -10.0
-    )  # Low temperature alert threshold (Celsius)
-    WEATHER_ALERT_WIND_SPEED: float = 15.0  # High wind speed alert threshold (m/s)
-    WEATHER_ALERT_VISIBILITY: int = 1000  # Low visibility alert threshold (meters)
-    WEATHER_ALERT_AQI: int = 3  # Air quality alert threshold (1-5 scale)
-    WEATHER_ALERT_FIRE_DANGER: int = (
-        3  # Fire weather index alert threshold (0-5 scale)
-    )
-
-    # Weather Map Settings
-    WEATHER_MAP_LAYERS: list = [
-        "temp_new",  # Temperature
-        "precipitation_new",  # Precipitation
-        "pressure_new",  # Pressure
-        "wind_new",  # Wind
-        "clouds_new",  # Clouds
-    ]  # Available weather map layers
-    WEATHER_MAP_OPACITY: float = 0.6  # Map layer opacity (0.0-1.0)
-    WEATHER_USE_ADVANCED_MAPS: bool = (
-        False  # Use Weather Maps 2.0 (requires paid plan)
-    )
-    WEATHER_USE_HOURLY_MAPS: bool = (
-        False  # Use Weather Maps 2.0 with 1-hour step (requires paid plan)
-    )
-
-    # Air Quality Settings
-    WEATHER_AQI_FORECAST_DAYS: int = 4  # Days of air quality forecast (max 4)
-    WEATHER_AQI_HISTORICAL_DAYS: int = 7  # Days of historical air quality data
-    WEATHER_SHOW_POLLUTANTS: list = [
-        "co",
-        "no",
-        "no2",
-        "o3",
-        "so2",
-        "pm2_5",
-        "pm10",
-        "nh3",
-    ]  # Pollutants to display
-
-    # Premium Features Settings
-    WEATHER_HOURLY_FORECAST_HOURS: int = (
-        96  # Hours of hourly forecast (max 96 for 4 days)
-    )
-    WEATHER_STATISTICAL_DATA: bool = (
-        False  # Enable statistical weather data (requires paid plan)
-    )
-    WEATHER_ROAD_RISK_API: bool = False  # Enable road risk API (requires paid plan)
-    WEATHER_SOLAR_IRRADIANCE: bool = (
-        False  # Enable solar irradiance data (requires paid plan)
-    )
-
-    # Weather Data Sources
-    WEATHER_BACKUP_SOURCES: bool = (
-        True  # Use backup weather data sources if primary fails
-    )
-    WEATHER_DATA_VALIDATION: bool = True  # Validate weather data before displaying
-    WEATHER_METRIC_CONVERSION: bool = (
-        True  # Auto-convert units based on user location
-    )
 
     # Command Suffix Settings
     CORRECT_CMD_SUFFIX: str = ""  # Comma-separated list of allowed command suffixes
@@ -1198,7 +1011,6 @@ class Config:
 
     # Extra Modules Settings
     IMDB_ENABLED: bool = True  # Enable/disable IMDB functionality
-    TRUECALLER_ENABLED: bool = True  # Enable/disable Truecaller functionality
 
     # Encoding/Decoding Settings
     ENCODING_ENABLED: bool = True  # Enable/disable encoding functionality
@@ -1216,12 +1028,7 @@ class Config:
     PHISH_DIRECTORY_TIMEOUT: int = 30
     PHISH_DIRECTORY_API_KEY: str = ""
 
-    # WOT (Web of Trust) Settings
-    WOT_API_URL: str = "https://scorecard.api.mywot.com"
-    WOT_ENABLED: bool = True
-    WOT_TIMEOUT: int = 30
-    WOT_API_KEY: str = ""
-    WOT_USER_ID: str = ""
+
 
     # AbuseIPDB Settings
     ABUSEIPDB_API_URL: str = "https://api.abuseipdb.com/api/v2"
@@ -1230,62 +1037,7 @@ class Config:
     ABUSEIPDB_API_KEY: str = ""
     ABUSEIPDB_MAX_AGE_DAYS: int = 90
 
-    # Trace.moe Settings
-    TRACE_MOE_API_KEY: str = ""  # trace.moe API key for enhanced search quota
-    TRACE_MOE_ENABLED: bool = True  # Enable/disable trace.moe functionality
-    TRACE_MOE_CUT_BORDERS: bool = True  # Enable border cutting for better accuracy
-    TRACE_MOE_VIDEO_PREVIEW: bool = True  # Enable video preview in results
-    TRACE_MOE_MUTE_PREVIEW: bool = False  # Mute video previews by default
-    TRACE_MOE_SKIP_PREVIEW: bool = False  # Skip video preview entirely
-    TRACE_MOE_MAX_FILE_SIZE: int = (
-        25 * 1024 * 1024
-    )  # 25MB max file size for trace.moe (API limit)
 
-    # Enhanced NSFW Detection Settings
-    NSFW_DETECTION_ENABLED: bool = True  # Master toggle for NSFW detection
-    NSFW_DETECTION_SENSITIVITY: str = "moderate"  # strict, moderate, permissive
-    NSFW_KEYWORD_DETECTION: bool = True  # Enable enhanced keyword detection
-    NSFW_VISUAL_DETECTION: bool = False  # Enable AI-powered visual analysis
-    NSFW_AUDIO_DETECTION: bool = False  # Enable audio content analysis
-    NSFW_FUZZY_MATCHING: bool = False  # Enable fuzzy keyword matching (disabled by default to reduce false positives)
-    NSFW_LEETSPEAK_DETECTION: bool = True  # Enable leetspeak detection
-    NSFW_MULTI_LANGUAGE: bool = (
-        False  # Enable multi-language keyword support (disabled by default)
-    )
-    NSFW_CONFIDENCE_THRESHOLD: float = (
-        0.7  # Minimum confidence for NSFW detection (0.0-1.0)
-    )
-    NSFW_CACHE_DURATION: int = 3600  # Cache detection results for 1 hour
-    NSFW_CONTEXT_CHECKING: bool = (
-        True  # Enable context-aware detection to reduce false positives
-    )
-    NSFW_MAX_FILE_SIZE: int = 50 * 1024 * 1024  # 50MB max file size for analysis
-    NSFW_VIDEO_ANALYSIS: bool = True  # Enable video frame analysis
-    NSFW_VIDEO_FRAME_COUNT: int = 5  # Number of frames to extract for analysis
-    NSFW_FRAME_QUALITY: int = (
-        2  # Frame extraction quality (1-5, higher = better quality)
-    )
-    NSFW_AUDIO_ANALYSIS: bool = True  # Enable audio content analysis
-    NSFW_SUBTITLE_ANALYSIS: bool = True  # Enable subtitle text analysis
-
-    # NSFW Visual Analysis API Settings
-    NSFW_GOOGLE_VISION_API_KEY: str = ""  # Google Cloud Vision API key
-    NSFW_AWS_ACCESS_KEY: str = ""  # AWS Rekognition access key
-    NSFW_AWS_SECRET_KEY: str = ""  # AWS Rekognition secret key
-    NSFW_AWS_REGION: str = "us-east-1"  # AWS region
-    NSFW_AZURE_ENDPOINT: str = ""  # Azure Content Moderator endpoint
-    NSFW_AZURE_KEY: str = ""  # Azure Content Moderator key
-    NSFW_OPENAI_API_KEY: str = ""  # OpenAI API key for vision analysis
-
-    # NSFW Text Analysis API Settings
-    NSFW_PERSPECTIVE_API_KEY: str = ""  # Google Perspective API key
-    NSFW_OPENAI_MODERATION: bool = False  # Use OpenAI moderation API
-
-    # NSFW Behavior and Logging
-    NSFW_LOG_DETECTIONS: bool = True  # Log NSFW detections for analysis
-    NSFW_STORE_METADATA: bool = True  # Store detection metadata in database
-    NSFW_AUTO_DELETE: bool = False  # Auto-delete detected NSFW content
-    NSFW_NOTIFY_ADMINS: bool = True  # Notify admins of NSFW detections
 
     # Terabox Proxy Settings
     TERABOX_PROXY: str = "YvZNLrCteHuikuWkUB2ZCVO9s8K0ZxQYMsR10sIw"

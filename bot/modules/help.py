@@ -1,18 +1,14 @@
 from bot.helper.ext_utils.bot_utils import COMMAND_USAGE, new_task
 from bot.helper.ext_utils.help_messages import (
-    AI_HELP_DICT,
     CLONE_HELP_DICT,
     FORWARD_HELP_DICT,
     GALLERY_DL_HELP_DICT,
     MIRROR_HELP_DICT,
-    NSFW_HELP_DICT,
     OSINT_HELP_DICT,
     PHISH_HELP_DICT,
     SHORTNER_HELP_DICT,
     TOOL_HELP_DICT,
-    TRACE_HELP_DICT,
     VT_HELP_DICT,
-    WOT_HELP_DICT,
     YT_HELP_DICT,
     help_string,
 )
@@ -98,12 +94,7 @@ async def arg_usage(_, query):
                 COMMAND_USAGE["clone"][0],
                 COMMAND_USAGE["clone"][1],
             )
-        elif data[2] == "a":
-            await edit_message(
-                message,
-                COMMAND_USAGE["ai"][0],
-                COMMAND_USAGE["ai"][1],
-            )
+
         elif data[2] == "v":
             await edit_message(
                 message,
@@ -117,6 +108,7 @@ async def arg_usage(_, query):
                 COMMAND_USAGE["phishcheck"][1],
             )
 
+
         elif data[2] == "gdl":
             await edit_message(
                 message,
@@ -129,12 +121,7 @@ async def arg_usage(_, query):
                 COMMAND_USAGE["f2l"][0],
                 COMMAND_USAGE["f2l"][1],
             )
-        elif data[2] == "nsfw":
-            await edit_message(
-                message,
-                COMMAND_USAGE["nsfw"][0],
-                COMMAND_USAGE["nsfw"][1],
-            )
+
         elif data[2] == "tool":
             # For Tool commands, show the main help page with buttons
             buttons = ButtonMaker()
@@ -151,6 +138,7 @@ async def arg_usage(_, query):
             buttons.data_button("❌ Close", "help close")
             button = buttons.build_menu(1)
             await edit_message(message, OSINT_HELP_DICT["main"], button)
+
         elif data[2] == "shortner":
             # For Shortner commands, show the main help page
             buttons = ButtonMaker()
@@ -176,12 +164,7 @@ async def arg_usage(_, query):
         buttons.data_button("Close", "help close")
         button = buttons.build_menu(2)
         await edit_message(message, CLONE_HELP_DICT[data[2]], button)
-    elif data[1] == "ai":
-        buttons = ButtonMaker()
-        buttons.data_button("Back", "help back a")
-        buttons.data_button("Close", "help close")
-        button = buttons.build_menu(2)
-        await edit_message(message, AI_HELP_DICT[data[2]], button)
+
     elif data[1] == "vt":
         buttons = ButtonMaker()
         buttons.data_button("Back", "help back v")
@@ -195,6 +178,7 @@ async def arg_usage(_, query):
         button = buttons.build_menu(2)
         await edit_message(message, PHISH_HELP_DICT[data[2]], button)
 
+
     elif data[1] == "gdl":
         buttons = ButtonMaker()
         buttons.data_button("Back", "help back gdl")
@@ -202,12 +186,7 @@ async def arg_usage(_, query):
         button = buttons.build_menu(2)
         await edit_message(message, GALLERY_DL_HELP_DICT[data[2]], button)
 
-    elif data[1] == "nsfw":
-        buttons = ButtonMaker()
-        buttons.data_button("Back", "help back nsfw")
-        buttons.data_button("Close", "help close")
-        button = buttons.build_menu(2)
-        await edit_message(message, NSFW_HELP_DICT[data[2]], button)
+
     elif data[1] == "tool":
         buttons = ButtonMaker()
         buttons.data_button("Back", "help back tool")
@@ -220,24 +199,14 @@ async def arg_usage(_, query):
         buttons.data_button("Close", "help close")
         button = buttons.build_menu(2)
         await edit_message(message, FORWARD_HELP_DICT[data[2]], button)
-    elif data[1] == "trace":
-        buttons = ButtonMaker()
-        buttons.data_button("Back", "help back trace")
-        buttons.data_button("Close", "help close")
-        button = buttons.build_menu(2)
-        await edit_message(message, TRACE_HELP_DICT[data[2]], button)
-    elif data[1] == "wot":
-        buttons = ButtonMaker()
-        buttons.data_button("Back", "help back wot")
-        buttons.data_button("Close", "help close")
-        button = buttons.build_menu(2)
-        await edit_message(message, WOT_HELP_DICT[data[2]], button)
     elif data[1] == "osint":
         buttons = ButtonMaker()
         buttons.data_button("Back", "help back osint")
         buttons.data_button("Close", "help close")
         button = buttons.build_menu(2)
         await edit_message(message, OSINT_HELP_DICT[data[2]], button)
+
+
     elif data[1] == "shortner":
         buttons = ButtonMaker()
         buttons.data_button("Back", "help back shortner")
