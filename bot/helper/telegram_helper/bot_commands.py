@@ -60,6 +60,7 @@ class BotCommands:
     GenSessionCommand = [f"gensession{i}", f"gs{i}"]
     SoxCommand = [f"spectrum{i}", f"sox{i}"]
     PasteCommand = f"paste{i}"
+    VirusTotalCommand = f"vt{i}"
     PhishCheckCommand = f"phishcheck{i}"
     MegaSearchCommand = [f"megasearch{i}", f"mgs{i}"]
     MdLeechCommand = [f"mdleech{i}", f"mdl{i}"]
