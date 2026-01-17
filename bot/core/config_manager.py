@@ -236,6 +236,7 @@ class Config:
     TELEGRAM_HASH: str = ""
     TG_PROXY: ClassVar[dict[str, str]] = {}
     THUMBNAIL_LAYOUT: str = ""
+# poster or backdrop
     TORRENT_TIMEOUT: int = 0
     UPLOAD_PATHS: ClassVar[dict[str, str]] = {}
     UPSTREAM_REPO: str = ""
@@ -976,8 +977,8 @@ class Config:
     # Cat API Settings
     CAT_API_KEY: str = ""  # The Cat API key for enhanced features
 
-    # Auto Thumbnail Settings
-    AUTO_THUMBNAIL: bool = False  # Enable/disable auto thumbnail from IMDB/TMDB
+    AUTO_THUMBNAIL: bool = False
+    AUTO_THUMBNAIL_STYLE: str = "poster"  
 
     # Rclone Settings
     RCLONE_ENABLED: bool = True

@@ -53,6 +53,15 @@ class AutoThumbnailHelper:
             if not auto_enabled:
                 return None
 
+            # Get thumbnail style preference
+            style = "poster"
+            if user_id:
+                from bot import user_data
+                user_dict = user_data.get(user_id, {})
+                style = user_dict.get("AUTO_THUMBNAIL_STYLE", Config.AUTO_THUMBNAIL_STYLE)
+            else:
+                style = getattr(Config, "AUTO_THUMBNAIL_STYLE", "poster")
+
             # Extract metadata from filename
             metadata = await extract_metadata_from_filename(filename)
             if not metadata:
@@ -71,14 +80,14 @@ class AutoThumbnailHelper:
             is_tv_show = bool(season or episode or cls._detect_tv_patterns(filename))
 
             # Try to get thumbnail from cache first
-            cache_key = cls._generate_cache_key(clean_title, year, is_tv_show)
+            cache_key = cls._generate_cache_key(clean_title, year, is_tv_show, style)
             cached_thumbnail = await cls._get_cached_thumbnail(cache_key)
             if cached_thumbnail:
                 return cached_thumbnail
 
             # Use advanced search strategy with multiple approaches
             thumbnail_url = await cls._advanced_search_strategy(
-                clean_title, year, is_tv_show, filename
+                clean_title, year, is_tv_show, filename, style
             )
 
             if not thumbnail_url:
@@ -449,6 +458,7 @@ class AutoThumbnailHelper:
         year: int | None,
         is_tv_show: bool,
         original_filename: str,
+        style: str = "poster",
     ) -> str | None:
         """Advanced search strategy with multiple approaches and fallbacks"""
 
@@ -461,7 +471,7 @@ class AutoThumbnailHelper:
         if Config.TMDB_API_KEY and Config.TMDB_ENABLED:
             for _variation_name, search_query, search_year in search_variations:
                 thumbnail_url = await cls._get_tmdb_thumbnail(
-                    search_query, search_year, is_tv_show
+                    search_query, search_year, is_tv_show, style
                 )
 
                 if thumbnail_url:
@@ -470,7 +480,7 @@ class AutoThumbnailHelper:
                 # For movies, also try as TV show (anime often categorized as TV)
                 if not is_tv_show:
                     thumbnail_url = await cls._get_tmdb_thumbnail(
-                        search_query, search_year, True
+                        search_query, search_year, True, style
                     )
                     if thumbnail_url:
                         return thumbnail_url
@@ -491,7 +501,7 @@ class AutoThumbnailHelper:
 
         # Last resort: Word-by-word and partial search
         thumbnail_url = await cls._desperate_search_strategy(
-            clean_title, year, is_tv_show
+            clean_title, year, is_tv_show, style
         )
         if thumbnail_url:
             return thumbnail_url
@@ -500,7 +510,7 @@ class AutoThumbnailHelper:
 
     @classmethod
     async def _desperate_search_strategy(
-        cls, clean_title: str, year: int | None, is_tv_show: bool
+        cls, clean_title: str, year: int | None, is_tv_show: bool, style: str = "poster"
     ) -> str | None:
         """Last resort: try every word and partial combinations"""
 
@@ -515,7 +525,7 @@ class AutoThumbnailHelper:
 
                 # Try as both movie and TV show
                 for is_tv in [is_tv_show, not is_tv_show]:
-                    thumbnail_url = await cls._get_tmdb_thumbnail(term, year, is_tv)
+                    thumbnail_url = await cls._get_tmdb_thumbnail(term, year, is_tv, style)
                     if thumbnail_url:
                         return thumbnail_url
 
@@ -998,7 +1008,11 @@ class AutoThumbnailHelper:
 
     @classmethod
     async def _get_tmdb_thumbnail(
-        cls, title: str, year: int | None = None, is_tv_show: bool = False
+        cls,
+        title: str,
+        year: int | None = None,
+        is_tv_show: bool = False,
+        style: str = "poster",
     ) -> str | None:
         """Enhanced TMDB thumbnail search with better result selection"""
         try:
@@ -1014,8 +1028,14 @@ class AutoThumbnailHelper:
             else:
                 result = await TMDBHelper.search_movie_enhanced(title, year)
 
-            if result and result.get("poster_path"):
-                return TMDBHelper.get_poster_url(result["poster_path"], "w500")
+            if result:
+                # Check for backdrop if requested
+                if style == "backdrop" and result.get("backdrop_path"):
+                    return TMDBHelper.get_poster_url(result["backdrop_path"], "w1280")
+                
+                # Fallback to poster if backdrop requested but not found, or if poster requested
+                if result.get("poster_path"):
+                    return TMDBHelper.get_poster_url(result["poster_path"], "w500")
 
             return None
 
@@ -1052,7 +1072,11 @@ class AutoThumbnailHelper:
 
     @classmethod
     def _generate_cache_key(
-        cls, title: str, year: int | None = None, is_tv_show: bool = False
+        cls,
+        title: str,
+        year: int | None = None,
+        is_tv_show: bool = False,
+        style: str = "poster",
     ) -> str:
         """Generate cache key for thumbnail"""
         key_parts = [title.lower().replace(" ", "_")]
@@ -1062,6 +1086,9 @@ class AutoThumbnailHelper:
             key_parts.append("tv")
         else:
             key_parts.append("movie")
+        
+        if style == "backdrop":
+            key_parts.append("backdrop")
 
         return "_".join(key_parts)
 

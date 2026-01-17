@@ -460,6 +460,15 @@ async def get_user_settings(from_user, stype="main"):
                 f"userset {user_id} tog AUTO_THUMBNAIL t",
             )
 
+        # Auto Thumbnail Style
+        auto_thumb_style = user_dict.get("AUTO_THUMBNAIL_STYLE", Config.AUTO_THUMBNAIL_STYLE)
+        style_displayText = "POSTER" if auto_thumb_style == "poster" else "BACKDROP"
+        next_style = "backdrop" if auto_thumb_style == "poster" else "poster"
+        buttons.data_button(
+             f"🎨 THUMB STYLE: {style_displayText}",
+             f"userset {user_id} thumbstyle AUTO_THUMBNAIL_STYLE {next_style}"
+        )
+
         buttons.data_button(
             "🏷️ LEECH PREFIX",
             f"userset {user_id} menu LEECH_FILENAME_PREFIX",
@@ -4538,6 +4547,15 @@ Cookies allow you to access restricted content on YouTube, Instagram, Twitter, a
         else:
             back_to = "leech"
         await update_user_settings(query, stype=back_to)
+        await database.update_user_data(user_id)
+    elif data[2] == "thumbstyle":
+        await query.answer()
+        if len(data) <= 4:
+            LOGGER.error(f"Missing thumbstyle parameters in request from user {user_id}")
+            await query.answer("Invalid thumbstyle request!", show_alert=True)
+            return
+        update_user_ldata(user_id, data[3], data[4])
+        await update_user_settings(query, "leech")
         await database.update_user_data(user_id)
     elif data[2] == "help":
         await query.answer()

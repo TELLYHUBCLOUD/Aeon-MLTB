@@ -169,6 +169,8 @@ DEFAULT_VALUES = {
     "AUTO_RESTART_ENABLED": False,
     "AUTO_RESTART_INTERVAL": 24,
     "EQUAL_SPLITS": False,
+    "AUTO_THUMBNAIL": False,
+    "AUTO_THUMBNAIL_STYLE": "poster",
     "AI_ENABLED": True,
     "IMDB_ENABLED": True,
     "TRUECALLER_ENABLED": True,
@@ -1335,6 +1337,10 @@ Send one of the following position options:
                 help_text = "Send the starting page number for document trimming.\n\n<b>Example:</b> <code>5</code> (start from page 5)\n\n<b>Default:</b> <code>1</code> (first page)"
             elif key == "TRIM_DOCUMENT_END_PAGE":
                 help_text = "Send the ending page number for document trimming. Leave empty for last page.\n\n<b>Example:</b> <code>10</code> (end at page 10)\n\n<b>Default:</b> Empty (last page)"
+            elif key == "AUTO_THUMBNAIL":
+                help_text = "Send 'true' to enable or 'false' to disable auto thumbnail generation."
+            elif key == "AUTO_THUMBNAIL_STYLE":
+                help_text = "Send 'poster' or 'backdrop' to set the preferred auto thumbnail style."
             else:
                 help_text = f"Send a valid value for <code>{key}</code>."
 
