@@ -122,176 +122,26 @@ class Mirror(TaskListener):
         # Ensure user_dict is never None to prevent AttributeError
         self._ensure_user_dict()
 
-        # Check if message text exists before trying to split it
-        if (
-            not self.message
-            or not hasattr(self.message, "text")
-            or self.message.text is None
-        ):
-            LOGGER.error(
-                "Message text is None or message doesn't have text attribute"
-            )
-            error_msg = "Invalid message format. Please make sure your message contains text."
-            error = await send_message(self.message, error_msg)
-            return await auto_delete_message(error, time=300)
+        from bot.helper.ext_utils.task_utils import task_init_helper
+        init_data = await task_init_helper(self)
+        if not init_data:
+            return
 
-        text = self.message.text.split("\n")
-        input_list = text[0].split(" ")
-        error_msg, error_button = await error_check(self.message)
-        if error_msg:
-            await delete_links(self.message)
-            error = await send_message(self.message, error_msg, error_button)
-            return await auto_delete_message(error, time=300)
+        self.link = self.auto_link or init_data["link"]
+        args = init_data["args"]
+        input_list = init_data["input_list"]
+        is_bulk = init_data["is_bulk"]
+        self.bulk = init_data["bulk_links"]
+        self.multi = init_data["multi"]
+        bulk_start = init_data["bulk_start"]
+        bulk_end = init_data["bulk_end"]
+
+        # Override name/folder if present in args
+        if args["-n"]: self.name = args["-n"]
+        if args["-m"]: self.folder_name = f"/{args['-m']}".rstrip("/")
+        else: self.folder_name = ""
+
         user_id = self.user_id
-        args = {
-            "-doc": False,
-            "-med": False,
-            "-d": False,
-            "-j": False,
-            "-s": False,
-            "-b": False,
-            "-e": False,
-            "-z": False,
-            "-sv": False,
-            "-ss": False,
-            "-f": False,
-            "-fd": False,
-            "-fu": False,
-            "-hl": False,
-            "-bt": False,
-            "-ut": False,
-            "-mt": False,
-            "-merge-video": False,
-            "-merge-audio": False,
-            "-merge-subtitle": False,
-            "-merge-all": False,
-            "-merge-image": False,
-            "-merge-pdf": False,
-            "-i": 0,
-            "-sp": 0,
-            "link": "",
-            "-n": "",
-            "-m": "",  # Same directory operation flag
-            "-watermark": "",
-            "-iwm": "",
-            "-up": "",
-            "-rcf": "",
-            "-au": "",
-            "-ap": "",
-            "-h": [],
-            "-t": "",
-            "-ca": "",
-            "-cv": "",
-            "-ns": "",
-            "-md": "",
-            "-metadata-title": "",
-            "-metadata-author": "",
-            "-metadata-comment": "",
-            "-metadata-all": "",
-            "-metadata-video-title": "",
-            "-metadata-video-author": "",
-            "-metadata-video-comment": "",
-            "-metadata-audio-title": "",
-            "-metadata-audio-author": "",
-            "-metadata-audio-comment": "",
-            "-metadata-subtitle-title": "",
-            "-metadata-subtitle-author": "",
-            "-metadata-subtitle-comment": "",
-            "-tl": "",
-            "-ff": set(),
-            "-compress": False,
-            "-comp-video": False,
-            "-comp-audio": False,
-            "-comp-image": False,
-            "-comp-document": False,
-            "-comp-subtitle": False,
-            "-comp-archive": False,
-            "-video-fast": False,
-            "-video-medium": False,
-            "-video-slow": False,
-            "-audio-fast": False,
-            "-audio-medium": False,
-            "-audio-slow": False,
-            "-image-fast": False,
-            "-image-medium": False,
-            "-image-slow": False,
-            "-document-fast": False,
-            "-document-medium": False,
-            "-document-slow": False,
-            "-subtitle-fast": False,
-            "-subtitle-medium": False,
-            "-subtitle-slow": False,
-            "-archive-fast": False,
-            "-archive-medium": False,
-            "-archive-slow": False,
-            "-trim": "",
-            "-extract": False,
-            "-extract-video": False,
-            "-extract-audio": False,
-            "-extract-subtitle": False,
-            "-extract-attachment": False,
-            "-extract-video-index": "",
-            "-extract-audio-index": "",
-            "-extract-subtitle-index": "",
-            "-extract-attachment-index": "",
-            "-extract-video-codec": "",
-            "-extract-audio-codec": "",
-            "-extract-subtitle-codec": "",
-            "-extract-maintain-quality": "",
-            "-extract-priority": "",
-            "-remove": False,
-            "-remove-video": False,
-            "-remove-audio": False,
-            "-remove-subtitle": False,
-            "-remove-attachment": False,
-            "-remove-metadata": False,
-            "-remove-video-index": "",
-            "-remove-audio-index": "",
-            "-remove-subtitle-index": "",
-            "-remove-attachment-index": "",
-            "-remove-priority": "",
-            "-add": False,
-            "-add-video": False,
-            "-add-audio": False,
-            "-add-subtitle": False,
-            "-add-attachment": False,
-            "-del": "",
-            "-preserve": False,
-            "-replace": False,
-            # Shorter index flags
-            "-vi": "",
-            "-ai": "",
-            "-si": "",
-            "-ati": "",
-            # Remove shorter index flags
-            "-rvi": "",
-            "-rai": "",
-            "-rsi": "",
-            "-rati": "",
-            # Swap flags
-            "-swap": False,
-            "-swap-audio": False,
-            "-swap-video": False,
-            "-swap-subtitle": False,
-            "-lulu": False,
-            "-buz": False,
-            "-pix": False,
-        }
-
-        # AUTO LEECH + AUTO COMPRESS CMD
-        if self.auto_link:
-            # Inject link if not present (Auto Leech)
-            if not any(x.startswith("http") or "magnet" in x for x in input_list):
-                input_list.append(self.auto_link)
-
-        # Check if user provided -ff
-        user_ff = any(item.strip() == "-ff" for item in input_list)
-        if not user_ff and self.auto_ff:
-            # Append auto FFmpeg args
-            input_list.extend(self.auto_ff.split())
-
-        # Parse arguments from the command
-        arg_parser(input_list[1:], args)
 
         # Check if media tools flags are enabled
         from bot.helper.ext_utils.bot_utils import is_flag_enabled
@@ -310,7 +160,6 @@ class Mirror(TaskListener):
 
         self.select = args["-s"]
         self.seed = args["-d"]
-        self.name = args["-n"]
         self.up_dest = args["-up"]
 
         # Handle DEFAULT_UPLOAD and -up flag for various upload destinations
@@ -416,7 +265,6 @@ class Mirror(TaskListener):
                 _default_server, _ = get_ddl_setting(user_id, "DDL_SERVER", "gofile")
 
         self.rc_flags = args["-rcf"]
-        self.link = self.auto_link or args["link"]
         self.compress = args["-z"]
         # Enable compression if -z flag is set and archive flags are enabled
         from bot.helper.ext_utils.bot_utils import is_flag_enabled
@@ -438,7 +286,7 @@ class Mirror(TaskListener):
         self.replace_flag = args["-replace"]
         
         if self.name is None:
-            self.name = args["name"]
+            self.name = args["name"] if "name" in args else args["-n"]
         if self.size is None:
             self.size = 0
 
@@ -507,9 +355,7 @@ class Mirror(TaskListener):
         self.metadata_subtitle_title = args["-metadata-subtitle-title"]
         self.metadata_subtitle_author = args["-metadata-subtitle-author"]
         self.metadata_subtitle_comment = args["-metadata-subtitle-comment"]
-        self.folder_name = (
-            f"/{args['-m']}".rstrip("/") if len(args["-m"]) > 0 else ""
-        )
+
         self.bot_trans = args["-bt"]
         self.user_trans = args["-ut"]
         self.merge_video = args["-merge-video"]
@@ -618,10 +464,7 @@ class Mirror(TaskListener):
         headers = args["-h"]
         if headers:
             headers = headers.split("|")
-        is_bulk = args["-b"]
 
-        bulk_start = 0
-        bulk_end = 0
         ratio = None
         seed_time = None
         reply_to = None
@@ -630,14 +473,12 @@ class Mirror(TaskListener):
 
         try:
             # Check if multi-link operations are enabled in the configuration
-            if not Config.MULTI_LINK_ENABLED and int(args["-i"]) > 0:
+            if not Config.MULTI_LINK_ENABLED and self.multi > 0:
                 await send_message(
                     self.message,
                     "❌ Multi-link operations are disabled by the administrator.",
                 )
                 self.multi = 0
-            else:
-                self.multi = int(args["-i"])
         except Exception:
             self.multi = 0
 
@@ -787,29 +628,12 @@ class Mirror(TaskListener):
                 seed_time = dargs[1] or None
             self.seed = True
 
-        if not isinstance(is_bulk, bool):
-            dargs = is_bulk.split(":")
-            bulk_start = int(dargs[0]) if dargs[0] else 0
-            if len(dargs) == 2:
-                bulk_end = int(dargs[1]) if dargs[1] else 0
-            is_bulk = True
-
         # Check if bulk operations are enabled in the configuration
         if is_bulk and not Config.BULK_ENABLED:
             await send_message(
                 self.message, "❌ Bulk operations are disabled by the administrator."
             )
             is_bulk = False
-
-
-        # Extract bulk links if not already populated and not explicitly set as bulk
-        if not is_bulk and len(self.bulk) == 0:
-            from bot.helper.ext_utils.bulk_links import extract_bulk_links
-            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
-            LOGGER.info(f"Extracted {len(self.bulk)} bulk links")
-            if len(self.bulk) > 1:
-                is_bulk = True
-
 
         if not is_bulk:
             if self.multi > 0:
@@ -1229,6 +1053,3 @@ async def nzb_leech(client, message):
 
 async def md_leech_node(client, message):
     await handle_mirror_command(client, message, is_leech=True, is_md_leech=True)
-
-
-
