@@ -1035,8 +1035,17 @@ class AutoThumbnailHelper:
                     if backdrop_path:
                         LOGGER.info(f"Found backdrop for '{title}': {backdrop_path}")
                         return TMDBHelper.get_backdrop_url(backdrop_path, "w1280")
-                    else:
-                        LOGGER.info(f"Backdrop requested for '{title}' but not found. Falling back to poster.")
+                    
+                    # Fallback: Query images endpoint
+                    LOGGER.info(f"Backdrop not found in search for '{title}'. Checking images endpoint...")
+                    media_type = "tv" if is_tv_show else "movie"
+                    backdrop_path = await TMDBHelper.get_best_backdrop(result["id"], media_type)
+                    
+                    if backdrop_path:
+                         LOGGER.info(f"Found backdrop via images endpoint for '{title}': {backdrop_path}")
+                         return TMDBHelper.get_backdrop_url(backdrop_path, "w1280")
+                    
+                    LOGGER.info(f"Backdrop request failed for '{title}'. Falling back to poster.")
                 
                 # Fallback to poster if backdrop requested but not found, or if poster requested
                 if result.get("poster_path"):
@@ -1819,6 +1828,42 @@ class TMDBHelper:
         if not poster_path:
             return ""
         return f"{cls.IMAGE_BASE_URL}/{size}{poster_path}"
+
+    @classmethod
+    async def get_best_backdrop(cls, tmdb_id: int, media_type: str = "movie") -> str | None:
+        """Fetch the best backdrop from the images endpoint as a fallback"""
+        try:
+            if not Config.TMDB_API_KEY:
+                return None
+                
+            endpoint = "movie" if media_type != "tv" else "tv"
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    f"{cls.BASE_URL}/{endpoint}/{tmdb_id}/images",
+                    params={"api_key": Config.TMDB_API_KEY}
+                ) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        backdrops = data.get("backdrops", [])
+                        
+                        # Filter for valid backdrops (landscape aspect ratio ~1.77)
+                        valid_backdrops = [
+                            b for b in backdrops 
+                            if b.get("file_path") and 1.7 <= b.get("aspect_ratio", 0) <= 1.85
+                        ]
+                        
+                        if valid_backdrops:
+                            # Sort by vote average and vote count
+                            valid_backdrops.sort(
+                                key=lambda x: (x.get("vote_average", 0), x.get("vote_count", 0)), 
+                                reverse=True
+                            )
+                            return valid_backdrops[0]["file_path"]
+            return None
+        except Exception as e:
+            LOGGER.error(f"Error fetching backdrop for {media_type} {tmdb_id}: {e}")
+            return None
 
     @classmethod
     def get_backdrop_url(cls, backdrop_path: str, size: str = "original") -> str:
