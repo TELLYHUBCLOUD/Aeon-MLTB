@@ -132,26 +132,7 @@ These placeholders are automatically replaced with the actual file path.
 • You can add telegram link for small size input like photo to set watermark
 </blockquote>"""
 
-# Legacy nsfw_keywords removed - now using enhanced detection system in nsfw_detection.py
 
-• Google Perspective API
-• OpenAI Moderation API
-• AWS Rekognition (planned)
-• Azure Content Moderator (planned)
-
-<b>🚀 Performance:</b>
-• Cached results for faster repeated checks
-• Async processing to avoid blocking
-• Progressive analysis (quick checks first)
-• Configurable file size limits
-
-<b>📈 Analytics:</b>
-• Detection accuracy tracking
-• Performance metrics
-• Error monitoring and logging
-
-The system is designed to provide excellent performance and accuracy with minimal administrative overhead.
-"""
 
 mirror = """<b>Send link along with command line or </b>
 
@@ -2790,19 +2771,19 @@ settings_commands = f"""
 /{BotCommands.RssCommand}: Subscribe to RSS feeds (Owner only).
 """
 
-# AI & Special Features page
+special_commands = f"""
 <b>🛠️ Special Features</b>
 
 /{BotCommands.OSINTCommand}: Comprehensive OSINT intelligence suite with phone, IP, email, user, and vehicle lookup capabilities (Sudo only).
 /{BotCommands.EncodeCommand[0]} or /{BotCommands.EncodeCommand[1]} [query]: Encode text using various encoding methods (Base64, Binary, Cryptography, etc.).
- /{BotCommands.DecodeCommand[0]} or /{BotCommands.DecodeCommand[1]} [query]: Decode text using various decoding methods.
- /{BotCommands.QuickInfoCommand[0]} or /{BotCommands.QuickInfoCommand[1]} [chat]: Get chat/user information with interactive buttons.
- / {BotCommands.File2LinkCommand}: Convert Telegram media files into direct streaming links with browser player support.
- /{BotCommands.WhisperCommand}: Send private whisper messages in group chats (reply to user or use -to flag for multiple targets).
- /{BotCommands.NekoCommand}: Get adorable cat images with voting system 🐱💕 (use /neko or /neko [number] for multiple cats).
- /{BotCommands.ShortnerCommand} [url] [alias]: Shorten URLs with Bitly API and generate professional QR codes with optional custom aliases.
- /{BotCommands.QRCodeCommand} [text/URL] [options]: Generate QR codes from text or URLs with customizable styles, colors, formats (PNG/JPEG/SVG), and error correction levels.
- """
+/{BotCommands.DecodeCommand[0]} or /{BotCommands.DecodeCommand[1]} [query]: Decode text using various decoding methods.
+/{BotCommands.QuickInfoCommand[0]} or /{BotCommands.QuickInfoCommand[1]} [chat]: Get chat/user information with interactive buttons.
+/{BotCommands.File2LinkCommand}: Convert Telegram media files into direct streaming links with browser player support.
+/{BotCommands.WhisperCommand}: Send private whisper messages in group chats (reply to user or use -to flag for multiple targets).
+/{BotCommands.NekoCommand}: Get adorable cat images with voting system 🐱💕 (use /neko or /neko [number] for multiple cats).
+/{BotCommands.ShortnerCommand} [url] [alias]: Shorten URLs with Bitly API and generate professional QR codes with optional custom aliases.
+/{BotCommands.QRCodeCommand} [text/URL] [options]: Generate QR codes from text or URLs with customizable styles, colors, formats (PNG/JPEG/SVG), and error correction levels.
+"""
 
 # System Commands page
 system_commands = f"""

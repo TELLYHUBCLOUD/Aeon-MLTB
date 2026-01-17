@@ -884,27 +884,7 @@ async def get_user_settings(from_user, stype="main"):
 
 <i>These are advanced settings for YouTube uploads.</i>"""
 
-<b>📈 Usage Summary:</b>
--> Total Requests: <b>{analytics["total_requests"]:,}</b>
--> Total Tokens: <b>{token_stats["total_tokens"]:,}</b>
--> Daily Tokens: <b>{token_stats["daily_tokens"]:,}</b>
--> Monthly Tokens: <b>{token_stats["monthly_tokens"]:,}</b>
--> Total Cost: <b>${token_stats["total_cost"]:.4f}</b>
 
-<b>💰 Budget Status:</b>
--> Daily Limit: <b>{daily_budget_icon} {budget_status["daily_token_usage"]:,} / {budget_status["daily_token_limit"]:,}</b>
--> Monthly Limit: <b>{monthly_budget_icon} {budget_status["monthly_token_usage"]:,} / {budget_status["monthly_token_limit"]:,}</b>
-
-<b>🤖 Top Models:</b>
-{models_text}
-
-<b>💬 Conversations:</b>
--> Total: <b>{analytics["total_conversations"]}</b>
--> Active: <b>{analytics["active_conversations"]}</b>
--> Avg Length: <b>{analytics["avg_conversation_length"]}</b>
-
-<i>View detailed analytics and manage your AI usage budget.</i>"""
-<i>Please contact the administrator to enable AI functionality.</i>"""
 
     elif stype == "mega":
         # Check if MEGA operations are enabled

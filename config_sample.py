@@ -390,16 +390,6 @@ ABUSEIPDB_API_KEY = ""  # AbuseIPDB API key (required for API access)
 ABUSEIPDB_MAX_AGE_DAYS = 90  # Maximum age of reports to consider (1-365 days)
 
 
-
-    WEATHER_DATA_VALIDATION: bool = True  # Validate weather data before displaying
-    WEATHER_METRIC_CONVERSION: bool = (
-        True  # Auto-convert units based on user location
-    )
-
-
-
-
-
 # Direct Link Generator Settings
 TERABOX_PROXY = "https://teradlrobot.cheemsbackup.workers.dev/"  # Terabox proxy URL for bypassing restrictions
 
