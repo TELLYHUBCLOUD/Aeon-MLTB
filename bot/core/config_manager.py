@@ -164,7 +164,7 @@ class Config:
 
     HELPER_TOKENS: str = ""
     HYPER_THREADS: int = 0
-    INCOMPLETE_TASK_NOTIFIER: bool = False
+    INCOMPLETE_TASK_NOTIFIER: bool = True
     INDEX_URL: str = ""
     IMDB_TEMPLATE: str = ""
     JD_EMAIL: str = ""
@@ -206,7 +206,7 @@ class Config:
     EQUAL_SPLITS: bool = False
     LOGIN_PASS: str = ""
     MEDIA_GROUP: bool = False
-    HYBRID_LEECH: bool = False
+    HYBRID_LEECH: bool = True
     MEDIA_SEARCH_CHATS: ClassVar[list] = []
     HYDRA_IP: str = ""
     HYDRA_API_KEY: str = ""
@@ -224,28 +224,27 @@ class Config:
     RSS_CHAT: str = ""
     RSS_DELAY: int = 600
     RSS_SIZE_LIMIT: int = 0
-    RSS_ENABLED: bool = True  # Enable/disable RSS functionality completely
+    RSS_ENABLED: bool = False  # Enable/disable RSS functionality completely
     RSS_JOB_INTERVAL: int = 600  # RSS job periodic runtime interval in seconds
     SCHEDULED_DELETION_ENABLED: bool = (
         True  # Enable/disable scheduled deletion functionality
     )
-    STOP_DUPLICATE: bool = False
+    STOP_DUPLICATE: bool = True
     STREAMWISH_API: str = ""
     SUDO_USERS: str = ""
     TELEGRAM_API: int = 0
     TELEGRAM_HASH: str = ""
     TG_PROXY: ClassVar[dict[str, str]] = {}
-    THUMBNAIL_LAYOUT: str = ""
-# poster or backdrop
+    THUMBNAIL_LAYOUT: str = ""  # poster or backdrop
     TORRENT_TIMEOUT: int = 0
     UPLOAD_PATHS: ClassVar[dict[str, str]] = {}
     UPSTREAM_REPO: str = ""
     USENET_SERVERS: ClassVar[list[dict[str, object]]] = []
-    UPSTREAM_BRANCH: str = "main"
+    UPSTREAM_BRANCH: str = ""
     USER_SESSION_STRING: str = ""
     USER_TRANSMISSION: bool = False
     USE_SERVICE_ACCOUNTS: bool = False
-    WEB_PINCODE: bool = False
+    WEB_PINCODE: bool = True
     YT_DLP_OPTIONS: ClassVar[dict[str, Any]] = {}
 
     # Gallery-dl Settings
@@ -320,10 +319,10 @@ class Config:
     TOKEN_TIMEOUT: int = 0
     PAID_CHANNEL_ID: int = 0
     PAID_CHANNEL_LINK: str = ""
-    DELETE_LINKS: bool = False
+    DELETE_LINKS: bool = True
     FSUB_IDS: str = ""
     AD_KEYWORDS: str = ""  # Custom keywords for ad detection, separated by comma
-    AD_BROADCASTER_ENABLED: bool = False  # Enable/disable ad broadcaster module
+    AD_BROADCASTER_ENABLED: bool = True  # Enable/disable ad broadcaster module
     LOG_CHAT_ID: int = 0
     LEECH_FILENAME_CAPTION: str = ""
     INSTADL_API: str = ""
@@ -410,7 +409,7 @@ class Config:
         ""  # Default tags for uploaded videos, separated by comma
     )
     YOUTUBE_UPLOAD_DEFAULT_DESCRIPTION: str = (
-        "Uploaded by AIM"  # Default description for uploaded videos
+        "Uploaded by TellY"  # Default description for uploaded videos
     )
     YOUTUBE_UPLOAD_DEFAULT_TITLE: str = (
         ""  # Default title template (empty = use filename)
