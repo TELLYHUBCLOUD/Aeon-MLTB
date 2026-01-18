@@ -66,26 +66,6 @@ class Clone(TaskListener):
 
 
     async def new_event(self):
-        # Check if message text exists before trying to split it
-        if (
-            not self.message
-            or not hasattr(self.message, "text")
-            or self.message.text is None
-        ):
-            LOGGER.error(
-                "Message text is None or message doesn't have text attribute"
-            )
-            error_msg = "Invalid message format. Please make sure your message contains text."
-            error = await send_message(self.message, error_msg)
-            return await auto_delete_message(error, time=300)
-
-        text = self.message.text.split("\n")
-        input_list = text[0].split(" ")
-        error_msg, error_button = await error_check(self.message)
-        if error_msg:
-            await delete_links(self.message)
-            error = await send_message(self.message, error_msg, error_button)
-            return await auto_delete_message(error, time=300)
         args = {
             "link": "",
             "-i": 0,
@@ -96,7 +76,12 @@ class Clone(TaskListener):
             "-sync": False,
         }
 
-        arg_parser(input_list[1:], args)
+        from bot.helper.ext_utils.task_utils import task_init_helper
+        input_list = await task_init_helper(self, args)
+        if not input_list:
+            return
+
+        text = self.message.text.split("\n")
 
         try:
             self.multi = int(args["-i"])
