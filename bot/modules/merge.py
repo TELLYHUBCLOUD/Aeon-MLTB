@@ -57,24 +57,13 @@ class Merge(TaskListener):
         self.name_subfix = ""
 
     async def new_event(self):
+        from bot.helper.ext_utils.task_utils import task_init_helper
+        init_res = await task_init_helper(self)
+        if init_res is None:
+            return
+
+        input_list, args, is_bulk, bulk_start, bulk_end = init_res
         text = self.message.text.split("\n")
-        input_list = text[0].split(" ")
-        error_msg, error_button = await error_check(self.message)
-        if error_msg:
-            await delete_links(self.message)
-            error = await send_message(self.message, error_msg, error_button)
-            return await auto_delete_message(error, time=300)
-
-        args = {
-            "link": "",
-            "-i": 0,
-            "-n": "",
-            "-up": "",
-            "-rcf": "",
-            "-b": False,
-        }
-
-        arg_parser(input_list[1:], args)
 
         self.link = args["link"]
         self.name = ""
@@ -82,22 +71,6 @@ class Merge(TaskListener):
         self.up_dest = args["-up"]
         self.rc_flags = args["-rcf"]
         self.multi = args["-i"]
-        is_bulk = args["-b"]
-        bulk_start = 0
-        bulk_end = 0
-
-        if not isinstance(is_bulk, bool):
-            dargs = is_bulk.split(":")
-            bulk_start = int(dargs[0]) if dargs[0] else 0
-            if len(dargs) == 2:
-                bulk_end = int(dargs[1]) if dargs[1] else 0
-            is_bulk = True
-
-        if not is_bulk:
-            from bot.helper.ext_utils.bulk_links import extract_bulk_links
-            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
-            if len(self.bulk) > 1:
-                is_bulk = True
 
         if is_bulk:
             await self.init_bulk(input_list, bulk_start, bulk_end, Merge)

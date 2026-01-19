@@ -232,70 +232,22 @@ class Encode(TaskListener):
         self.multi_tag = ""
 
     async def new_event(self):
-        text = self.message.text.split("\n")
-        input_list = text[0].split(" ")
-        error_msg, error_button = await error_check(self.message)
-        if error_msg:
-            await delete_links(self.message)
-            error = await send_message(self.message, error_msg, error_button)
-            return await auto_delete_message(error, time=300)
-
-        args = {
-            "link": "",
-            "-i": 0,
-            "-n": "",
-            "-up": "",
-            "-rcf": "",
-            "-q": "",
-            "-an": False,
-            "-sn": False,
-            "-b": False,
-        }
-
-        arg_parser(input_list[1:], args)
-
-        self.link = args["link"]
-        self.multi = args["-i"]
-        is_bulk = args["-b"]
-        bulk_start = 0
-        bulk_end = 0
-
-        if not isinstance(is_bulk, bool):
-            dargs = is_bulk.split(":")
-            bulk_start = int(dargs[0]) if dargs[0] else 0
-            if len(dargs) == 2:
-                bulk_end = int(dargs[1]) if dargs[1] else 0
-            is_bulk = True
-
-        if not is_bulk:
-            from bot.helper.ext_utils.bulk_links import extract_bulk_links
-            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
-            if len(self.bulk) > 1:
-                is_bulk = True
-
-        if is_bulk:
-            await self.init_bulk(input_list, bulk_start, bulk_end, Encode)
+        from bot.helper.ext_utils.task_utils import task_init_helper
+        init_res = await task_init_helper(self)
+        if init_res is None:
             return
 
-        await self.run_multi(input_list, Encode)
+        input_list, args, is_bulk, bulk_start, bulk_end = init_res
+        text = self.message.text.split("\n")
 
+        self.link = args["link"]
+        self.multi = int(args["-i"])
         self.name = args["-n"]
         self.up_dest = args["-up"]
         self.rc_flags = args["-rcf"]
         self.quality = args["-q"]
         self.remove_audio = args["-an"]
         self.remove_subs = args["-sn"]
-        self.multi = int(args["-i"])
-        is_bulk = args["-b"]
-        bulk_start = 0
-        bulk_end = 0
-
-        if not isinstance(is_bulk, bool):
-            dargs = is_bulk.split(":")
-            bulk_start = int(dargs[0]) if dargs[0] else 0
-            if len(dargs) == 2:
-                bulk_end = int(dargs[1]) if dargs[1] else 0
-            is_bulk = True
 
         if is_bulk:
             await self.init_bulk(input_list, bulk_start, bulk_end, Encode)
