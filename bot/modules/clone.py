@@ -66,70 +66,23 @@ class Clone(TaskListener):
 
 
     async def new_event(self):
-        # Check if message text exists before trying to split it
-        if (
-            not self.message
-            or not hasattr(self.message, "text")
-            or self.message.text is None
-        ):
-            LOGGER.error(
-                "Message text is None or message doesn't have text attribute"
-            )
-            error_msg = "Invalid message format. Please make sure your message contains text."
-            error = await send_message(self.message, error_msg)
-            return await auto_delete_message(error, time=300)
+        from bot.helper.ext_utils.task_utils import task_init_helper
+        input_list, args, is_bulk, bulk_start, bulk_end = await task_init_helper(self)
+        if input_list is None:
+            return
 
-        text = self.message.text.split("\n")
-        input_list = text[0].split(" ")
-        error_msg, error_button = await error_check(self.message)
-        if error_msg:
-            await delete_links(self.message)
-            error = await send_message(self.message, error_msg, error_button)
-            return await auto_delete_message(error, time=300)
-        args = {
-            "link": "",
-            "-i": 0,
-            "-b": False,
-            "-n": "",
-            "-up": "",
-            "-rcf": "",
-            "-sync": False,
-        }
-
-        arg_parser(input_list[1:], args)
-
-        try:
-            self.multi = int(args["-i"])
-        except Exception:
-            self.multi = 0
-
+        self.multi = int(args["-i"])
         self.up_dest = args["-up"]
         self.rc_flags = args["-rcf"]
         self.link = args["link"]
         self.name = args["-n"]
-
-        is_bulk = args["-b"]
-        sync = args["-sync"]
-        bulk_start = 0
-        bulk_end = 0
-
-        if not isinstance(is_bulk, bool):
-            dargs = is_bulk.split(":")
-            bulk_start = int(dargs[0]) if dargs[0] else 0
-            if len(dargs) == 2:
-                bulk_end = int(dargs[1]) if dargs[1] else 0
-            is_bulk = True
-
-        if not is_bulk:
-            from bot.helper.ext_utils.bulk_links import extract_bulk_links
-            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
-            if len(self.bulk) > 1:
-                is_bulk = True
+        sync = args.get("-sync", False)
 
         if is_bulk:
             await self.init_bulk(input_list, bulk_start, bulk_end, Clone)
             return None
 
+        text = self.message.text.split("\n")
         await self.get_tag(text)
 
         if not self.link and (reply_to := self.message.reply_to_message):
