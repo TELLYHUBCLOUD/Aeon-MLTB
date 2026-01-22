@@ -6,6 +6,7 @@ from aiofiles.os import remove
 
 from bot import LOGGER, bot_loop, task_dict, task_dict_lock
 from bot.helper.aeon_utils.access_check import error_check
+from bot.helper.ext_utils.task_utils import task_init_helper
 from bot.helper.ext_utils.bot_utils import (
     COMMAND_USAGE,
     arg_parser,
@@ -57,6 +58,8 @@ class Clone(TaskListener):
         self.options = options
         self.same_dir = {}
         self.bulk = bulk
+        self.auto_link = auto_link
+        self.auto_ff = auto_ff
         super().__init__()
         self.is_clone = True
         
@@ -66,37 +69,9 @@ class Clone(TaskListener):
 
 
     async def new_event(self):
-        # Check if message text exists before trying to split it
-        if (
-            not self.message
-            or not hasattr(self.message, "text")
-            or self.message.text is None
-        ):
-            LOGGER.error(
-                "Message text is None or message doesn't have text attribute"
-            )
-            error_msg = "Invalid message format. Please make sure your message contains text."
-            error = await send_message(self.message, error_msg)
-            return await auto_delete_message(error, time=300)
-
-        text = self.message.text.split("\n")
-        input_list = text[0].split(" ")
-        error_msg, error_button = await error_check(self.message)
-        if error_msg:
-            await delete_links(self.message)
-            error = await send_message(self.message, error_msg, error_button)
-            return await auto_delete_message(error, time=300)
-        args = {
-            "link": "",
-            "-i": 0,
-            "-b": False,
-            "-n": "",
-            "-up": "",
-            "-rcf": "",
-            "-sync": False,
-        }
-
-        arg_parser(input_list[1:], args)
+        args, input_list, is_bulk, bulk, valid = await task_init_helper(self, 'Clone')
+        if not valid:
+             return
 
         try:
             self.multi = int(args["-i"])
@@ -108,28 +83,14 @@ class Clone(TaskListener):
         self.link = args["link"]
         self.name = args["-n"]
 
-        is_bulk = args["-b"]
         sync = args["-sync"]
-        bulk_start = 0
-        bulk_end = 0
-
-        if not isinstance(is_bulk, bool):
-            dargs = is_bulk.split(":")
-            bulk_start = int(dargs[0]) if dargs[0] else 0
-            if len(dargs) == 2:
-                bulk_end = int(dargs[1]) if dargs[1] else 0
-            is_bulk = True
-
-        if not is_bulk:
-            from bot.helper.ext_utils.bulk_links import extract_bulk_links
-            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
-            if len(self.bulk) > 1:
-                is_bulk = True
 
         if is_bulk:
-            await self.init_bulk(input_list, bulk_start, bulk_end, Clone)
+            await self.init_bulk(input_list, 0, 0, Clone)
             return None
 
+        self.bulk = bulk
+        text = self.message.text.split("\n")
         await self.get_tag(text)
 
         if not self.link and (reply_to := self.message.reply_to_message):

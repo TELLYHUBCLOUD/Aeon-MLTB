@@ -12,6 +12,7 @@ from bot import DOWNLOAD_DIR, LOGGER, bot_loop, task_dict_lock, user_data
 from bot.core.aeon_client import TgClient
 from bot.core.config_manager import Config
 from bot.helper.aeon_utils.access_check import error_check
+from bot.helper.ext_utils.task_utils import task_init_helper
 from bot.helper.ext_utils.bot_utils import (
     COMMAND_USAGE,
     arg_parser,
@@ -122,176 +123,9 @@ class Mirror(TaskListener):
         # Ensure user_dict is never None to prevent AttributeError
         self._ensure_user_dict()
 
-        # Check if message text exists before trying to split it
-        if (
-            not self.message
-            or not hasattr(self.message, "text")
-            or self.message.text is None
-        ):
-            LOGGER.error(
-                "Message text is None or message doesn't have text attribute"
-            )
-            error_msg = "Invalid message format. Please make sure your message contains text."
-            error = await send_message(self.message, error_msg)
-            return await auto_delete_message(error, time=300)
-
-        text = self.message.text.split("\n")
-        input_list = text[0].split(" ")
-        error_msg, error_button = await error_check(self.message)
-        if error_msg:
-            await delete_links(self.message)
-            error = await send_message(self.message, error_msg, error_button)
-            return await auto_delete_message(error, time=300)
-        user_id = self.user_id
-        args = {
-            "-doc": False,
-            "-med": False,
-            "-d": False,
-            "-j": False,
-            "-s": False,
-            "-b": False,
-            "-e": False,
-            "-z": False,
-            "-sv": False,
-            "-ss": False,
-            "-f": False,
-            "-fd": False,
-            "-fu": False,
-            "-hl": False,
-            "-bt": False,
-            "-ut": False,
-            "-mt": False,
-            "-merge-video": False,
-            "-merge-audio": False,
-            "-merge-subtitle": False,
-            "-merge-all": False,
-            "-merge-image": False,
-            "-merge-pdf": False,
-            "-i": 0,
-            "-sp": 0,
-            "link": "",
-            "-n": "",
-            "-m": "",  # Same directory operation flag
-            "-watermark": "",
-            "-iwm": "",
-            "-up": "",
-            "-rcf": "",
-            "-au": "",
-            "-ap": "",
-            "-h": [],
-            "-t": "",
-            "-ca": "",
-            "-cv": "",
-            "-ns": "",
-            "-md": "",
-            "-metadata-title": "",
-            "-metadata-author": "",
-            "-metadata-comment": "",
-            "-metadata-all": "",
-            "-metadata-video-title": "",
-            "-metadata-video-author": "",
-            "-metadata-video-comment": "",
-            "-metadata-audio-title": "",
-            "-metadata-audio-author": "",
-            "-metadata-audio-comment": "",
-            "-metadata-subtitle-title": "",
-            "-metadata-subtitle-author": "",
-            "-metadata-subtitle-comment": "",
-            "-tl": "",
-            "-ff": set(),
-            "-compress": False,
-            "-comp-video": False,
-            "-comp-audio": False,
-            "-comp-image": False,
-            "-comp-document": False,
-            "-comp-subtitle": False,
-            "-comp-archive": False,
-            "-video-fast": False,
-            "-video-medium": False,
-            "-video-slow": False,
-            "-audio-fast": False,
-            "-audio-medium": False,
-            "-audio-slow": False,
-            "-image-fast": False,
-            "-image-medium": False,
-            "-image-slow": False,
-            "-document-fast": False,
-            "-document-medium": False,
-            "-document-slow": False,
-            "-subtitle-fast": False,
-            "-subtitle-medium": False,
-            "-subtitle-slow": False,
-            "-archive-fast": False,
-            "-archive-medium": False,
-            "-archive-slow": False,
-            "-trim": "",
-            "-extract": False,
-            "-extract-video": False,
-            "-extract-audio": False,
-            "-extract-subtitle": False,
-            "-extract-attachment": False,
-            "-extract-video-index": "",
-            "-extract-audio-index": "",
-            "-extract-subtitle-index": "",
-            "-extract-attachment-index": "",
-            "-extract-video-codec": "",
-            "-extract-audio-codec": "",
-            "-extract-subtitle-codec": "",
-            "-extract-maintain-quality": "",
-            "-extract-priority": "",
-            "-remove": False,
-            "-remove-video": False,
-            "-remove-audio": False,
-            "-remove-subtitle": False,
-            "-remove-attachment": False,
-            "-remove-metadata": False,
-            "-remove-video-index": "",
-            "-remove-audio-index": "",
-            "-remove-subtitle-index": "",
-            "-remove-attachment-index": "",
-            "-remove-priority": "",
-            "-add": False,
-            "-add-video": False,
-            "-add-audio": False,
-            "-add-subtitle": False,
-            "-add-attachment": False,
-            "-del": "",
-            "-preserve": False,
-            "-replace": False,
-            # Shorter index flags
-            "-vi": "",
-            "-ai": "",
-            "-si": "",
-            "-ati": "",
-            # Remove shorter index flags
-            "-rvi": "",
-            "-rai": "",
-            "-rsi": "",
-            "-rati": "",
-            # Swap flags
-            "-swap": False,
-            "-swap-audio": False,
-            "-swap-video": False,
-            "-swap-subtitle": False,
-            "-lulu": False,
-            "-buz": False,
-            "-pix": False,
-        }
-
-        # AUTO LEECH + AUTO COMPRESS CMD
-        if self.auto_link:
-            # Inject link if not present (Auto Leech)
-            if not any(x.startswith("http") or "magnet" in x for x in input_list):
-                input_list.append(self.auto_link)
-
-        # Check if user provided -ff
-        user_ff = any(item.strip() == "-ff" for item in input_list)
-        if not user_ff and self.auto_ff:
-            # Append auto FFmpeg args
-            input_list.extend(self.auto_ff.split())
-
-        # Parse arguments from the command
-        arg_parser(input_list[1:], args)
+        args, input_list, is_bulk, bulk, valid = await task_init_helper(self, 'Mirror')
+        if not valid:
+             return
 
         # Check if media tools flags are enabled
         from bot.helper.ext_utils.bot_utils import is_flag_enabled
@@ -365,8 +199,6 @@ class Mirror(TaskListener):
                     )
                     return None
 
-                # Determine which account will be used and check if folder selection is needed
-
                 # Always show MEGA folder selection since we removed upload folder config
                 show_folder_selection = True
 
@@ -438,7 +270,7 @@ class Mirror(TaskListener):
         self.replace_flag = args["-replace"]
         
         if self.name is None:
-            self.name = args["name"]
+            self.name = args["name"] if "name" in args else "" # args["-n"] already set self.name
         if self.size is None:
             self.size = 0
 
@@ -491,8 +323,9 @@ class Mirror(TaskListener):
         # Register user as pending task user if -mt flag is used
         if self.media_tools:
             from bot.modules.media_tools import register_pending_task_user
-
+            user_id = self.message.from_user.id
             register_pending_task_user(user_id)
+
         self.metadata = args["-md"]
         self.metadata_title = args["-metadata-title"]
         self.metadata_author = args["-metadata-author"]
@@ -527,8 +360,7 @@ class Mirror(TaskListener):
         self.is_buzzheavier = args["-buz"] if not self.is_leech else False
         self.is_pixeldrain = args["-pix"] if not self.is_leech else False
 
-        # Swap flags - merge command line flags with configuration
-        # Command line flags enable swap functionality, but detailed config comes from database/settings
+        # Swap flags
         if args["-swap"]:
             self.swap_enabled = True
         if args["-swap-audio"]:
@@ -538,7 +370,6 @@ class Mirror(TaskListener):
         if args["-swap-subtitle"]:
             self.swap_subtitle_enabled = True
 
-        # Enable swap if any specific swap flag is set
         if (
             self.swap_audio_enabled
             or self.swap_video_enabled
@@ -555,7 +386,6 @@ class Mirror(TaskListener):
         self.compress_subtitle = args["-comp-subtitle"]
         self.compress_archive = args["-comp-archive"]
 
-        # Enable compression if any specific compression flag is set
         if (
             self.compress_video
             or self.compress_audio
@@ -618,15 +448,6 @@ class Mirror(TaskListener):
         headers = args["-h"]
         if headers:
             headers = headers.split("|")
-        is_bulk = args["-b"]
-
-        bulk_start = 0
-        bulk_end = 0
-        ratio = None
-        seed_time = None
-        reply_to = None
-        file_ = None
-        session = TgClient.bot
 
         try:
             # Check if multi-link operations are enabled in the configuration
@@ -731,47 +552,35 @@ class Mirror(TaskListener):
                             for cmd in cmds:
                                 self.ffmpeg_cmds.append(cmd)
                         else:
-                            # Treat as direct command if not found
-                            pass  # Set usually implies presets, invalid keys are ignored or logged
+                            pass
 
-                # 2. Handle List (could be mix of keys and commands, or direct command list)
+                # 2. Handle List
                 elif isinstance(raw_input, list):
                     for item in raw_input:
                         if isinstance(item, str):
-                            # Try lookup first
                             cmds = get_cmds_from_key(item)
                             if cmds:
                                 for cmd in cmds:
                                     self.ffmpeg_cmds.append(cmd)
                             else:
-                                # Treat as direct command string
                                 import shlex
-
                                 self.ffmpeg_cmds.append(shlex.split(item))
                         elif isinstance(item, list):
-                            # Already split command
                             self.ffmpeg_cmds.append(item)
 
-                # 3. Handle Single String (Key or Command)
+                # 3. Handle Single String
                 elif isinstance(raw_input, str):
-                    # Try lookup
                     cmds = get_cmds_from_key(raw_input)
                     if cmds:
                         for cmd in cmds:
                             self.ffmpeg_cmds.append(cmd)
                     else:
-                        # Direct command
                         import shlex
-
-                        # Check for multi-line/semicolon separated logic if needed,
-                        # but usually it's one command or preset
                         if " " in raw_input and not any(
                             k in raw_input for k in (Config.FFMPEG_CMDS or {})
                         ):
-                            # It's a command string like "-c copy"
                             self.ffmpeg_cmds.append(shlex.split(raw_input))
                         else:
-                            # Maybe a key that wasn't found or a simple command
                             self.ffmpeg_cmds.append(shlex.split(raw_input))
 
                 LOGGER.info(f"Resolved FFmpeg commands: {self.ffmpeg_cmds}")
@@ -787,29 +596,18 @@ class Mirror(TaskListener):
                 seed_time = dargs[1] or None
             self.seed = True
 
-        if not isinstance(is_bulk, bool):
-            dargs = is_bulk.split(":")
-            bulk_start = int(dargs[0]) if dargs[0] else 0
-            if len(dargs) == 2:
-                bulk_end = int(dargs[1]) if dargs[1] else 0
-            is_bulk = True
 
-        # Check if bulk operations are enabled in the configuration
-        if is_bulk and not Config.BULK_ENABLED:
-            await send_message(
-                self.message, "❌ Bulk operations are disabled by the administrator."
-            )
-            is_bulk = False
-
+        if is_bulk:
+            await self.init_bulk(input_list, 0, 0, Mirror)
+            return None
 
         # Extract bulk links if not already populated and not explicitly set as bulk
-        if not is_bulk and len(self.bulk) == 0:
-            from bot.helper.ext_utils.bulk_links import extract_bulk_links
-            self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
-            LOGGER.info(f"Extracted {len(self.bulk)} bulk links")
-            if len(self.bulk) > 1:
-                is_bulk = True
+        # task_init_helper handles basic bulk extraction, but Mirror had special logic
+        # self.bulk = await extract_bulk_links(self.message, bulk_start, bulk_end)
+        # ^ This was done in task_init_helper.
+        # So self.bulk is already populated if found.
 
+        self.bulk = bulk # from helper
 
         if not is_bulk:
             if self.multi > 0:
@@ -840,7 +638,7 @@ class Mirror(TaskListener):
                         for fd_name in self.same_dir:
                             self.same_dir[fd_name]["total"] -= 1
         else:
-            await self.init_bulk(input_list, bulk_start, bulk_end, Mirror)
+            await self.init_bulk(input_list, 0, 0, Mirror)
             return None
 
         if len(self.bulk) != 0:
@@ -848,10 +646,11 @@ class Mirror(TaskListener):
 
         await self.run_multi(input_list, Mirror)
 
+        text = self.message.text.split("\n")
         await self.get_tag(text)
 
         path = f"{DOWNLOAD_DIR}{self.mid}{self.folder_name}"
-
+        user_id = self.user_id
 
         # Consolidated reply_to handling
         # Priority: Media > Caption Link > Command Link
@@ -1187,20 +986,7 @@ async def handle_mirror_command(client, message, **kwargs):
     if kwargs.get('is_nzb') and not Config.NZB_ENABLED:
         return await send_message(message, "❌ NZB is disabled by the administrator.")
 
-    from bot.helper.ext_utils.bulk_links import extract_bulk_links
-
-    bulk = (
-        await extract_bulk_links(message, "0", "0")
-        if Config.BULK_ENABLED
-        else []
-    )
-
-    if len(bulk) > 1:
-        await Mirror(client, message, **kwargs).init_bulk(
-            message.text.split("\n")[0].split(), 0, 0, Mirror
-        )
-    else:
-        bot_loop.create_task(Mirror(client, message, **kwargs).new_event())
+    bot_loop.create_task(Mirror(client, message, **kwargs).new_event())
 
 
 async def mirror(client, message):
@@ -1229,6 +1015,3 @@ async def nzb_leech(client, message):
 
 async def md_leech_node(client, message):
     await handle_mirror_command(client, message, is_leech=True, is_md_leech=True)
-
-
-
