@@ -4,7 +4,7 @@ from asyncio.subprocess import PIPE
 
 from aiofiles.os import path as aiopath
 
-from bot import LOGGER, cpu_no
+from bot import LOGGER, cpu_no, user_data
 
 
 async def get_streams(file):
@@ -58,7 +58,14 @@ async def get_watermark_cmd(file, key, user_id=None):
         A tuple containing the command list and the temporary output file path.
     """
     temp_file = f"{file}.temp.mkv"
-    font_path = f"fonts/{user_id}.otf" if user_id and await aiopath.exists(f"fonts/{user_id}.otf") else "default.otf"
+
+    font_path = "default.otf"
+    if user_id:
+        user_font = user_data.get(user_id, {}).get("USER_FONT")
+        if user_font and await aiopath.exists(user_font):
+            font_path = user_font
+        elif await aiopath.exists(f"fonts/{user_id}.otf"):
+             font_path = f"fonts/{user_id}.otf"
 
     cmd = [
         "xtra",

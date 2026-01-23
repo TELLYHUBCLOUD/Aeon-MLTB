@@ -2,7 +2,7 @@ from asyncio import sleep
 from functools import partial
 from html import escape
 from io import BytesIO
-from os import getcwd
+from os import getcwd, path as ospath
 from re import findall
 from time import time
 
@@ -509,7 +509,8 @@ async def add_file(_, message, ftype):
     elif ftype == "USER_FONT":
         tpath = f"{getcwd()}/fonts/"
         await makedirs(tpath, exist_ok=True)
-        des_dir = f"{tpath}{user_id}.otf"
+        ext = ospath.splitext(message.document.file_name)[1]
+        des_dir = f"{tpath}{user_id}{ext}"
         await message.download(file_name=des_dir)
     update_user_ldata(user_id, ftype, des_dir)
     await delete_message(message)
