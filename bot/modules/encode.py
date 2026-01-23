@@ -246,6 +246,7 @@ class Encode(TaskListener):
         self.quality = args["-q"]
         self.remove_audio = args["-an"]
         self.remove_subs = args["-sn"]
+        self.dm_mode = args["-dm"]
         self.multi = int(args["-i"])
 
         if len(self.bulk) != 0:

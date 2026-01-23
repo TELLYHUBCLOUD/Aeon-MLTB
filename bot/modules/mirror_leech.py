@@ -140,6 +140,7 @@ class Mirror(TaskListener):
         self.seed = args["-d"]
         self.name = args["-n"]
         self.up_dest = args["-up"]
+        self.dm_mode = args["-dm"]
 
         # Handle DEFAULT_UPLOAD and -up flag for various upload destinations
         if not self.is_leech:

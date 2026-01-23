@@ -224,6 +224,7 @@ def arg_parser(items, arg_base):
         "-lulu",
         "-buz",
         "-pix",
+        "-dm",
         "-mt",
         "-merge-video",
         "-merge-audio",
@@ -300,6 +301,7 @@ def arg_parser(items, arg_base):
                 "-lulu",
                 "-buz",
                 "-pix",
+                "-dm",
             ]:
                 arg_base[part] = True
             else:

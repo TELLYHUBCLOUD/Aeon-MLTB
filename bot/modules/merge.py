@@ -39,12 +39,13 @@ from bot.helper.telegram_helper.message_utils import (
 
 
 class Merge(TaskListener):
-    def __init__(self, client, message, **kwargs):
+    def __init__(self, client, message, is_merge_audio=False, **kwargs):
         self.message = message
         self.client = client
         super().__init__()
         self.is_leech = True
         self.is_merge = True
+        self.is_merge_audio = is_merge_audio
         self.bulk = []
         self.multi = 0
         self.options = ""
@@ -69,6 +70,7 @@ class Merge(TaskListener):
         self.output_name = args["-n"]
         self.up_dest = args["-up"]
         self.rc_flags = args["-rcf"]
+        self.dm_mode = args["-dm"]
         self.multi = args["-i"]
         is_bulk = args.get("-b", False)
 
@@ -130,14 +132,23 @@ class Merge(TaskListener):
                      "message": self.message,
                      "client": self.client,
                      "adapter": self,
+                     "mode": "merge_audio" if self.is_merge_audio else "merge",
                  }
-                 await send_message(self.message, f"Merge Session Started!\nSend/Forward files to add them (Max 10).\nUse /{BotCommands.MdoneCommand} to start merging.")
+                 if self.is_merge_audio:
+                     await send_message(self.message, f"Merge Audio Session Started!\nFirst send Video, then Audio (Max 2).\nUse /{BotCommands.MdoneCommand} to start merging.")
+                 else:
+                     await send_message(self.message, f"Merge Session Started!\nSend/Forward files to add them (Max 10).\nUse /{BotCommands.MdoneCommand} to start merging.")
              else:
                  count = len(MERGE_SESSIONS[user_id]["inputs"])
-                 await send_message(self.message, f"Merge Session Active.\nFiles Added: {count}/10\nSend files to add, or /{BotCommands.MdoneCommand} to start.")
+                 mode_msg = "Merge Audio" if MERGE_SESSIONS[user_id].get("mode") == "merge_audio" else "Merge"
+                 limit = 2 if MERGE_SESSIONS[user_id].get("mode") == "merge_audio" else 10
+                 await send_message(self.message, f"{mode_msg} Session Active.\nFiles Added: {count}/{limit}\nSend files to add, or /{BotCommands.MdoneCommand} to start.")
              return
 
-        if len(self.inputs) > 10:
+        if self.is_merge_audio and len(self.inputs) > 2:
+             await send_message(self.message, "Merge Audio Limit: You can only merge 2 files (1 Video, 1 Audio).")
+             return
+        if not self.is_merge_audio and len(self.inputs) > 10:
              await send_message(self.message, "Merge Limit: You can only merge up to 10 files/links at once.")
              return
 
@@ -282,13 +293,16 @@ class Merge(TaskListener):
             await self.on_upload_error(f"Need at least 2 files to merge. Found: {len(input_files)}")
             return
             
-        input_files.sort()
+        # Sort by directory index to ensure 0 (Video) comes before 1 (Audio)
+        def get_dir_index(file_path):
+            try:
+                # Path format: .../mid/INDEX/filename
+                parent_dir = ospath.basename(ospath.dirname(file_path))
+                return int(parent_dir)
+            except:
+                return 999
         
-        # Create input.txt
-        input_txt_path = f"{self.dir}/input.txt"
-        with open(input_txt_path, 'w') as f:
-            for file in input_files:
-                f.write(f"file '{file}'\n")
+        input_files.sort(key=get_dir_index)
         
         # Prepare FFMpeg Status
         ffmpeg = FFMpeg(self)
@@ -298,6 +312,75 @@ class Merge(TaskListener):
             task_dict[self.mid] = FFmpegStatus(self, ffmpeg, self.gid, "merging")
         
         await send_status_message(self.message)
+
+        if self.is_merge_audio:
+            # Merge Audio Logic
+            if len(input_files) != 2:
+                await self.on_upload_error(f"Merge Audio requires exactly 2 files (Video + Audio). Found: {len(input_files)}")
+                return
+
+            video_file = input_files[0]
+            audio_file = input_files[1]
+
+            # Verify types and swap if needed
+            is_video_0, _, _ = await get_document_type(video_file)
+            is_video_1, _, _ = await get_document_type(audio_file)
+
+            if not is_video_0 and is_video_1:
+                # Swap if 0 is Audio and 1 is Video (User error correction)
+                video_file, audio_file = audio_file, video_file
+                LOGGER.info("Swapped Video/Audio inputs based on file type.")
+
+            if not self.output_name:
+                self.output_name = ospath.basename(video_file)
+
+            if self.name_subfix:
+                name, ext = ospath.splitext(self.output_name)
+                self.output_name = f"{name} {self.name_subfix}{ext}"
+
+            self.name = self.output_name
+            if not self.name.lower().endswith(".mkv"):
+                 base_name = ospath.splitext(self.name)[0]
+                 self.name = f"{base_name}.mkv"
+
+            output_file = f"{self.dir}/{self.name}"
+
+            # Command to merge video from file 0 and audio from file 1
+            cmd = [
+                "xtra",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-progress",
+                "pipe:1",
+                "-i", video_file,
+                "-i", audio_file,
+                "-map", "0:v",
+                "-map", "1:a",
+                "-c", "copy",
+                "-metadata", f"title={self.name}",
+                output_file
+            ]
+            LOGGER.info(f"Running Merge Audio CMD: {cmd}")
+            # Use duration of video file
+            duration = (await get_media_info(video_file))[0]
+
+            res = await ffmpeg.metadata_watermark_cmds(cmd, output_file, duration)
+            if res:
+                 for file in input_files:
+                     await remove(file)
+                 await super().on_download_complete()
+            else:
+                 await self.on_upload_error("Merge Audio Failed. Check logs.")
+            return
+
+        # Regular Merge Logic
+
+        # Create input.txt
+        input_txt_path = f"{self.dir}/input.txt"
+        with open(input_txt_path, 'w') as f:
+            for file in input_files:
+                f.write(f"file '{file}'\n")
         
         
         # Smart Renaming Logic
@@ -416,6 +499,20 @@ async def merge(client, message):
     else:
         bot_loop.create_task(Merge(client, message).new_event())
 
+async def merge_audio(client, message):
+    from bot.helper.ext_utils.bulk_links import extract_bulk_links
+    # For merge audio, we typically use sessions, but if bulk links provided (e.g. video link + audio link), handle it.
+    # But usually merge audio is via session.
+    # If links are in message, process.
+    text = message.text.split("\n")
+    inputs = []
+    if len(text) > 1 or len(message.text.split()) > 1:
+         # Direct execution if inputs provided
+         bot_loop.create_task(Merge(client, message, is_merge_audio=True).new_event())
+    else:
+         # Start Session
+         bot_loop.create_task(Merge(client, message, is_merge_audio=True).new_event())
+
 async def merge_done(client, message):
     user_id = message.from_user.id
     if user_id not in MERGE_SESSIONS:
@@ -430,7 +527,8 @@ async def merge_done(client, message):
     # Trigger Merge
     msg = session["message"] # Original first message for auth checks etc
     
-    listener = Merge(client, message) # Use current message for listener context
+    is_merge_audio = session.get("mode") == "merge_audio"
+    listener = Merge(client, message, is_merge_audio=is_merge_audio) # Use current message for listener context
     listener.inputs = session["inputs"]
     listener.total_batch_files = len(listener.inputs)
     del MERGE_SESSIONS[user_id]
@@ -469,26 +567,29 @@ async def merge_session_handler(client, message):
         
     session = MERGE_SESSIONS[user_id]
     
-    if len(session["inputs"]) >= 10:
-        await send_message(message, f"Merge Limit Reached (10/10)!\nUse /{BotCommands.MdoneCommand} to start.")
+    limit = 2 if session.get("mode") == "merge_audio" else 10
+
+    if len(session["inputs"]) >= limit:
+        await send_message(message, f"Merge Limit Reached ({limit}/{limit})!\nUse /{BotCommands.MdoneCommand} to start.")
         return
 
     # Add query message to session inputs
     session["inputs"].append(message)
     count = len(session["inputs"])
     
-    if count == 10:
+    if count == limit:
          # Auto start
-         listener = Merge(client, session["message"])
+         is_merge_audio = session.get("mode") == "merge_audio"
+         listener = Merge(client, session["message"], is_merge_audio=is_merge_audio)
          listener.inputs = session["inputs"]
-         listener.total_batch_files = 10
+         listener.total_batch_files = limit
          del MERGE_SESSIONS[user_id]
          
-         await send_message(message, "Limit reached (10/10). Starting Merge...")
+         await send_message(message, f"Limit reached ({limit}/{limit}). Starting Merge...")
          try:
              await listener.before_start()
              await listener._proceed_to_download()
          except Exception as e:
              await send_message(message, str(e))
     else:
-         await send_message(message, f"Added: {count}/10\nSend more or /{BotCommands.MdoneCommand}")
+         await send_message(message, f"Added: {count}/{limit}\nSend more or /{BotCommands.MdoneCommand}")

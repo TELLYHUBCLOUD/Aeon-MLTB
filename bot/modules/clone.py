@@ -82,6 +82,7 @@ class Clone(TaskListener):
         self.rc_flags = args["-rcf"]
         self.link = args["link"]
         self.name = args["-n"]
+        self.dm_mode = args["-dm"]
         sync = args["-sync"]
 
         await self.get_tag(text)

@@ -2,7 +2,9 @@ import json
 from asyncio import create_subprocess_exec
 from asyncio.subprocess import PIPE
 
-from bot import LOGGER, cpu_no
+from aiofiles.os import path as aiopath
+
+from bot import LOGGER, cpu_no, user_data
 
 
 async def get_streams(file):
@@ -43,19 +45,27 @@ async def get_streams(file):
 
 
 # TODO Lots of work need
-async def get_watermark_cmd(file, key):
+async def get_watermark_cmd(file, key, user_id=None):
     """
     Generates an FFmpeg (xtra) command to add a text watermark to a video file.
 
     Args:
         file: Path to the input video file.
         key: The text string to use as the watermark.
+        user_id: The ID of the user requesting the watermark (for custom font).
 
     Returns:
         A tuple containing the command list and the temporary output file path.
     """
     temp_file = f"{file}.temp.mkv"
+
     font_path = "default.otf"
+    if user_id:
+        user_font = user_data.get(user_id, {}).get("USER_FONT")
+        if user_font and await aiopath.exists(user_font):
+            font_path = user_font
+        elif await aiopath.exists(f"fonts/{user_id}.otf"):
+             font_path = f"fonts/{user_id}.otf"
 
     cmd = [
         "xtra",
