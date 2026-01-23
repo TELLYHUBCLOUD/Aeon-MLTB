@@ -380,6 +380,7 @@ async def get_user_settings(from_user, stype="main"):
         buttons.data_button("🧹 Cap Remove", f"userset {user_id} menu AUTO_CAPTION_REMOVE")
         buttons.data_button("✏️ Substitute", f"userset {user_id} menu NAME_SUBSTITUTE")
         buttons.data_button("🔡 Leech Font", f"userset {user_id} menu LEECH_CAPTION_FONT")
+        buttons.data_button("📤 Upload Font", f"userset {user_id} file USER_FONT")
         buttons.data_button("🔙 Back", f"userset {user_id} back")
         buttons.data_button("❌ Close", f"userset {user_id} close")
         
@@ -504,7 +505,12 @@ async def add_file(_, message, ftype):
         tpath = f"{getcwd()}/tokens/"
         await makedirs(tpath, exist_ok=True)
         des_dir = f"{tpath}{user_id}.pickle"
-        await message.download(file_name=des_dir)  # TODO user font
+        await message.download(file_name=des_dir)
+    elif ftype == "USER_FONT":
+        tpath = f"{getcwd()}/fonts/"
+        await makedirs(tpath, exist_ok=True)
+        des_dir = f"{tpath}{user_id}.otf"
+        await message.download(file_name=des_dir)
     update_user_ldata(user_id, ftype, des_dir)
     await delete_message(message)
     await database.update_user_doc(user_id, ftype, des_dir)
@@ -580,7 +586,7 @@ async def get_menu(option, message, user_id):
     handler_dict[user_id] = False
     user_dict = user_data.get(user_id, {})
     buttons = ButtonMaker()
-    if option in ["THUMBNAIL", "RCLONE_CONFIG", "TOKEN_PICKLE"]:
+    if option in ["THUMBNAIL", "RCLONE_CONFIG", "TOKEN_PICKLE", "USER_FONT"]:
         key = "file"
     else:
         key = "set"
@@ -815,6 +821,8 @@ async def edit_user_settings(client, query):
             )
         elif data[3] == "RCLONE_CONFIG":
             text = "📤 Send rclone.conf. ⏱️ Timeout: 60 sec"
+        elif data[3] == "USER_FONT":
+            text = "📤 Send font file (otf/ttf). ⏱️ Timeout: 60 sec"
         else:
             text = "📤 Send token.pickle. ⏱️ Timeout: 60 sec"
         buttons.data_button("🔙 Back", f"userset {user_id} setevent")
@@ -864,11 +872,13 @@ async def edit_user_settings(client, query):
         await get_menu(data[3], message, user_id)
     elif data[2] == "remove":
         await query.answer("🗑️ Removed!", show_alert=True)
-        if data[3] in ["THUMBNAIL", "RCLONE_CONFIG", "TOKEN_PICKLE"]:
+        if data[3] in ["THUMBNAIL", "RCLONE_CONFIG", "TOKEN_PICKLE", "USER_FONT"]:
             if data[3] == "THUMBNAIL":
                 fpath = thumb_path
             elif data[3] == "RCLONE_CONFIG":
                 fpath = rclone_conf
+            elif data[3] == "USER_FONT":
+                fpath = f"fonts/{user_id}.otf"
             else:
                 fpath = token_pickle
             if await aiopath.exists(fpath):

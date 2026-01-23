@@ -145,6 +145,7 @@ class TaskConfig:
         self.auto_rename_start_episode = 0
         self.auto_rename_start_season = 0
         self.is_super_chat = self.message.chat.type.name in ["SUPERGROUP", "CHANNEL"]
+        self.dm_mode = False
 
         # Swap flags
         self.swap_enabled = False
@@ -1524,7 +1525,7 @@ class TaskConfig:
         checked = False
         if self.is_file:
             if is_mkv(dl_path):
-                cmd, temp_file = await get_watermark_cmd(dl_path, key)
+                cmd, temp_file = await get_watermark_cmd(dl_path, key, self.user_id)
                 if cmd:
                     if not checked:
                         checked = True
@@ -1556,7 +1557,7 @@ class TaskConfig:
                         cpu_eater_lock.release()
                         return ""
                     if is_mkv(file_path):
-                        cmd, temp_file = await get_watermark_cmd(file_path, key)
+                        cmd, temp_file = await get_watermark_cmd(file_path, key, self.user_id)
                         if cmd:
                             if not checked:
                                 checked = True

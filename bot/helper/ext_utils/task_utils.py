@@ -38,7 +38,7 @@ def _get_default_args(task_type):
             "-add-audio": False, "-add-subtitle": False, "-add-attachment": False, "-del": "", "-preserve": False,
             "-replace": False, "-vi": "", "-ai": "", "-si": "", "-ati": "", "-rvi": "", "-rai": "", "-rsi": "",
             "-rati": "", "-swap": False, "-swap-audio": False, "-swap-video": False, "-swap-subtitle": False,
-            "-lulu": False, "-buz": False, "-pix": False,
+            "-lulu": False, "-buz": False, "-pix": False, "-dm": False,
         }
     elif task_type == 'clone':
         return {
@@ -49,6 +49,7 @@ def _get_default_args(task_type):
             "-up": "",
             "-rcf": "",
             "-sync": False,
+            "-dm": False,
         }
     elif task_type == 'encode':
         return {
@@ -61,6 +62,7 @@ def _get_default_args(task_type):
             "-an": False,
             "-sn": False,
             "-b": False,
+            "-dm": False,
         }
     elif task_type == 'merge':
         return {
@@ -70,6 +72,7 @@ def _get_default_args(task_type):
             "-up": "",
             "-rcf": "",
             "-b": False,
+            "-dm": False,
         }
     return {}
 

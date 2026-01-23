@@ -644,8 +644,10 @@ class TelegramUploader:
         # Collect all destination targets
         destinations = []
 
-        # Add user's PM if not already there and BOT_PM is enabled
-        if source_chat_id != self._user_id and self._is_bot_pm_enabled():
+        # Add user's PM if not already there and BOT_PM is enabled or dm_mode is set
+        if source_chat_id != self._user_id and (
+            self._is_bot_pm_enabled() or self._listener.dm_mode
+        ):
             destinations.append(self._user_id)
 
         # Add user dump if configured

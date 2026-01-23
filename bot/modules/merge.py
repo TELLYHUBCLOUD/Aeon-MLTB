@@ -69,6 +69,7 @@ class Merge(TaskListener):
         self.output_name = args["-n"]
         self.up_dest = args["-up"]
         self.rc_flags = args["-rcf"]
+        self.dm_mode = args["-dm"]
         self.multi = args["-i"]
         is_bulk = args.get("-b", False)
 
